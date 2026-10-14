@@ -2595,17 +2595,17 @@ L_5878:
 	rst 20h			;5886   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	jr nz,L_58FC		;5887
 	ld hl,(04002h)		;5889
-	ld e,09fh		;588c
-	call 0e065h		;588e
+	ld e,09fh		;588c   ; primero 9F FD, la direccion de H.TIMI: los cartuchos de MSX2 de Konami se cuelgan ahi
+	call 0e065h		;588e   ; encontrado y reconocido: sale con C
 	ret c			;5891
 	ld hl,(04002h)		;5892
-	ld e,09ah		;5895
+	ld e,09ah		;5895   ; si no, 9A FD, la de H.KEYI: los de MSX1
 L_5897:
 	ld bc,00100h		;5897
 L_589A:
-	ld a,e			;589a   ; busca el byte bajo de 0xFD9B...
-	cpir		;589b   ; ...en el INIT copiado del juego
-	jr nz,L_58FC		;589d   ; no esta: no es un juego de Konami
+	ld a,e			;589a   ; busca el byte E...
+	cpir		;589b   ; ...en los 256 primeros bytes del INIT del juego
+	jr nz,L_58FC		;589d   ; no esta
 	jp po,0e0cah		;589f   ; se acabaron los bytes
 	ld a,0fdh		;58a2   ; le sigue 0xFD?
 	cp (hl)			;58a4

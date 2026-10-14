@@ -374,11 +374,14 @@ C 0x584F los 4 slots
 C 0x5866 un subslot
 C 0x5868 lo mira (0xE0F5)
 C 0x586E y lo prueba (0xE046)
-C 0x589A busca el byte bajo de 0xFD9B...
-C 0x589B ...en el INIT copiado del juego
-C 0x589D no esta: no es un juego de Konami
+C 0x589A busca el byte E...
+C 0x589B ...en los 256 primeros bytes del INIT del juego
+C 0x589D no esta
 C 0x589F se acabaron los bytes
 C 0x58A2 le sigue 0xFD?
+C 0x588C primero 9F FD, la direccion de H.TIMI: los cartuchos de MSX2 de Konami se cuelgan ahi
+C 0x588E encontrado y reconocido: sale con C
+C 0x5895 si no, 9A FD, la de H.KEYI: los de MSX1
 C 0x58A7 la segunda cabecera del juego (0x4010):
 C 0x58AA 'AB'...
 C 0x58B0 ...'CD'...

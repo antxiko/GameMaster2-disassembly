@@ -33,6 +33,7 @@
 0x66E6   # p01:669B entrada 1 de la tabla de 0x669E (despachador en 0x669B)
 0x66F1   # p01:669B entrada 2 de la tabla de 0x669E (despachador en 0x669B)
 0x6713   # huerfana: borra la VRAM segun 0x002D; gemela p02:99A8
+0x6751   # huerfana (fragmento)
 0x6756   # p09:8124 call
 0x6762   # p00:5DF1 call
 0x6789   # a mano, p01:642C: ld ix,0x6789 + jp CALSLT
@@ -74,6 +75,7 @@
 0x730D   # p09:8246 call
 0x7323   # p09:81B7 call
 0x737B   # p00:5A2F call
+0x7387   # huerfana (fragmento)
 0x738B   # p00:51AD call
 0x738F   # p00:5DFA call
 0x748F   # p00:5D56 call
@@ -81,6 +83,7 @@
 0x749E   # p00:5A12 call
 0x74BA   # p00:51BA call
 0x74BF   # p00:5C09 call
+0x74CC   # huerfana (fragmento)
 0x7646   # p00:44B4 call
 0x7676   # p00:5E02 call
 0x7690   # p00:5A20 call

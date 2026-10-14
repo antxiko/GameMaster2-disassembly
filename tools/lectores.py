@@ -46,7 +46,16 @@ def apuntadores(t):
         elif op == 0xED and ROM[o + 1] in CARGA_ED:
             w = ROM[o + 2] | (ROM[o + 3] << 8)
             txt = CARGA_ED[ROM[o + 1]]
-        if w is None or not 0x4000 <= w < 0xC000:
+        if w is None:
+            continue
+        # Dentro de un trozo que se ejecuta en RAM (src/reubica.txt), un
+        # puntero a su rango de ejecucion apunta a sus propios bytes.
+        w2 = bancos.traduce(b, pc, w)
+        if w2 != w:
+            fuera[(b, w2)].append((b, pc, "%s %04X (en RAM; aqui %04X)" % (
+                txt.split(",")[0] if "%" in txt else txt.rstrip(","), w, w2)))
+            continue
+        if not 0x4000 <= w < 0xC000:
             continue
         if w < 0x6000:
             destinos = {0}

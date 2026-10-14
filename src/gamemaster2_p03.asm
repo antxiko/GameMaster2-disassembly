@@ -10,8 +10,10 @@
 
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa000..0xa002  (2 bytes)
-DATA_A000:
+; DATOS partida_A000: los 2 ultimos bytes de la instruccion de p02:9FFF (21 23
+;   A0), que empieza en el banco 2; lo leen p02:9FFF (2 bytes)
+;   0xa000..0xa002  (2 bytes)
+DATA_partida_A000:
 	defb 023h,0a0h	; a000
 
 ; ======================================================================
@@ -41,8 +43,11 @@ L_A00C:
 	ret			;a022
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa023..0xa033  (16 bytes)
-DATA_A023:
+; DATOS resto_A023: lo apuntan con el banco puesto p03:A009 (0xA02B); el
+;   tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen
+;   p03:A009 (16 bytes)
+;   0xa023..0xa033  (16 bytes)
+DATA_resto_A023:
 	defb 014h,000h,006h,000h,080h,000h,055h,000h,015h,000h,075h,000h,002h,030h,004h,030h	; a023  ......U...u..0.0
 
 ; ======================================================================
@@ -92,8 +97,11 @@ L_A05A:
 	ret			;a07f
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa080..0xa09b  (27 bytes)
-DATA_A080:
+; DATOS resto_A080: lo apuntan con el banco puesto p03:A05A (0xA080), p03:A071
+;   (0xA089); el tamano es lo que hay hasta lo siguiente, no sale de
+;   recorrerlo; lo leen p03:A05A, p03:A071 (27 bytes)
+;   0xa080..0xa09b  (27 bytes)
+DATA_resto_A080:
 	defb 077h,033h,0bbh,0eeh,011h,0bbh,0eeh,011h,011h,000h,000h,070h,00ch,020h,01ah,050h	; a080  w3.........p. .P
 	defb 028h,030h,036h,0e0h,043h,040h,052h,0c0h,061h,0d0h,06eh	; a090  (06.C@R.a.n
 
@@ -131,8 +139,11 @@ L_A0B1:
 	ret			;a0ce
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa0cf..0xa0e9  (26 bytes)
-DATA_A0CF:
+; DATOS resto_A0CF: lo apuntan con el banco puesto p03:A0C0 (0xA0CF); el
+;   tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen
+;   p03:A0C0 (26 bytes)
+;   0xa0cf..0xa0e9  (26 bytes)
+DATA_resto_A0CF:
 	defb 006h,080h,006h,070h,006h,070h,006h,070h,006h,060h,006h,050h,006h,050h,006h,050h	; a0cf  ...p.p.p.`.P.P.P
 	defb 006h,060h,006h,060h,006h,050h,006h,050h,000h,080h	; a0df  .`.`.P.P..
 
@@ -206,8 +217,11 @@ L_A157:
 	ret			;a15a
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa15b..0xa17b  (32 bytes)
-DATA_A15B:
+; DATOS resto_A15B: lo apuntan con el banco puesto p03:A13F (0xA15B); el
+;   tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen
+;   p03:A13F (32 bytes)
+;   0xa15b..0xa17b  (32 bytes)
+DATA_resto_A15B:
 	defb 008h,000h,004h,008h,004h,008h,001h,008h,008h,004h,008h,004h,004h,004h,004h,008h	; a15b  ................
 	defb 001h,008h,008h,004h,008h,004h,004h,004h,004h,008h,004h,008h,001h,002h,008h,004h	; a16b  ................
 
@@ -394,8 +408,11 @@ L_A2A5:
 	ret			;a2b0
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa2b1..0xa2cb  (26 bytes)
-DATA_A2B1:
+; DATOS resto_A2B1: lo apuntan con el banco puesto p03:A29D (0xA2B1), p03:A2A2
+;   (0xA2B7), p03:A28A (0xA2BD); el tamano es lo que hay hasta lo siguiente,
+;   no sale de recorrerlo; lo leen p03:A29D, p03:A2A2, p03:A28A (26 bytes)
+;   0xa2b1..0xa2cb  (26 bytes)
+DATA_resto_A2B1:
 	defb 001h,001h,000h,002h,080h,0f6h,000h,000h,000h,000h,0ffh,0ffh,044h,007h,045h,007h	; a2b1  ............D.E.
 	defb 047h,007h,048h,007h,050h,007h,053h,007h,0ffh,0ffh	; a2c1  G.H.P.S...
 
@@ -512,8 +529,11 @@ L_A38C:
 	ret			;a391
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa392..0xa39e  (12 bytes)
-DATA_A392:
+; DATOS resto_A392: lo apuntan con el banco puesto p03:A353 (0xA392); el
+;   tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen
+;   p03:A353 (12 bytes)
+;   0xa392..0xa39e  (12 bytes)
+DATA_resto_A392:
 	defb 008h,0d3h,00ch,0d3h,00eh,0d3h,010h,0d3h,006h,0d3h,014h,0d3h	; a392  ............
 
 ; ======================================================================
@@ -617,8 +637,11 @@ L_A416:
 	ret			;a422
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa423..0xa443  (32 bytes)
-DATA_A423:
+; DATOS resto_A423: lo apuntan con el banco puesto p03:A40F (0xA423); el
+;   tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen
+;   p03:A40F (32 bytes)
+;   0xa423..0xa443  (32 bytes)
+DATA_resto_A423:
 	defb 000h,000h,000h,000h,011h,006h,033h,007h,017h,001h,027h,003h,051h,001h,027h,006h	; a423  ......3...'.Q.'.
 	defb 071h,001h,073h,003h,061h,006h,064h,006h,011h,004h,065h,002h,055h,005h,077h,007h	; a433  q.s.a.d...e.U.w.
 
@@ -662,12 +685,15 @@ L_A457:
 	jp 00047h		;a474   ; BIOS WRTVDP - Writes data in the VDP-register
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa477..0xa47f  (8 bytes)
-DATA_A477:
+; DATOS resto_A477: lo apuntan con el banco puesto p03:A451 (0xA477); el
+;   tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen
+;   p03:A451 (8 bytes)
+;   0xa477..0xa47f  (8 bytes)
+DATA_resto_A477:
 	defb 002h,0e2h,00eh,07fh,007h,076h,003h,0e1h	; a477  .....v..
 
 ; ======================================================================
-; CODIGO 0xa47f..0xa4b8  (57 bytes)
+; CODIGO 0xa47f..0xa770  (753 bytes)
 ; ======================================================================
 
 
@@ -710,18 +736,21 @@ L_A4A4:
 	dec a			;a4b4
 	jr nz,L_A4A4		;a4b5
 	ret			;a4b7
-
-; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa4b8..0xa4cb  (19 bytes)
-DATA_A4B8:
-	defb 006h,003h,0c5h,0e5h,0d5h,0cdh,0cfh,0a4h,0d1h,021h,000h,008h,019h,0ebh,0e1h,0c1h	; a4b8  .........!......
-	defb 010h,0f0h,0c9h	; a4c8
-
-; ======================================================================
-; CODIGO 0xa4cb..0xa51c  (81 bytes)
-; ======================================================================
-
-
+L_A4B8:
+	ld b,003h		;a4b8
+L_A4BA:
+	push bc			;a4ba
+	push hl			;a4bb
+	push de			;a4bc
+	call L_A4CF		;a4bd
+	pop de			;a4c0
+	ld hl,00800h		;a4c1
+	add hl,de			;a4c4
+	ex de,hl			;a4c5
+	pop hl			;a4c6
+	pop bc			;a4c7
+	djnz L_A4BA		;a4c8
+	ret			;a4ca
 L_A4CB:
 	ld e,(hl)			;a4cb
 	inc hl			;a4cc
@@ -790,17 +819,9 @@ L_A517:
 	ld d,(hl)			;a519
 	ex de,hl			;a51a
 	jp (hl)			;a51b
-
-; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa51c..0xa520  (4 bytes)
-DATA_A51C:
-	defb 00eh,000h,018h,006h	; a51c
-
-; ======================================================================
-; CODIGO 0xa520..0xa64b  (299 bytes)
-; ======================================================================
-
-
+L_A51C:
+	ld c,000h		;a51c
+	jr L_A526		;a51e
 L_A520:
 	ld c,0ffh		;a520
 	jr L_A52A		;a522
@@ -972,19 +993,14 @@ L_A644:
 	or a			;a647
 	ret z			;a648
 	jr L_A5EF		;a649
-
-; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa64b..0xa655  (10 bytes)
-DATA_A64B:
-	defb 03ah,06dh,0d1h,0feh,03ah,021h,000h,039h,038h,003h	; a64b  :m..:!.98.
-
-; ======================================================================
-; CODIGO 0xa655..0xa770  (283 bytes)
-; ======================================================================
-
-
+L_A64B:
+	ld a,(0d16dh)		;a64b
+	cp 03ah		;a64e
+	ld hl,03900h		;a650
+	jr c,L_A658		;a653
 L_A655:
 	ld hl,03a00h		;a655
+L_A658:
 	ld bc,00100h		;a658
 	xor a			;a65b
 	jp 00056h		;a65c   ; BIOS FILVRM - Fills VRAM with value
@@ -1131,8 +1147,11 @@ L_A76A:
 	jp 0005ch		;a76d   ; BIOS LDIRVM - Block transfers to VRAM from memory
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa770..0xa778  (8 bytes)
-DATA_A770:
+; DATOS resto_A770: lo apuntan con el banco puesto p03:A74F (0xA770); el
+;   tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen
+;   p03:A74F (8 bytes)
+;   0xa770..0xa778  (8 bytes)
+DATA_resto_A770:
 	defb 000h,010h,018h,0fch,0feh,0fch,018h,010h	; a770  ........
 
 ; ======================================================================

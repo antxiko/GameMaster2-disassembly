@@ -10,8 +10,11 @@
 
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa000..0xb45e  (5214 bytes)
-DATA_A000:
+; DATOS resto_A000: lo apuntan con el banco puesto p09:8B42 (0xA000), p09:8B4D
+;   (0xA000); el tamano es lo que hay hasta lo siguiente, no sale de
+;   recorrerlo; lo leen p09:8B42, p09:8B4D (5214 bytes)
+;   0xa000..0xb45e  (5214 bytes)
+DATA_resto_A000:
 	defb 004h,011h,010h,099h,003h,011h,089h,019h,0bbh,0bbh,0b1h,099h,0bbh,0bbh,019h,099h	; a000  ................
 	defb 004h,011h,01ch,099h,004h,011h,010h,099h,081h,091h,003h,011h,081h,091h,003h,0bbh	; a010  ................
 	defb 081h,01bh,003h,0bbh,004h,011h,010h,099h,085h,011h,019h,099h,099h,0b1h,003h,099h	; a020  ................

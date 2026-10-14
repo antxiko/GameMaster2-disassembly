@@ -1,12 +1,52 @@
 # Notas del banco 01
 
 # --- BLOQUES QUE LEE EL CODIGO (seccion que reescribe tools/bloques.py; no editar a mano) ---
+D 0x6000 0x603A resto_6000  lo apuntan con el banco puesto p00:40D8 (0x6000), p00:4A80 (0x6000), p00:573F (0x6000), p02:8042 (0x6000), p02:80BF (0x6000), p02:810F (0x6000); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p00:40D8, p00:4A80, p00:573F, p02:8042, p02:80BF, p02:810F (58 bytes)
+F 0x6000 16
 D 0x605F 0x6065 saltos_605F  tabla de 3 palabras del despachador (call 0x408D en 0x605C); lo leen el despachador (6 bytes)
 F 0x605F 2
+D 0x60B8 0x60E4 resto_60B8  lo apuntan con el banco puesto p01:6089 (0x60B8); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p01:6089 (44 bytes)
+F 0x60B8 16
+D 0x6137 0x623B resto_6137  lo apuntan con el banco puesto p01:6106 (0x6137); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p01:6106 (260 bytes)
+F 0x6137 16
+D 0x6273 0x62CC resto_6273  lo apuntan con el banco puesto p01:6043 (0x6273), p01:604F (0x62C4); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p01:6043, p01:604F (89 bytes)
+F 0x6273 16
+D 0x6384 0x6389 resto_6384  lo apuntan con el banco puesto p01:6363 (0x6384); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p01:6363 (5 bytes)
+F 0x6384 16
 D 0x669E 0x66A4 saltos_669E  tabla de 3 palabras del despachador (call 0x408D en 0x669B); lo leen el despachador (6 bytes)
 F 0x669E 2
 D 0x68CE 0x68D2 saltos_68CE  tabla de 2 palabras del despachador (call 0x408D en 0x68CB); lo leen el despachador (4 bytes)
 F 0x68CE 2
+D 0x6958 0x69AD resto_6958  lo apuntan con el banco puesto p01:6854 (0x6958), p01:6883 (0x6972), p01:6930 (0x6982), p01:6946 (0x698F), p01:68BD (0x699C), p01:68C3 (0x69A9); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p01:6854, p01:6883, p01:6930, p01:6946, p01:68BD, p01:68C3 (85 bytes)
+F 0x6958 16
+D 0x6C35 0x6C38 resto_6C35  lo apuntan con el banco puesto p01:6C15 (0x6C35); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p01:6C15 (3 bytes)
+F 0x6C35 16
+D 0x6C50 0x6D17 resto_6C50  lo apuntan con el banco puesto p01:60FA (0x6CA6), p01:67F9 (0x6CA6), p01:607E (0x6CD7), p01:680A (0x6CD7); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p01:60FA, p01:67F9, p01:607E, p01:680A (199 bytes)
+F 0x6C50 16
+D 0x6D87 0x6D9A resto_6D87  lo apuntan con el banco puesto p01:6D74 (0x6D87); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p01:6D74 (19 bytes)
+F 0x6D87 16
+D 0x6DC9 0x6DD8 resto_6DC9  lo apuntan con el banco puesto p01:6DB1 (0x6DC9); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p01:6DB1 (15 bytes)
+F 0x6DC9 16
+D 0x6E24 0x6E38 resto_6E24  lo apuntan con el banco puesto p01:6E11 (0x6E24), p01:6E16 (0x6E2E); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p01:6E11, p01:6E16 (20 bytes)
+F 0x6E24 16
+D 0x6E71 0x6E81 resto_6E71  lo apuntan con el banco puesto p01:6E4D (0x6E71), p01:6E57 (0x6E79); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p01:6E4D, p01:6E57 (16 bytes)
+F 0x6E71 16
+D 0x6ECE 0x6EE9 resto_6ECE  lo apuntan con el banco puesto p01:6EA8 (0x6ECE), p01:6EBF (0x6ED7); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p01:6EA8, p01:6EBF (27 bytes)
+F 0x6ECE 16
+D 0x6F1D 0x6F37 resto_6F1D  lo apuntan con el banco puesto p01:6F0E (0x6F1D); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p01:6F0E (26 bytes)
+F 0x6F1D 16
+D 0x6FA9 0x6FC9 resto_6FA9  lo apuntan con el banco puesto p01:6F8D (0x6FA9); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p01:6F8D (32 bytes)
+F 0x6FA9 16
+D 0x70F8 0x7112 resto_70F8  lo apuntan con el banco puesto p01:70E4 (0x70F8), p01:70E9 (0x70FE), p01:70D1 (0x7104); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p01:70E4, p01:70E9, p01:70D1 (26 bytes)
+F 0x70F8 16
+D 0x71ED 0x71F9 resto_71ED  lo apuntan con el banco puesto p01:71BA (0x71ED); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p01:71BA (12 bytes)
+F 0x71ED 16
+D 0x728E 0x72AE resto_728E  lo apuntan con el banco puesto p01:727A (0x728E); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p01:727A (32 bytes)
+F 0x728E 16
+D 0x72E2 0x72EA resto_72E2  lo apuntan con el banco puesto p01:72BC (0x72E2); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p01:72BC (8 bytes)
+F 0x72E2 16
+D 0x762B 0x7633 resto_762B  lo apuntan con el banco puesto p01:760A (0x762B); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p01:760A (8 bytes)
+F 0x762B 16
 D 0x79CF 0x79D7 saltos_79CF  tabla de 4 palabras del despachador (call 0x408D en 0x79CC); lo leen el despachador (8 bytes)
 F 0x79CF 2
 D 0x7A1A 0x8000 relleno_ff  1510 bytes a 0xFF hasta el final del banco: relleno; lo leen nadie (1510 bytes)

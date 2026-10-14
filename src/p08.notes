@@ -1,8 +1,12 @@
 # Notas del banco 08
 
 # --- BLOQUES QUE LEE EL CODIGO (seccion que reescribe tools/bloques.py; no editar a mano) ---
+D 0xA000 0xA001 partida_A000  los 1 ultimos bytes de la instruccion de p07:9FFE (3A EF E2), que empieza en el banco 7; lo leen p07:9FFE (1 bytes)
+F 0xA000 1
 D 0xA03E 0xA07C saltos_A03E  tabla de 31 palabras del despachador (call 0x408D en 0xA03D); lo leen el despachador (62 bytes)
 F 0xA03E 2
+D 0xA3CE 0xAF1B resto_A3CE  lo apuntan con el banco puesto p08:A388 (0xA3CE), p08:A39E (0xA3D2), p08:A3B4 (0xA3D6), p07:9DF4 (0xA3DA); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p08:A388, p08:A39E, p08:A3B4, p07:9DF4 (2893 bytes)
+F 0xA3CE 16
 D 0xAF1B 0xC000 relleno_ff  4325 bytes a 0xFF hasta el final del banco: relleno; lo leen nadie (4325 bytes)
 F 0xAF1B 16
 # --- fin de los bloques de bloques.py ---

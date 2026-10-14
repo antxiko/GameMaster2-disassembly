@@ -10,12 +10,14 @@
 
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa000..0xa002  (2 bytes)
-DATA_A000:
+; DATOS partida_A000: los 2 ultimos bytes de la instruccion de p05:9FFF (CD 57
+;   A1), que empieza en el banco 5; lo leen p05:9FFF (2 bytes)
+;   0xa000..0xa002  (2 bytes)
+DATA_partida_A000:
 	defb 057h,0a1h	; a000
 
 ; ======================================================================
-; CODIGO 0xa002..0xa0be  (188 bytes)
+; CODIGO 0xa002..0xa15e  (348 bytes)
 ; ======================================================================
 
 
@@ -102,17 +104,13 @@ L_A092:
 	ld hl,0a17ch		;a0b7
 	call 086afh		;a0ba
 	ret			;a0bd
-
-; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa0be..0xa0cc  (14 bytes)
-DATA_A0BE:
-	defb 021h,02ah,02ah,001h,020h,090h,03eh,044h,016h,000h,0cdh,0c8h,083h,0c9h	; a0be  !**. .>D......
-
-; ======================================================================
-; CODIGO 0xa0cc..0xa15e  (146 bytes)
-; ======================================================================
-
-
+L_A0BE:
+	ld hl,02a2ah		;a0be
+	ld bc,09020h		;a0c1
+	ld a,044h		;a0c4
+	ld d,000h		;a0c6
+	call 083c8h		;a0c8
+	ret			;a0cb
 L_A0CC:
 	ld hl,0a19dh		;a0cc
 	call 086afh		;a0cf
@@ -188,8 +186,13 @@ L_A157:
 	ret			;a15d
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa15e..0xa23b  (221 bytes)
-DATA_A15E:
+; DATOS resto_A15E: lo apuntan con el banco puesto p06:A08B (0xA15E), p06:A0B7
+;   (0xA17C), p06:A0CC (0xA19D), p06:A0D3 (0xA1A6), p06:A13B (0xA1B2),
+;   p06:A142 (0xA1BD); el tamano es lo que hay hasta lo siguiente, no sale de
+;   recorrerlo; lo leen p06:A08B, p06:A0B7, p06:A0CC, p06:A0D3, p06:A13B,
+;   p06:A142 (221 bytes)
+;   0xa15e..0xa23b  (221 bytes)
+DATA_resto_A15E:
 	defb 020h,018h,042h,049h,052h,054h,048h,044h,041h,059h,0feh,020h,020h,059h,020h,020h	; a15e   .BIRTHDAY.  Y
 	defb 020h,020h,020h,020h,04dh,020h,020h,020h,020h,044h,020h,020h,020h,0ffh,030h,030h	; a16e      M    D   .00
 	defb 043h,048h,045h,043h,04bh,020h,020h,020h,044h,041h,059h,0feh,030h,038h,059h,020h	; a17e  CHECK   DAY.08Y
@@ -230,8 +233,11 @@ L_A23B:
 	ret			;a266
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa267..0xa270  (9 bytes)
-DATA_A267:
+; DATOS resto_A267: lo apuntan con el banco puesto p06:A260 (0xA267); el
+;   tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen
+;   p06:A260 (9 bytes)
+;   0xa267..0xa270  (9 bytes)
+DATA_resto_A267:
 	defb 0b8h,0a8h,04fh,04bh,03ch,052h,045h,054h,0ffh	; a267  ..OK<RET.
 
 ; ======================================================================
@@ -270,7 +276,7 @@ DATA_saltos_A28C:
 	defb 01dh,0a3h	; a29a
 
 ; ======================================================================
-; CODIGO 0xa29c..0xa3e7  (331 bytes)
+; CODIGO 0xa29c..0xa417  (379 bytes)
 ; ======================================================================
 
 
@@ -448,30 +454,21 @@ L_A3B1:
 L_A3CD:
 	ld b,000h		;a3cd
 	cp 0a8h		;a3cf
-	jr nc,$+23		;a3d1
+	jr nc,L_A3E8		;a3d1
 	inc b			;a3d3
 	cp 094h		;a3d4
-	jr nc,$+18		;a3d6
+	jr nc,L_A3E8		;a3d6
 	inc b			;a3d8
 	cp 07eh		;a3d9
-	jr nc,$+13		;a3db
+	jr nc,L_A3E8		;a3db
 	inc b			;a3dd
 	cp 06ch		;a3de
-	jr nc,$+8		;a3e0
+	jr nc,L_A3E8		;a3e0
 	inc b			;a3e2
 	cp 000h		;a3e3
-	jr $+3		;a3e5
-
-; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa3e7..0xa3e8  (1 bytes)
-DATA_A3E7:
-	defb 0c9h	; a3e7
-
-; ======================================================================
-; CODIGO 0xa3e8..0xa417  (47 bytes)
-; ======================================================================
-
-
+	jr L_A3E8		;a3e5
+L_A3E7:
+	ret			;a3e7
 L_A3E8:
 	ld (hl),b			;a3e8
 	ret			;a3e9
@@ -496,8 +493,11 @@ L_A40F:
 	ret			;a416
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa417..0xa421  (10 bytes)
-DATA_A417:
+; DATOS resto_A417: lo apuntan con el banco puesto p06:A40F (0xA417); el
+;   tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen
+;   p06:A40F (10 bytes)
+;   0xa417..0xa421  (10 bytes)
+DATA_resto_A417:
 	defb 01dh,0a2h,023h,0a2h,027h,0a2h,02fh,0a2h,036h,0a2h	; a417  ..#.'./.6.
 
 ; ======================================================================

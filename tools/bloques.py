@@ -168,7 +168,11 @@ def despachadores():
 
 
 def relleno():
-    """La cola de 0xFF de cada banco."""
+    """La cola de 0xFF de cada banco, y las tiras de 0xFF de 32 bytes o mas
+    que hay entre codigo en mitad de un banco (fuera de lo trazado, y sin
+    ninguna instruccion que apunte dentro: lectores.apuntadores)."""
+    import lectores
+    ap = lectores.apuntadores(TRAZADOR[0])
     for p in range(N_PAGINAS):
         fin = ORG[p] + TAM_PAGINA
         a = fin
@@ -178,6 +182,23 @@ def relleno():
             BLOQUES.append(dict(p=p, ini=a, fin=fin, nombre="relleno_ff",
                                 texto="%d bytes a 0xFF hasta el final del banco: "
                                 "relleno" % (fin - a), lectores=["nadie"], F=16))
+        cod = codigo_trazado(p)
+        i = 0
+        while i < a - ORG[p]:
+            if ROM[p * TAM_PAGINA + i] != 0xFF or cod[i]:
+                i += 1
+                continue
+            j = i
+            while j < a - ORG[p] and ROM[p * TAM_PAGINA + j] == 0xFF and not cod[j]:
+                j += 1
+            ini, z = ORG[p] + i, ORG[p] + j
+            dentro = [w for (d, w) in ap if d == p and ini <= w < z]
+            if j - i >= 32 and not dentro:
+                BLOQUES.append(dict(p=p, ini=ini, fin=z, nombre="relleno_%04X" % ini,
+                                    texto="%d bytes a 0xFF en mitad del banco, sin "
+                                    "ninguna instruccion que apunte dentro: relleno"
+                                    % (z - ini), lectores=["nadie"], F=16))
+            i = j
 
 
 # ------------------------------------------------------------- escritura
@@ -234,6 +255,27 @@ def junta(bloques):
     return out
 
 
+def partidas():
+    """Las instrucciones que empiezan al final de un banco y acaban en el
+    siguiente (tools/bancos.py las mide): el trazador de un solo banco no las
+    ve enteras, asi que sus dos trozos van como datos con su explicacion."""
+    t = TRAZADOR[0]
+    for b, pc, n in sorted(t.partidas):
+        trio = sorted(t.config_de[(b, pc)])[0]
+        bs = bytes(leer(trio, pc + i) for i in range(n))
+        fin_banco = (pc & 0xE000) + TAM_PAGINA
+        sig = banco(trio, fin_banco)
+        declara(trio, pc, fin_banco, "partida_%04X" % pc,
+                "los %d primeros bytes de una instruccion de %d (%s) que sigue en el "
+                "banco %d: el trazador de un solo banco no puede verla entera "
+                "(tools/bancos.py)" % (fin_banco - pc, n, bs.hex(" ").upper(), sig),
+                "%s:%04X" % (nombre(b), pc), F=fin_banco - pc)
+        declara(trio, fin_banco, pc + n, "partida_%04X" % fin_banco,
+                "los %d ultimos bytes de la instruccion de %s:%04X (%s), que empieza "
+                "en el banco %d" % (pc + n - fin_banco, nombre(b), pc, bs.hex(" ").upper(), b),
+                "%s:%04X" % (nombre(b), pc), F=pc + n - fin_banco)
+
+
 def restos(p, mascara, lineas):
     """Lo que nadie ha declarado: se dice quien lo apunta con su banco puesto
     (tools/lectores.py), y el tamano es lo que hay hasta lo siguiente."""
@@ -268,6 +310,7 @@ def restos(p, mascara, lineas):
 def main(argv):
     escribe = "--escribe" in argv
     automaticos()
+    partidas()
     despachadores()
     relleno()
     por = defaultdict(list)

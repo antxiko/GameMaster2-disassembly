@@ -12,6 +12,7 @@
 #
 # Este fichero lo regenera `make semillas` (tools/bancos.py escribe).
 0xA001   # p07:9FFE sigue de largo (el codigo cruza la frontera de banco)
+0xA016   # huerfana (fragmento)
 0xA029   # p07:9CFE call
 0xA07C   # p08:A03D entrada 0 de la tabla de 0xA03E (jp (hl) en 0xA03D)
 0xA092   # p08:A03D entrada 1 de la tabla de 0xA03E (jp (hl) en 0xA03D)

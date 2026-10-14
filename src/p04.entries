@@ -12,6 +12,7 @@
 #
 # Este fichero lo regenera `make semillas` (tools/bancos.py escribe).
 0x8000   # p00:403B call
+0x806B   # huerfana (fragmento); en 0xA000 la SRAM (0x10, p00:4033)
 0x807F   # p04:8030 entrada 0 de la tabla de 0x8033 (despachador en 0x8030)
 0x80F9   # p04:8030 entrada 1 de la tabla de 0x8033 (despachador en 0x8030)
 0x8169   # p04:8030 entrada 2 de la tabla de 0x8033 (despachador en 0x8030)

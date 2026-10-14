@@ -21,5 +21,7 @@
 0x8191   # p01:6694 call
 0x82CA   # p01:6681 call
 0x846D   # p01:6684 call
+0x84F3   # huerfana (fragmento)
 0x8846   # p01:6678 call
 0x8F8F   # huerfana: gemela de p05:870E. Las palabras 0x8F8F que hay en p09 caen en los graficos de p09:9048 (datos), no en codigo
+0x8FED   # huerfana (fragmento)

@@ -1,14 +1,54 @@
 # Notas del banco 05
 
 # --- BLOQUES QUE LEE EL CODIGO (seccion que reescribe tools/bloques.py; no editar a mano) ---
+D 0x82D7 0x8305 resto_82D7  lo apuntan con el banco puesto p05:82C3 (0x82D7); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p05:82C3 (46 bytes)
+F 0x82D7 16
+D 0x8758 0x8760 resto_8758  lo apuntan con el banco puesto p05:8747 (0x8758); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p05:8747 (8 bytes)
+F 0x8758 16
+D 0x877F 0x8787 resto_877F  lo apuntan con el banco puesto p05:876E (0x877F); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p05:876E (8 bytes)
+F 0x877F 16
+D 0x87B2 0x87BA resto_87B2  lo apuntan con el banco puesto p05:8796 (0x87B2); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p05:8796 (8 bytes)
+F 0x87B2 16
+D 0x8808 0x896E resto_8808  lo apuntan con el banco puesto p05:87BD (0x8808), p05:87F6 (0x8951); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p05:87BD, p05:87F6 (358 bytes)
+F 0x8808 16
+D 0x89B4 0x8B14 resto_89B4  lo apuntan con el banco puesto p05:899A (0x89B4), p05:897B (0x8B0C); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p05:899A, p05:897B (352 bytes)
+F 0x89B4 16
+D 0x8B1B 0x8B40 resto_8B1B  lo apuntan con el banco puesto p05:8B40 (0x8B1B), p05:8B49 (0x8B29); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p05:8B40, p05:8B49 (37 bytes)
+F 0x8B1B 16
+D 0x8CE2 0x8CFA resto_8CE2  lo apuntan con el banco puesto p05:8CDB (0x8CE2); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p05:8CDB (24 bytes)
+F 0x8CE2 16
+D 0x8D77 0x8D97 resto_8D77  lo apuntan con el banco puesto p05:8D70 (0x8D77); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p05:8D70 (32 bytes)
+F 0x8D77 16
+D 0x8DAA 0x8DC2 resto_8DAA  lo apuntan con el banco puesto p05:8D97 (0x8DAA); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p05:8D97 (24 bytes)
+F 0x8DAA 16
+D 0x8DCC 0x8DD5 resto_8DCC  lo apuntan con el banco puesto p05:8CD4 (0x8DCC), p05:8DC5 (0x8DCC); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p05:8CD4, p05:8DC5 (9 bytes)
+F 0x8DCC 16
+D 0x8E06 0x8E34 resto_8E06  lo apuntan con el banco puesto p05:8DFC (0x8E06); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p05:8DFC (46 bytes)
+F 0x8E06 16
+D 0x9043 0x9049 resto_9043  lo apuntan con el banco puesto p05:9020 (0x9043), p05:9CED (0x9043); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p05:9020, p05:9CED (6 bytes)
+F 0x9043 16
+D 0x94E8 0x95B7 resto_94E8  lo apuntan con el banco puesto p05:9343 (0x94E8), p05:9357 (0x94E8), p05:936A (0x94E8), p05:937C (0x94E8), p05:8F25 (0x959E), p05:9392 (0x959E); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p05:9343, p05:9357, p05:936A, p05:937C, p05:8F25, p05:9392 (207 bytes)
+F 0x94E8 16
 D 0x95BD 0x95CD saltos_95BD  tabla de 8 palabras del despachador (call 0x408D en 0x95BA); lo leen el despachador (16 bytes)
 F 0x95BD 2
 D 0x9680 0x968A saltos_9680  tabla de 5 palabras del despachador (call 0x408D en 0x967D); lo leen el despachador (10 bytes)
 F 0x9680 2
+D 0x96D2 0x96F2 resto_96D2  lo apuntan con el banco puesto p05:96B8 (0x96D2); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p05:96B8 (32 bytes)
+F 0x96D2 16
 D 0x9707 0x9717 saltos_9707  tabla de 8 palabras del despachador (call 0x408D en 0x9704); lo leen el despachador (16 bytes)
 F 0x9707 2
 D 0x9785 0x9793 saltos_9785  tabla de 7 palabras del despachador (call 0x408D en 0x9782); lo leen el despachador (14 bytes)
 F 0x9785 2
+D 0x9978 0x9984 resto_9978  lo apuntan con el banco puesto p05:98B6 (0x9978); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p05:98B6 (12 bytes)
+F 0x9978 16
 D 0x9990 0x999A saltos_9990  tabla de 5 palabras del despachador (call 0x408D en 0x998D); lo leen el despachador (10 bytes)
 F 0x9990 2
+D 0x9AA3 0x9AC3 resto_9AA3  lo apuntan con el banco puesto p05:9A7A (0x9AA3); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p05:9A7A (32 bytes)
+F 0x9AA3 16
+D 0x9DC2 0x9DCC resto_9DC2  lo apuntan con el banco puesto p05:9D81 (0x9DC2); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p05:9D81 (10 bytes)
+F 0x9DC2 16
+D 0x9E3E 0x9F72 resto_9E3E  lo apuntan con el banco puesto p05:9E30 (0x9E3E), p05:9E37 (0x9E47), p05:9DDA (0x9E50), p05:9DE1 (0x9EDC), p05:9E29 (0x9EF9), p05:9DF1 (0x9F0A); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p05:9E30, p05:9E37, p05:9DDA, p05:9DE1, p05:9E29, p05:9DF1 (308 bytes)
+F 0x9E3E 16
+D 0x9FFF 0xA000 partida_9FFF  los 1 primeros bytes de una instruccion de 3 (CD 57 A1) que sigue en el banco 6: el trazador de un solo banco no puede verla entera (tools/bancos.py); lo leen p05:9FFF (1 bytes)
+F 0x9FFF 1
 # --- fin de los bloques de bloques.py ---

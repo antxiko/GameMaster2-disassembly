@@ -34,8 +34,10 @@
 0xA443   # huerfana: paleta desde una lista [color, d, e] que acaba en 0xFF
 0xA451   # huerfana: los 8 registros del VDP de p03:A477 y, en MSX2, R#23 y R#9
 0xA47F   # p02:9942 call
+0xA4B8   # huerfana (fragmento)
 0xA4CF   # p02:92B1 call
 0xA510   # p02:9949 call
+0xA51C   # huerfana (fragmento)
 0xA520   # p02:9559 call
 0xA524   # p02:87E3 call
 0xA54B   # p02:9F97 call
@@ -43,6 +45,7 @@
 0xA56E   # p02:873C call
 0xA63C   # p02:9545 call
 0xA644   # p02:9566 call
+0xA64B   # huerfana (fragmento)
 0xA65F   # p02:8C91 jp
 0xA798   # p02:87EB call
 0xA829   # p02:9318 call

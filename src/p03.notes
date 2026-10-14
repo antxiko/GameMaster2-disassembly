@@ -1,6 +1,26 @@
 # Notas del banco 03
 
 # --- BLOQUES QUE LEE EL CODIGO (seccion que reescribe tools/bloques.py; no editar a mano) ---
+D 0xA000 0xA002 partida_A000  los 2 ultimos bytes de la instruccion de p02:9FFF (21 23 A0), que empieza en el banco 2; lo leen p02:9FFF (2 bytes)
+F 0xA000 2
+D 0xA023 0xA033 resto_A023  lo apuntan con el banco puesto p03:A009 (0xA02B); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p03:A009 (16 bytes)
+F 0xA023 16
+D 0xA080 0xA09B resto_A080  lo apuntan con el banco puesto p03:A05A (0xA080), p03:A071 (0xA089); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p03:A05A, p03:A071 (27 bytes)
+F 0xA080 16
+D 0xA0CF 0xA0E9 resto_A0CF  lo apuntan con el banco puesto p03:A0C0 (0xA0CF); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p03:A0C0 (26 bytes)
+F 0xA0CF 16
+D 0xA15B 0xA17B resto_A15B  lo apuntan con el banco puesto p03:A13F (0xA15B); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p03:A13F (32 bytes)
+F 0xA15B 16
+D 0xA2B1 0xA2CB resto_A2B1  lo apuntan con el banco puesto p03:A29D (0xA2B1), p03:A2A2 (0xA2B7), p03:A28A (0xA2BD); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p03:A29D, p03:A2A2, p03:A28A (26 bytes)
+F 0xA2B1 16
+D 0xA392 0xA39E resto_A392  lo apuntan con el banco puesto p03:A353 (0xA392); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p03:A353 (12 bytes)
+F 0xA392 16
+D 0xA423 0xA443 resto_A423  lo apuntan con el banco puesto p03:A40F (0xA423); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p03:A40F (32 bytes)
+F 0xA423 16
+D 0xA477 0xA47F resto_A477  lo apuntan con el banco puesto p03:A451 (0xA477); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p03:A451 (8 bytes)
+F 0xA477 16
+D 0xA770 0xA778 resto_A770  lo apuntan con el banco puesto p03:A74F (0xA770); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p03:A74F (8 bytes)
+F 0xA770 16
 D 0xA941 0xA949 saltos_A941  tabla de 4 palabras del despachador (call 0x408D en 0xA93E); lo leen el despachador (8 bytes)
 F 0xA941 2
 D 0xA98C 0xC000 relleno_ff  5748 bytes a 0xFF hasta el final del banco: relleno; lo leen nadie (5748 bytes)

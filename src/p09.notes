@@ -1,4 +1,34 @@
 # Notas del banco 09
 
 # --- BLOQUES QUE LEE EL CODIGO (seccion que reescribe tools/bloques.py; no editar a mano) ---
+D 0x80CA 0x80D2 resto_80CA  lo apuntan con el banco puesto p09:8098 (0x80CA); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p09:8098 (8 bytes)
+F 0x80CA 16
+D 0x8107 0x8117 resto_8107  lo apuntan con el banco puesto p09:80DF (0x8107); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p09:80DF (16 bytes)
+F 0x8107 16
+D 0x81DB 0x823D resto_81DB  lo apuntan con el banco puesto p09:81D2 (0x81DB), p09:81B1 (0x81FC), p09:81BA (0x820D); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p09:81D2, p09:81B1, p09:81BA (98 bytes)
+F 0x81DB 16
+D 0x831B 0x8457 resto_831B  lo apuntan con el banco puesto p09:830E (0x831B), p09:82F6 (0x8337), p09:8302 (0x83AF); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p09:830E, p09:82F6, p09:8302 (316 bytes)
+F 0x831B 16
+D 0x84D1 0x84D9 resto_84D1  lo apuntan con el banco puesto p09:84AC (0x84D1); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p09:84AC (8 bytes)
+F 0x84D1 16
+D 0x8560 0x85CB resto_8560  lo apuntan con el banco puesto p09:8522 (0x8560), p09:8511 (0x8568); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p09:8522, p09:8511 (107 bytes)
+F 0x8560 16
+D 0x85EA 0x861A resto_85EA  lo apuntan con el banco puesto p09:84A0 (0x85EA); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p09:84A0 (48 bytes)
+F 0x85EA 16
+D 0x864C 0x8692 resto_864C  lo apuntan con el banco puesto p09:8634 (0x864C), p09:863E (0x8669), p09:8625 (0x868C); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p09:8634, p09:863E, p09:8625 (70 bytes)
+F 0x864C 16
+D 0x8706 0x8731 resto_8706  lo apuntan con el banco puesto p09:86FF (0x8706); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p09:86FF (43 bytes)
+F 0x8706 16
+D 0x87F8 0x8846 resto_87F8  lo apuntan con el banco puesto p09:87BA (0x87F8), p09:873D (0x8800), p09:87AE (0x8818), p09:879F (0x8840); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p09:87BA, p09:873D, p09:87AE, p09:879F (78 bytes)
+F 0x87F8 16
+D 0x88A0 0x8B20 resto_88A0  lo apuntan con el banco puesto p09:888B (0x88A0), p09:887F (0x88C0), p09:8876 (0x8900); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p09:888B, p09:887F, p09:8876 (640 bytes)
+F 0x88A0 16
+D 0x8B9C 0x8D27 resto_8B9C  lo apuntan con el banco puesto p09:8B95 (0x8B9C), p09:8B51 (0x8BCD), p09:8B5D (0x8BED), p09:8734 (0x8C00), p09:8B69 (0x8CED), p09:8B75 (0x8D0D); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p09:8B95, p09:8B51, p09:8B5D, p09:8734, p09:8B69, p09:8B75 (395 bytes)
+F 0x8B9C 16
+D 0x8D74 0x8D83 resto_8D74  lo apuntan con el banco puesto p09:8D6D (0x8D74); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p09:8D6D (15 bytes)
+F 0x8D74 16
+D 0x8D99 0x8DEE resto_8D99  lo apuntan con el banco puesto p09:8D55 (0x8D99), p09:8D61 (0x8DE4), p09:8D2A (0x8DE6); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p09:8D55, p09:8D61, p09:8D2A (85 bytes)
+F 0x8D99 16
+D 0x9048 0xA000 resto_9048  lo apuntan con el banco puesto p09:8858 (0x9048), p09:87B1 (0x9050), p09:8861 (0x953A), p09:86C8 (0x9828), p09:86D4 (0x98A0), p09:87D4 (0x9948); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p09:8858, p09:87B1, p09:8861, p09:86C8, p09:86D4, p09:87D4 (4024 bytes)
+F 0x9048 16
 # --- fin de los bloques de bloques.py ---

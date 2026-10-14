@@ -36,9 +36,15 @@
 !reubica 0x4b56 0x4b61 0xc800   # p00:4B43 ldir (hl=4B56 de=C800 bc=000B)
 !reubica 0x4b61 0x4b64 0xfeda   # p00:4B4E ldir (hl=4B61 de=FEDA bc=0003): H.STKE = jp 0xC800
 0x4D03   # huerfana: graba 0x1000 bytes de 0x8000 por BDOS (c=0x1A, jp p00:5152); gemela p02:9273
+0x4D11   # huerfana (fragmento)
+0x50BF   # huerfana (fragmento)
+0x50D3   # huerfana (fragmento)
+0x50F3   # huerfana (fragmento)
+0x50FF   # huerfana (fragmento)
 0x5583   # cabecera AB: INIT
 0x563F   # p01:66D2 jp
 !reubica 0x578d 0x5813 0xe010   # p00:5788 ldir (hl=578D de=E010 bc=0086), salta p00:578A
+0x5813   # huerfana (fragmento)
 !reubica 0x5832 0x5937 0xe000   # p00:582D ldir (hl=5832 de=E000 bc=0105), salta p00:582F
 !reubica 0x5945 0x59cc 0xe000   # p00:5940 ldir (hl=5945 de=E000 bc=0087)
 !reubica 0x5a01 0x5a0c 0xe800   # p00:59EE ldir (hl=5A01 de=E800 bc=000B)
@@ -64,6 +70,7 @@
 0x5E4A   # p00:5E0A entrada 2 de la tabla de 0x5E0D (despachador en 0x5E0A)
 0x5E89   # p00:5E0A entrada 1 de la tabla de 0x5E0D (despachador en 0x5E0A)
 0x5E98   # p00:5E0A entrada 4 de la tabla de 0x5E0D (despachador en 0x5E0A)
+0x5EAC   # huerfana (fragmento)
 0x5EC2   # p01:668B call
 0x5F1A   # p00:5E0A entrada 0 de la tabla de 0x5E0D (despachador en 0x5E0A)
 0x5F88   # p00:5F81 entrada 0 de la tabla de 0x5F84 (despachador en 0x5F81)

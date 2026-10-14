@@ -16,9 +16,26 @@ sys.path.insert(0, TOOLS)
 
 class Listado(unittest.TestCase):
 
+    def test_ni_un_byte_sin_explicar(self):
+        """tools/presupuesto.py: cada byte es codigo trazado o una D con nombre."""
+        if not os.path.exists(os.path.join(RAIZ, "work", "p00.trace.json")):
+            raise AssertionError("faltan los trazados de work/: haz `make trace`")
+        r = subprocess.run([sys.executable, os.path.join(TOOLS, "presupuesto.py"),
+                            os.path.join(RAIZ, "work"), os.path.join(RAIZ, "src")],
+                           capture_output=True, text=True, cwd=TOOLS)
+        linea = next(l for l in r.stdout.splitlines() if l.strip().startswith("sin explicar"))
+        self.assertEqual(int(linea.split()[2]), 0, linea)
+
+    def test_ningun_resto_sin_lector(self):
+        """Todo bloque de datos dice quien lo lee: ni un 'SIN LECTOR'."""
+        for p in range(16):
+            with open(os.path.join(RAIZ, "src", "p%02d.notes" % p), encoding="utf-8") as f:
+                self.assertNotIn("SIN LECTOR", f.read(), "p%02d" % p)
+
     def test_el_makefile_y_paginas_py_dicen_lo_mismo(self):
         from paginas import ORG
-        mk = open(os.path.join(RAIZ, "Makefile"), encoding="utf-8").read()
+        with open(os.path.join(RAIZ, "Makefile"), encoding="utf-8") as f:
+            mk = f.read()
         for p, o in ORG.items():
             self.assertIn("ORG_%02d = %#06x" % (p, o), mk)
 

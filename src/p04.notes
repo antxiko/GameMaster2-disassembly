@@ -3,6 +3,8 @@
 # --- BLOQUES QUE LEE EL CODIGO (seccion que reescribe tools/bloques.py; no editar a mano) ---
 D 0x8033 0x804F saltos_8033  tabla de 14 palabras del despachador (call 0x408D en 0x8030); lo leen el despachador (28 bytes)
 F 0x8033 2
+D 0x8513 0x8519 resto_8513  lo apuntan con el banco puesto p04:8500 (0x8513); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p04:8500 (6 bytes)
+F 0x8513 16
 D 0x867A 0xA000 relleno_ff  6534 bytes a 0xFF hasta el final del banco: relleno; lo leen nadie (6534 bytes)
 F 0x867A 16
 # --- fin de los bloques de bloques.py ---

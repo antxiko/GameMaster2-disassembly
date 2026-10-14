@@ -18,6 +18,7 @@
 0x8300   # p00:4A78 jp
 0x8303   # p00:4A05 jp
 0x8306   # p00:4A19 jp
+0x837F   # huerfana (fragmento)
 !reubica 0x83ba 0x8487 0xda00   # p02:83B5 ldir (hl=83BA de=DA00 bc=00CD), salta p02:83B7
 0x84BD   # p02:84A4 entrada 0 de la tabla de 0x84A7 (despachador en 0x84A4)
 0x84E6   # p02:84DD entrada 1 de la tabla de 0x84E0 (despachador en 0x84DD)
@@ -35,6 +36,7 @@
 0x8813   # p02:87F3 entrada 2 de la tabla de 0x87F6 (despachador en 0x87F3)
 0x8826   # p02:87F3 entrada 1 de la tabla de 0x87F6 (despachador en 0x87F3)
 0x8899   # p02:87F3 entrada 4 de la tabla de 0x87F6 (despachador en 0x87F3)
+0x88AD   # huerfana (fragmento)
 0x88C3   # p02:87F3 entrada 0 de la tabla de 0x87F6 (despachador en 0x87F3)
 0x8908   # huerfana: menu de dos opciones (hl=0x8996, b=2, call 0xA7B2)
 0x8920   # p02:8919 entrada 0 de la tabla de 0x891C (despachador en 0x8919)
@@ -49,16 +51,23 @@
 0x8DBF   # a mano, call 0xD83B desde p02:837C: bloque p02:8D98 (en 0xD814) + 0x27
 !reubica 0x8de5 0x8f73 0xd170   # p02:8D95 ldir (hl=8DE5 de=D170 bc=018E)
 0x8F09   # a mano, call 0xD294 desde p02:9025: bloque p02:8DE5 (en 0xD170) + 0x124
+0x8F4D   # huerfana (fragmento)
 0x8F73   # a mano, p02:8E12: ld ix,0x8F73 + jp 0xD214
 0x8F88   # a mano, p02:8ED5 y p02:8F24: ld ix,0x8F88 + 0xD214
 0x8FC0   # a mano, p02:8ECE: ld ix,0x8FC0 + call 0xD214
 0x8FE8   # a mano, p02:8E85: ld ix,0x8FE8, y cae en el puente (p02:8E89)
 0x902E   # a mano, p02:8EF4: ld ix,0x902E + call 0xD214
 0x9273   # huerfana: gemela de p00:4D03
+0x9281   # huerfana (fragmento)
+0x946B   # huerfana (fragmento)
+0x947F   # huerfana (fragmento)
+0x949F   # huerfana (fragmento)
+0x94AB   # huerfana (fragmento)
 0x9959   # p02:9949 entrada 0 de la tabla de 0x994C (despachador en 0x9949)
 0x9981   # p02:9949 entrada 1 de la tabla de 0x994C (despachador en 0x9949)
 0x998C   # p02:9949 entrada 2 de la tabla de 0x994C (despachador en 0x9949)
 0x99A8   # huerfana: gemela de p01:6713
+0x99C2   # huerfana (fragmento)
 0x99FA   # a mano, p02:8E30: ld ix,0x99FA + jp 0xD214
 0x9B3C   # p02:9B35 entrada 0 de la tabla de 0x9B38 (despachador en 0x9B35)
 0x9F51   # tabla 0x9EE0 (p02:9A6B ld hl,0x9EE0), juegos 25

@@ -10,12 +10,14 @@
 
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa000..0xa001  (1 bytes)
-DATA_A000:
+; DATOS partida_A000: los 1 ultimos bytes de la instruccion de p07:9FFE (3A EF
+;   E2), que empieza en el banco 7; lo leen p07:9FFE (1 bytes)
+;   0xa000..0xa001  (1 bytes)
+DATA_partida_A000:
 	defb 0e2h	; a000
 
 ; ======================================================================
-; CODIGO 0xa001..0xa016  (21 bytes)
+; CODIGO 0xa001..0xa03e  (61 bytes)
 ; ======================================================================
 
 
@@ -31,17 +33,9 @@ L_A001:
 L_A013:
 	res 3,(hl)		;a013
 	ret			;a015
-
-; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa016..0xa019  (3 bytes)
-DATA_A016:
-	defb 0cbh,08eh,0c9h	; a016
-
-; ======================================================================
-; CODIGO 0xa019..0xa03e  (37 bytes)
-; ======================================================================
-
-
+L_A016:
+	res 1,(hl)		;a016
+	ret			;a018
 L_A019:
 	ld a,(0e258h)		;a019
 	or a			;a01c
@@ -605,8 +599,12 @@ L_A3C7:
 	ret			;a3cd
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa3ce..0xaf1b  (2893 bytes)
-DATA_A3CE:
+; DATOS resto_A3CE: lo apuntan con el banco puesto p08:A388 (0xA3CE), p08:A39E
+;   (0xA3D2), p08:A3B4 (0xA3D6), p07:9DF4 (0xA3DA); el tamano es lo que hay
+;   hasta lo siguiente, no sale de recorrerlo; lo leen p08:A388, p08:A39E,
+;   p08:A3B4, p07:9DF4 (2893 bytes)
+;   0xa3ce..0xaf1b  (2893 bytes)
+DATA_resto_A3CE:
 	defb 089h,081h,088h,080h,092h,082h,090h,080h,0a4h,084h,0a0h,080h,0eeh,0a3h,0f5h,0a3h	; a3ce  ................
 	defb 002h,0a4h,017h,0a4h,030h,0a4h,048h,0a4h,048h,0a4h,048h,0a4h,048h,0a4h,048h,0a4h	; a3de  ....0.H.H.H.H.H.
 	defb 0e1h,001h,0e4h,000h,008h,005h,0ffh,0e3h,001h,0e4h,000h,08ah,000h,0e1h,004h,006h	; a3ee  ................

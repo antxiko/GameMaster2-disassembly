@@ -98,7 +98,9 @@ class Cartucho(unittest.TestCase):
         ese destino y esa longitud (ld hl / ld de / ld bc delante)."""
         import re
         n = 0
-        for ln in open(os.path.join(RAIZ, "src", "reubica.txt"), encoding="utf-8"):
+        with open(os.path.join(RAIZ, "src", "reubica.txt"), encoding="utf-8") as f:
+            filas = f.read().splitlines()
+        for ln in filas:
             m = re.match(r"p(\d\d) (0x\w+) (0x\w+) (0x\w+)\s+# p(\d\d):(\w{4}) ldir", ln)
             if not m:
                 continue

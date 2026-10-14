@@ -15,14 +15,14 @@
 
 
 sram_puerta:		; la entrada de la SRAM: IX = el bloque de DE, la orden en C (0x0A guarda B en ix+0x17)
-	push de			;8000
+	push de			;8000   ; IX = el bloque de la orden (DE)
 	pop ix		;8001
-	ld a,010h		;8003
+	ld a,010h		;8003   ; la mitad 0x10 de la SRAM
 	ld (0a000h),a		;8005   ; el mapper: pone en 0xA000 el banco de A
-	ld a,c			;8008
+	ld a,c			;8008   ; la orden 0x0A...
 	cp 00ah		;8009
 	jr nz,L_8010		;800b
-	ld (ix+017h),b		;800d
+	ld (ix+017h),b		;800d   ; ...guarda B en (ix+0x17): sobrescribir
 L_8010:
 	call sram_orden		;8010   ; sram_orden: la orden C: comprueba la SRAM y salta a la de la tabla
 	push af			;8013
@@ -234,14 +234,14 @@ sram_bloques:		; los bloques del fichero
 L_8144:
 	ld a,(hl)			;8144
 L_8145:
-	ld hl,0b200h		;8145
+	ld hl,0b200h		;8145   ; el bloque siguiente de la cadena (tabla de 0xB200)
 	call hl_mas_a		;8148   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
-	djnz L_8144		;814b
-	ld a,(hl)			;814d
-	ld (hl),0ffh		;814e
-	cp (hl)			;8150
+	djnz L_8144		;814b   ; B saltos
+	ld a,(hl)			;814d   ; el bloque...
+	ld (hl),0ffh		;814e   ; ...queda libre (0xFF)...
+	cp (hl)			;8150   ; ...si ya lo era, se acabo la cadena
 	ret z			;8151
-	ld b,040h		;8152
+	ld b,040h		;8152   ; como mucho 0x40 bloques
 	jr L_815E		;8154
 sram_libera_cadena:		; libera la cadena de bloques de un fichero
 	ld b,040h		;8156
@@ -357,14 +357,14 @@ L_8221:
 	pop bc			;822d
 	inc c			;822e   ; C = cuantas
 L_822F:
-	pop hl			;822f
+	pop hl			;822f   ; la entrada siguiente (8 bytes)
 	ld a,008h		;8230
 	call hl_mas_a		;8232   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
-	djnz L_8221		;8235
-	ld a,c			;8237
+	djnz L_8221		;8235   ; las B entradas
+	ld a,c			;8237   ; C = cuantas se copiaron
 	and a			;8238
-	jp z,L_805B		;8239
-	xor a			;823c
+	jp z,L_805B		;8239   ; ninguna: error
+	xor a			;823c   ; A = 0: bien
 	ret			;823d
 L_823E:
 	ld a,010h		;823e
@@ -672,16 +672,16 @@ L_8472:
 	call sram_cierra		;848c   ; y lo cierra
 	ret			;848f
 L_8490:
-	ld a,010h		;8490
+	ld a,010h		;8490   ; la mitad 0x10
 	ld (0a000h),a		;8492   ; el mapper: pone en 0xA000 el banco de A
-	call sram_crea		;8495   ; sram_crea: crea un fichero en la SRAM
+	call sram_crea		;8495   ; crea el fichero
 	and a			;8498
-	jr z,L_84A5		;8499
-	cp 001h		;849b
+	jr z,L_84A5		;8499   ; creado: sigue
+	cp 001h		;849b   ; el error 1 (ya existe)...
 	ret nz			;849d
-	ld a,(ix+017h)		;849e
+	ld a,(ix+017h)		;849e   ; ...si la orden pide sobrescribir (ix+0x17)...
 	and a			;84a1
-	jp z,L_8053		;84a2
+	jp z,L_8053		;84a2   ; ...se borra; si no, error
 L_84A5:
 	call sram_abre		;84a5   ; sram_abre: abre el fichero de IX
 	ret nz			;84a8
@@ -816,19 +816,19 @@ crc16_byte:		; pasa el byte A por el CRC-16 de HL (polinomio 0xA001, reflejado)
 	ld de,0a001h		;8573
 	ld b,008h		;8576
 L_8578:
-	ld a,c			;8578   ; un bit: el bajo del byte...
-	rr c		;8579
-	and a			;857b
+	ld a,c			;8578   ; C = el byte que entra...
+	rr c		;8579   ; ...su bit bajo...
+	and a			;857b   ; ...y el de HL
 	rr h		;857c   ; ...entra por arriba en HL al desplazarlo
 	rr l		;857e
 	adc a,000h		;8580   ; el bit que sale de HL...
 	rra			;8582   ; ...decide
 	jr nc,L_858B		;8583
 	ld a,d			;8585   ; si es 1, XOR con el polinomio 0xA001 (DE)
-	xor h			;8586
+	xor h			;8586   ; la parte alta
 	ld h,a			;8587
 	ld a,e			;8588
-	xor l			;8589
+	xor l			;8589   ; la baja
 	ld l,a			;858a
 L_858B:
 	djnz L_8578		;858b
@@ -951,15 +951,15 @@ letra_igual:		; compara dos letras (espacio y 0 valen lo mismo)
 	ld a,(de)			;8634
 	jp letra_valida_b		;8635   ; letra_valida_b: Z si A es 0 o espacio
 tiene_asterisco:		; busca un '*' en el nombre
-	push ix		;8638
+	push ix		;8638   ; el nombre de IX...
 	pop hl			;863a
-	ld a,019h		;863b
+	ld a,019h		;863b   ; ...desde el byte 0x19
 	call hl_mas_a		;863d   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
-	ld bc,00004h		;8640
-	ld a,02ah		;8643
+	ld bc,00004h		;8640   ; las 4 primeras letras
+	ld a,02ah		;8643   ; busca un '*'
 	cpir		;8645
-	jr z,L_864B		;8647
-	scf			;8649
+	jr z,L_864B		;8647   ; hay: NC
+	scf			;8649   ; no hay: C
 	ret			;864a
 L_864B:
 	ld b,c			;864b

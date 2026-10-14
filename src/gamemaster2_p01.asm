@@ -76,23 +76,23 @@ L_607E:
 	call busca_en_tabla		;6081   ; busca_en_tabla: busca 0xF281 en la tabla [codigo, direccion] de HL
 	jr nz,$-74		;6084
 L_6086:
-	call borra_sprites		;6086   ; borra_sprites: borra la tabla de sprites (0x3880, 0x200 bytes)
+	call borra_sprites		;6086   ; MODIFY STAGE NUMBER: borra los sprites
 	ld hl,060b8h		;6089
 	call pinta_texto		;608c   ; pinta_texto: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
-	ld hl,03974h		;608f
-	call menu_dos		;6092   ; menu_dos: menu de 2 opciones (p01:750E)
-	jp z,L_6266		;6095
+	ld hl,03974h		;608f   ; en 0x3974...
+	call menu_dos		;6092   ; ...un numero de 2 cifras
+	jp z,L_6266		;6095   ; sin numero, sale
 	ld hl,0f29bh		;6098   ; apunta a la fase que se pide
 	call teclado_a_nibble		;609b   ; teclado_a_nibble: pasa la tecla del bufer (0x920B) a un nibble
 	jp z,L_6266		;609e
 	ld hl,0f29ch		;60a1   ; apunta a el valor que se escribe
 	call teclado_a_nibble_b		;60a4   ; teclado_a_nibble_b: pasa las teclas del bufer (0x920B) a un byte
-	ld hl,(0f294h)		;60a7   ; lee la rutina propia del juego y el byte siguiente (16 bits)
+	ld hl,(0f294h)		;60a7   ; si el juego tiene rutina propia...
 	ld a,h			;60aa
 	or l			;60ab
 	ld hl,0f298h		;60ac   ; apunta a las opciones del MODIFY
 	jr z,L_60B3		;60af
-	set 2,(hl)		;60b1
+	set 2,(hl)		;60b1   ; ...bit 2: se usa
 L_60B3:
 	set 1,(hl)		;60b3
 	jp L_6266		;60b5
@@ -710,18 +710,18 @@ devuelve_volumenes:		; devuelve los tres volumenes del PSG (y el SCC)
 	call 00014h		;662a   ; BIOS WRSLT - Writes a value to an address in another slot
 	ret			;662d
 lee_teclas:		; las teclas del Game Master (SNSMAT 1, 6 y 7) en 0xF10D: C = las recien pulsadas
-	ld a,001h		;662e
+	ld a,001h		;662e   ; la fila 1 del teclado...
 	call 00141h		;6630   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
-	cpl			;6633
-	and 080h		;6634
+	cpl			;6633   ; ...a nivel alto...
+	and 080h		;6634   ; ...el bit 7
 	ld d,a			;6636
-	ld a,006h		;6637
+	ld a,006h		;6637   ; la fila 6...
 	call 00141h		;6639   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
-	cpl			;663c
-	and 0e2h		;663d
-	bit 1,a		;663f
+	cpl			;663c   ; ...a nivel alto...
+	and 0e2h		;663d   ; ...los bits 1, 5, 6 y 7
+	bit 1,a		;663f   ; CTRL...
 	jr z,L_6645		;6641
-	or 008h		;6643
+	or 008h		;6643   ; ...tambien al bit 3
 L_6645:
 	and 0e8h		;6645   ; los bits de la fila 6 que interesan
 	ld e,a			;6647
@@ -989,14 +989,14 @@ truco_propio:		; llama por CALSLT a la rutina del juego de 0xF294
 	pop bc			;6825
 	ret			;6826
 busca_en_tabla_y_salta:		; busca 0xF281 en la tabla [codigo, direccion] de HL y salta
-	ld a,(hl)			;6827
-	inc a			;6828
+	ld a,(hl)			;6827   ; la entrada de la tabla
+	inc a			;6828   ; 0xFF acaba
 	ret z			;6829
-	ld a,(0f281h)		;682a   ; lee el codigo del juego
-	cp (hl)			;682d
+	ld a,(0f281h)		;682a   ; el codigo del juego...
+	cp (hl)			;682d   ; ...es este?
 	inc hl			;682e
-	jr z,L_6835		;682f
-	inc hl			;6831
+	jr z,L_6835		;682f   ; si: su direccion
+	inc hl			;6831   ; si no, la entrada siguiente (3 bytes)
 	inc hl			;6832
 	jr busca_en_tabla_y_salta		;6833
 L_6835:
@@ -1006,13 +1006,13 @@ L_6835:
 	ex de,hl			;6838
 	jp (hl)			;6839
 busca_en_tabla:		; busca 0xF281 en la tabla [codigo, direccion] de HL
-	ld a,(hl)			;683a
-	inc a			;683b
+	ld a,(hl)			;683a   ; la entrada de la tabla
+	inc a			;683b   ; 0xFF acaba
 	jr z,L_6848		;683c
-	ld a,(0f281h)		;683e   ; lee el codigo del juego
-	cp (hl)			;6841
-	ret z			;6842
-	inc hl			;6843
+	ld a,(0f281h)		;683e   ; el codigo del juego...
+	cp (hl)			;6841   ; ...es este?
+	ret z			;6842   ; si: Z con HL en la entrada
+	inc hl			;6843   ; si no, la siguiente (3 bytes)
 	inc hl			;6844
 	inc hl			;6845
 	jr busca_en_tabla		;6846
@@ -1338,7 +1338,7 @@ L_6A7A:
 	add a,a			;6a82
 	add a,b			;6a83
 	ld hl,09257h		;6a84   ; apunta a los nombres del ranking (9 bytes por fila)
-	call hl_mas_a		;6a87   ; hl_mas_a: HL = HL + A
+	call hl_mas_a		;6a87   ; HL = el nombre en el ranking
 	pop af			;6a8a
 	ld de,092b7h		;6a8b   ; apunta a el nombre que se mete en el ranking
 	cp 032h		;6a8e
@@ -1456,17 +1456,17 @@ copia_a_vram:		; copia BC bytes de HL a la VRAM DE (letra a letra si es de texto
 	call modo_de_texto		;6b48   ; modo_de_texto: Z si la pantalla es de texto (0xFCAF < 5)
 	jp nz,0005ch		;6b4b   ; BIOS LDIRVM - Block transfers to VRAM from memory
 L_6B4E:
-	ld a,(hl)			;6b4e
+	ld a,(hl)			;6b4e   ; un byte...
 	ex de,hl			;6b4f
-	call pon_letra		;6b50   ; pon_letra: escribe A en la VRAM HL guardando los registros
+	call pon_letra		;6b50   ; ...a la VRAM DE, letra a letra
 	ex de,hl			;6b53
-	inc hl			;6b54
+	inc hl			;6b54   ; el siguiente
 	inc de			;6b55
-	dec bc			;6b56
+	dec bc			;6b56   ; BC bytes
 	ld a,b			;6b57
 	or c			;6b58
 	jr nz,L_6B4E		;6b59
-	ld a,(0f122h)		;6b5b   ; lee la pagina activa guardada
+	ld a,(0f122h)		;6b5b   ; devuelve la pagina activa
 	ld (0faf6h),a		;6b5e   ; guarda ACPAGE, la pagina activa
 	ret			;6b61
 ranking_edita:		; edita el nombre del ranking
@@ -2276,9 +2276,9 @@ busca_ficha:		; copia la ficha por defecto (p00:45D0) y busca la del juego por s
 	ld (0f293h),a		;7143   ; guarda la fase elegida
 	ld hl,04010h		;7146
 	call 0576bh		;7149   ; lee_palabra_del_juego: DE = la palabra HL del cartucho del juego (RDSLT en 0xF104)
-	ld hl,04241h		;714c
+	ld hl,04241h		;714c   ; ...es 'AB'?
 	rst 20h			;714f   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
-	jr nz,L_715E		;7150
+	jr nz,L_715E		;7150   ; no: se busca por la suma
 	ld hl,04012h		;7152
 	ld de,0f280h		;7155   ; apunta a la ficha del juego
 	ld bc,00013h		;7158
@@ -2384,13 +2384,13 @@ L_71F9:
 	ld hl,05000h		;71ff
 	ld b,000h		;7202
 L_7204:
-	push af			;7204
+	push af			;7204   ; un byte del juego...
 	push bc			;7205
 	push de			;7206
-	call 0000ch		;7207   ; BIOS RDSLT - Reads the value of an address in another slot
+	call 0000ch		;7207   ; BIOS RDSLT - Reads the value of an address in another slot | ...por RDSLT
 	pop de			;720a
 	pop bc			;720b
-	add a,e			;720c
+	add a,e			;720c   ; se suma a DE
 	ld e,a			;720d
 	jr nc,L_7211		;720e
 	inc d			;7210
@@ -2476,15 +2476,15 @@ paleta_desde:		; MSX2: los 16 colores de HL (gemela de p05:82C6)
 	ld b,010h		;727d
 	ld a,000h		;727f
 L_7281:
-	ld d,(hl)			;7281
+	ld d,(hl)			;7281   ; rojo y azul
 	inc hl			;7282
-	ld e,(hl)			;7283
+	ld e,(hl)			;7283   ; verde
 	inc hl			;7284
 	push af			;7285
-	call pon_color		;7286   ; pon_color: MSX2: el color B de la paleta con D y E (R#16 y puerto 2)
+	call pon_color		;7286   ; el color A
 	pop af			;7289
-	inc a			;728a
-	djnz L_7281		;728b
+	inc a			;728a   ; el siguiente
+	djnz L_7281		;728b   ; los B colores
 	ret			;728d
 
 ; ----------------------------------------------------------------------
@@ -2559,14 +2559,14 @@ borra_nombres:		; borra la tabla de nombres y esconde los sprites (0xD0 en 0x3B0
 rellena_tercios:		; FILVRM en los tres tercios de la pantalla
 	ld d,003h		;72fc
 L_72FE:
-	push bc			;72fe
+	push bc			;72fe   ; un tercio: FILVRM
 	push de			;72ff
 	call 00056h		;7300   ; BIOS FILVRM - Fills VRAM with value
-	ld bc,00800h		;7303
+	ld bc,00800h		;7303   ; el siguiente, 0x800 mas alla
 	add hl,bc			;7306
 	pop de			;7307
 	pop bc			;7308
-	dec d			;7309
+	dec d			;7309   ; los D tercios
 	jr nz,L_72FE		;730a
 	ret			;730c
 copia_tercios:		; LDIRVM en los tres tercios de la pantalla
@@ -2733,15 +2733,15 @@ rellena_ventana:		; rellena una ventana de B filas por C columnas con A
 	call modo_de_texto		;73e1   ; modo_de_texto: Z si la pantalla es de texto (0xFCAF < 5)
 	jr z,L_73F6		;73e4
 L_73E6:
-	push bc			;73e6
+	push bc			;73e6   ; una fila de C casillas
 	ld b,000h		;73e7
 	push af			;73e9
-	call 00056h		;73ea   ; BIOS FILVRM - Fills VRAM with value
+	call 00056h		;73ea   ; BIOS FILVRM - Fills VRAM with value | se rellena con A
 	pop af			;73ed
-	ld bc,00020h		;73ee
+	ld bc,00020h		;73ee   ; la fila siguiente (32 casillas)
 	add hl,bc			;73f1
 	pop bc			;73f2
-	djnz L_73E6		;73f3
+	djnz L_73E6		;73f3   ; las B filas
 	ret			;73f5
 L_73F6:
 	push af			;73f6
@@ -2873,13 +2873,13 @@ p02_8000:		; p02:8000 con el cartucho en la pagina 2 y vuelta a la RAM
 	ld (08000h),a		;74a3   ; el mapper: pone en 0x8000 el banco de A
 	call 08000h		;74a6   ; guarda_pantalla: guarda la pantalla del juego antes del menu (segun el modo de 0xF3DF/0xF3E0)
 L_74A9:
-	push af			;74a9
+	push af			;74a9   ; guarda los registros
 	push hl			;74aa
 	push de			;74ab
 	push bc			;74ac
-	ld a,(0f2a0h)		;74ad   ; lee el slot de la RAM de la pagina 2
+	ld a,(0f2a0h)		;74ad   ; la RAM...
 	ld h,080h		;74b0
-	call 00024h		;74b2   ; BIOS ENASLT - Switches to specified slot and page definitively
+	call 00024h		;74b2   ; BIOS ENASLT - Switches to specified slot and page definitively | ...vuelve a la pagina 2
 	pop bc			;74b5
 	pop de			;74b6
 	pop hl			;74b7
@@ -2903,32 +2903,32 @@ L_74CC:
 borra_segun_modo:		; borra la pantalla segun el modo
 	ld hl,03a00h		;74d6
 L_74D9:
-	push hl			;74d9
+	push hl			;74d9   ; el modo de pantalla:
 	ld a,(0f3dfh)		;74da   ; lee los registros del VDP (copia de la BIOS)
 	and 00eh		;74dd
 	ld l,a			;74df
 	ld a,(0f3e0h)		;74e0   ; lee el registro 1 del VDP (copia de la BIOS)
 	and 018h		;74e3
 	ld h,a			;74e5
-	ld de,00006h		;74e6
+	ld de,00006h		;74e6   ; 6 es SCREEN 3...
 	rst 20h			;74e9   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	pop hl			;74ea
-	jr z,L_74F4		;74eb
-	ld bc,00100h		;74ed
-	xor a			;74f0
+	jr z,L_74F4		;74eb   ; ...con su propio borrado
+	ld bc,00100h		;74ed   ; si no, 0x100 bytes...
+	xor a			;74f0   ; ...a cero
 	jp 00056h		;74f1   ; BIOS FILVRM - Fills VRAM with value
 L_74F4:
 	call cartucho_en_8000		;74f4   ; cartucho_en_8000: pone el cartucho (0xF103) en la pagina 2
 	call 08080h		;74f7   ; rellena_vram_128k: pone a 0 BC bytes de la VRAM HL (128 KB)
 	jp L_74A9		;74fa
 cartucho_en_8000:		; pone el cartucho (0xF103) en la pagina 2
-	push hl			;74fd
+	push hl			;74fd   ; guarda los registros
 	push de			;74fe
 	push bc			;74ff
 	push af			;7500
-	ld a,(0f103h)		;7501   ; lee el slot del Game Master
+	ld a,(0f103h)		;7501   ; el Game Master...
 	ld h,080h		;7504
-	call 00024h		;7506   ; BIOS ENASLT - Switches to specified slot and page definitively
+	call 00024h		;7506   ; BIOS ENASLT - Switches to specified slot and page definitively | ...en la pagina 2
 	pop af			;7509
 	pop bc			;750a
 	pop de			;750b
@@ -3019,17 +3019,17 @@ L_759B:
 	sub 020h		;75a4
 	jr L_7590		;75a6
 L_75A8:
-	ld b,a			;75a8
+	ld b,a			;75a8   ; B = la letra
 	ld hl,0922eh		;75a9   ; apunta a la opcion elegida
-	ld a,(0922dh)		;75ac   ; lee la ultima opcion del menu
+	ld a,(0922dh)		;75ac   ; ya esta en la ultima opcion
 	cp (hl)			;75af
 	jp z,L_7526		;75b0
-	inc (hl)			;75b3
+	inc (hl)			;75b3   ; la siguiente
 	ld a,(hl)			;75b4
-	cp 001h		;75b5
+	cp 001h		;75b5   ; la primera letra...
 	jr nz,L_75C7		;75b7
 	push bc			;75b9
-	ld hl,(09233h)		;75ba   ; lee la posicion de la primera opcion en la VRAM y el byte siguiente (16 bits)
+	ld hl,(09233h)		;75ba   ; ...borra la linea de las opciones
 	ld b,00eh		;75bd
 	xor a			;75bf
 L_75C0:
@@ -3075,9 +3075,9 @@ cursor_apaga_b:		; quita el cursor (gemela de p03:A74F)
 	jr nz,L_7625		;7614
 	ld a,(0f2e6h)		;7616   ; lee el menu va en MSX2
 	and a			;7619
-	ld de,021d0h		;761a
+	ld de,021d0h		;761a   ; el patron del cursor en 0x21D0 (MSX1)...
 	jr z,L_7622		;761d
-	ld de,02080h		;761f
+	ld de,02080h		;761f   ; ...o en 0x2080 (MSX2)
 L_7622:
 	jp copia_tercios		;7622   ; copia_tercios: LDIRVM en los tres tercios de la pantalla
 L_7625:
@@ -3379,19 +3379,19 @@ L_77C3:
 	ld a,0d0h		;782f
 	jp 0004dh		;7831   ; BIOS WRTVRM - Writes data in VRAM
 lee_vram_tercios:		; LDIRMV de los tres tercios (0x2000 de paso)
-	push bc			;7834
+	push bc			;7834   ; guarda la cuenta, el destino y la VRAM
 	push de			;7835
 	push hl			;7836
-	call 00059h		;7837   ; BIOS LDIRMV - Block transfers to memory from VRAM
+	call 00059h		;7837   ; BIOS LDIRMV - Block transfers to memory from VRAM | el primer tercio
 	pop hl			;783a
-	ld bc,02000h		;783b
+	ld bc,02000h		;783b   ; el segundo esta 0x2000 mas alla en la VRAM...
 	add hl,bc			;783e
 	pop de			;783f
 	pop bc			;7840
-	ex de,hl			;7841
+	ex de,hl			;7841   ; ...y BC mas alla en la RAM
 	add hl,bc			;7842
 	ex de,hl			;7843
-	jp 00059h		;7844   ; BIOS LDIRMV - Block transfers to memory from VRAM
+	jp 00059h		;7844   ; BIOS LDIRMV - Block transfers to memory from VRAM | el segundo tercio
 L_7847:
 	ld a,(0f2a0h)		;7847   ; la RAM en la pagina 2
 	ld h,080h		;784a
@@ -3418,18 +3418,18 @@ L_7847:
 	ld bc,00001h		;7888
 	jp 0005ch		;788b   ; BIOS LDIRVM - Block transfers to VRAM from memory
 copia_vram_tercios:		; LDIRVM de los tres tercios (0x2000 de paso)
-	push bc			;788e
+	push bc			;788e   ; guarda la cuenta, el origen y la VRAM
 	push hl			;788f
 	push de			;7890
-	call 0005ch		;7891   ; BIOS LDIRVM - Block transfers to VRAM from memory
+	call 0005ch		;7891   ; BIOS LDIRVM - Block transfers to VRAM from memory | el primer tercio
 	pop hl			;7894
-	ld bc,02000h		;7895
+	ld bc,02000h		;7895   ; el segundo esta 0x2000 mas alla en la VRAM...
 	add hl,bc			;7898
 	pop de			;7899
 	pop bc			;789a
 	ex de,hl			;789b
-	add hl,bc			;789c
-	jp 0005ch		;789d   ; BIOS LDIRVM - Block transfers to VRAM from memory
+	add hl,bc			;789c   ; ...y BC mas alla en la RAM
+	jp 0005ch		;789d   ; BIOS LDIRVM - Block transfers to VRAM from memory | el segundo tercio
 borra_por_modo:		; borra la pantalla segun el modo de 0xF2A1
 	ld hl,(0f2a1h)		;78a0   ; lee el modo de pantalla guardado y el byte siguiente (16 bits)
 	ld de,00002h		;78a3

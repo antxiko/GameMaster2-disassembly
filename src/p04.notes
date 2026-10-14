@@ -5,6 +5,10 @@ C 0x866F A x 2: cada destino es una palabra
 # --- fin de los comentarios copiados ---
 
 # --- A MANO: comentarios escritos leyendo el codigo ---
+C 0x8000 IX = el bloque de la orden (DE)
+C 0x8003 la mitad 0x10 de la SRAM
+C 0x8008 la orden 0x0A...
+C 0x800D ...guarda B en (ix+0x17): sobrescribir
 C 0x807F crear: la mitad 0x10 de la SRAM
 C 0x8084 el nombre tiene que valer
 C 0x808A y no existir
@@ -45,6 +49,12 @@ C 0x8139 x 2: H = los bloques de 128 bytes
 C 0x813A si pasa de 0x7FFF, error
 C 0x813D B = cuantos bloques
 C 0x813F el primer bloque (ix+0x08)
+C 0x8145 el bloque siguiente de la cadena (tabla de 0xB200)
+C 0x814B B saltos
+C 0x814D el bloque...
+C 0x814E ...queda libre (0xFF)...
+C 0x8150 ...si ya lo era, se acabo la cadena
+C 0x8152 como mucho 0x40 bloques
 C 0x8169 abrir: la mitad 0x10 de la SRAM
 C 0x816E el nombre tiene que valer
 C 0x8174 y existir
@@ -78,6 +88,11 @@ C 0x8221 la entrada
 C 0x8222 0x10: libre, no se copia
 C 0x8228 la ocupada se copia (8 bytes)
 C 0x822E C = cuantas
+C 0x822F la entrada siguiente (8 bytes)
+C 0x8235 las B entradas
+C 0x8237 C = cuantas se copiaron
+C 0x8239 ninguna: error
+C 0x823C A = 0: bien
 C 0x8257 la entrada (ix+0x12)...
 C 0x825C ...x 8 en el directorio
 C 0x8263 queda libre (0x10)
@@ -176,6 +191,12 @@ C 0x847B si falla, el error
 C 0x847C cuantos bytes: su tamano entero
 C 0x8488 los lee
 C 0x848C y lo cierra
+C 0x8490 la mitad 0x10
+C 0x8495 crea el fichero
+C 0x8499 creado: sigue
+C 0x849B el error 1 (ya existe)...
+C 0x849E ...si la orden pide sobrescribir (ix+0x17)...
+C 0x84A2 ...se borra; si no, error
 C 0x84EC la marca de la SRAM formateada: 0xFFFA...
 C 0x84F2 ...y 0xFF en 0xB202-0xB205
 C 0x8508 compara la marca de 0xB200 con la de p04:8513
@@ -202,11 +223,15 @@ C 0x855E el siguiente
 C 0x8560 los 128
 C 0x8562 donde va el CRC de este bloque: 0xB280 + 2 x bloque
 C 0x856C vuelve a la mitad 0x10 de la SRAM
-C 0x8578 un bit: el bajo del byte...
+C 0x8578 C = el byte que entra...
+C 0x8579 ...su bit bajo...
+C 0x857B ...y el de HL
 C 0x857C ...entra por arriba en HL al desplazarlo
 C 0x8580 el bit que sale de HL...
 C 0x8582 ...decide
 C 0x8585 si es 1, XOR con el polinomio 0xA001 (DE)
+C 0x8586 la parte alta
+C 0x8589 la baja
 C 0x859E una letra del nombre
 C 0x85A0 '*' no vale en el nombre de un fichero nuevo
 C 0x85A5 '?' tampoco
@@ -220,6 +245,12 @@ C 0x85EA si: hecho
 C 0x85ED con un '*' vale el resto
 C 0x85F4 B nombres
 C 0x85F6 ninguno: NZ
+C 0x8638 el nombre de IX...
+C 0x863B ...desde el byte 0x19
+C 0x8640 las 4 primeras letras
+C 0x8643 busca un '*'
+C 0x8647 hay: NC
+C 0x8649 no hay: C
 C 0x8651 desplaza el nombre una letra
 C 0x8655 las B letras
 C 0x8657 la que sale: 0...
@@ -328,7 +359,6 @@ C 0x843B hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x8461 sram_tamano: el tamano del fichero de IX
 C 0x8474 el mapper: pone en 0xA000 el banco de A
 C 0x8492 el mapper: pone en 0xA000 el banco de A
-C 0x8495 sram_crea: crea un fichero en la SRAM
 C 0x84A5 sram_abre: abre el fichero de IX
 C 0x84A9 sram_escribe: escribe en el fichero desde la RAM
 C 0x84AD sram_cierra: cierra el fichero de IX

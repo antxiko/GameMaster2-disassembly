@@ -179,6 +179,13 @@ C 0xA272 ...6 bytes a 0xD4F6
 C 0xA27E el primer byte
 C 0xA27F sin el bit 7
 C 0xA281 el bit 7: el juego tiene SCC
+C 0xA2E2 la ficha por defecto (p00:45D0, 22 bytes)...
+C 0xA2E5 ...a 0xD300
+C 0xA2ED sin codigo de truco aun (0xD313 = 0xFF)
+C 0xA2F2 la segunda cabecera del juego (0x4010)...
+C 0xA2F8 ...es 'AB'?
+C 0xA2FC no: se busca por la suma
+C 0xA2FE si: su ficha viene en el propio juego, en 0x4012 (19 bytes)
 C 0xA317 la cabecera del juego desde 0x4012...
 C 0xA31A ...45 bytes a 0xD351
 C 0xA323 el RC del juego
@@ -199,12 +206,27 @@ C 0xA37C ...o RC-752?
 C 0xA382 por debajo del RC-758...
 C 0xA386 ...ya esta
 C 0xA387 si no, el bit 7 de la cabecera (0xD379)
+C 0xA3A9 un byte del juego...
+C 0xA3AC ...por RDSLT
+C 0xA3B1 se suma a DE
+C 0xA416 rojo y azul
+C 0xA418 verde
+C 0xA41B el color A
+C 0xA41F el siguiente
+C 0xA420 los B colores
+C 0xA493 un tercio: FILVRM
+C 0xA498 el siguiente, 0x800 mas alla
+C 0xA49E los D tercios
 C 0xA52A la letra
 C 0xA52D 0xFF acaba
 C 0xA52F 0xFE: otra direccion de VRAM
 C 0xA532 con la mascara C
 C 0xA534 a la VRAM
 C 0xA538 la columna siguiente
+C 0xA53B una fila de C casillas
+C 0xA53F se rellena con A
+C 0xA543 la fila siguiente (32 casillas)
+C 0xA548 las B filas
 C 0xA578 0xD12A: la pantalla ya esta guardada
 C 0xA57D si: nada
 C 0xA57E la apunta
@@ -217,6 +239,11 @@ C 0xA5BB borra 0x3A00
 C 0xA5BE la fuente del Game Master a la VRAM (p00:409D por CALSLT)
 C 0xA5C9 con el color 0xF5
 C 0xA5D4 sin sprites (0xD0)
+C 0xA5DC guarda la cuenta, el destino y la VRAM
+C 0xA5DF el primer tercio
+C 0xA5E3 el segundo esta 0x2000 mas alla en la VRAM...
+C 0xA5E9 ...y BC mas alla en la RAM
+C 0xA5EC el segundo tercio
 C 0xA5EF 0xD12A: hay pantalla guardada
 C 0xA5F4 no: nada
 C 0xA5F5 ya no la habra
@@ -225,12 +252,21 @@ C 0xA5FA devuelve los patrones de 0x1000
 C 0xA606 los de 0x1180
 C 0xA612 la tabla de nombres de 0x3A00
 C 0xA61E y el primer byte de los sprites
+C 0xA62A guarda la cuenta, el origen y la VRAM
+C 0xA62D el primer tercio
+C 0xA631 el segundo esta 0x2000 mas alla en la VRAM...
+C 0xA638 ...y BC mas alla en la RAM
+C 0xA639 el segundo tercio
 C 0xA6B4 '.': la tecla del punto
 C 0xA6B8 solo en el menu de letras (0xFE)
 C 0xA6C3 '<', el punto en la fuente del menu
 C 0xA6C8 si ya esta, nada
 C 0xA6E1 guarda la tecla
 C 0xA6E2 0xD167 = 0xFF: el menu no admite letras
+C 0xA74F el cursor que se quita: las 8 lineas de p03:A770
+C 0xA755 0xD13D: en el menu del juego...
+C 0xA75F el patron del cursor en 0x21D0 (MSX1)...
+C 0xA764 ...o en 0x2080 (MSX2)
 C 0xA84D el byte
 C 0xA84F se copia
 C 0xA852 se acabo la pantalla?
@@ -355,7 +391,6 @@ C 0xA278 copia_del_juego: copia BC bytes de HL del cartucho del juego (RDSLT) a 
 C 0xA285 guarda el juego tiene SCC (copia)
 C 0xA2AD rc_751_o_752_b: compara el RC del juego (0xD351, al reves) con 0x751 y 0x752
 C 0xA2DF guarda el juego tiene SCC (copia)
-C 0xA2E5 apunta a la ficha del juego (copia)
 C 0xA2F5 lee_palabra_del_juego: DE = la palabra HL del cartucho del juego (RDSLT en 0xF104) (gemela de p00:576B)
 C 0xA2FB DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 C 0xA301 apunta a la ficha del juego (copia)
@@ -372,7 +407,6 @@ C 0xA39E lee el slot del cartucho del juego (copia)
 C 0xA3DB apunta a la ficha del juego (copia)
 C 0xA3F3 el puerto de escritura del VDP (VDP.DW)
 C 0xA40A la version del MSX (0 = MSX1)
-C 0xA41B pon_color: MSX2: el color B de la paleta con D y E (R
 C 0xA461 la version del MSX (0 = MSX1)
 C 0xA4BD descomprime: descomprime HL a la VRAM DE: n & 0x7F repeticiones o copias (gemela de p01:733A)
 C 0xA4D0 vram_escribe_en: SETWRT (o NSTWRT en MSX2) en HL (gemela de p01:736A)

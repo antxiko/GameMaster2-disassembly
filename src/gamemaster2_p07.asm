@@ -223,17 +223,17 @@ L_8141:
 	jp L_80EC		;8151
 th_marcador_set:		; pinta el SET y el 1ST/2ND/3RD (tenis: 0xE412 = 1)
 	ld a,(0e412h)		;8154   ; lee el juego: 1 tenis, 2 hockey
-	dec a			;8157
+	dec a			;8157   ; solo el tenis
 	jr nz,$+39		;8158
-	ld de,08186h		;815a
+	ld de,08186h		;815a   ; el texto de p07:8186 (SET)
 	call th_pinta_texto		;815d   ; th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
-	ld hl,0e40ch		;8160
+	ld hl,0e40ch		;8160   ; el set que se juega...
 	ld a,(hl)			;8163
-	add a,a			;8164
+	add a,a			;8164   ; ...x 3...
 	add a,(hl)			;8165
-	ld hl,08176h		;8166
+	ld hl,08176h		;8166   ; ...su texto en la tabla de p07:8176 (1ST, 2ND, 3RD)...
 	call hl_mas_a		;8169   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
-	ld de,03909h		;816c
+	ld de,03909h		;816c   ; ...3 letras en 0x3909
 	ld bc,00003h		;816f
 	call 0005ch		;8172   ; BIOS LDIRVM - Block transfers to VRAM from memory
 	ret			;8175
@@ -469,20 +469,20 @@ L_832D:
 	jp z,th_pinta_texto		;8333   ; th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
 	jp L_863D		;8336
 L_8339:
-	dec b			;8339
+	dec b			;8339   ; B = quien gano el partido
 	jr z,L_8356		;833a
-	ld hl,0e2f7h		;833c
+	ld hl,0e2f7h		;833c   ; 0xE2F7: se acabo
 	ld a,(hl)			;833f
 	and a			;8340
 	ret z			;8341
 	ld (hl),000h		;8342
-	ld a,012h		;8344
+	ld a,012h		;8344   ; la musica 0x12
 	call pide_sonido		;8346   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
-	call th_pantalla_campo		;8349   ; th_pantalla_campo: borra y pinta el campo (p07:83F5 en 0x38E8)
-	call th_pinta_campo		;834c   ; th_pinta_campo: pinta las piezas del campo de la tabla de p07:83C6
-	xor a			;834f
+	call th_pantalla_campo		;8349   ; el campo...
+	call th_pinta_campo		;834c   ; ...y sus piezas
+	xor a			;834f   ; 0xE403 a cero
 	ld (0e403h),a		;8350
-	jp L_80EC		;8353
+	jp L_80EC		;8353   ; y vuelve al menu
 L_8356:
 	ld a,(0e200h)		;8356   ; lee los canales del motor de sonido (0x2C bytes cada uno)
 	and a			;8359
@@ -574,19 +574,19 @@ th_pantalla_campo:		; borra y pinta el campo (p07:83F5 en 0x38E8)
 	ld de,038e8h		;83d8
 	ld bc,00a10h		;83db
 L_83DE:
-	push bc			;83de
+	push bc			;83de   ; una fila de C bytes...
 	push hl			;83df
 	push de			;83e0
 	ld b,000h		;83e1
-	call 0005ch		;83e3   ; BIOS LDIRVM - Block transfers to VRAM from memory
+	call 0005ch		;83e3   ; BIOS LDIRVM - Block transfers to VRAM from memory | ...a la VRAM
 	pop de			;83e6
-	ld a,020h		;83e7
+	ld a,020h		;83e7   ; la fila siguiente (32)
 	call de_mas_a		;83e9   ; de_mas_a: DE = DE + A (gemela de p01:7256)
 	pop hl			;83ec
 	pop bc			;83ed
-	ld a,c			;83ee
+	ld a,c			;83ee   ; el origen avanza C
 	call hl_mas_a		;83ef   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
-	djnz L_83DE		;83f2
+	djnz L_83DE		;83f2   ; las B filas
 	ret			;83f4
 
 ; ----------------------------------------------------------------------
@@ -999,24 +999,24 @@ th_teclas_1:		; las teclas del jugador 1 (SNSMAT 7 y 8)
 	or b			;8738   ; junto con lo del mando
 	ret			;8739
 th_teclas_2:		; las teclas del jugador 2 (SNSMAT 3...)
-	push af			;873a
+	push af			;873a   ; guarda lo del mando
 	ld a,003h		;873b   ; la fila 3 del teclado
 	call 00141h		;873d   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
 	cpl			;8740   ; a nivel alto (1 = pulsada)
 	ld c,a			;8741   ; C = la fila
 	and 008h		;8742   ; una tecla al bit 3
-	ld e,a			;8744
-	ld a,c			;8745
+	ld e,a			;8744   ; E = las teclas juntas
+	ld a,c			;8745   ; la fila otra vez
 	rrca			;8746   ; otra al bit 0
 	rrca			;8747
 	and 001h		;8748
 	or e			;874a
-	ld e,a			;874b
-	ld a,c			;874c
+	ld e,a			;874b   ; E = las teclas juntas
+	ld a,c			;874c   ; la fila otra vez
 	rlca			;874d   ; otra al bit 1
 	and 002h		;874e
 	or e			;8750
-	ld e,a			;8751
+	ld e,a			;8751   ; E = las teclas juntas
 	ld a,005h		;8752   ; la fila 5
 	call 00141h		;8754   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
 	cpl			;8757   ; a nivel alto
@@ -1024,7 +1024,7 @@ th_teclas_2:		; las teclas del jugador 2 (SNSMAT 3...)
 	rlca			;8759
 	and 004h		;875a
 	or e			;875c
-	ld e,a			;875d
+	ld e,a			;875d   ; E = las teclas juntas
 	ld a,006h		;875e   ; la fila 6
 	call 00141h		;8760   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
 	cpl			;8763   ; a nivel alto
@@ -1189,17 +1189,17 @@ L_8A08:
 L_8A24:
 	ld (hl),a			;8a24
 	ld a,(0e415h)		;8a25   ; lee TYPE
-	or a			;8a28
+	or a			;8a28   ; TYPE 0: el color de siempre (p07:8AAF)
 	jp z,L_8AAF		;8a29
-	dec a			;8a2c
+	dec a			;8a2c   ; TYPE 1-2...
 	ld b,a			;8a2d
 	ld a,(0e412h)		;8a2e   ; lee el juego: 1 tenis, 2 hockey
-	and 002h		;8a31
+	and 002h		;8a31   ; ...+ 2 en el hockey
 	add a,b			;8a33
-	ld hl,08a4dh		;8a34
+	ld hl,08a4dh		;8a34   ; el color de la raqueta en la tabla de p07:8A4D
 	call hl_mas_a		;8a37   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;8a3a
-	ld de,0e426h		;8a3b
+	ld de,0e426h		;8a3b   ; al jugador 1 (0xE426)
 	ld (de),a			;8a3e
 	jr $+112		;8a3f
 
@@ -1242,17 +1242,17 @@ L_8A67:
 L_8A83:
 	ld (hl),a			;8a83
 	ld a,(0e415h)		;8a84   ; lee TYPE
-	or a			;8a87
+	or a			;8a87   ; TYPE 0: el color de siempre
 	jr z,$+60		;8a88
-	dec a			;8a8a
+	dec a			;8a8a   ; TYPE 1-2...
 	ld b,a			;8a8b
 	ld a,(0e412h)		;8a8c   ; lee el juego: 1 tenis, 2 hockey
-	and 002h		;8a8f
+	and 002h		;8a8f   ; ...+ 2 en el hockey
 	add a,b			;8a91
-	ld hl,08aabh		;8a92
+	ld hl,08aabh		;8a92   ; el color de la raqueta en la tabla de p07:8AAB
 	call hl_mas_a		;8a95   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;8a98
-	ld de,0e436h		;8a99
+	ld de,0e436h		;8a99   ; al jugador 2 (0xE436)
 	ld (de),a			;8a9c
 	jr $+39		;8a9d
 
@@ -1336,18 +1336,18 @@ DATA_saltos_8AEE:
 
 
 L_8AF4:
-	ld a,(0e413h)		;8af4   ; lee LENGTH, el largo de la raqueta
+	ld a,(0e413h)		;8af4   ; el largo de la raqueta segun LENGTH (tabla p07:8BCF)
 	ld hl,08bcfh		;8af7
 	call hl_mas_a		;8afa   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;8afd
-	ld d,a			;8afe
-	ld h,d			;8aff
+	ld d,a			;8afe   ; D = el largo
+	ld h,d			;8aff   ; la velocidad hacia arriba: -1 linea
 	dec h			;8b00
 	ld l,000h		;8b01
-	ld a,(0e422h)		;8b03
-	cp d			;8b06
+	ld a,(0e422h)		;8b03   ; la raqueta del jugador 1...
+	cp d			;8b06   ; ...si esta arriba del todo, no sube
 	jr c,L_8B28		;8b07
-	ld de,0fc00h		;8b09
+	ld de,0fc00h		;8b09   ; sube 4 lineas (0xFC00)
 	jr L_8B24		;8b0c
 L_8B0E:
 	ld a,(0e413h)		;8b0e   ; lee LENGTH, el largo de la raqueta
@@ -1521,8 +1521,8 @@ th_sprite_raqueta:		; escribe los sprites de una raqueta (C de alto)
 	ld a,(de)			;8c18   ; Y del primer sprite
 	ld b,a			;8c19   ; B = Y para el segundo sprite
 	ld (hl),a			;8c1a   ; Y a la copia
-	inc l			;8c1b
-	pop af			;8c1c
+	inc l			;8c1b   ; el byte siguiente
+	pop af			;8c1c   ; recupera la columna
 	exx			;8c1d   ; X
 	ld b,a			;8c1e   ; B' = X para el segundo sprite
 	exx			;8c1f
@@ -1533,35 +1533,35 @@ th_sprite_raqueta:		; escribe los sprites de una raqueta (C de alto)
 	inc e			;8c24
 	inc e			;8c25
 	inc e			;8c26
-	inc l			;8c27
+	inc l			;8c27   ; el patron
 	ld a,(de)			;8c28   ; el patron de la raqueta...
 	ld (hl),a			;8c29   ; ...a la copia
 	inc l			;8c2a
 	ld (hl),c			;8c2b   ; el color (C)
-	inc l			;8c2c
+	inc l			;8c2c   ; el segundo sprite
 	dec e			;8c2d   ; la raqueta corta (LENGTH = 1)...
 	ld a,(de)			;8c2e   ; LENGTH...
 	dec a			;8c2f   ; ...es 1?
 	jr nz,L_8C3C		;8c30
 	ld a,0e0h		;8c32   ; ...esconde el segundo sprite (Y = 0xE0)
 	ld (hl),a			;8c34   ; Y, X, patron y color del segundo sprite, todos a 0xE0
-	inc l			;8c35
+	inc l			;8c35   ; X
 	ld (hl),a			;8c36
-	inc l			;8c37
+	inc l			;8c37   ; el patron
 	ld (hl),a			;8c38
-	inc l			;8c39
+	inc l			;8c39   ; el color
 	ld (hl),a			;8c3a
 	ret			;8c3b
 L_8C3C:
 	ld a,b			;8c3c   ; el segundo sprite, 16 lineas mas abajo
 	add a,010h		;8c3d
-	ld (hl),a			;8c3f
+	ld (hl),a			;8c3f   ; Y
 	inc l			;8c40
 	exx			;8c41   ; la misma X
 	ld a,b			;8c42
 	exx			;8c43
-	ld (hl),a			;8c44
-	inc e			;8c45
+	ld (hl),a			;8c44   ; X
+	inc e			;8c45   ; dos bytes mas alla en la ficha
 	inc e			;8c46
 	inc l			;8c47
 	ld a,(de)			;8c48   ; su patron
@@ -1617,40 +1617,40 @@ L_8C7D:
 	ret			;8c85
 th_sprite_barra:		; con BAR, los tres sprites de la barra del centro
 	ld a,(0e416h)		;8c86   ; sin barra, nada
-	or a			;8c89
+	or a			;8c89   ; 0: sin barra
 	ret z			;8c8a
 	ld hl,0e524h		;8c8b   ; los sprites 9-11 de la copia (0xE524)
 	ld de,0e452h		;8c8e   ; la altura y la columna de la barra
 	ld a,(de)			;8c91
 	ld b,a			;8c92   ; B = la altura
 	ld (hl),a			;8c93   ; Y del primer sprite
-	inc l			;8c94
+	inc l			;8c94   ; X, en el byte siguiente
 	inc e			;8c95
 	ld a,(de)			;8c96
 	ld c,a			;8c97   ; C = la columna
 	ld (hl),a			;8c98   ; X
-	inc l			;8c99
+	inc l			;8c99   ; el patron
 	ld (hl),018h		;8c9a   ; patron 0x18
-	inc l			;8c9c
+	inc l			;8c9c   ; el color
 	ld (hl),00dh		;8c9d   ; color 0x0D
-	inc l			;8c9f
+	inc l			;8c9f   ; el segundo sprite
 	ld a,b			;8ca0   ; el segundo, 16 lineas mas abajo
 	add a,010h		;8ca1
 	ld (hl),a			;8ca3
-	inc l			;8ca4
+	inc l			;8ca4   ; X
 	ld (hl),c			;8ca5   ; la misma X
-	inc l			;8ca6
+	inc l			;8ca6   ; el patron
 	ld (hl),01ch		;8ca7   ; patron 0x1C
-	inc l			;8ca9
+	inc l			;8ca9   ; el color
 	ld (hl),00dh		;8caa   ; el mismo color
-	inc l			;8cac
+	inc l			;8cac   ; el tercer sprite
 	add a,010h		;8cad   ; el tercero, 16 mas
 	ld (hl),a			;8caf
-	inc l			;8cb0
+	inc l			;8cb0   ; X
 	ld (hl),c			;8cb1   ; la misma X
-	inc l			;8cb2
+	inc l			;8cb2   ; el patron
 	ld (hl),020h		;8cb3   ; patron 0x20
-	inc l			;8cb5
+	inc l			;8cb5   ; el color
 	ld (hl),00dh		;8cb6   ; el mismo color
 	ret			;8cb8
 th_prepara_pelota:		; la pelota al centro (0xE440)
@@ -2141,16 +2141,16 @@ th_choca_borde:		; mira si la pelota toca el borde de la raqueta
 	exx			;8fca   ; el largo de la raqueta...
 	ld hl,09024h		;8fcb   ; ...segun LENGTH (tabla p07:9024)
 	ld a,(0e413h)		;8fce   ; lee LENGTH, el largo de la raqueta
-	add a,a			;8fd1
+	add a,a			;8fd1   ; x 2: dos bytes por largo
 	call hl_mas_a		;8fd2   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
-	ld a,(hl)			;8fd5
+	ld a,(hl)			;8fd5   ; A = el borde de arriba
 	exx			;8fd6
 	add a,l			;8fd7   ; la parte de arriba de la raqueta...
 	cp e			;8fd8   ; ...por debajo de la pelota: no
 	ret nc			;8fd9
-	ld l,a			;8fda
+	ld l,a			;8fda   ; L = la parte de arriba
 	exx			;8fdb
-	inc hl			;8fdc
+	inc hl			;8fdc   ; el borde de abajo
 	ld a,(hl)			;8fdd
 	exx			;8fde
 	add a,l			;8fdf   ; la de abajo...
@@ -2165,12 +2165,12 @@ th_choca_borde:		; mira si la pelota toca el borde de la raqueta
 	ret c			;8fea
 	ld a,001h		;8feb   ; toca: 0xE44B = 1
 	ld (0e44bh),a		;8fed
-	exx			;8ff0
+	exx			;8ff0   ; vuelve a los registros de la pelota
 	ld a,(0e44ch)		;8ff1   ; el lado (0xE44C)...
 	ld c,008h		;8ff4   ; ...decide el sonido: 8 o 7
-	or a			;8ff6
+	or a			;8ff6   ; lado 0: el 8
 	jr z,L_8FFB		;8ff7
-	ld c,007h		;8ff9
+	ld c,007h		;8ff9   ; si no, el 7
 L_8FFB:
 	exx			;8ffb
 	inc b			;8ffc
@@ -2221,17 +2221,17 @@ DATA_resto_9024:
 th_sprite_pelota:		; el sprite de la pelota a la copia de 0xE500
 	ld hl,0e500h		;902c   ; apunta a la copia de la tabla de sprites
 	ld de,0e441h		;902f   ; apunta a la altura de la pelota
-	ld a,(de)			;9032
+	ld a,(de)			;9032   ; Y del sprite 0 = la altura de la pelota
 	ld (hl),a			;9033
 	inc l			;9034
-	inc e			;9035
+	inc e			;9035   ; la columna de la pelota (0xE443)...
 	inc e			;9036
 	ld a,(de)			;9037
-	ld (hl),a			;9038
+	ld (hl),a			;9038   ; ...X
 	inc l			;9039
-	ld (hl),000h		;903a
+	ld (hl),000h		;903a   ; patron 0
 	inc l			;903c
-	ld (hl),00fh		;903d
+	ld (hl),00fh		;903d   ; color 0x0F (blanco)
 	ret			;903f
 th_velocidades:		; las dos velocidades de las tablas de p07:9051 y p07:9059
 	push af			;9040
@@ -2432,16 +2432,16 @@ L_9188:
 L_9199:
 	xor a			;9199   ; borra las cuatro marcas del menu GAME MODIFY
 	ld hl,038cfh		;919a
-	call 0004dh		;919d   ; BIOS WRTVRM - Writes data in VRAM
-	xor a			;91a0
+	call 0004dh		;919d   ; BIOS WRTVRM - Writes data in VRAM | la marca de 0x38CF
+	xor a			;91a0   ; a cero
 	ld hl,0390fh		;91a1
-	call 0004dh		;91a4   ; BIOS WRTVRM - Writes data in VRAM
-	xor a			;91a7
+	call 0004dh		;91a4   ; BIOS WRTVRM - Writes data in VRAM | la de 0x390F
+	xor a			;91a7   ; a cero
 	ld hl,0394fh		;91a8
-	call 0004dh		;91ab   ; BIOS WRTVRM - Writes data in VRAM
-	xor a			;91ae
+	call 0004dh		;91ab   ; BIOS WRTVRM - Writes data in VRAM | la de 0x394F
+	xor a			;91ae   ; a cero
 	ld hl,0398fh		;91af
-	call 0004dh		;91b2   ; BIOS WRTVRM - Writes data in VRAM
+	call 0004dh		;91b2   ; BIOS WRTVRM - Writes data in VRAM | y la de 0x398F
 	ld a,(0e460h)		;91b5   ; lee la opcion elegida del GAME MODIFY
 	ld hl,0920ch		;91b8   ; la posicion de la opcion elegida (tabla de p07:920C)...
 	add a,a			;91bb
@@ -2568,30 +2568,30 @@ L_92A6:
 	ld (0e410h),a		;92af   ; guarda los tantos del jugador 1
 	ld (0e411h),a		;92b2   ; guarda los tantos del jugador 2
 	ld a,(de)			;92b5   ; un juego mas al ganador (BCD)
-	add a,001h		;92b6
+	add a,001h		;92b6   ; BCD: un juego mas
 	daa			;92b8
-	ld (de),a			;92b9
+	ld (de),a			;92b9   ; guarda los juegos
 	cp 006h		;92ba   ; hasta 6 juegos...
 	ret c			;92bc
 	push de			;92bd   ; ...el set: guarda los juegos de cada uno en 0xE580
-	ld hl,0e417h		;92be
-	ld de,0e580h		;92c1
+	ld hl,0e417h		;92be   ; los juegos del jugador 1 (0xE417)...
+	ld de,0e580h		;92c1   ; ...a la tabla de 0xE580, dos bytes por set
 	ld a,(0e40ch)		;92c4   ; el set que se juega (0xE40C) x 2
 	add a,a			;92c7
 	call de_mas_a		;92c8   ; de_mas_a: DE = DE + A (gemela de p01:7256)
 	ldi		;92cb   ; los juegos del jugador 1
-	ld hl,0e41bh		;92cd
+	ld hl,0e41bh		;92cd   ; los juegos del jugador 2 (0xE41B)
 	ldi		;92d0   ; y los del 2
 	xor a			;92d2   ; vuelven a cero
 	ld (0e417h),a		;92d3
-	ld (0e41bh),a		;92d6
+	ld (0e41bh),a		;92d6   ; los del jugador 2 tambien
 	inc a			;92d9   ; 0xE41F = 1
 	ld (0e41fh),a		;92da
 	ld hl,0e40ch		;92dd   ; el set siguiente
 	inc (hl)			;92e0
-	pop de			;92e1
+	pop de			;92e1   ; recupera los juegos del ganador
 	inc de			;92e2   ; los sets ganados
-	ld a,(de)			;92e3
+	ld a,(de)			;92e3   ; sus sets
 	cp 001h		;92e4   ; con uno, el partido
 	jp z,L_92EC		;92e6
 	inc a			;92e9   ; un set mas
@@ -3068,7 +3068,7 @@ L_9D7B:
 	and 003h		;9d7e
 	jp z,L_9DDE		;9d80   ; 0: tono
 	cp 001h		;9d83   ; 1: ...
-	jp z,L_9DC3		;9d85
+	jp z,L_9DC3		;9d85   ; 1: ruido
 	ld a,(hl)			;9d88   ; el byte de la orden
 	bit 6,(ix+00eh)		;9d89   ; bit 6...
 	jp nz,L_9DAD		;9d8d

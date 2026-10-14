@@ -16,11 +16,26 @@ C 0xA084 ...a (ix+0x0D)
 C 0xA089 el siguiente a (ix+0x13)
 C 0xA08D con modo 0...
 C 0xA090 ...el byte no se consume
+C 0xA092 la orden del ruido
+C 0xA093 solo en el canal del ruido (8)
+C 0xA09E hay ruido que mandar
+C 0xA0A5 y sigue como la orden del modo
 C 0xA0B2 el parametro
 C 0xA0B4 el periodo del ruido (5 bits)
 C 0xA0B8 solo en el canal del ruido (8)
 C 0xA0C1 a 0xE2F0
 C 0xA0C7 hay ruido que mandar
+C 0xA0F2 el byte siguiente...
+C 0xA0F3 ...la parte alta de la envolvente (0xE2F5)
+C 0xA0FB hay que mandarla (bit 6)
+C 0xA102 el byte siguiente...
+C 0xA103 ...la parte baja de la envolvente (0xE2F4)
+C 0xA10A hay que mandarla (bit 7)
+C 0xA10E y el canal va con envolvente (bit 2 del modo)
+C 0xA113 sin envolvente: no hay nada que mandar...
+C 0xA118 ...de la envolvente (bits 5-7 a cero)
+C 0xA11B y el modo...
+C 0xA11E ...sin los bits 2 y 3
 C 0xA132 el parametro
 C 0xA134 conserva solo el bit 7 de (ix+0x0F)
 C 0xA13C la parte alta del parametro...
@@ -55,6 +70,11 @@ C 0xA222 ya llego?
 C 0xA226 no: sube la cuenta...
 C 0xA229 HL = la palabra siguiente...
 C 0xA22E ...menos uno (el bucle vuelve alli)
+C 0xA237 el parametro: cuantas veces se repite (el segundo bucle)
+C 0xA239 la cuenta (ix+0x06)
+C 0xA23D ya llego?
+C 0xA241 no: sube la cuenta...
+C 0xA244 ...y vuelve al principio del bucle
 C 0xA252 el parametro...
 C 0xA255 ...a (ix+0x09)
 C 0xA258 de 4 en adelante...
@@ -64,6 +84,9 @@ C 0xA275 una nota: la parte baja
 C 0xA278 0x0F: silencio
 C 0xA27D de 6 en adelante...
 C 0xA282 la parte baja a (ix+0x16)
+C 0xA294 el canal 4 deja de mandar...
+C 0xA296 ...salvo que su prioridad (0xE285)...
+C 0xA29D ...no sea menor que la del canal 2 (0xE259)
 C 0xA2A3 quita el bit 2 del mezclador
 C 0xA2A5 el canal de 0xE22D...
 C 0xA2A9 ...y el de 0xE2B1
@@ -74,6 +97,9 @@ C 0xA2C3 el canal 1 (0xE20A)
 C 0xA2CC bit 2: el canal 4 manda en el canal A
 C 0xA2D1 bit 3: se acaba de soltar
 C 0xA2D6 el canal 1 vuelve a sonar (0xE238 = 5)
+C 0xA2EC bit 0: el canal 4 manda
+C 0xA2F4 bit 1: se acaba de soltar
+C 0xA2FB el canal 2 vuelve a sonar (0xE264 = 5)
 C 0xA30E la frecuencia, parte baja...
 C 0xA30F ...al registro B
 C 0xA315 la parte alta...
@@ -84,6 +110,10 @@ C 0xA31D los registros del canal siguiente
 C 0xA320 bit 3: el canal no suena
 C 0xA326 bit 2: hay envolvente...
 C 0xA329 ...se apunta
+C 0xA32F bit 0: hay un ruido nuevo
+C 0xA334 lo apunta como mandado
+C 0xA338 el periodo del ruido...
+C 0xA33C ...a R#6
 C 0xA342 bit 1: ya esta mandado
 C 0xA345 bit 2: hay que mandar el ruido
 C 0xA348 lo apunta como mandado (bit 3)
@@ -97,6 +127,16 @@ C 0xA367 bit 6: la parte alta
 C 0xA36C ...a R#12
 C 0xA375 bit 5: la forma
 C 0xA37A ...a R#13
+C 0xA384 el modo del canal 1 (0xE20D)...
+C 0xA388 ...sus bits del mezclador (tabla de p08:A3CE)
+C 0xA38F con el canal 4 mandando...
+C 0xA394 ...el modo del canal 2 (0xE239)...
+C 0xA39A ...o el del canal 5 (0xE2BD)
+C 0xA39D el modo del canal...
+C 0xA39E ...sus bits del mezclador (tabla de p08:A3D2)
+C 0xA3A5 con el canal 4 mandando...
+C 0xA3AA ...el canal 3 (0xE265)...
+C 0xA3B0 ...o el 4 (0xE291)
 # --- fin de lo escrito a mano ---
 
 # --- BLOQUES QUE LEE EL CODIGO (seccion que reescribe tools/bloques.py; no editar a mano) ---
@@ -121,7 +161,6 @@ L 0xA356 sonido_envolvente la envolvente (R#11-13) si hay que cambiarla
 L 0xA384 sonido_mezclador el mezclador del PSG (R#7) segun los canales
 L 0xA3BD pon_mezclador escribe A en R#7 del PSG y en 0xE2EE
 L 0xA3C7 tabla_por_dos_bits HL = HL + (A and 3)
-C 0xA093 lee el canal que se esta tocando
 C 0xA098 lee lo que hay que mandar al PSG
 C 0xA0A2 guarda lo que hay que mandar al PSG
 C 0xA0AC guarda lo que hay que mandar al PSG
@@ -134,7 +173,6 @@ C 0xA0F7 apunta a lo que hay que mandar al PSG
 C 0xA107 apunta a lo que hay que mandar al PSG
 C 0xA114 apunta a lo que hay que mandar al PSG
 C 0xA20A palabra_y_retrocede: HL = la palabra siguiente - 1
-C 0xA244 palabra_y_retrocede: HL = la palabra siguiente - 1
 C 0xA24F palabra_y_retrocede: HL = la palabra siguiente - 1
 C 0xA291 apunta a el estado del mezclador
 C 0xA2B2 sonido_al_psg: manda al PSG los registros de los canales
@@ -145,13 +183,10 @@ C 0xA2C6 tres_registros_psg: escribe tres registros del PSG desde HL
 C 0xA2C9 apunta a el estado del mezclador
 C 0xA2E0 tres_registros_psg: escribe tres registros del PSG desde HL
 C 0xA2E9 tres_registros_psg: escribe tres registros del PSG desde HL
-C 0xA2EC apunta a el estado del mezclador
 C 0xA303 tres_registros_psg: escribe tres registros del PSG desde HL
 C 0xA30A tres_registros_psg: escribe tres registros del PSG desde HL
 C 0xA32C apunta a lo que hay que mandar al PSG
 C 0xA38B tabla_por_dos_bits: HL = HL + (A and 3)
-C 0xA38F lee el estado del mezclador
 C 0xA3A1 tabla_por_dos_bits: HL = HL + (A and 3)
-C 0xA3A5 lee el estado del mezclador
 C 0xA3B7 tabla_por_dos_bits: HL = HL + (A and 3)
 # --- fin de las anotaciones de anota.py ---

@@ -734,19 +734,19 @@ copia_ficha_del_juego:		; copia la ficha del juego (0xF280, 23 bytes) y sus opci
 	ld (0d317h),a		;4a35   ; guarda las opciones del MODIFY (copia)
 	ret			;4a38
 L_4A39:
-	di			;4a39
+	di			;4a39   ; el modo sin juego: borra 0xC000-0xDFFF
 	ld hl,0c000h		;4a3a
 	ld de,0c001h		;4a3d
 	ld (hl),000h		;4a40
 	ld bc,01fffh		;4a42
 	ldir		;4a45
-	ld a,0ffh		;4a47
+	ld a,0ffh		;4a47   ; 0xD13B = 0xFF
 	ld (0d13bh),a		;4a49
 	call mi_slot		;4a4c   ; mi_slot: A = el slot de la pagina 1 (RSLREG y EXPTBL): el del propio cartucho
 	ld (0d12eh),a		;4a4f   ; guarda el slot del Game Master (copia)
-	call salta_a_c000		;4a52   ; salta_a_c000: copia p00:4A9A a 0xC000 (0x87 bytes) y salta alli
-	jr nc,L_4A5A		;4a55
-	jp L_4B21		;4a57
+	call salta_a_c000		;4a52   ; busca la ROM del disco (en 0xC000)
+	jr nc,L_4A5A		;4a55   ; no hay: sigue
+	jp L_4B21		;4a57   ; hay: arranca el disco
 L_4A5A:
 	ld sp,0df80h		;4a5a
 	ld a,0ffh		;4a5d
@@ -1207,20 +1207,20 @@ L_4DD9:
 	or 0ffh		;4dd9
 	ret			;4ddb
 L_4DDC:
-	ld de,08000h		;4ddc
+	ld de,08000h		;4ddc   ; sin cabecera: el bufer en 0x8000...
 	ld c,01ah		;4ddf
 	call 0f37dh		;4de1
-	ld hl,00008h		;4de4
+	ld hl,00008h		;4de4   ; ...8 bytes
 	call bdos_lee		;4de7   ; bdos_lee: BDOS 0x27, leer HL registros; si falla, el error 3
-	ld hl,08000h		;4dea
+	ld hl,08000h		;4dea   ; los 8 registros del VDP...
 	ld e,008h		;4ded
 	ld c,000h		;4def
-	call pon_registros_vdp		;4df1   ; pon_registros_vdp: escribe E registros del VDP desde HL, empezando por C
+	call pon_registros_vdp		;4df1   ; ...al VDP
 	ld a,(0002dh)		;4df4   ; la version del MSX (0 = MSX1)
 	and a			;4df7
-	ret z			;4df8
-	call 07275h		;4df9   ; paleta_msx2: MSX2: los 16 colores de p01:728E
-	xor a			;4dfc
+	ret z			;4df8   ; en MSX1, ya esta
+	call 07275h		;4df9   ; en MSX2, la paleta de siempre
+	xor a			;4dfc   ; A = 0: bien
 	ret			;4dfd
 pon_registros_vdp:		; escribe E registros del VDP desde HL, empezando por C
 	push bc			;4dfe
@@ -1240,20 +1240,20 @@ disco_graba_vram:		; graba en disco la VRAM y los registros del VDP
 	jr nz,L_4E17		;4e13
 	ld c,040h		;4e15
 L_4E17:
-	ld hl,0faf6h		;4e17   ; apunta a ACPAGE, la pagina activa
+	ld hl,0faf6h		;4e17   ; la pagina activa...
 	ld a,(hl)			;4e1a
-	push af			;4e1b
-	ld (hl),000h		;4e1c
-	call disco_graba_de_vram		;4e1e   ; disco_graba_de_vram: lee de la VRAM y lo graba en disco
-	ld a,(0dd9dh)		;4e21
+	push af			;4e1b   ; ...se guarda...
+	ld (hl),000h		;4e1c   ; ...y pasa a la 0
+	call disco_graba_de_vram		;4e1e   ; graba la pagina 0
+	ld a,(0dd9dh)		;4e21   ; el modo 2 (0xDD9D)...
 	cp 002h		;4e24
 	jr nz,L_4E3C		;4e26
-	ld a,(0fcafh)		;4e28   ; lee SCRMOD, el modo de pantalla
+	ld a,(0fcafh)		;4e28   ; ...en SCREEN 5 o 6 graba otra pagina...
 	sub 005h		;4e2b
 	and 002h		;4e2d
-	ld a,001h		;4e2f
+	ld a,001h		;4e2f   ; ...la 1...
 	jr nz,L_4E34		;4e31
-	inc a			;4e33
+	inc a			;4e33   ; ...o la 2 en SCREEN 7 u 8
 L_4E34:
 	ld (0faf6h),a		;4e34   ; guarda ACPAGE, la pagina activa
 	ld c,000h		;4e37
@@ -1328,17 +1328,17 @@ L_4EAE:
 	ld hl,0003bh		;4eb6
 	jp bdos_graba		;4eb9   ; bdos_graba: BDOS 0x26, grabar HL registros; si falla, el error 4
 L_4EBC:
-	ld de,08000h		;4ebc
+	ld de,08000h		;4ebc   ; el bufer en 0x8000
 	ld c,01ah		;4ebf
 	call 0f37dh		;4ec1
-	xor a			;4ec4
+	xor a			;4ec4   ; el modo 0 (sin cabecera de MSX2)...
 	ld de,08000h		;4ec5
 	ld (de),a			;4ec8
 	inc de			;4ec9
-	ld hl,0f3dfh		;4eca   ; apunta a los registros del VDP (copia de la BIOS)
+	ld hl,0f3dfh		;4eca   ; ...y los registros del VDP de la BIOS
 	ld bc,00009h		;4ecd
 	ldir		;4ed0
-	ld hl,00009h		;4ed2
+	ld hl,00009h		;4ed2   ; 9 bytes
 	jp bdos_graba		;4ed5   ; bdos_graba: BDOS 0x26, grabar HL registros; si falla, el error 4
 disco_graba_pantalla:		; graba la pantalla segun el modo (0xF3DF, 0xF3E0)
 	ld a,(0f3dfh)		;4ed8   ; lee los registros del VDP (copia de la BIOS)
@@ -1368,18 +1368,18 @@ L_4F06:
 	ld hl,0f400h		;4f0d
 	ld bc,00005h		;4f10
 L_4F13:
-	push bc			;4f13
+	push bc			;4f13   ; 0x80 bytes de la VRAM cada vez...
 	ld bc,00080h		;4f14
 	call disco_graba_bc_de_vram		;4f17   ; disco_graba_bc_de_vram: lee BC bytes de la VRAM y los graba
 	pop bc			;4f1a
-	djnz L_4F13		;4f1b
-	ld hl,0f680h		;4f1d
+	djnz L_4F13		;4f1b   ; ...B veces
+	ld hl,0f680h		;4f1d   ; la paleta (0xF680, 32 bytes)
 	ld bc,00020h		;4f20
 	call disco_graba_bc_de_vram		;4f23   ; disco_graba_bc_de_vram: lee BC bytes de la VRAM y los graba
-	ld hl,036a0h		;4f26
+	ld hl,036a0h		;4f26   ; los atributos de los sprites (0x36A0, 0x160 bytes)
 	ld bc,00160h		;4f29
 	call disco_graba_bc_de_vram		;4f2c   ; disco_graba_bc_de_vram: lee BC bytes de la VRAM y los graba
-	ld hl,0f800h		;4f2f
+	ld hl,0f800h		;4f2f   ; y los patrones de los sprites (0xF800)
 	ld b,008h		;4f32
 L_4F34:
 	push bc			;4f34
@@ -1791,7 +1791,7 @@ error_de_disco:		; pinta el mensaje del error C (tabla de p00:5209)
 	pop hl			;51e2
 	ld bc,00040h		;51e3   ; una fila mas abajo (0x40)...
 	add hl,bc			;51e6
-	ld de,051fah		;51e7
+	ld de,051fah		;51e7   ; el texto de p00:51FA (RETURN KEY / RETRY)
 	ex de,hl			;51ea
 	call 0738bh		;51eb   ; pinta_texto_en: pinta el texto de HL en la VRAM DE
 	call 00156h		;51ee   ; BIOS KILBUF - Clears keyboard buffer | borra el teclado
@@ -2094,18 +2094,18 @@ busca_ficheros:		; busca los ficheros del disco (BDOS 0x11 y 0x12)
 	inc a			;5514
 	jr z,L_5540		;5515
 L_5517:
-	ld hl,09100h		;5517   ; apunta a cuantos ficheros hay
+	ld hl,09100h		;5517   ; un fichero mas
 	inc (hl)			;551a
 	push hl			;551b
-	call guarda_fichero_hallado		;551c   ; guarda_fichero_hallado: copia el nombre hallado a la lista
+	call guarda_fichero_hallado		;551c   ; a la lista
 	pop hl			;551f
-	ld a,(hl)			;5520
+	ld a,(hl)			;5520   ; hasta 20 (0x14)
 	cp 014h		;5521
 	jr z,L_5530		;5523
-	ld de,09823h		;5525   ; apunta a el FCB
+	ld de,09823h		;5525   ; BDOS 0x12: el siguiente
 	ld c,012h		;5528
 	call 0f37dh		;552a
-	inc a			;552d
+	inc a			;552d   ; 0xFF: no hay mas
 	jr nz,L_5517		;552e
 L_5530:
 	ld a,(09100h)		;5530   ; lee cuantos ficheros hay

@@ -123,15 +123,15 @@ L_A07D:
 	dec hl			;a090   ; ...el byte no se consume
 	ret			;a091
 L_A092:
-	pop hl			;a092
-	ld a,(0e2efh)		;a093   ; lee el canal que se esta tocando
+	pop hl			;a092   ; la orden del ruido
+	ld a,(0e2efh)		;a093   ; solo en el canal del ruido (8)
 	cp 008h		;a096
 	ld a,(0e2f2h)		;a098   ; lee lo que hay que mandar al PSG
 	jp nz,L_A0A8		;a09b
-	set 0,a		;a09e
+	set 0,a		;a09e   ; hay ruido que mandar
 	res 1,a		;a0a0
 	ld (0e2f2h),a		;a0a2   ; guarda lo que hay que mandar al PSG
-	jp L_A07D		;a0a5
+	jp L_A07D		;a0a5   ; y sigue como la orden del modo
 L_A0A8:
 	set 2,a		;a0a8
 	res 3,a		;a0aa
@@ -174,34 +174,34 @@ L_A0DD:
 L_A0F1:
 	pop hl			;a0f1
 L_A0F2:
-	inc hl			;a0f2
-	ld a,(hl)			;a0f3
+	inc hl			;a0f2   ; el byte siguiente...
+	ld a,(hl)			;a0f3   ; ...la parte alta de la envolvente (0xE2F5)
 	ld (0e2f5h),a		;a0f4
 	ld de,0e2f2h		;a0f7   ; apunta a lo que hay que mandar al PSG
 	ld a,(de)			;a0fa
-	set 6,a		;a0fb
+	set 6,a		;a0fb   ; hay que mandarla (bit 6)
 	ld (de),a			;a0fd
 	jp L_A102		;a0fe
 L_A101:
 	pop hl			;a101
 L_A102:
-	inc hl			;a102
-	ld a,(hl)			;a103
+	inc hl			;a102   ; el byte siguiente...
+	ld a,(hl)			;a103   ; ...la parte baja de la envolvente (0xE2F4)
 	ld (0e2f4h),a		;a104
 	ld de,0e2f2h		;a107   ; apunta a lo que hay que mandar al PSG
-	ld a,(de)			;a10a
+	ld a,(de)			;a10a   ; hay que mandarla (bit 7)
 	set 7,a		;a10b
 	ld (de),a			;a10d
-	set 2,(ix+00dh)		;a10e
+	set 2,(ix+00dh)		;a10e   ; y el canal va con envolvente (bit 2 del modo)
 	ret			;a112
 L_A113:
-	pop hl			;a113
+	pop hl			;a113   ; sin envolvente: no hay nada que mandar...
 	ld de,0e2f2h		;a114   ; apunta a lo que hay que mandar al PSG
 	ld a,(de)			;a117
-	and 01fh		;a118
+	and 01fh		;a118   ; ...de la envolvente (bits 5-7 a cero)
 	ld (de),a			;a11a
-	ld a,(ix+00dh)		;a11b
-	and 0f3h		;a11e
+	ld a,(ix+00dh)		;a11b   ; y el modo...
+	and 0f3h		;a11e   ; ...sin los bits 2 y 3
 	ld (ix+00dh),a		;a120
 	ret			;a123
 L_A124:
@@ -379,14 +379,14 @@ L_A230:
 	ld (ix+005h),000h		;a232
 	ret			;a236
 L_A237:
-	pop hl			;a237
+	pop hl			;a237   ; el parametro: cuantas veces se repite (el segundo bucle)
 	inc hl			;a238
-	ld a,(ix+006h)		;a239
+	ld a,(ix+006h)		;a239   ; la cuenta (ix+0x06)
 	inc a			;a23c
-	cp (hl)			;a23d
+	cp (hl)			;a23d   ; ya llego?
 	jp z,L_A247		;a23e
-	ld (ix+006h),a		;a241
-	jp palabra_y_retrocede		;a244   ; palabra_y_retrocede: HL = la palabra siguiente - 1
+	ld (ix+006h),a		;a241   ; no: sube la cuenta...
+	jp palabra_y_retrocede		;a244   ; ...y vuelve al principio del bucle
 L_A247:
 	inc hl			;a247
 	inc hl			;a248
@@ -430,11 +430,11 @@ L_A28C:
 	ret			;a290
 sonido_mezcla:		; decide que canales van al PSG segun sus prioridades
 	ld hl,0e2f6h		;a291   ; apunta a el estado del mezclador
-	res 0,(hl)		;a294
-	ld a,(0e259h)		;a296
+	res 0,(hl)		;a294   ; el canal 4 deja de mandar...
+	ld a,(0e259h)		;a296   ; ...salvo que su prioridad (0xE285)...
 	ld b,a			;a299
 	ld a,(0e285h)		;a29a
-	cp b			;a29d
+	cp b			;a29d   ; ...no sea menor que la del canal 2 (0xE259)
 	jp c,L_A2A3		;a29e
 	set 0,(hl)		;a2a1
 L_A2A3:
@@ -472,13 +472,13 @@ L_A2E6:
 	ld hl,0e2bah		;a2e6
 	call tres_registros_psg		;a2e9   ; tres_registros_psg: escribe tres registros del PSG desde HL
 L_A2EC:
-	ld hl,0e2f6h		;a2ec   ; apunta a el estado del mezclador
+	ld hl,0e2f6h		;a2ec   ; bit 0: el canal 4 manda
 	bit 0,(hl)		;a2ef
 	jp nz,L_A307		;a2f1
-	bit 1,(hl)		;a2f4
+	bit 1,(hl)		;a2f4   ; bit 1: se acaba de soltar
 	jp z,L_A300		;a2f6
 	res 1,(hl)		;a2f9
-	ld a,005h		;a2fb
+	ld a,005h		;a2fb   ; el canal 2 vuelve a sonar (0xE264 = 5)
 	ld (0e264h),a		;a2fd
 L_A300:
 	ld hl,0e262h		;a300
@@ -512,13 +512,13 @@ tres_registros_psg:		; escribe tres registros del PSG desde HL
 	ret			;a32b
 sonido_ruido:		; el periodo del ruido (R#6) si hay que cambiarlo
 	ld hl,0e2f2h		;a32c   ; apunta a lo que hay que mandar al PSG
-	bit 0,(hl)		;a32f
+	bit 0,(hl)		;a32f   ; bit 0: hay un ruido nuevo
 	jp z,L_A342		;a331
-	res 0,(hl)		;a334
+	res 0,(hl)		;a334   ; lo apunta como mandado
 	set 1,(hl)		;a336
-	ld a,(0e2f0h)		;a338
+	ld a,(0e2f0h)		;a338   ; el periodo del ruido...
 	ld e,a			;a33b
-	ld a,006h		;a33c
+	ld a,006h		;a33c   ; ...a R#6
 	call 00093h		;a33e   ; BIOS WRTPSG - Writes data to PSG-register
 	ret			;a341
 L_A342:
@@ -558,26 +558,26 @@ sonido_envolvente:		; la envolvente (R#11-13) si hay que cambiarla
 	call 00093h		;a380   ; BIOS WRTPSG - Writes data to PSG-register
 	ret			;a383
 sonido_mezclador:		; el mezclador del PSG (R#7) segun los canales
-	ld hl,0e20dh		;a384
+	ld hl,0e20dh		;a384   ; el modo del canal 1 (0xE20D)...
 	ld a,(hl)			;a387
-	ld hl,0a3ceh		;a388
+	ld hl,0a3ceh		;a388   ; ...sus bits del mezclador (tabla de p08:A3CE)
 	call tabla_por_dos_bits		;a38b   ; tabla_por_dos_bits: HL = HL + (A and 3)
 	ld b,(hl)			;a38e
-	ld a,(0e2f6h)		;a38f   ; lee el estado del mezclador
+	ld a,(0e2f6h)		;a38f   ; con el canal 4 mandando...
 	bit 2,a		;a392
-	ld hl,0e239h		;a394
+	ld hl,0e239h		;a394   ; ...el modo del canal 2 (0xE239)...
 	jp z,L_A39D		;a397
-	ld hl,0e2bdh		;a39a
+	ld hl,0e2bdh		;a39a   ; ...o el del canal 5 (0xE2BD)
 L_A39D:
-	ld a,(hl)			;a39d
-	ld hl,0a3d2h		;a39e
+	ld a,(hl)			;a39d   ; el modo del canal...
+	ld hl,0a3d2h		;a39e   ; ...sus bits del mezclador (tabla de p08:A3D2)
 	call tabla_por_dos_bits		;a3a1   ; tabla_por_dos_bits: HL = HL + (A and 3)
 	ld c,(hl)			;a3a4
-	ld a,(0e2f6h)		;a3a5   ; lee el estado del mezclador
+	ld a,(0e2f6h)		;a3a5   ; con el canal 4 mandando...
 	bit 0,a		;a3a8
-	ld hl,0e265h		;a3aa
+	ld hl,0e265h		;a3aa   ; ...el canal 3 (0xE265)...
 	jp z,L_A3B3		;a3ad
-	ld hl,0e291h		;a3b0
+	ld hl,0e291h		;a3b0   ; ...o el 4 (0xE291)
 L_A3B3:
 	ld a,(hl)			;a3b3
 	ld hl,0a3d6h		;a3b4

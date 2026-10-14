@@ -95,6 +95,11 @@ C 0x49E4 ...y otra copia a 0xE280
 C 0x49F5 el Game Master en la pagina 2
 C 0x49FD sin opcion elegida (0xFF)
 C 0x4A05 y sigue en p02:8303 (el menu con el juego puesto)
+C 0x4A39 el modo sin juego: borra 0xC000-0xDFFF
+C 0x4A47 0xD13B = 0xFF
+C 0x4A52 busca la ROM del disco (en 0xC000)
+C 0x4A55 no hay: sigue
+C 0x4A57 hay: arranca el disco
 C 0x4AA2 el byte de EXPTBL de ese slot
 C 0x4AA3 bit 7: el slot esta expandido
 C 0x4AA7 B = el slot
@@ -154,6 +159,21 @@ C 0x4DD0 a la paleta
 C 0x4DD4 el color siguiente
 C 0x4DD5 los B colores
 C 0x4DD7 A = 0: bien
+C 0x4DDC sin cabecera: el bufer en 0x8000...
+C 0x4DE4 ...8 bytes
+C 0x4DEA los 8 registros del VDP...
+C 0x4DF1 ...al VDP
+C 0x4DF8 en MSX1, ya esta
+C 0x4DF9 en MSX2, la paleta de siempre
+C 0x4DFC A = 0: bien
+C 0x4E17 la pagina activa...
+C 0x4E1B ...se guarda...
+C 0x4E1C ...y pasa a la 0
+C 0x4E1E graba la pagina 0
+C 0x4E21 el modo 2 (0xDD9D)...
+C 0x4E28 ...en SCREEN 5 o 6 graba otra pagina...
+C 0x4E2F ...la 1...
+C 0x4E33 ...o la 2 en SCREEN 7 u 8
 C 0x4E44 128 bytes de la VRAM...
 C 0x4E46 ...a 0x8802
 C 0x4E4F se comprimen en 0x8002
@@ -174,6 +194,15 @@ C 0x4E97 ...al bufer
 C 0x4E9C 32 bytes de paleta
 C 0x4EA0 si es la de la BIOS (0xF680)...
 C 0x4EA7 ...se copian de la RAM
+C 0x4EBC el bufer en 0x8000
+C 0x4EC4 el modo 0 (sin cabecera de MSX2)...
+C 0x4ECA ...y los registros del VDP de la BIOS
+C 0x4ED2 9 bytes
+C 0x4F13 0x80 bytes de la VRAM cada vez...
+C 0x4F1B ...B veces
+C 0x4F1D la paleta (0xF680, 32 bytes)
+C 0x4F26 los atributos de los sprites (0x36A0, 0x160 bytes)
+C 0x4F2F y los patrones de los sprites (0xF800)
 C 0x4FB5 guarda el primer byte del gancho...
 C 0x4FB9 ...y lo cambia por `ret`: la interrupcion no entra en el juego
 C 0x4FBB guarda la RAM del juego de 0xC000 (0x3380 bytes) en 0xAC80, que es RAM en la pagina 2
@@ -232,6 +261,7 @@ C 0x5170 ...es el bufer (DE)
 C 0x5171 BDOS 0x1A: el bufer de los registros (DTA)
 C 0x5177 un registro de 1 byte por la rutina de BC
 C 0x517A A = el byte
+C 0x51E7 el texto de p00:51FA (RETURN KEY / RETRY)
 C 0x527C la direccion de vuelta
 C 0x527E copia 13 bytes de p00:5294 a 0x9803: la pasarela entre slots
 C 0x5287 en 0x9808 el slot...
@@ -265,6 +295,11 @@ C 0x54B6 si el fichero tiene extension...
 C 0x54BA ...pinta un punto ('<' en la fuente del menu)
 C 0x54CA la fila siguiente de la pantalla
 C 0x54D0 las B filas
+C 0x5517 un fichero mas
+C 0x551C a la lista
+C 0x5520 hasta 20 (0x14)
+C 0x5525 BDOS 0x12: el siguiente
+C 0x552D 0xFF: no hay mas
 C 0x5565 HL = la fila A
 C 0x5568 el tipo de lista: 1 = nombre y extension (11 bytes); si no, 8
 C 0x556F 8 bytes por fila
@@ -708,7 +743,6 @@ C 0x4A32 lee las opciones del MODIFY
 C 0x4A35 guarda las opciones del MODIFY (copia)
 C 0x4A4C mi_slot: A = el slot de la pagina 1 (RSLREG y EXPTBL): el del propio cartucho
 C 0x4A4F guarda el slot del Game Master (copia)
-C 0x4A52 salta_a_c000: copia p00:4A9A a 0xC000 (0x87 bytes) y salta alli
 C 0x4A62 apunta a el gancho H.TIMI
 C 0x4A6D lee el slot del Game Master (copia)
 C 0x4A75 mapper_del_juego_a_cero: pone 0-1-2-3 en 0x4000-0xA000: los registros del mapper del OTRO cartucho
@@ -817,13 +851,8 @@ C 0x4D8E bdos_lee: BDOS 0x27, leer HL registros; si falla, el error 3
 C 0x4D9A la version del MSX (0 = MSX1)
 C 0x4DAB bdos_lee: BDOS 0x27, leer HL registros; si falla, el error 3
 C 0x4DE7 bdos_lee: BDOS 0x27, leer HL registros; si falla, el error 3
-C 0x4DF1 pon_registros_vdp: escribe E registros del VDP desde HL, empezando por C
 C 0x4DF4 la version del MSX (0 = MSX1)
-C 0x4DF9 paleta_msx2: MSX2: los 16 colores de p01:728E
 C 0x4E0A disco_cabecera_vram: prepara el primer registro: modo y registros del VDP
-C 0x4E17 apunta a ACPAGE, la pagina activa
-C 0x4E1E disco_graba_de_vram: lee de la VRAM y lo graba en disco
-C 0x4E28 lee SCRMOD, el modo de pantalla
 C 0x4E34 guarda ACPAGE, la pagina activa
 C 0x4E39 disco_graba_de_vram: lee de la VRAM y lo graba en disco
 C 0x4E3D guarda ACPAGE, la pagina activa
@@ -831,7 +860,6 @@ C 0x4E6B DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 C 0x4E6F la version del MSX (0 = MSX1)
 C 0x4EA3 DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 C 0x4EB9 bdos_graba: BDOS 0x26, grabar HL registros; si falla, el error 4
-C 0x4ECA apunta a los registros del VDP (copia de la BIOS)
 C 0x4ED5 bdos_graba: BDOS 0x26, grabar HL registros; si falla, el error 4
 C 0x4ED8 lee los registros del VDP (copia de la BIOS)
 C 0x4EDE lee el registro 1 del VDP (copia de la BIOS)
@@ -935,9 +963,6 @@ C 0x54FD entra_al_disco: pone la RAM en la pagina 2, desengancha la interrupcion
 C 0x5501 guarda cuantos ficheros hay
 C 0x5504 apunta a la lista de ficheros
 C 0x550C apunta a el FCB
-C 0x5517 apunta a cuantos ficheros hay
-C 0x551C guarda_fichero_hallado: copia el nombre hallado a la lista
-C 0x5525 apunta a el FCB
 C 0x5530 lee cuantos ficheros hay
 C 0x5537 copia_nombre: copia un nombre de la lista
 C 0x553A sale_del_disco: espera, devuelve la RAM del juego, los ganchos y la pila (0x984A)

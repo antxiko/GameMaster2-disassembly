@@ -439,18 +439,18 @@ busca_ficha_b:		; copia la ficha por defecto (p00:45D0) a 0xD300 y busca la del 
 	xor a			;a2de
 	ld (0d4d4h),a		;a2df   ; guarda el juego tiene SCC (copia)
 busca_ficha:		; copia la ficha por defecto (p00:45D0) y busca la del juego por su suma (gemela de p01:7136)
-	ld hl,045d0h		;a2e2
-	ld de,0d300h		;a2e5   ; apunta a la ficha del juego (copia)
+	ld hl,045d0h		;a2e2   ; la ficha por defecto (p00:45D0, 22 bytes)...
+	ld de,0d300h		;a2e5   ; ...a 0xD300
 	ld bc,00016h		;a2e8
 	ldir		;a2eb
-	ld a,0ffh		;a2ed
+	ld a,0ffh		;a2ed   ; sin codigo de truco aun (0xD313 = 0xFF)
 	ld (0d313h),a		;a2ef
-	ld hl,04010h		;a2f2
+	ld hl,04010h		;a2f2   ; la segunda cabecera del juego (0x4010)...
 	call 08398h		;a2f5   ; lee_palabra_del_juego: DE = la palabra HL del cartucho del juego (RDSLT en 0xF104) (gemela de p00:576B)
-	ld hl,04241h		;a2f8
+	ld hl,04241h		;a2f8   ; ...es 'AB'?
 	rst 20h			;a2fb   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
-	jr nz,L_A30A		;a2fc
-	ld hl,04012h		;a2fe
+	jr nz,L_A30A		;a2fc   ; no: se busca por la suma
+	ld hl,04012h		;a2fe   ; si: su ficha viene en el propio juego, en 0x4012 (19 bytes)
 	ld de,0d300h		;a301   ; apunta a la ficha del juego (copia)
 	ld bc,00013h		;a304
 	jp 08d74h		;a307   ; copia_del_juego: copia BC bytes de HL del cartucho del juego (RDSLT) a DE (gemela de p01:6371)
@@ -549,13 +549,13 @@ L_A39E:
 	ld hl,05000h		;a3a4
 	ld b,000h		;a3a7
 L_A3A9:
-	push af			;a3a9
+	push af			;a3a9   ; un byte del juego...
 	push bc			;a3aa
 	push de			;a3ab
-	call 0000ch		;a3ac   ; BIOS RDSLT - Reads the value of an address in another slot
+	call 0000ch		;a3ac   ; BIOS RDSLT - Reads the value of an address in another slot | ...por RDSLT
 	pop de			;a3af
 	pop bc			;a3b0
-	add a,e			;a3b1
+	add a,e			;a3b1   ; se suma a DE
 	ld e,a			;a3b2
 	jr nc,L_A3B6		;a3b3
 	inc d			;a3b5
@@ -629,15 +629,15 @@ paleta_desde:		; MSX2: los 16 colores de HL (gemela de p05:82C6)
 	ld b,010h		;a412
 	ld a,000h		;a414
 L_A416:
-	ld d,(hl)			;a416
+	ld d,(hl)			;a416   ; rojo y azul
 	inc hl			;a417
-	ld e,(hl)			;a418
+	ld e,(hl)			;a418   ; verde
 	inc hl			;a419
 	push af			;a41a
-	call pon_color		;a41b   ; pon_color: MSX2: el color B de la paleta con D y E (R
+	call pon_color		;a41b   ; el color A
 	pop af			;a41e
-	inc a			;a41f
-	djnz L_A416		;a420
+	inc a			;a41f   ; el siguiente
+	djnz L_A416		;a420   ; los B colores
 	ret			;a422
 
 ; ----------------------------------------------------------------------
@@ -712,14 +712,14 @@ borra_nombres:		; borra la tabla de nombres y esconde los sprites (0xD0 en 0x3B0
 rellena_tercios:		; FILVRM en los tres tercios de la pantalla (gemela de p01:72FC)
 	ld d,003h		;a491
 L_A493:
-	push bc			;a493
+	push bc			;a493   ; un tercio: FILVRM
 	push de			;a494
 	call 00056h		;a495   ; BIOS FILVRM - Fills VRAM with value
-	ld bc,00800h		;a498
+	ld bc,00800h		;a498   ; el siguiente, 0x800 mas alla
 	add hl,bc			;a49b
 	pop de			;a49c
 	pop bc			;a49d
-	dec d			;a49e
+	dec d			;a49e   ; los D tercios
 	jr nz,L_A493		;a49f
 	ret			;a4a1
 copia_tercios:		; LDIRVM en los tres tercios de la pantalla (gemela de p01:730D)
@@ -851,15 +851,15 @@ L_A52A:
 	inc de			;a538   ; la columna siguiente
 	jr L_A52A		;a539
 L_A53B:
-	push bc			;a53b
+	push bc			;a53b   ; una fila de C casillas
 	ld b,000h		;a53c
 	push af			;a53e
-	call 00056h		;a53f   ; BIOS FILVRM - Fills VRAM with value
+	call 00056h		;a53f   ; BIOS FILVRM - Fills VRAM with value | se rellena con A
 	pop af			;a542
-	ld bc,00020h		;a543
+	ld bc,00020h		;a543   ; la fila siguiente (32 casillas)
 	add hl,bc			;a546
 	pop bc			;a547
-	djnz L_A53B		;a548
+	djnz L_A53B		;a548   ; las B filas
 	ret			;a54a
 binario_a_bcd:		; HL a BCD en DE (gemela de p01:746C)
 	ld b,010h		;a54b
@@ -937,19 +937,19 @@ L_A578:
 	ld a,0d0h		;a5d7
 	jp 0004dh		;a5d9   ; BIOS WRTVRM - Writes data in VRAM
 lee_vram_tercios:		; LDIRMV de los tres tercios (0x2000 de paso) (gemela de p01:7834)
-	push bc			;a5dc
+	push bc			;a5dc   ; guarda la cuenta, el destino y la VRAM
 	push de			;a5dd
 	push hl			;a5de
-	call 00059h		;a5df   ; BIOS LDIRMV - Block transfers to memory from VRAM
+	call 00059h		;a5df   ; BIOS LDIRMV - Block transfers to memory from VRAM | el primer tercio
 	pop hl			;a5e2
-	ld bc,02000h		;a5e3
+	ld bc,02000h		;a5e3   ; el segundo esta 0x2000 mas alla en la VRAM...
 	add hl,bc			;a5e6
 	pop de			;a5e7
 	pop bc			;a5e8
-	ex de,hl			;a5e9
+	ex de,hl			;a5e9   ; ...y BC mas alla en la RAM
 	add hl,bc			;a5ea
 	ex de,hl			;a5eb
-	jp 00059h		;a5ec   ; BIOS LDIRMV - Block transfers to memory from VRAM
+	jp 00059h		;a5ec   ; BIOS LDIRMV - Block transfers to memory from VRAM | el segundo tercio
 L_A5EF:
 	ld hl,0d12ah		;a5ef   ; 0xD12A: hay pantalla guardada
 	ld a,(hl)			;a5f2
@@ -975,18 +975,18 @@ L_A5EF:
 	ld bc,00001h		;a624
 	jp 0005ch		;a627   ; BIOS LDIRVM - Block transfers to VRAM from memory
 copia_vram_tercios:		; LDIRVM de los tres tercios (0x2000 de paso) (gemela de p01:788E)
-	push bc			;a62a
+	push bc			;a62a   ; guarda la cuenta, el origen y la VRAM
 	push hl			;a62b
 	push de			;a62c
-	call 0005ch		;a62d   ; BIOS LDIRVM - Block transfers to VRAM from memory
+	call 0005ch		;a62d   ; BIOS LDIRVM - Block transfers to VRAM from memory | el primer tercio
 	pop hl			;a630
-	ld bc,02000h		;a631
+	ld bc,02000h		;a631   ; el segundo esta 0x2000 mas alla en la VRAM...
 	add hl,bc			;a634
 	pop de			;a635
 	pop bc			;a636
 	ex de,hl			;a637
-	add hl,bc			;a638
-	jp 0005ch		;a639   ; BIOS LDIRVM - Block transfers to VRAM from memory
+	add hl,bc			;a638   ; ...y BC mas alla en la RAM
+	jp 0005ch		;a639   ; BIOS LDIRVM - Block transfers to VRAM from memory | el segundo tercio
 guarda_pantalla_si:		; si 0xD13D, guarda la pantalla (p03:A578)
 	ld a,(0d13dh)		;a63c
 	or a			;a63f
@@ -1134,16 +1134,16 @@ borra_teclado:		; borra el bufer de teclas del menu (0x920B) (gemela de p01:75E2
 	ld (0d166h),a		;a74b
 	ret			;a74e
 cursor_apaga_b:		; quita el cursor
-	ld hl,0a770h		;a74f
+	ld hl,0a770h		;a74f   ; el cursor que se quita: las 8 lineas de p03:A770
 	ld bc,00008h		;a752
-	ld a,(0d13dh)		;a755
+	ld a,(0d13dh)		;a755   ; 0xD13D: en el menu del juego...
 	or a			;a758
 	jr nz,L_A76A		;a759
 	ld a,(0d4d3h)		;a75b   ; lee el menu va en MSX2 (copia)
 	and a			;a75e
-	ld de,021d0h		;a75f
+	ld de,021d0h		;a75f   ; el patron del cursor en 0x21D0 (MSX1)...
 	jr z,L_A767		;a762
-	ld de,02080h		;a764
+	ld de,02080h		;a764   ; ...o en 0x2080 (MSX2)
 L_A767:
 	jp copia_tercios		;a767   ; copia_tercios: LDIRVM en los tres tercios de la pantalla (gemela de p01:730D)
 L_A76A:

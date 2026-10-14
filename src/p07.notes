@@ -5,6 +5,12 @@ C 0x802F A x 2: cada destino es una palabra
 # --- fin de los comentarios copiados ---
 
 # --- A MANO: comentarios escritos leyendo el codigo ---
+C 0x8157 solo el tenis
+C 0x815A el texto de p07:8186 (SET)
+C 0x8160 el set que se juega...
+C 0x8164 ...x 3...
+C 0x8166 ...su texto en la tabla de p07:8176 (1ST, 2ND, 3RD)...
+C 0x816C ...3 letras en 0x3909
 C 0x81E4 esconde los sprites
 C 0x81E7 0xE409: alguien hizo un tanto
 C 0x81EB si: lo suma
@@ -43,12 +49,24 @@ C 0x831B quien saca (0xE41D): 0...
 C 0x831F ...el texto de p07:881C
 C 0x8324 1: el de p07:8808
 C 0x832A 2: el de p07:8812
+C 0x8339 B = quien gano el partido
+C 0x833C 0xE2F7: se acabo
+C 0x8344 la musica 0x12
+C 0x8349 el campo...
+C 0x834C ...y sus piezas
+C 0x834F 0xE403 a cero
+C 0x8353 y vuelve al menu
 C 0x83AF la direccion de VRAM de la cifra
 C 0x83B6 el set C...
 C 0x83B7 ...en la tabla de juegos por set (0xE580)
 C 0x83BD pinta su cifra
 C 0x83C2 el set siguiente
 C 0x83C3 los B sets
+C 0x83DE una fila de C bytes...
+C 0x83E3 ...a la VRAM
+C 0x83E7 la fila siguiente (32)
+C 0x83EE el origen avanza C
+C 0x83F2 las B filas
 C 0x85C1 la posicion en pixeles: L / 8...
 C 0x85C6 ...pasando los bits bajos de H...
 C 0x85CE ...L = la columna
@@ -107,26 +125,49 @@ C 0x872E las flechas arriba/abajo, a los bits 3 y 4
 C 0x8734 izquierda/derecha, a los bits 0 y 1
 C 0x8737 lo que traia el mando...
 C 0x8738 junto con lo del mando
+C 0x873A guarda lo del mando
 C 0x873B la fila 3 del teclado
 C 0x8740 a nivel alto (1 = pulsada)
 C 0x8741 C = la fila
 C 0x8742 una tecla al bit 3
+C 0x8744 E = las teclas juntas
+C 0x8745 la fila otra vez
 C 0x8746 otra al bit 0
+C 0x874B E = las teclas juntas
+C 0x874C la fila otra vez
 C 0x874D otra al bit 1
+C 0x8751 E = las teclas juntas
 C 0x8752 la fila 5
 C 0x8757 a nivel alto
 C 0x8758 una tecla al bit 2
+C 0x875D E = las teclas juntas
 C 0x875E la fila 6
 C 0x8763 a nivel alto
 C 0x8764 dos teclas a los bits 4 y 5
 C 0x876B lo que trae el mando
 C 0x876C junto con lo del mando
+C 0x8A28 TYPE 0: el color de siempre (p07:8AAF)
+C 0x8A2C TYPE 1-2...
+C 0x8A31 ...+ 2 en el hockey
+C 0x8A34 el color de la raqueta en la tabla de p07:8A4D
+C 0x8A3B al jugador 1 (0xE426)
+C 0x8A87 TYPE 0: el color de siempre
+C 0x8A8A TYPE 1-2...
+C 0x8A8F ...+ 2 en el hockey
+C 0x8A92 el color de la raqueta en la tabla de p07:8AAB
+C 0x8A99 al jugador 2 (0xE436)
 C 0x8AAF LENGTH...
 C 0x8AB2 ...elige dos bytes de la tabla de p07:8AD9...
 C 0x8ABB ...para el jugador 1 (0xE428)
 C 0x8AC4 LENGTH...
 C 0x8AC7 ...elige dos bytes de la tabla de p07:8AD9...
 C 0x8AD0 ...para el jugador 2 (0xE438)
+C 0x8AF4 el largo de la raqueta segun LENGTH (tabla p07:8BCF)
+C 0x8AFE D = el largo
+C 0x8AFF la velocidad hacia arriba: -1 linea
+C 0x8B03 la raqueta del jugador 1...
+C 0x8B06 ...si esta arriba del todo, no sube
+C 0x8B09 sube 4 lineas (0xFC00)
 C 0x8B2C lo recien pulsado del jugador 1 (arriba y abajo)
 C 0x8B32 C = 0: quieto
 C 0x8B36 lo que mantiene pulsado
@@ -145,20 +186,30 @@ C 0x8C17 guarda la columna
 C 0x8C18 Y del primer sprite
 C 0x8C19 B = Y para el segundo sprite
 C 0x8C1A Y a la copia
+C 0x8C1B el byte siguiente
+C 0x8C1C recupera la columna
 C 0x8C1D X
 C 0x8C1E B' = X para el segundo sprite
 C 0x8C20 X a la copia
 C 0x8C21 el patron, 6 bytes mas alla en la ficha
+C 0x8C27 el patron
 C 0x8C28 el patron de la raqueta...
 C 0x8C29 ...a la copia
 C 0x8C2B el color (C)
+C 0x8C2C el segundo sprite
 C 0x8C2D la raqueta corta (LENGTH = 1)...
 C 0x8C2E LENGTH...
 C 0x8C2F ...es 1?
 C 0x8C32 ...esconde el segundo sprite (Y = 0xE0)
 C 0x8C34 Y, X, patron y color del segundo sprite, todos a 0xE0
+C 0x8C35 X
+C 0x8C37 el patron
+C 0x8C39 el color
 C 0x8C3C el segundo sprite, 16 lineas mas abajo
+C 0x8C3F Y
 C 0x8C41 la misma X
+C 0x8C44 X
+C 0x8C45 dos bytes mas alla en la ficha
 C 0x8C48 su patron
 C 0x8C4B el color
 C 0x8C62 sin barra, nada
@@ -167,21 +218,33 @@ C 0x8C6B su altura (0xE452)
 C 0x8C71 bajando, hasta 0x88...
 C 0x8C75 ...una linea por cuadro
 C 0x8C86 sin barra, nada
+C 0x8C89 0: sin barra
 C 0x8C8B los sprites 9-11 de la copia (0xE524)
 C 0x8C8E la altura y la columna de la barra
 C 0x8C92 B = la altura
 C 0x8C93 Y del primer sprite
+C 0x8C94 X, en el byte siguiente
 C 0x8C97 C = la columna
 C 0x8C98 X
+C 0x8C99 el patron
 C 0x8C9A patron 0x18
+C 0x8C9C el color
 C 0x8C9D color 0x0D
+C 0x8C9F el segundo sprite
 C 0x8CA0 el segundo, 16 lineas mas abajo
+C 0x8CA4 X
 C 0x8CA5 la misma X
+C 0x8CA6 el patron
 C 0x8CA7 patron 0x1C
+C 0x8CA9 el color
 C 0x8CAA el mismo color
+C 0x8CAC el tercer sprite
 C 0x8CAD el tercero, 16 mas
+C 0x8CB0 X
 C 0x8CB1 la misma X
+C 0x8CB2 el patron
 C 0x8CB3 patron 0x20
+C 0x8CB5 el color
 C 0x8CB6 el mismo color
 C 0x8CB9 0xE448 = 0
 C 0x8CBE 0xE449 = 0x50
@@ -268,21 +331,33 @@ C 0x8FB8 la raqueta del jugador 2
 C 0x8FC5 la toca?
 C 0x8FCA el largo de la raqueta...
 C 0x8FCB ...segun LENGTH (tabla p07:9024)
+C 0x8FD1 x 2: dos bytes por largo
+C 0x8FD5 A = el borde de arriba
 C 0x8FD7 la parte de arriba de la raqueta...
 C 0x8FD8 ...por debajo de la pelota: no
+C 0x8FDA L = la parte de arriba
+C 0x8FDC el borde de abajo
 C 0x8FDF la de abajo...
 C 0x8FE0 ...por encima: no
 C 0x8FE2 la columna de la raqueta, mas 5...
 C 0x8FE7 ...y 4 de ancho
 C 0x8FEB toca: 0xE44B = 1
+C 0x8FF0 vuelve a los registros de la pelota
 C 0x8FF1 el lado (0xE44C)...
 C 0x8FF4 ...decide el sonido: 8 o 7
+C 0x8FF6 lado 0: el 8
+C 0x8FF9 si no, el 7
 C 0x9007 la parte de arriba de la barra
 C 0x900B por debajo de la pelota: no
 C 0x900D la de abajo (0x30 de alto)
 C 0x9011 la columna de la barra (0x7C)...
 C 0x9015 ...y 6 de ancho
 C 0x9019 toca: B + 1
+C 0x9032 Y del sprite 0 = la altura de la pelota
+C 0x9035 la columna de la pelota (0xE443)...
+C 0x9038 ...X
+C 0x903A patron 0
+C 0x903D color 0x0F (blanco)
 C 0x9079 HL = A x 2...
 C 0x907D ...en la tabla de DE
 C 0x907E DE = la palabra
@@ -305,6 +380,13 @@ C 0x917A ya en 0, nada
 C 0x917F baja uno
 C 0x9180 con el sonido 3
 C 0x9199 borra las cuatro marcas del menu GAME MODIFY
+C 0x919D la marca de 0x38CF
+C 0x91A0 a cero
+C 0x91A4 la de 0x390F
+C 0x91A7 a cero
+C 0x91AB la de 0x394F
+C 0x91AE a cero
+C 0x91B2 y la de 0x398F
 C 0x91B8 la posicion de la opcion elegida (tabla de p07:920C)...
 C 0x91C3 ...pinta la flecha (0x8D)
 C 0x91C8 el valor de LENGTH...
@@ -330,15 +412,23 @@ C 0x92A0 si no, 10 mas (0x30 -> 0x40)
 C 0x92A6 cambia el que saca
 C 0x92AE los dos tantos a cero
 C 0x92B5 un juego mas al ganador (BCD)
+C 0x92B6 BCD: un juego mas
+C 0x92B9 guarda los juegos
 C 0x92BA hasta 6 juegos...
 C 0x92BD ...el set: guarda los juegos de cada uno en 0xE580
+C 0x92BE los juegos del jugador 1 (0xE417)...
+C 0x92C1 ...a la tabla de 0xE580, dos bytes por set
 C 0x92C4 el set que se juega (0xE40C) x 2
 C 0x92CB los juegos del jugador 1
+C 0x92CD los juegos del jugador 2 (0xE41B)
 C 0x92D0 y los del 2
 C 0x92D2 vuelven a cero
+C 0x92D6 los del jugador 2 tambien
 C 0x92D9 0xE41F = 1
 C 0x92DD el set siguiente
+C 0x92E1 recupera los juegos del ganador
 C 0x92E2 los sets ganados
+C 0x92E3 sus sets
 C 0x92E4 con uno, el partido
 C 0x92E9 un set mas
 C 0x9309 el tanto en BCD, con tope 99
@@ -389,6 +479,7 @@ C 0x9D52 ...divide la frecuencia
 C 0x9D7B el modo del canal (ix+0x0D)
 C 0x9D80 0: tono
 C 0x9D83 1: ...
+C 0x9D85 1: ruido
 C 0x9D88 el byte de la orden
 C 0x9D89 bit 6...
 C 0x9D90 ...o bit 5 del estado
@@ -703,8 +794,6 @@ C 0x830A pide_sonido: pide el sonido A al motor (con las interrupciones cerradas
 C 0x8311 th_borra_pantalla: borra los sprites y la tabla de nombres
 C 0x8333 th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
 C 0x8346 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
-C 0x8349 th_pantalla_campo: borra y pinta el campo (p07:83F5 en 0x38E8)
-C 0x834C th_pinta_campo: pinta las piezas del campo de la tabla de p07:83C6
 C 0x8356 lee los canales del motor de sonido (0x2C bytes cada uno)
 C 0x835D pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x8374 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
@@ -793,7 +882,6 @@ C 0x8A8C lee el juego: 1 tenis, 2 hockey
 C 0x8A95 hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x8AE1 th_direccion_1: la direccion del mando del jugador 1
 C 0x8AEB despacha: salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
-C 0x8AF4 lee LENGTH, el largo de la raqueta
 C 0x8AFA hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x8B0E lee LENGTH, el largo de la raqueta
 C 0x8B14 hl_mas_a: HL = HL + A (gemela de p01:7251)

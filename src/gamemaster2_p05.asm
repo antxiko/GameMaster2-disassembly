@@ -405,18 +405,18 @@ espejo_16:		; escribe 16 bytes de la VRAM dados la vuelta (bit a bit)
 L_821D:
 	ld b,010h		;821d
 L_821F:
-	ex de,hl			;821f
+	ex de,hl			;821f   ; un byte de la VRAM...
 	call lee_vram_byte		;8220   ; lee_vram_byte: lee el byte de la VRAM HL (128 KB)
 	ex de,hl			;8223
-	call espeja_byte		;8224   ; espeja_byte: da la vuelta a los 8 bits de A
-	call escribe_vram_byte		;8227   ; escribe_vram_byte: escribe A en la VRAM HL (128 KB)
-	inc e			;822a
+	call espeja_byte		;8224   ; ...al reves...
+	call escribe_vram_byte		;8227   ; ...se escribe en HL
+	inc e			;822a   ; el siguiente
 	inc hl			;822b
-	djnz L_821F		;822c
-	ld a,e			;822e
+	djnz L_821F		;822c   ; los B bytes
+	ld a,e			;822e   ; la fila de patrones anterior (-32)
 	sub 020h		;822f
 	ld e,a			;8231
-	bit 4,e		;8232
+	bit 4,e		;8232   ; hasta que el bit 4 de E diga que acabo
 	jr z,L_821D		;8234
 	pop de			;8236
 	ret			;8237
@@ -512,15 +512,15 @@ paleta_desde:		; MSX2: los 16 colores de HL
 	ld b,010h		;82c6
 	ld a,000h		;82c8
 L_82CA:
-	ld d,(hl)			;82ca
+	ld d,(hl)			;82ca   ; rojo y azul
 	inc hl			;82cb
-	ld e,(hl)			;82cc
+	ld e,(hl)			;82cc   ; verde
 	inc hl			;82cd
 	push af			;82ce
-	call pon_color		;82cf   ; pon_color: MSX2: el color B de la paleta con D y E (R#16 y puerto 2)
+	call pon_color		;82cf   ; el color A
 	pop af			;82d2
-	inc a			;82d3
-	djnz L_82CA		;82d4
+	inc a			;82d3   ; el siguiente
+	djnz L_82CA		;82d4   ; los B colores
 	ret			;82d6
 
 ; ----------------------------------------------------------------------
@@ -718,19 +718,19 @@ L_83F6:
 vdp_hmmm:		; copia rapida de VRAM a VRAM (HMMM): origen HL, destino DE, tamano BC, paginas en A (gemela de p09:8E52)
 	ex af,af'			;8404   ; guarda las paginas
 	call espera_vdp		;8405   ; espera al VDP
-	push bc			;8408
+	push bc			;8408   ; guarda NX y NY
 	ld a,(00007h)		;8409   ; el puerto de los registros (VDP.DW + 1)
 	inc a			;840c
 	ld c,a			;840d
 	ld a,020h		;840e   ; R#17 = 32 (SX) con incremento: los 15 registros del comando seguidos
 	di			;8410   ; sin interrupciones
-	out (c),a		;8411
-	ld a,091h		;8413
+	out (c),a		;8411   ; el valor...
+	ld a,091h		;8413   ; ...a R#17 (0x80 + 17)
 	out (c),a		;8415
 	inc c			;8417   ; C = el puerto de registros indirectos (VDP.DW + 3)
 	inc c			;8418
 	out (c),h		;8419   ; SX = H
-	xor a			;841b
+	xor a			;841b   ; la parte alta de SX, 0
 	out (c),a		;841c
 	out (c),l		;841e   ; SY = L...
 	ex af,af'			;8420
@@ -738,7 +738,7 @@ vdp_hmmm:		; copia rapida de VRAM a VRAM (HMMM): origen HL, destino DE, tamano B
 	and 003h		;8422   ; ...con la pagina de origen (A & 3)
 	out (c),a		;8424
 	out (c),d		;8426   ; DX = D
-	xor a			;8428
+	xor a			;8428   ; la parte alta de DX, 0
 	out (c),a		;8429
 	out (c),e		;842b   ; DY = E...
 	ld a,l			;842d   ; ...con la pagina de destino ((A >> 2) & 3)
@@ -748,7 +748,7 @@ vdp_hmmm:		; copia rapida de VRAM a VRAM (HMMM): origen HL, destino DE, tamano B
 	out (c),a		;8432
 	pop hl			;8434   ; NX = B (de la pila)
 	out (c),h		;8435
-	xor a			;8437
+	xor a			;8437   ; la parte alta de NX, 0
 	out (c),a		;8438
 	out (c),l		;843a   ; NY = C
 	out (c),a		;843c   ; CLR y ARG a 0
@@ -756,42 +756,42 @@ vdp_hmmm:		; copia rapida de VRAM a VRAM (HMMM): origen HL, destino DE, tamano B
 	out (c),a		;8440
 	ld a,0d0h		;8442   ; CMD = 0xD0: HMMM
 	out (c),a		;8444
-	ei			;8446
+	ei			;8446   ; vuelven las interrupciones
 	ret			;8447
 vdp_hmmc:		; copia rapida de la RAM (HL) a un rectangulo de VRAM (HMMC, 0xF0)
 	ex af,af'			;8448   ; guarda la pagina
 	call espera_vdp		;8449   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
-	push bc			;844c
+	push bc			;844c   ; guarda NX y NY
 	ld a,(00007h)		;844d   ; el puerto de escritura del VDP (VDP.DW)
-	inc a			;8450
+	inc a			;8450   ; C = el puerto de los registros (VDP.DW + 1)
 	ld c,a			;8451
 	ld a,024h		;8452   ; R#17 = 36 (DX) con incremento
 	di			;8454   ; sin interrupciones
-	out (c),a		;8455
-	ld a,091h		;8457
+	out (c),a		;8455   ; el valor...
+	ld a,091h		;8457   ; ...a R#17 (0x80 + 17)
 	out (c),a		;8459
-	inc c			;845b
+	inc c			;845b   ; C = el puerto de registros indirectos (VDP.DW + 3)
 	inc c			;845c
 	out (c),d		;845d   ; DX = D
-	xor a			;845f
+	xor a			;845f   ; la parte alta de DX, 0
 	out (c),a		;8460
 	out (c),e		;8462   ; DY = E, en la pagina A
 	ex af,af'			;8464
-	out (c),a		;8465
-	pop de			;8467
+	out (c),a		;8465   ; la parte alta de DY
+	pop de			;8467   ; D = NX, E = NY
 	out (c),d		;8468   ; NX = B (de la pila)
-	xor a			;846a
+	xor a			;846a   ; la parte alta de NX, 0
 	out (c),a		;846b
 	out (c),e		;846d   ; NY = C
-	out (c),a		;846f
+	out (c),a		;846f   ; la parte alta de NY, 0
 	ld a,(hl)			;8471   ; CLR = el primer byte de HL
 	inc hl			;8472
 	out (c),a		;8473
-	xor a			;8475
+	xor a			;8475   ; ARG = 0
 	out (c),a		;8476
 	ld a,0f0h		;8478   ; CMD = 0xF0: HMMC (de la CPU a la VRAM)
 	out (c),a		;847a
-	dec c			;847c
+	dec c			;847c   ; C = el puerto de los registros otra vez
 	dec c			;847d
 	ld a,0ach		;847e   ; R#17 = 44 (CLR) sin incremento, para los bytes que siguen
 	out (c),a		;8480
@@ -814,13 +814,13 @@ L_8488:
 vdp_ymmm:		; copia en vertical dentro de la VRAM (YMMM, 0xE0)
 	ex af,af'			;8499   ; guarda las paginas
 	call espera_vdp		;849a   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
-	ld a,(00007h)		;849d   ; el puerto de escritura del VDP (VDP.DW)
+	ld a,(00007h)		;849d   ; C = el puerto de los registros (VDP.DW + 1)
 	inc a			;84a0
 	ld c,a			;84a1
 	ld a,022h		;84a2   ; R#17 = 34 (SY) con incremento
 	di			;84a4   ; sin interrupciones
-	out (c),a		;84a5
-	ld a,091h		;84a7
+	out (c),a		;84a5   ; el valor...
+	ld a,091h		;84a7   ; ...a R#17 (0x80 + 17)
 	out (c),a		;84a9
 	inc c			;84ab   ; C = el puerto de registros indirectos
 	inc c			;84ac
@@ -830,7 +830,7 @@ vdp_ymmm:		; copia en vertical dentro de la VRAM (YMMM, 0xE0)
 	and 003h		;84b1
 	out (c),a		;84b3   ; ...con la pagina de origen
 	out (c),h		;84b5   ; DX = H
-	xor a			;84b7
+	xor a			;84b7   ; la parte alta de DX, 0
 	out (c),a		;84b8
 	out (c),e		;84ba   ; DY = E...
 	ld a,l			;84bc   ; ...con la pagina de destino
@@ -922,35 +922,35 @@ vdp_lmcm:		; copia de la VRAM a la RAM con el comando del VDP (LMCM, 0xA0 | op)
 	call espera_vdp		;8539   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 	ld a,007h		;853c   ; lee S#7 para dejarlo limpio
 	call lee_estado_vdp		;853e   ; lee_estado_vdp: lee el registro de estado A del VDP (R
-	push de			;8541
+	push de			;8541   ; guarda NX y NY
 	push bc			;8542
 	ld a,(00007h)		;8543   ; el puerto de escritura del VDP (VDP.DW)
-	inc a			;8546
+	inc a			;8546   ; C = el puerto de los registros (VDP.DW + 1)
 	ld c,a			;8547
 	ld a,020h		;8548   ; R#17 = 32 (SX) con incremento
 	di			;854a
-	out (c),a		;854b
-	ld a,091h		;854d
+	out (c),a		;854b   ; el valor...
+	ld a,091h		;854d   ; ...a R#17 (0x80 + 17)
 	out (c),a		;854f
-	inc c			;8551
+	inc c			;8551   ; C = el puerto de registros indirectos (VDP.DW + 3)
 	inc c			;8552
 	out (c),h		;8553   ; SX = H
-	xor a			;8555
+	xor a			;8555   ; la parte alta de SX, 0
 	out (c),a		;8556
 	out (c),l		;8558   ; SY = L...
 	ex af,af'			;855a   ; ...con la pagina (bits 6-7 de A)
-	ld h,a			;855b
+	ld h,a			;855b   ; H = la operacion, para despues
 	rlca			;855c
 	rlca			;855d
 	and 003h		;855e
-	out (c),a		;8560
+	out (c),a		;8560   ; la parte alta de SY
 	out (c),a		;8562   ; DX y DY no cuentan en LMCM: a cero
 	out (c),a		;8564
 	out (c),a		;8566
 	out (c),a		;8568
 	pop de			;856a
 	out (c),d		;856b   ; NX = D (de la pila)
-	xor a			;856d
+	xor a			;856d   ; la parte alta de NX, 0
 	out (c),a		;856e
 	out (c),e		;8570   ; NY = E; 0 vale 256
 	cp e			;8572   ; 0 vale 256
@@ -982,43 +982,43 @@ L_8585:
 vdp_lmmm:		; copia de VRAM a VRAM con operacion logica (LMMM, desde R#32)
 	ex af,af'			;8599   ; guarda la operacion y las paginas
 	call espera_vdp		;859a   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
-	push bc			;859d
+	push bc			;859d   ; guarda NX y NY
 	ld a,(00007h)		;859e   ; el puerto de los registros (VDP.DW + 1)
 	inc a			;85a1
 	ld c,a			;85a2
 	ld a,020h		;85a3   ; R#17 = 32 (SX) con incremento
 	di			;85a5   ; sin interrupciones
-	out (c),a		;85a6
-	ld a,091h		;85a8
+	out (c),a		;85a6   ; el valor...
+	ld a,091h		;85a8   ; ...a R#17 (0x80 + 17)
 	out (c),a		;85aa
 	inc c			;85ac   ; C = el puerto de registros indirectos (VDP.DW + 3)
 	inc c			;85ad
 	out (c),h		;85ae   ; SX = H
-	xor a			;85b0
+	xor a			;85b0   ; la parte alta de SX, 0
 	out (c),a		;85b1
 	out (c),l		;85b3   ; SY = L...
 	ex af,af'			;85b5   ; ...con la pagina de origen (bits 6-7 de A)
 	rlca			;85b6
 	rlca			;85b7
 	ld l,a			;85b8
-	and 003h		;85b9
-	out (c),a		;85bb
+	and 003h		;85b9   ; los 2 bits de la pagina...
+	out (c),a		;85bb   ; ...a la parte alta de SY
 	out (c),d		;85bd   ; DX = D
-	xor a			;85bf
+	xor a			;85bf   ; la parte alta de DX, 0
 	out (c),a		;85c0
 	out (c),e		;85c2   ; DY = E...
 	ld a,l			;85c4   ; ...con la pagina de destino (bits 4-5)
 	ld e,a			;85c5
 	rlca			;85c6
 	rlca			;85c7
-	and 003h		;85c8
-	out (c),a		;85ca
+	and 003h		;85c8   ; los 2 bits de la pagina...
+	out (c),a		;85ca   ; ...a la parte alta de DY
 	pop hl			;85cc
 	out (c),h		;85cd   ; NX = B (de la pila)
-	xor a			;85cf
+	xor a			;85cf   ; la parte alta de NX, 0
 	out (c),a		;85d0
 	out (c),l		;85d2   ; NY = C
-	out (c),a		;85d4   ; CLR y ARG a 0
+	out (c),a		;85d4   ; la parte alta de NY, 0
 	out (c),a		;85d6
 	out (c),a		;85d8
 	ld a,e			;85da   ; la operacion logica (bits 0-3 de A)...
@@ -1027,7 +1027,7 @@ vdp_lmmm:		; copia de VRAM a VRAM con operacion logica (LMMM, desde R#32)
 	and 00fh		;85dd
 	or 090h		;85df   ; ...con CMD = 0x90: LMMM
 	out (c),a		;85e1
-	ei			;85e3
+	ei			;85e3   ; vuelven las interrupciones
 	ret			;85e4
 L_85E5:
 	ld (0faf5h),a		;85e5   ; guarda DPPAGE, la pagina que se ve
@@ -1074,19 +1074,19 @@ letras_1bit_a_4bit:		; pinta B letras de 1 bit en SCREEN 5 (4 bits)
 	djnz letras_1bit_a_4bit		;862e
 	ret			;8630
 L_8631:
-	push bc			;8631
+	push bc			;8631   ; guarda los registros
 	push de			;8632
 	push hl			;8633
 	push de			;8634
-	call letra_expande		;8635   ; letra_expande: expande los 8 bytes de la letra a 32 con el color C (0xE090)
+	call letra_expande		;8635   ; la letra a 4 bits en 0xE090
 	pop de			;8638
-	ld hl,0e090h		;8639   ; apunta a el bufer de 0xE090 (las cifras de las fechas, o la letra expandida a 4 bits)
-	ld bc,00808h		;863c
-	ld a,001h		;863f
-	call vdp_hmmc		;8641   ; vdp_hmmc: copia rapida de la RAM (HL) a un rectangulo de VRAM (HMMC, 0xF0)
-	call espera_vdp		;8644   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
+	ld hl,0e090h		;8639   ; desde 0xE090...
+	ld bc,00808h		;863c   ; ...8 x 8 pixeles...
+	ld a,001h		;863f   ; ...a la pagina 1
+	call vdp_hmmc		;8641   ; HMMC
+	call espera_vdp		;8644   ; espera a que acabe
 	pop hl			;8647
-	ld bc,00008h		;8648
+	ld bc,00008h		;8648   ; la letra siguiente, 8 bytes mas alla
 	add hl,bc			;864b
 	pop de			;864c
 	pop bc			;864d
@@ -1667,18 +1667,18 @@ bio_teclas:		; las teclas recien pulsadas (0xE057)
 	ld (hl),a			;8c3b
 	ret			;8c3c
 bio_lee_teclas:		; lee las teclas del biorritmo (SNSMAT 8 y 7)
-	ld a,008h		;8c3d
+	ld a,008h		;8c3d   ; la fila 8 del teclado...
 	call 00141h		;8c3f   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
-	cpl			;8c42
-	and 099h		;8c43
+	cpl			;8c42   ; ...a nivel alto...
+	and 099h		;8c43   ; ...el espacio y las flechas izquierda, abajo y derecha (0x99)
 	push af			;8c45
-	ld a,007h		;8c46
+	ld a,007h		;8c46   ; la fila 7...
 	call 00141h		;8c48   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
 	cpl			;8c4b
-	and 004h		;8c4c
+	and 004h		;8c4c   ; ...el bit 2 (ESC)
 	ld b,a			;8c4e
 	pop af			;8c4f
-	or b			;8c50
+	or b			;8c50   ; todo junto
 	ret			;8c51
 L_8C52:
 	ld hl,0e002h		;8c52   ; apunta a el estado del biorritmo
@@ -2479,19 +2479,19 @@ L_9224:
 	push hl			;9225
 	ld b,008h		;9226
 L_9228:
-	push af			;9228
+	push af			;9228   ; el byte de color...
 	ld d,a			;9229
-	call 0004ah		;922a   ; BIOS RDVRM - Reads the content of VRAM
-	or d			;922d
-	call 0004dh		;922e   ; BIOS WRTVRM - Writes data in VRAM
+	call 0004ah		;922a   ; BIOS RDVRM - Reads the content of VRAM | ...que habia...
+	or d			;922d   ; ...con los bits de A...
+	call 0004dh		;922e   ; BIOS WRTVRM - Writes data in VRAM | ...vuelve a la VRAM
 	pop af			;9231
-	inc hl			;9232
-	djnz L_9228		;9233
+	inc hl			;9232   ; la casilla siguiente
+	djnz L_9228		;9233   ; las B casillas
 	pop hl			;9235
-	ld de,00100h		;9236
+	ld de,00100h		;9236   ; la fila siguiente (0x100)
 	add hl,de			;9239
 	pop bc			;923a
-	djnz L_9224		;923b
+	djnz L_9224		;923b   ; las filas
 	ret			;923d
 bio_avanza_grafica_msx2:		; un paso de la grafica en MSX2
 	call bio_alturas_mas		;923e   ; bio_alturas_mas: las alturas de los tres ciclos (desplazamientos 4, 3, 2)
@@ -2574,16 +2574,16 @@ bio_a_pantalla:		; pasa la altura a la pantalla (+0x88, +0x20)
 	ld (hl),d			;92e1
 	ret			;92e2
 bio_angulo_desplazado:		; el angulo mas el desplazamiento A
-	push hl			;92e3
+	push hl			;92e3   ; el angulo...
 	ld e,(hl)			;92e4
 	inc hl			;92e5
 	ld d,(hl)			;92e6
-	call suma_con_signo		;92e7   ; suma_con_signo: DE + A con signo
+	call suma_con_signo		;92e7   ; ...mas el desplazamiento
 	ex de,hl			;92ea
-	call angulo_0_359		;92eb   ; angulo_0_359: suma o resta 360 hasta que HL este entre 0 y 359
+	call angulo_0_359		;92eb   ; entre 0 y 359
 	ex de,hl			;92ee
 	pop hl			;92ef
-	ld (hl),e			;92f0
+	ld (hl),e			;92f0   ; y se guarda
 	inc hl			;92f1
 	ld (hl),d			;92f2
 	ret			;92f3
@@ -2632,23 +2632,23 @@ L_9320:
 	rr e		;932c
 	ret			;932e
 seno:		; el seno del angulo HL: el cuadrante (90, 180, 270) y la tabla
-	ld de,0010eh		;932f
+	ld de,0010eh		;932f   ; 270 grados o mas: el cuarto cuadrante
 	rst 20h			;9332   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	jr nc,L_9374		;9333
-	ld de,000b4h		;9335
+	ld de,000b4h		;9335   ; 180 o mas: el tercero
 	rst 20h			;9338   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	jr nc,L_9363		;9339
-	ld de,0005ah		;933b
+	ld de,0005ah		;933b   ; 90 o mas: el segundo
 	rst 20h			;933e   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	jr nc,L_934F		;933f
-	ld a,l			;9341
-	add a,a			;9342
-	ld hl,094e8h		;9343
+	ld a,l			;9341   ; el primero: el angulo...
+	add a,a			;9342   ; ...x 2 bytes...
+	ld hl,094e8h		;9343   ; ...en la tabla del seno de p05:94E8
 	call hl_mas_a		;9346   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
-	ld a,(hl)			;9349
+	ld a,(hl)			;9349   ; el seno, en negativo (la pantalla crece hacia abajo)
 	neg		;934a
 	inc hl			;934c
-	ld b,(hl)			;934d
+	ld b,(hl)			;934d   ; B = el segundo byte
 	ret			;934e
 L_934F:
 	ld de,000b4h		;934f   ; el tercer cuadrante (180-269): angulo - 180
@@ -3151,22 +3151,22 @@ L_96A8:
 	ret			;96ac
 bio_cursor:		; pinta el cursor parpadeando en su cifra (tabla p05:96D2)
 	call bio_cursor_al_final		;96ad   ; bio_cursor_al_final: Z si el cursor esta en la ultima cifra
-	jr z,L_96D1		;96b0
-	ld hl,0e07ah		;96b2   ; apunta a la cifra en la que esta el cursor
+	jr z,L_96D1		;96b0   ; en la ultima cifra no hay cursor
+	ld hl,0e07ah		;96b2   ; la cifra del cursor...
 	ld a,(hl)			;96b5
 	ld c,a			;96b6
-	add a,a			;96b7
+	add a,a			;96b7   ; ...su posicion en la copia de nombres (tabla de p05:96D2)
 	ld hl,096d2h		;96b8
 	call hl_mas_a		;96bb   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld e,(hl)			;96be
 	inc hl			;96bf
 	ld d,(hl)			;96c0
-	ld b,004h		;96c1
-	call bio_cifra_del_cursor		;96c3   ; bio_cifra_del_cursor: B = la cifra que hay bajo el cursor
-	ld a,(0e00dh)		;96c6   ; lee el parpadeo del cursor
-	bit 2,a		;96c9
+	ld b,004h		;96c1   ; 4 = el cursor
+	call bio_cifra_del_cursor		;96c3   ; o la cifra que hay
+	ld a,(0e00dh)		;96c6   ; el parpadeo...
+	bit 2,a		;96c9   ; ...bit 2
 	jr nz,L_96CF		;96cb
-	ld b,00fh		;96cd
+	ld b,00fh		;96cd   ; apagado: la casilla vacia (0x0F)
 L_96CF:
 	ld a,b			;96cf
 	ld (de),a			;96d0
@@ -4203,15 +4203,15 @@ bio_pinta_niveles:		; pinta los niveles de los tres ciclos
 L_9D5C:
 	ld a,(0e075h)		;9d5c
 	call bio_texto_nivel		;9d5f   ; bio_texto_nivel: el texto del nivel A (tabla de p05:9DC2)
-	ld de,0e36ah		;9d62
+	ld de,0e36ah		;9d62   ; en (0x30, 0x50)
 	call bio_pinta_texto_nivel		;9d65   ; bio_pinta_texto_nivel: pinta el texto del nivel
 	ld a,(0e074h)		;9d68
 	call bio_texto_nivel		;9d6b   ; bio_texto_nivel: el texto del nivel A (tabla de p05:9DC2)
-	ld de,0e38ah		;9d6e
+	ld de,0e38ah		;9d6e   ; en (0x3A, 0x50)
 	call bio_pinta_texto_nivel		;9d71   ; bio_pinta_texto_nivel: pinta el texto del nivel
 	ld a,(0e073h)		;9d74
 	call bio_texto_nivel		;9d77   ; bio_texto_nivel: el texto del nivel A (tabla de p05:9DC2)
-	ld de,0e3aah		;9d7a
+	ld de,0e3aah		;9d7a   ; en (0x44, 0x50)
 	call bio_pinta_texto_nivel		;9d7d   ; bio_pinta_texto_nivel: pinta el texto del nivel
 	ret			;9d80
 bio_texto_nivel:		; el texto del nivel A (tabla de p05:9DC2)

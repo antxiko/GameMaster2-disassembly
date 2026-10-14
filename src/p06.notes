@@ -6,6 +6,8 @@ C 0xA01D su marco de color 0x0F
 C 0xA028 y otro marco por fuera
 C 0xA066 la sombra: un rectangulo de color 0x99 en (0x16, 0x1E)...
 C 0xA069 ...de 0x1C x 0x8C
+C 0xA06C de color 0x99
+C 0xA06E en la pagina 0
 C 0xA073 la caja de color 0x55, 4 pixeles mas arriba y a la izquierda
 C 0xA080 su marco de color 0x0F
 C 0xA08B y el texto de p06:A15E
@@ -13,6 +15,7 @@ C 0xA092 la sombra en (0x2E, 0x2E)
 C 0xA09F la caja de color 0x55
 C 0xA0AC su marco
 C 0xA0B7 y el texto de p06:A17C
+C 0xA0BE borra la zona (0x2A, 0x2A) de 0x20 x 0x90 con el color 0x44
 C 0xA0DB la casilla empieza una fila y una columna antes
 C 0xA0E2 de 0x0A x 0x0C
 C 0xA0E5 color 0x55
@@ -21,10 +24,19 @@ C 0xA0F6 la sombra en (0x16, 0x1C), de 0x3C x 0xCE
 C 0xA103 la caja de color 0x55
 C 0xA110 su marco
 C 0xA11B y el texto de p06:A1EB
+C 0xA122 la zona de la grafica en (0xB8, 0x4E)...
+C 0xA125 ...de 0x0C x 0x74...
+C 0xA128 ...de color 0x55
+C 0xA12F y su marco de color 0x0F
 C 0xA23B la sombra en (0xA8, 0xB8), de 0x10 x 0x38
 C 0xA248 la caja de color 0x55
 C 0xA255 su marco
 C 0xA260 y el texto de p06:A267
+C 0xA270 borra la caja (0xA4, 0xB4) de 0x14 x 0x3C con el color 0x44
+C 0xA27E el contador de cuadros (0xE06E)...
+C 0xA283 ...cada 16
+C 0xA286 el estado (0xE003)...
+C 0xA289 ...decide que se hace
 C 0xA2BD el dia
 C 0xA2BE del 0x13 en adelante, ya esta
 C 0xA2C2 el azul sube con el dia (0-7), el rojo a 7
@@ -40,12 +52,38 @@ C 0xA302 el verde sube con el dia (0-7)
 C 0xA309 en el color 14
 C 0xA342 ordena las coordenadas: que B sea la mayor
 C 0xA34A y que D tambien
+C 0xA368 un valor...
+C 0xA369 ...sin los 3 bits bajos (de 8 en 8)
+C 0xA36B a 0xE070
+C 0xA36C el siguiente (2 bytes mas alla)
+C 0xA372 los B valores
+C 0xA379 el fisico...
+C 0xA37C ...con la letra 'P'
+C 0xA381 la sensibilidad...
+C 0xA384 ...con la 'S'
+C 0xA389 el intelecto...
+C 0xA38C ...con la 'I'
+C 0xA392 HL = la posicion de la marca
+C 0xA397 su casilla
+C 0xA39C y la letra
 C 0xA3CD B = el nivel: 0 desde 0xA8
 C 0xA3D3 1 desde 0x94
 C 0xA3D8 2 desde 0x7E
 C 0xA3DD 3 desde 0x6C
 C 0xA3E2 4 por debajo
 C 0xA3E5 el texto del nivel
+C 0xA3F0 en (0x30, 0x50)
+C 0xA3FC en (0x3A, 0x50)
+C 0xA408 en (0x44, 0x50)
+C 0xA421 la palabra A...
+C 0xA425 ...en DE
+C 0xA429 guarda la posicion y el texto
+C 0xA42B borra la zona
+C 0xA430 con la mascara 0xFF...
+C 0xA432 ...pinta el texto
+C 0xA436 la posicion del texto...
+C 0xA437 ...0x08 x 0x38...
+C 0xA43A ...con el color 0x55
 # --- fin de lo escrito a mano ---
 
 # --- BLOQUES QUE LEE EL CODIGO (seccion que reescribe tools/bloques.py; no editar a mano) ---
@@ -142,7 +180,6 @@ C 0xA252 vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de
 C 0xA25D vdp_rectangulo: dibuja el marco de un rectangulo con cuatro lineas
 C 0xA263 pinta_texto_8x8: pinta un texto [x, y][letras] con letras de 8x8 y la mascara 0xFF; 0xFF acaba, 0xFE otra posicion
 C 0xA27A vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
-C 0xA289 despacha: salta a la palabra A de la tabla pegada detras del `call`
 C 0xA29C bio_borra_zona: borra la zona de la grafica (comando del VDP)
 C 0xA29F bio_texto_a1b2: pinta el texto de p06:A1B2
 C 0xA2A5 bio_borra_zona: borra la zona de la grafica (comando del VDP)
@@ -173,9 +210,6 @@ C 0xA375 apunta a los tres valores del dia
 C 0xA37E bio_pinta_marca: pinta la marca de un ciclo en su altura
 C 0xA386 bio_pinta_marca: pinta la marca de un ciclo en su altura
 C 0xA38E bio_pinta_marca: pinta la marca de un ciclo en su altura
-C 0xA392 bio_coordenada: HL = 0x1200 + A
-C 0xA397 bio_casilla: pinta una casilla con el comando del VDP
-C 0xA39C pinta_letra_8x8: copia la letra A de 8x8 de la hoja de letras a DE (LMMM)
 C 0xA3AA bio_niveles: clasifica los tres ciclos (0xE05A, 0xE05C, 0xE05E)
 C 0xA3AD bio_pinta_niveles: pinta el nivel de cada ciclo
 C 0xA3B1 lee la altura del fisico
@@ -198,6 +232,5 @@ C 0xA405 bio_texto_nivel: el texto del nivel A (tabla de p06:A417)
 C 0xA40B bio_pinta_texto: pinta el texto del nivel en DE
 C 0xA412 tabla_palabra: DE = la palabra A de la tabla de HL
 C 0xA422 hl_mas_a: HL = HL + A (gemela de p01:7251)
-C 0xA42B bio_borra_texto: borra la zona del texto (comando del VDP)
 C 0xA43E vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 # --- fin de las anotaciones de anota.py ---

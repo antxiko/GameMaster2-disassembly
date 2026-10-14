@@ -111,6 +111,11 @@ C 0x97E0 si queda por encima de la ventana...
 C 0x97E4 ...la ventana sube una fila
 C 0x9868 la fila siguiente de la pantalla
 C 0x986E las B filas
+C 0x98B5 un fichero mas
+C 0x98BA a la lista
+C 0x98BE hasta 20 (0x14)
+C 0x98C3 BDOS 0x12: el siguiente
+C 0x98CB 0xFF: no hay mas
 C 0x9903 HL = la fila A
 C 0x9906 el tipo de lista: 1 = nombre y extension (11 bytes); si no, 8
 C 0x990D 8 bytes por fila
@@ -128,6 +133,18 @@ C 0x9A52 guarda la pantalla del juego
 C 0x9A55 el ranking
 C 0x9A58 devuelve la pantalla del juego
 C 0x9A5B el menu ya no esta abierto
+C 0x9A91 la entrada de la tabla
+C 0x9A92 0xFF acaba
+C 0x9A94 el codigo del juego...
+C 0x9A97 ...es este?
+C 0x9A99 si: su direccion
+C 0x9A9B si no, la entrada siguiente (3 bytes)
+C 0x9AA4 la entrada de la tabla
+C 0x9AA5 0xFF acaba
+C 0x9AA8 el codigo del juego...
+C 0x9AAB ...es este?
+C 0x9AAC si: Z con HL en la entrada
+C 0x9AAD si no, la siguiente (3 bytes)
 C 0x9B44 pone a cero 3 bytes
 C 0x9B4E sin puntos no hay ranking
 C 0x9B54 tampoco sin el
@@ -256,6 +273,28 @@ C 0x8426 'AB'...
 C 0x842C ...'CD'...
 C 0x8432 ...o 'EF': trae su numero de RC
 C 0x8438 si no hay cabecera: suma los 256 bytes de 0x5000
+C 0x88C3 LOAD SCREEN DATA: sin disco, vuelve al menu
+C 0x88CC el tipo 2, opcion 1
+C 0x88D1 la ventana
+C 0x88D4 elige el fichero
+C 0x88D7 ESC: vuelve al menu
+C 0x88DA la ventana del mensaje
+C 0x88E3 carga la pantalla
+C 0x88E6 si falla, vuelve al menu
+C 0x88E9 0xD13D = 0xFF: hay pantalla cargada
+C 0x88EE la ensea hasta una tecla
+C 0x88F1 la fila 6: SHIFT o CTRL...
+C 0x88F8 ...si: no se graba
+C 0x88FB si no, la graba como .VRM
+C 0x8A47 MODIFY STAGE NUMBER: borra los sprites
+C 0x8A4A el texto de p02:8A79
+C 0x8A50 en 0x3974...
+C 0x8A53 ...un numero de 2 cifras
+C 0x8A56 sin numero, sale
+C 0x8A59 la decena a 0xD31A
+C 0x8A62 el numero entero a 0xD31B
+C 0x8A68 si el juego tiene rutina propia...
+C 0x8A72 ...bit 2: se usa
 C 0x8AC4 MODIFY PLAYER NUMBER: borra los sprites
 C 0x8AC7 el texto de p02:8AF8
 C 0x8ACD en 0x3975...
@@ -274,6 +313,14 @@ C 0x8CA8 la fila siguiente
 C 0x8CAE las B filas
 C 0x8CB0 una ventana de 16 x 8 con el color 0x0F
 C 0x8CBB y 6 bytes de p02:8CC7 en 0x3AF9
+C 0x8CF7 sin tecla, 0
+C 0x8CFD sin tecla, Z
+C 0x8D01 con una sola tecla...
+C 0x8D05 ...su cifra
+C 0x8D1E sin teclas, 0
+C 0x8D24 sin teclas, Z
+C 0x8D28 con una sola tecla...
+C 0x8D2C ...su cifra
 C 0x8D5D busca el byte bajo de 0xFD9B...
 C 0x8D5F ...en los 0x100 bytes copiados del INIT del juego
 C 0x8D61 no esta
@@ -378,6 +425,14 @@ C 0x9004 si: sigue congelado
 C 0x900A el bit 7 de las teclas: el congelado
 C 0x900E el bit 6
 C 0x9011 el bit 5
+C 0x9072 la fila 1 del teclado...
+C 0x9077 ...a nivel alto...
+C 0x9078 ...el bit 7
+C 0x907B la fila 6...
+C 0x9080 ...a nivel alto...
+C 0x9081 ...los bits 1, 5, 6 y 7
+C 0x9083 CTRL...
+C 0x9087 ...tambien al bit 3
 C 0x929B lee el tamano del bloque comprimido
 C 0x92A0 el bufer en 0xC000
 C 0x92A9 lee el bloque
@@ -392,6 +447,11 @@ C 0x92D8 el modo de pantalla (el primer byte)...
 C 0x92DB ...a 0xD4D2
 C 0x92DE 0: sin pantalla
 C 0x92E0 NZ: hay pantalla
+C 0x92EF el bufer en 0xC000
+C 0x92F7 el modo 0 (sin cabecera de MSX2)...
+C 0x92FD ...y los 8 registros del VDP de la BIOS
+C 0x9305 9 bytes
+C 0x930B y la VRAM desde 0
 C 0x93B5 espera 0x200 vueltas...
 C 0x93B6 ...llamando a 0xD4F0
 C 0x93BD hasta que BC llega a 0
@@ -399,6 +459,9 @@ C 0x93C0 devuelve los 0x1100 bytes de 0xE280 a 0xE000
 C 0x93CB e intercambia otra vez 0xE000 con 0xC000
 C 0x93CE con las interrupciones abiertas
 C 0x93D9 intercambia un byte de HL con uno de DE
+C 0x93DA el de HL...
+C 0x93DB ...y el de DE...
+C 0x93DC ...se cruzan
 C 0x93E0 el siguiente
 C 0x93E2 BC bytes
 C 0x93E8 menu de 8 letras (p03:A65F con A = 0)
@@ -459,6 +522,7 @@ C 0x9CD4 ...o, con la marca 2 ('2'), los de 0xD31F
 C 0x9CE4 guarda los registros
 C 0x9CE7 la fila x 9: el nombre
 C 0x9CEE en el ranking (0xD477)
+C 0x9CF1 HL = el nombre en el ranking
 C 0x9CF5 el nombre que entra (0xD322)...
 C 0x9CF8 ...o, con la marca 2, el de 0xD32A
 C 0x9DBA guarda la fila y el nombre
@@ -872,16 +936,10 @@ C 0x88AD pregunta_vuelve: pregunta y vuelve al menu
 C 0x88B0 borra_nombres: borra la tabla de nombres y esconde los sprites (0xD0 en 0x3B00) (gemela de p01:72EA)
 C 0x88B9 guarda la esquina de la ventana del menu y el byte siguiente (16 bits)
 C 0x88BF guarda la esquina de la ventana pequena y el byte siguiente (16 bits)
-C 0x88C3 hay_disco_b: Z si no hay disco (H.PHYD = ret) y 0xD4F9 no lo fuerza
 C 0x88C9 borra_sprites: borra la tabla de sprites (0x3880, 0x200 bytes) (gemela de p01:62D3)
 C 0x88CE guarda tipo y opcion del menu de disco
-C 0x88D1 modify_mode: el MODIFY MODE MENU: limpia y pinta
-C 0x88D4 elige_fichero: lista los ficheros del disco y deja elegir uno
 C 0x88DD ventana_b: abre una ventana de texto con el marco de DE
 C 0x88E0 borra_sprites: borra la tabla de sprites (0x3880, 0x200 bytes) (gemela de p01:62D3)
-C 0x88E3 disco_carga_pantalla: carga SCREEN DATA del disco
-C 0x88EE pregunta_vuelve: pregunta y vuelve al menu
-C 0x88FB ventana_menu: las esquinas de la ventana del menu (0x9235, 0x9237)
 C 0x88FE disco_guarda_vrm: graba un fichero .VRM (la VRAM)
 C 0x8908 borra_sprites: borra la tabla de sprites (0x3880, 0x200 bytes) (gemela de p01:62D3)
 C 0x890E pinta_texto_b: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
@@ -905,12 +963,9 @@ C 0x8A1D despacha: salta a la palabra A de la tabla pegada detras del `call` (ge
 C 0x8A26 lee el codigo del juego (copia)
 C 0x8A2B sin_juego_b: Z si no se reconocio el juego (0xD301 = 0xFF)
 C 0x8A42 busca_en_tabla: busca 0xF281 en la tabla [codigo, direccion] de HL (gemela de p01:683A)
-C 0x8A47 borra_sprites: borra la tabla de sprites (0x3880, 0x200 bytes) (gemela de p01:62D3)
 C 0x8A4D pinta_texto_b: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
-C 0x8A53 menu_dos_b: menu de 2 opciones (p03:A65F)
 C 0x8A5C teclado_a_nibble_c: pasa la tecla del bufer (0xD142) a un nibble
 C 0x8A65 teclado_a_byte: pasa las teclas del bufer (0xD142) a un byte
-C 0x8A68 lee la rutina propia del juego (copia) y el byte siguiente (16 bits)
 C 0x8A6D apunta a las opciones del MODIFY (copia)
 C 0x8AA5 sin_juego_b: Z si no se reconocio el juego (0xD301 = 0xFF)
 C 0x8ABE busca_en_tabla: busca 0xF281 en la tabla [codigo, direccion] de HL (gemela de p01:683A)
@@ -1063,7 +1118,6 @@ C 0x9293 disco_lee_vram_bloques: lee la VRAM por bloques de 0x80
 C 0x929C disco_lee_palabra: lee una palabra del fichero en HL
 C 0x92B1 descomprime: descomprime HL a la VRAM DE: n & 0x7F repeticiones o copias (gemela de p01:733A)
 C 0x92CB bdos_lee: BDOS 0x27, leer HL registros; si falla, el error 3
-C 0x92FD apunta a los registros del VDP (copia de la BIOS)
 C 0x9308 bdos_graba: BDOS 0x26, grabar HL registros; si falla, el error 4
 C 0x9318 comprime: comprime 0x8802 en 0x8002 (lo contrario de p01:733A) (gemela de p01:7707)
 C 0x9328 bdos_graba: BDOS 0x26, grabar HL registros; si falla, el error 4
@@ -1140,8 +1194,6 @@ C 0x987E apunta a el nombre del fichero (FCB)
 C 0x9898 nombre_de_fichero: pone en el FCB (0x982C) el nombre: tipo y numero de juego
 C 0x989B entra_al_disco_b: intercambia la RAM del juego y desplaza 0xF0FF hacia arriba para el disco
 C 0x98AA apunta a el nombre del fichero (FCB)
-C 0x98BA guarda_fichero_hallado: copia el nombre hallado a la lista
-C 0x98C3 apunta a el nombre del fichero (FCB)
 C 0x98D5 copia_nombre: copia un nombre de la lista
 C 0x98D8 sale_del_disco_b: espera y devuelve la RAM del juego
 C 0x98DE sale_del_disco_b: espera y devuelve la RAM del juego
@@ -1181,8 +1233,6 @@ C 0x9A71 truco_9f69: pone 0xD319 en la variable del juego
 C 0x9A80 busca_en_tabla_y_salta: busca 0xF281 en la tabla [codigo, direccion] de HL y salta (gemela de p01:6827)
 C 0x9A86 truco_9f7b: calcula el valor que se escribe en el juego (p03:A21E)
 C 0x9A8C llama_al_juego: llama al juego por CALSLT a 0xD314 con su slot (0xD12E) en la pagina 2
-C 0x9A94 lee el codigo del juego (copia)
-C 0x9AA8 lee el codigo del juego (copia)
 C 0x9AC1 pinta_texto_b: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
 C 0x9AC4 pinta_ranking_b: pinta la cabecera y las filas del ranking
 C 0x9ACA menu_ocho_b: menu de 8 opciones (p03:A65F)
@@ -1212,7 +1262,6 @@ C 0x9C73 ranking_mueve: mueve una fila del ranking (gemela de p01:6A59)
 C 0x9C7B ranking_mueve: mueve una fila del ranking (gemela de p01:6A59)
 C 0x9C88 ranking_compara: compara dos filas del ranking (gemela de p01:6A2B)
 C 0x9CCD hl_mas_a: HL = HL + A (gemela de p01:7251)
-C 0x9CF1 hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x9D14 cursor_apaga_b: quita el cursor
 C 0x9D18 guarda cuantas letras lleva el nombre
 C 0x9D1B guarda la fila elegida

@@ -71,8 +71,8 @@ bio_rejilla:		; dibuja la rejilla de la grafica
 bio_caja_a15e:		; una caja con sombra, su marco y el texto de p06:A15E
 	ld hl,01e16h		;a066   ; la sombra: un rectangulo de color 0x99 en (0x16, 0x1E)...
 	ld bc,08c1ch		;a069   ; ...de 0x1C x 0x8C
-	ld a,099h		;a06c
-	ld d,000h		;a06e
+	ld a,099h		;a06c   ; de color 0x99
+	ld d,000h		;a06e   ; en la pagina 0
 	call 083c8h		;a070   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 	ld hl,01a12h		;a073   ; la caja de color 0x55, 4 pixeles mas arriba y a la izquierda
 	ld bc,08c1ch		;a076
@@ -105,7 +105,7 @@ bio_caja_a17c:		; una caja con sombra, su marco y el texto de p06:A17C
 	call 086afh		;a0ba   ; pinta_texto_8x8: pinta un texto [x, y][letras] con letras de 8x8 y la mascara 0xFF; 0xFF acaba, 0xFE otra posicion
 	ret			;a0bd
 L_A0BE:
-	ld hl,02a2ah		;a0be
+	ld hl,02a2ah		;a0be   ; borra la zona (0x2A, 0x2A) de 0x20 x 0x90 con el color 0x44
 	ld bc,09020h		;a0c1
 	ld a,044h		;a0c4
 	ld d,000h		;a0c6
@@ -154,12 +154,12 @@ bio_caja_a1eb:		; una caja con sombra, su marco y el texto de p06:A1EB
 	call 086afh		;a11e   ; pinta_texto_8x8: pinta un texto [x, y][letras] con letras de 8x8 y la mascara 0xFF; 0xFF acaba, 0xFE otra posicion
 	ret			;a121
 bio_borra_zona:		; borra la zona de la grafica (comando del VDP)
-	ld hl,04eb8h		;a122
-	ld bc,0740ch		;a125
-	ld a,055h		;a128
+	ld hl,04eb8h		;a122   ; la zona de la grafica en (0xB8, 0x4E)...
+	ld bc,0740ch		;a125   ; ...de 0x0C x 0x74...
+	ld a,055h		;a128   ; ...de color 0x55
 	ld d,000h		;a12a
 	call 083c8h		;a12c   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
-	ld hl,04eb8h		;a12f
+	ld hl,04eb8h		;a12f   ; y su marco de color 0x0F
 	ld de,0740ch		;a132
 	ld c,00fh		;a135
 	call 0839ch		;a137   ; vdp_rectangulo: dibuja el marco de un rectangulo con cuatro lineas
@@ -246,20 +246,20 @@ DATA_resto_A267:
 
 
 bio_borra_caja:		; borra una caja (color 0x44)
-	ld hl,0b4a4h		;a270
+	ld hl,0b4a4h		;a270   ; borra la caja (0xA4, 0xB4) de 0x14 x 0x3C con el color 0x44
 	ld bc,03c14h		;a273
 	ld a,044h		;a276
 	ld d,000h		;a278
 	call 083c8h		;a27a   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 	ret			;a27d
 bio_parpadea:		; cada 16 cuadros (0xE06E) cambia el texto que parpadea
-	ld hl,0e06eh		;a27e
+	ld hl,0e06eh		;a27e   ; el contador de cuadros (0xE06E)...
 	inc (hl)			;a281
 	ld a,(hl)			;a282
-	and 00fh		;a283
+	and 00fh		;a283   ; ...cada 16
 	ret nz			;a285
-	ld a,(0e003h)		;a286
-	call 08078h		;a289   ; despacha: salta a la palabra A de la tabla pegada detras del `call`
+	ld a,(0e003h)		;a286   ; el estado (0xE003)...
+	call 08078h		;a289   ; ...decide que se hace
 
 ; ----------------------------------------------------------------------
 ; DATOS saltos_A28C: tabla de 8 palabras del despachador (call 0x408D en
@@ -400,34 +400,34 @@ bio_valores:		; los tres valores del dia (0xE05A..) a 0xE070
 	ld de,0e070h		;a363   ; apunta a los tres valores del dia
 	ld b,003h		;a366
 L_A368:
-	ld a,(hl)			;a368
-	and 0f8h		;a369
-	ld (de),a			;a36b
-	ld a,002h		;a36c
+	ld a,(hl)			;a368   ; un valor...
+	and 0f8h		;a369   ; ...sin los 3 bits bajos (de 8 en 8)
+	ld (de),a			;a36b   ; a 0xE070
+	ld a,002h		;a36c   ; el siguiente (2 bytes mas alla)
 	call 0806eh		;a36e   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	inc de			;a371
-	djnz L_A368		;a372
+	djnz L_A368		;a372   ; los B valores
 	ret			;a374
 bio_pinta_letras:		; pinta P, S e I (fisico, sensibilidad, intelecto) en su altura
 	ld ix,0e070h		;a375   ; apunta a los tres valores del dia
-	ld a,(ix+000h)		;a379
-	ld b,050h		;a37c
+	ld a,(ix+000h)		;a379   ; el fisico...
+	ld b,050h		;a37c   ; ...con la letra 'P'
 	call bio_pinta_marca		;a37e   ; bio_pinta_marca: pinta la marca de un ciclo en su altura
-	ld a,(ix+001h)		;a381
-	ld b,053h		;a384
+	ld a,(ix+001h)		;a381   ; la sensibilidad...
+	ld b,053h		;a384   ; ...con la 'S'
 	call bio_pinta_marca		;a386   ; bio_pinta_marca: pinta la marca de un ciclo en su altura
-	ld a,(ix+002h)		;a389
-	ld b,049h		;a38c
+	ld a,(ix+002h)		;a389   ; el intelecto...
+	ld b,049h		;a38c   ; ...con la 'I'
 	call bio_pinta_marca		;a38e   ; bio_pinta_marca: pinta la marca de un ciclo en su altura
 	ret			;a391
 bio_pinta_marca:		; pinta la marca de un ciclo en su altura
-	call bio_coordenada		;a392   ; bio_coordenada: HL = 0x1200 + A
+	call bio_coordenada		;a392   ; HL = la posicion de la marca
 	push bc			;a395
 	push hl			;a396
-	call bio_casilla		;a397   ; bio_casilla: pinta una casilla con el comando del VDP
+	call bio_casilla		;a397   ; su casilla
 	pop de			;a39a
 	pop af			;a39b
-	call 086fch		;a39c   ; pinta_letra_8x8: copia la letra A de 8x8 de la hoja de letras a DE (LMMM)
+	call 086fch		;a39c   ; y la letra
 	ret			;a39f
 bio_coordenada:		; HL = 0x1200 + A
 	ld l,a			;a3a0
@@ -476,15 +476,15 @@ L_A3E8:
 bio_pinta_niveles:		; pinta el nivel de cada ciclo
 	ld a,(0e075h)		;a3ea   ; lee el nivel del fisico
 	call bio_texto_nivel		;a3ed   ; bio_texto_nivel: el texto del nivel A (tabla de p06:A417)
-	ld de,05030h		;a3f0
+	ld de,05030h		;a3f0   ; en (0x30, 0x50)
 	call bio_pinta_texto		;a3f3   ; bio_pinta_texto: pinta el texto del nivel en DE
 	ld a,(0e074h)		;a3f6   ; lee el nivel de la sensibilidad
 	call bio_texto_nivel		;a3f9   ; bio_texto_nivel: el texto del nivel A (tabla de p06:A417)
-	ld de,0503ah		;a3fc
+	ld de,0503ah		;a3fc   ; en (0x3A, 0x50)
 	call bio_pinta_texto		;a3ff   ; bio_pinta_texto: pinta el texto del nivel en DE
 	ld a,(0e073h)		;a402   ; lee el nivel del intelecto
 	call bio_texto_nivel		;a405   ; bio_texto_nivel: el texto del nivel A (tabla de p06:A417)
-	ld de,05044h		;a408
+	ld de,05044h		;a408   ; en (0x44, 0x50)
 	call bio_pinta_texto		;a40b   ; bio_pinta_texto: pinta el texto del nivel en DE
 	ret			;a40e
 bio_texto_nivel:		; el texto del nivel A (tabla de p06:A417)
@@ -507,25 +507,25 @@ DATA_resto_A417:
 
 
 tabla_palabra:		; DE = la palabra A de la tabla de HL
-	add a,a			;a421
+	add a,a			;a421   ; la palabra A...
 	call 0806eh		;a422   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
-	ld e,(hl)			;a425
+	ld e,(hl)			;a425   ; ...en DE
 	inc hl			;a426
 	ld d,(hl)			;a427
 	ret			;a428
 bio_pinta_texto:		; pinta el texto del nivel en DE
-	push de			;a429
+	push de			;a429   ; guarda la posicion y el texto
 	push hl			;a42a
-	call bio_borra_texto		;a42b   ; bio_borra_texto: borra la zona del texto (comando del VDP)
+	call bio_borra_texto		;a42b   ; borra la zona
 	pop hl			;a42e
 	pop de			;a42f
-	ld c,0ffh		;a430
-	call 086b9h		;a432
+	ld c,0ffh		;a430   ; con la mascara 0xFF...
+	call 086b9h		;a432   ; ...pinta el texto
 	ret			;a435
 bio_borra_texto:		; borra la zona del texto (comando del VDP)
-	ex de,hl			;a436
-	ld bc,03808h		;a437
-	ld a,055h		;a43a
+	ex de,hl			;a436   ; la posicion del texto...
+	ld bc,03808h		;a437   ; ...0x08 x 0x38...
+	ld a,055h		;a43a   ; ...con el color 0x55
 	ld d,000h		;a43c
 	call 083c8h		;a43e   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 	ret			;a441

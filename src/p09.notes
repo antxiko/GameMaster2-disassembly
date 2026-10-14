@@ -1,6 +1,13 @@
 # Notas del banco 09
 # --- COMENTARIOS COPIADOS DE LAS GEMELAS (tools/gemelas.py; no editar a mano) ---
+C 0x8E56 guarda NX y NY
 C 0x8E5E sin interrupciones
+C 0x8E5F el valor...
+C 0x8E61 ...a R#17 (0x80 + 17)
+C 0x8E69 la parte alta de SX, 0
+C 0x8E76 la parte alta de DX, 0
+C 0x8E85 la parte alta de NX, 0
+C 0x8E94 vuelven las interrupciones
 C 0x8EEB guarda los registros
 C 0x8EF3 D y E: la posicion en pixeles...
 C 0x8EF6 .../ 2: la direccion en la VRAM (2 pixeles por byte)
@@ -8,6 +15,13 @@ C 0x8F01 8 lineas
 # --- fin de los comentarios copiados ---
 
 # --- A MANO: comentarios escritos leyendo el codigo ---
+C 0x8060 SCREEN 2
+C 0x8065 toda la VRAM (16 KB)...
+C 0x806B ...a cero
+C 0x8072 A distinto de 0: enciende la luz de CAPS
+C 0x8077 la tabla de atributos de los sprites (0x3B00)...
+C 0x807D ...entera a 0xE0: ningun sprite a la vista
+C 0x8082 R#7 = 0x04: el color del borde
 C 0x809B un registro del VDP: el numero...
 C 0x809E ...y el valor
 C 0x80A1 al VDP
@@ -19,6 +33,13 @@ C 0x80B8 la vuelve a encender
 C 0x80BB los atributos de los sprites del MSX2 (0xF600)...
 C 0x80C1 ...a 0xE0: escondidos
 C 0x80C6 sin sprites
+C 0x80DF la paleta de p09:8107
+C 0x80E5 R#7 = 0x0F: el color del borde
+C 0x80EC un rectangulo de la VRAM...
+C 0x80F2 ...con el color 0...
+C 0x80F3 ...en la pagina 1
+C 0x8101 0xE001 = 0x31
+C 0x8104 0xE002 = 0
 C 0x8135 el paso de la animacion a 0
 C 0x813B descomprime p09:9988 donde dice su primera palabra
 C 0x8141 borra 0x0B00 (0x3F0 bytes)
@@ -26,6 +47,17 @@ C 0x814B en 0x3907...
 C 0x814E ...las letras desde la 0x60...
 C 0x8150 ...6 filas...
 C 0x8152 ...de 11
+C 0x8163 el rotulo de p09:9B6A...
+C 0x8166 ...en 0x0800...
+C 0x8169 ...13 letras (C = 1)
+C 0x816F el de p09:9BD2...
+C 0x8172 ...en 0x7000...
+C 0x8175 ...13 letras (C = 2)
+C 0x817B el de p09:9C3A...
+C 0x817E ...en 0xD800...
+C 0x8181 ...26 letras (C = 3)
+C 0x8187 en (0x40, 0x40)...
+C 0x818A ...la lista de letras de p09:9B29
 C 0x819B 32 bytes de 0x3F en 0x2400 (los patrones, por tercios)
 C 0x81A6 32 de 0xFC en 0x2420
 C 0x81B1 descomprime p09:81FC en 0x0400 (los colores)
@@ -41,6 +73,14 @@ C 0x826B ...desde 0x0B00
 C 0x826F mas la columna C
 C 0x8273 21 casillas
 C 0x8278 color 0xF0
+C 0x827D la direccion siguiente (DE de paso)
+C 0x827E B veces
+C 0x8284 sube...
+C 0x8285 ...de 0 a 7
+C 0x8288 cada 8 cuadros...
+C 0x8289 ...el contador de 0xE002...
+C 0x828A ...sube
+C 0x828C llego a 6? (Z)
 C 0x8297 el ancho: 0x31 menos lo que ya se ve
 C 0x829B 0xA8 de alto
 C 0x829D desde y hacia (0x40, 0x28)...
@@ -63,8 +103,13 @@ C 0x82F6 el dibujo de p09:8337 (12 x 10) en 0x38C2
 C 0x8302 el de p09:83AF (12 x 14) en 0x38CF
 C 0x830E y los atributos de 7 sprites (p09:831B) en 0x3B00
 C 0x8457 una fila de C bytes
+C 0x8458 guarda el origen
+C 0x8459 BC = C
 C 0x845D a la VRAM
+C 0x8460 HL = el destino
 C 0x8461 la fila siguiente de la pantalla (32 bytes mas alla)
+C 0x8465 DE = la fila siguiente
+C 0x8467 recupera el origen
 C 0x8468 el origen avanza C bytes
 C 0x846A las B filas
 C 0x848C la opcion elegida es la 2...
@@ -81,14 +126,21 @@ C 0x8507 ...ha cambiado desde la ultima vez (0xE022)?
 C 0x850B no: nada
 C 0x850C la apunta
 C 0x850D la opcion elegida (0xE010)...
+C 0x8510 x 2: una palabra por opcion
 C 0x8511 ...su tabla de sprites (p09:8568)
+C 0x8517 DE = la tabla de esa opcion
 C 0x851A C = el primer byte
+C 0x851C las entradas, detras
 C 0x851D el paso de la animacion (0xE021)...
+C 0x8520 A = el paso
 C 0x8521 ...sube
 C 0x8522 el desplazamiento de ese paso (p09:8560)
 C 0x8529 0xFF: se acabo
 C 0x852D x 6
+C 0x852E x 6: 6 bytes por paso
 C 0x8534 los atributos de los sprites del MSX2 (0xF600)
+C 0x853A L = el primer byte
+C 0x853E C = el puerto
 C 0x853F 3 sprites
 C 0x8541 un color: rojo y azul...
 C 0x8545 ...y verde
@@ -123,7 +175,12 @@ C 0x879F ...su rotulo (p09:8840)...
 C 0x87A5 ...en (0x58, 0x50): 2 letras
 C 0x87AE el texto de p09:8818 en (0x50, 0x90): 5 letras
 C 0x87BA la tabla de p09:87F8 segun la opcion
+C 0x87C4 la direccion de la entrada...
+C 0x87C6 ...en DE
+C 0x87C7 HL = la entrada
 C 0x87C8 E = la columna, B = cuantas letras
+C 0x87CB HL = las letras, detras
+C 0x87CC C = 1
 C 0x87CE en la fila 0x90
 C 0x8849 con el juego de caracteres japones, nada
 C 0x884E en MSX2, otra (p09:8B20)

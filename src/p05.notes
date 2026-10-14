@@ -21,6 +21,11 @@ C 0x8183 los dos bits altos de la direccion...
 C 0x8189 ...a R#14
 C 0x818F la parte baja
 C 0x8192 y la alta con el bit de escritura (0x40)
+C 0x82CA rojo y azul
+C 0x82CC verde
+C 0x82CF el color A
+C 0x82D3 el siguiente
+C 0x82D4 los B colores
 C 0x8311 los puertos del VDP
 C 0x8314 C = el de los registros
 C 0x8318 el numero de registro de estado...
@@ -67,6 +72,9 @@ C 0x872C la fila (de 32 en 32) / 4: Y
 C 0x8733 8 pixeles a la derecha
 C 0x8737 si no da la vuelta, ya esta
 C 0x8738 si la da, 8 pixeles mas abajo
+C 0x9D62 en (0x30, 0x50)
+C 0x9D6E en (0x3A, 0x50)
+C 0x9D7A en (0x44, 0x50)
 # --- fin de los comentarios copiados ---
 
 # --- A MANO: comentarios escritos leyendo el codigo ---
@@ -100,6 +108,13 @@ C 0x81CF n & 0x7F...
 C 0x81D1 ...si es el mismo, bit 7 a 0: repetir
 C 0x81D4 0x80: otra direccion de VRAM
 C 0x81D7 bit 7 a 1: copiar n bytes
+C 0x821F un byte de la VRAM...
+C 0x8224 ...al reves...
+C 0x8227 ...se escribe en HL
+C 0x822A el siguiente
+C 0x822C los B bytes
+C 0x822E la fila de patrones anterior (-32)
+C 0x8232 hasta que el bit 4 de E diga que acabo
 C 0x829B B = el numero de color
 C 0x82A2 el numero de color...
 C 0x82A4 ...a R#16, el puntero de la paleta
@@ -131,16 +146,35 @@ C 0x83B4 guarda los registros...
 C 0x83B7 ...traza la linea...
 C 0x83BA ...y los devuelve
 C 0x8404 guarda las paginas
+C 0x8408 guarda NX y NY
 C 0x8410 sin interrupciones
+C 0x8411 el valor...
+C 0x8413 ...a R#17 (0x80 + 17)
+C 0x841B la parte alta de SX, 0
+C 0x8428 la parte alta de DX, 0
+C 0x8437 la parte alta de NX, 0
+C 0x8446 vuelven las interrupciones
 C 0x8448 guarda la pagina
+C 0x844C guarda NX y NY
+C 0x8450 C = el puerto de los registros (VDP.DW + 1)
 C 0x8452 R#17 = 36 (DX) con incremento
 C 0x8454 sin interrupciones
+C 0x8455 el valor...
+C 0x8457 ...a R#17 (0x80 + 17)
+C 0x845B C = el puerto de registros indirectos (VDP.DW + 3)
 C 0x845D DX = D
+C 0x845F la parte alta de DX, 0
 C 0x8462 DY = E, en la pagina A
+C 0x8465 la parte alta de DY
+C 0x8467 D = NX, E = NY
 C 0x8468 NX = B (de la pila)
+C 0x846A la parte alta de NX, 0
 C 0x846D NY = C
+C 0x846F la parte alta de NY, 0
 C 0x8471 CLR = el primer byte de HL
+C 0x8475 ARG = 0
 C 0x8478 CMD = 0xF0: HMMC (de la CPU a la VRAM)
+C 0x847C C = el puerto de los registros otra vez
 C 0x847E R#17 = 44 (CLR) sin incremento, para los bytes que siguen
 C 0x8481 R#17
 C 0x8486 C = el puerto de registros indirectos
@@ -149,12 +183,16 @@ C 0x848D bit 0 (CE): el comando acabo
 C 0x848F bit 7 (TR): el VDP pide otro byte
 C 0x8493 el byte siguiente a CLR
 C 0x8499 guarda las paginas
+C 0x849D C = el puerto de los registros (VDP.DW + 1)
 C 0x84A2 R#17 = 34 (SY) con incremento
 C 0x84A4 sin interrupciones
+C 0x84A5 el valor...
+C 0x84A7 ...a R#17 (0x80 + 17)
 C 0x84AB C = el puerto de registros indirectos
 C 0x84AD SY = L...
 C 0x84B3 ...con la pagina de origen
 C 0x84B5 DX = H
+C 0x84B7 la parte alta de DX, 0
 C 0x84BA DY = E...
 C 0x84BC ...con la pagina de destino
 C 0x84C3 NX no cuenta en YMMM: a cero
@@ -182,12 +220,21 @@ C 0x852E bit 7 (TR): el VDP pide otro byte
 C 0x8532 el byte siguiente a CLR
 C 0x8538 guarda la operacion y la pagina
 C 0x853C lee S#7 para dejarlo limpio
+C 0x8541 guarda NX y NY
+C 0x8546 C = el puerto de los registros (VDP.DW + 1)
 C 0x8548 R#17 = 32 (SX) con incremento
+C 0x854B el valor...
+C 0x854D ...a R#17 (0x80 + 17)
+C 0x8551 C = el puerto de registros indirectos (VDP.DW + 3)
 C 0x8553 SX = H
+C 0x8555 la parte alta de SX, 0
 C 0x8558 SY = L...
 C 0x855A ...con la pagina (bits 6-7 de A)
+C 0x855B H = la operacion, para despues
+C 0x8560 la parte alta de SY
 C 0x8562 DX y DY no cuentan en LMCM: a cero
 C 0x856B NX = D (de la pila)
+C 0x856D la parte alta de NX, 0
 C 0x8570 NY = E; 0 vale 256
 C 0x8572 0 vale 256
 C 0x8576 su parte alta
@@ -195,21 +242,32 @@ C 0x857A ARG a 0
 C 0x857D la operacion logica...
 C 0x8580 ...con CMD = 0xA0: LMCM (de la VRAM a la CPU)
 C 0x8599 guarda la operacion y las paginas
+C 0x859D guarda NX y NY
 C 0x859E el puerto de los registros (VDP.DW + 1)
 C 0x85A3 R#17 = 32 (SX) con incremento
 C 0x85A5 sin interrupciones
+C 0x85A6 el valor...
+C 0x85A8 ...a R#17 (0x80 + 17)
 C 0x85AC C = el puerto de registros indirectos (VDP.DW + 3)
 C 0x85AE SX = H
+C 0x85B0 la parte alta de SX, 0
 C 0x85B3 SY = L...
 C 0x85B5 ...con la pagina de origen (bits 6-7 de A)
+C 0x85B9 los 2 bits de la pagina...
+C 0x85BB ...a la parte alta de SY
 C 0x85BD DX = D
+C 0x85BF la parte alta de DX, 0
 C 0x85C2 DY = E...
 C 0x85C4 ...con la pagina de destino (bits 4-5)
+C 0x85C8 los 2 bits de la pagina...
+C 0x85CA ...a la parte alta de DY
 C 0x85CD NX = B (de la pila)
+C 0x85CF la parte alta de NX, 0
 C 0x85D2 NY = C
-C 0x85D4 CLR y ARG a 0
+C 0x85D4 la parte alta de NY, 0
 C 0x85DA la operacion logica (bits 0-3 de A)...
 C 0x85DF ...con CMD = 0x90: LMMM
+C 0x85E3 vuelven las interrupciones
 C 0x85E8 D = la pagina
 C 0x85E9 L = pagina x 2...
 C 0x85EB ...E = pagina x 16...
@@ -235,6 +293,14 @@ C 0x861B R#6: los patrones de los sprites
 C 0x8620 con la pagina
 C 0x8622 R#6
 C 0x8624 a R#6
+C 0x8631 guarda los registros
+C 0x8635 la letra a 4 bits en 0xE090
+C 0x8639 desde 0xE090...
+C 0x863C ...8 x 8 pixeles...
+C 0x863F ...a la pagina 1
+C 0x8641 HMMC
+C 0x8644 espera a que acabe
+C 0x8648 la letra siguiente, 8 bytes mas alla
 C 0x8654 un byte de la letra (8 pixeles de 1 bit)
 C 0x8659 4 pares de pixeles
 C 0x865B el color C...
@@ -274,6 +340,12 @@ C 0x8997 en (0x00, 0x80)...
 C 0x899A ...las letras de p05:89B4
 C 0x899D 0x2B letras en el color 0x0F
 C 0x89A3 la pagina activa, la 0
+C 0x8C3D la fila 8 del teclado...
+C 0x8C42 ...a nivel alto...
+C 0x8C43 ...el espacio y las flechas izquierda, abajo y derecha (0x99)
+C 0x8C46 la fila 7...
+C 0x8C4C ...el bit 2 (ESC)
+C 0x8C50 todo junto
 C 0x8CBD 0, 1, 2... 0xFF
 C 0x8CC4 dos veces
 C 0x8CC6 y 0x40 bytes de 0xE400 a cero
@@ -323,13 +395,33 @@ C 0x912F ...x 8: la columna de casillas
 C 0x9136 sumada a la posicion
 C 0x913D el pixel dentro del byte...
 C 0x9141 ...contado desde la izquierda: 7 - resto
+C 0x9228 el byte de color...
+C 0x922A ...que habia...
+C 0x922D ...con los bits de A...
+C 0x922E ...vuelve a la VRAM
+C 0x9232 la casilla siguiente
+C 0x9233 las B casillas
+C 0x9236 la fila siguiente (0x100)
+C 0x923B las filas
 C 0x92D7 la altura + 0x88...
 C 0x92DB ...a la tabla
 C 0x92DD la columna + 0x20
+C 0x92E3 el angulo...
+C 0x92E7 ...mas el desplazamiento
+C 0x92EB entre 0 y 359
+C 0x92F0 y se guarda
 C 0x9302 A con signo (0x80 = cero)
 C 0x9304 en negativo
 C 0x9307 se resta de DE
 C 0x9320 DE / 8 (sin signo)
+C 0x932F 270 grados o mas: el cuarto cuadrante
+C 0x9335 180 o mas: el tercero
+C 0x933B 90 o mas: el segundo
+C 0x9341 el primero: el angulo...
+C 0x9342 ...x 2 bytes...
+C 0x9343 ...en la tabla del seno de p05:94E8
+C 0x9349 el seno, en negativo (la pantalla crece hacia abajo)
+C 0x934D B = el segundo byte
 C 0x934F el tercer cuadrante (180-269): angulo - 180
 C 0x9355 x 2 bytes
 C 0x9357 en la tabla del seno de p05:94E8
@@ -417,6 +509,14 @@ C 0x965F el dia (0xE3BB)
 C 0x966B una cifra...
 C 0x966C ...a letra (+0x10)
 C 0x9671 B cifras
+C 0x96B0 en la ultima cifra no hay cursor
+C 0x96B2 la cifra del cursor...
+C 0x96B7 ...su posicion en la copia de nombres (tabla de p05:96D2)
+C 0x96C1 4 = el cursor
+C 0x96C3 o la cifra que hay
+C 0x96C6 el parpadeo...
+C 0x96C9 ...bit 2
+C 0x96CD apagado: la casilla vacia (0x0F)
 C 0x971C 16 cifras a 0xD4 (el guion)
 C 0x9722 0xE004 = 0
 C 0x9726 y sigue
@@ -872,8 +972,6 @@ C 0x8206 espejo_16: escribe 16 bytes de la VRAM dados la vuelta (bit a bit)
 C 0x8210 espejo_16: escribe 16 bytes de la VRAM dados la vuelta (bit a bit)
 C 0x8215 de_mas_a: DE = DE + A (gemela de p01:7256)
 C 0x8220 lee_vram_byte: lee el byte de la VRAM HL (128 KB)
-C 0x8224 espeja_byte: da la vuelta a los 8 bits de A
-C 0x8227 escribe_vram_byte: escribe A en la VRAM HL (128 KB)
 C 0x8248 esconde_sprites_msx2: 0xD8 en la tabla de sprites del MSX2 (0xF600)
 C 0x824B pantalla_apagada: R#1 sin el bit 6: pantalla apagada
 C 0x8257 vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
@@ -884,7 +982,6 @@ C 0x8283 lee el registro 8 del VDP (copia de la BIOS)
 C 0x828E lee el registro 8 del VDP (copia de la BIOS)
 C 0x829C el puerto de escritura del VDP (VDP.DW)
 C 0x82B7 vram_situa_128k: pone la direccion de 17 bits de la VRAM (R
-C 0x82CF pon_color: MSX2: el color B de la paleta con D y E (R#16 y puerto 2)
 C 0x8307 lee_estado_vdp: lee el registro de estado A del VDP (R
 C 0x830B espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 C 0x832F espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
@@ -901,7 +998,6 @@ C 0x8449 espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 C 0x844D el puerto de escritura del VDP (VDP.DW)
 C 0x848A lee_estado_vdp: lee el registro de estado A del VDP (R
 C 0x849A espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
-C 0x849D el puerto de escritura del VDP (VDP.DW)
 C 0x84DC espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 C 0x84E0 el puerto de escritura del VDP (VDP.DW)
 C 0x8529 lee_estado_vdp: lee el registro de estado A del VDP (R
@@ -914,10 +1010,6 @@ C 0x859A espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 C 0x85E5 guarda DPPAGE, la pagina que se ve
 C 0x8628 letra_1bit_a_4bit: pasa una letra de 1 bit a 4 bits (0xE100) y la escribe (gemela de p09:8EEB)
 C 0x862B siguiente_letra: D += 8; al pasar de fila, E += 8 (gemela de p09:903E)
-C 0x8635 letra_expande: expande los 8 bytes de la letra a 32 con el color C (0xE090)
-C 0x8639 apunta a el bufer de 0xE090 (las cifras de las fechas, o la letra expandida a 4 bits)
-C 0x8641 vdp_hmmc: copia rapida de la RAM (HL) a un rectangulo de VRAM (HMMC, 0xF0)
-C 0x8644 espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 C 0x8651 apunta a el bufer de 0xE090 (las cifras de las fechas, o la letra expandida a 4 bits)
 C 0x869B escribe_vram_otir: escribe BC bytes de HL en la VRAM DE con OTIR (gemela de p09:8DF6)
 C 0x86E3 vdp_hmmm: copia rapida de VRAM a VRAM (HMMM): origen HL, destino DE, tamano BC, paginas en A (gemela de p09:8E52)
@@ -1231,8 +1323,6 @@ C 0x92C4 bio_altura: la altura de un ciclo: el seno del angulo
 C 0x92CA bio_angulo_desplazado: el angulo mas el desplazamiento A
 C 0x92CE bio_seno: la altura del angulo (p05:932F) y la columna (0xE03F)
 C 0x92D3 bio_a_pantalla: pasa la altura a la pantalla (+0x88, +0x20)
-C 0x92E7 suma_con_signo: DE + A con signo
-C 0x92EB angulo_0_359: suma o resta 360 hasta que HL este entre 0 y 359
 C 0x92F8 resta_negativo: DE - (-A)
 C 0x92FE de_mas_a: DE = DE + A (gemela de p01:7256)
 C 0x9312 seno: el seno del angulo HL: el cuadrante (90, 180, 270) y la tabla
@@ -1287,10 +1377,7 @@ C 0x968D bio_parpadeo: cada 16 cuadros cambia el parpadeo (0xE00D)
 C 0x9690 bio_cursor: pinta el cursor parpadeando en su cifra (tabla p05:96D2)
 C 0x969B guarda la tecla pulsada
 C 0x96AD bio_cursor_al_final: Z si el cursor esta en la ultima cifra
-C 0x96B2 apunta a la cifra en la que esta el cursor
 C 0x96BB hl_mas_a: HL = HL + A (gemela de p01:7251)
-C 0x96C3 bio_cifra_del_cursor: B = la cifra que hay bajo el cursor
-C 0x96C6 lee el parpadeo del cursor
 C 0x96F2 apunta a el bufer de 0xE090 (las cifras de las fechas, o la letra expandida a 4 bits)
 C 0x96F5 lee la cifra en la que esta el cursor
 C 0x96F8 hl_mas_a: HL = HL + A (gemela de p01:7251)

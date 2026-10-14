@@ -22,6 +22,7 @@
 0x4089   # p02:993E call
 0x4095   # p02:9945 call
 0x409D   # a mano, p03:A5BE: ld ix,0x409D + call CALSLT
+0x40AE   # huerfana: la pasarela de 0x4095 con otro bloque (hl=0x488F, bc=8)
 0x40EF   # p02:997E jp
 0x40F2   # p02:8813 call
 0x4108   # p02:8800 call
@@ -34,6 +35,7 @@
 !reubica 0x4a9a 0x4b21 0xc000   # p00:4A95 ldir (hl=4A9A de=C000 bc=0087), salta p00:4A97 jp 0xC000
 !reubica 0x4b56 0x4b61 0xc800   # p00:4B43 ldir (hl=4B56 de=C800 bc=000B)
 !reubica 0x4b61 0x4b64 0xfeda   # p00:4B4E ldir (hl=4B61 de=FEDA bc=0003): H.STKE = jp 0xC800
+0x4D03   # huerfana: graba 0x1000 bytes de 0x8000 por BDOS (c=0x1A, jp p00:5152); gemela p02:9273
 0x5583   # cabecera AB: INIT
 0x563F   # p01:66D2 jp
 !reubica 0x578d 0x5813 0xe010   # p00:5788 ldir (hl=578D de=E010 bc=0086), salta p00:578A
@@ -45,8 +47,15 @@
 0x5AA2   # p00:5A2F entrada 0 de la tabla de 0x5A32 (despachador en 0x5A2F)
 0x5AD4   # p00:5AC8 entrada 1 de la tabla de 0x5ACB (despachador en 0x5AC8)
 0x5AE3   # p00:5AC8 entrada 0 de la tabla de 0x5ACB (despachador en 0x5AC8)
+0x5AF2   # huerfana: gestor de menu como p00:5AE3; gemela p02:8504
+0x5B09   # huerfana: gestor de menu como p00:5AE3; gemela p02:851B
 0x5B5B   # p00:5A2F entrada 1 de la tabla de 0x5A32 (despachador en 0x5A2F)
 0x5B84   # p00:5B7B entrada 0 de la tabla de 0x5B7E (despachador en 0x5B7B)
+0x5B92   # huerfana: gestor de menu como p00:5B84; gemela p02:85A4
+0x5BA8   # huerfana: gestor de menu como p00:5B92; gemela p02:85BA
+0x5BD3   # huerfana: gestor de menu; gemela p02:85E5
+0x5BF1   # p00:5BE8 entrada 1 de la tabla de 0x5BEB (despachador en 0x5BE8)
+0x5C00   # p00:5BE8 entrada 0 de la tabla de 0x5BEB (despachador en 0x5BE8)
 0x5C09   # p00:5A2F entrada 2 de la tabla de 0x5A32 (despachador en 0x5A2F)
 0x5C32   # p01:604C call
 0x5D9A   # p01:6247 call

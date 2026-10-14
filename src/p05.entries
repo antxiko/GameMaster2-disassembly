@@ -14,8 +14,15 @@
 0x8000   # p00:5E28 call
 !reubica 0x8030 0x8033 0xfd9f   # p05:801E ldir (hl=8030 de=FD9F bc=0003): H.TIMI = jp 0x8033
 0x8078   # p06:A289 call
+0x811C   # huerfana: rutina de la biblioteca grafica de p05 (call 0x819C, 0x812F)
+0x81F2   # huerfana: entrada alternativa (ld c,1 / jr p05:81BB)
+0x81F6   # huerfana: entrada alternativa (ld c,1 / jr p05:81C1)
 0x839C   # p06:A137 call
+0x85E5   # huerfana: guarda A en 0xFAF5 y calcula A*8, A*16
+0x8631   # huerfana: rutina de dibujo con la tabla de 0xE090
 0x86B9   # p06:A432 call
+0x86CB   # huerfana: recorre una lista de bytes que acaba en 0xFF. Las dos palabras 0x86CB de p08 (A293, A333) no cuentan: con p08 en 0xA000 esta p07 en 0x8000
+0x870E   # huerfana: un caracter de 8x8 por el comando del VDP (p05:8404); gemela p09:8F8F
 0x8B5D   # tabla p05:8B1B (MSX1), estado 0
 0x8B66   # tabla p05:8B29 (MSX2), estado 0
 0x8B6F   # tabla p05:8B1B (MSX1), estado 1
@@ -28,6 +35,8 @@
 0x8BDB   # tabla p05:8B1B (MSX1), estado 5
 0x8C02   # tabla p05:8B29 (MSX2), estado 5
 0x8C2B   # tabla p05:8B1B (MSX1), estado 6
+0x8DED   # huerfana: call 0x826E / call 0x8261 y 0xE008 = 1
+0x9484   # huerfana: aritmetica con p05:94AE y p05:94A2
 0x95CD   # p05:95BA entrada 2 de la tabla de 0x95BD (despachador en 0x95BA)
 0x95DC   # p05:95BA entrada 5 de la tabla de 0x95BD (despachador en 0x95BA)
 0x95EB   # p05:95BA entrada 0 de la tabla de 0x95BD (despachador en 0x95BA)

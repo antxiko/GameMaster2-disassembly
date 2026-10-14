@@ -256,9 +256,18 @@ L_A27E:
 	call 08078h		;a289
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa28c..0xa29c  (16 bytes)
-DATA_A28C:
-	defb 09ch,0a2h,0b7h,0a2h,0a5h,0a2h,0d3h,0a2h,0aeh,0a2h,0f7h,0a2h,014h,0a3h,01dh,0a3h	; a28c  ................
+; DATOS saltos_A28C: tabla de 8 palabras del despachador (call 0x408D en
+;   0xA289); lo leen el despachador (16 bytes)
+;   0xa28c..0xa29c  (16 bytes)
+DATA_saltos_A28C:
+	defb 09ch,0a2h	; a28c
+	defb 0b7h,0a2h	; a28e
+	defb 0a5h,0a2h	; a290
+	defb 0d3h,0a2h	; a292
+	defb 0aeh,0a2h	; a294
+	defb 0f7h,0a2h	; a296
+	defb 014h,0a3h	; a298
+	defb 01dh,0a3h	; a29a
 
 ; ======================================================================
 ; CODIGO 0xa29c..0xa3e7  (331 bytes)
@@ -521,8 +530,10 @@ L_A436:
 	ret			;a441
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa442..0xc000  (7102 bytes)
-DATA_A442:
+; DATOS relleno_ff: 7102 bytes a 0xFF hasta el final del banco: relleno; lo
+;   leen nadie (7102 bytes)
+;   0xa442..0xc000  (7102 bytes)
+DATA_relleno_ff:
 	defb 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh	; a442  ................
 	defb 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh	; a452  ................
 	defb 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh	; a462  ................

@@ -1113,7 +1113,7 @@ DATA_8D99:
 	defb 049h,051h,049h,022h,01ch	; 8de9
 
 ; ======================================================================
-; CODIGO 0x8dee..0x8f8f  (417 bytes)
+; CODIGO 0x8dee..0x8fed  (511 bytes)
 ; ======================================================================
 
 
@@ -1405,21 +1405,78 @@ L_8F7D:
 	pop hl			;8f8c
 	pop bc			;8f8d
 	ret			;8f8e
+L_8F8F:
+	push bc			;8f8f
+	push hl			;8f90
+	push de			;8f91
+	call L_8EA8		;8f92
+	ld bc,00808h		;8f95
+	ld a,048h		;8f98
+	call L_8FA1		;8f9a
+	pop de			;8f9d
+	pop hl			;8f9e
+	pop bc			;8f9f
+	ret			;8fa0
+L_8FA1:
+	ex af,af'			;8fa1
+	call L_8E28		;8fa2
+	push bc			;8fa5
+	ld a,(00007h)		;8fa6
+	inc a			;8fa9
+	ld c,a			;8faa
+	ld a,020h		;8fab
+	di			;8fad
+	out (c),a		;8fae
+	ld a,091h		;8fb0
+	out (c),a		;8fb2
+	inc c			;8fb4
+	inc c			;8fb5
+	out (c),h		;8fb6
+	xor a			;8fb8
+	out (c),a		;8fb9
+	out (c),l		;8fbb
+	ex af,af'			;8fbd
+	rlca			;8fbe
+	rlca			;8fbf
+	ld l,a			;8fc0
+	and 003h		;8fc1
+	out (c),a		;8fc3
+	out (c),d		;8fc5
+	xor a			;8fc7
+	out (c),a		;8fc8
+	out (c),e		;8fca
+	ld a,l			;8fcc
+	ld e,a			;8fcd
+	rlca			;8fce
+	rlca			;8fcf
+	and 003h		;8fd0
+	out (c),a		;8fd2
+	pop hl			;8fd4
+	out (c),h		;8fd5
+	xor a			;8fd7
+	out (c),a		;8fd8
+	out (c),l		;8fda
+	out (c),a		;8fdc
+	out (c),a		;8fde
+	out (c),a		;8fe0
+	ld a,e			;8fe2
+	rra			;8fe3
+	rra			;8fe4
+	and 00fh		;8fe5
+	or 090h		;8fe7
+	out (c),a		;8fe9
+	ei			;8feb
+	ret			;8fec
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0x8f8f..0x903e  (175 bytes)
-DATA_8F8F:
-	defb 0c5h,0e5h,0d5h,0cdh,0a8h,08eh,001h,008h,008h,03eh,048h,0cdh,0a1h,08fh,0d1h,0e1h	; 8f8f  .........>H.....
-	defb 0c1h,0c9h,008h,0cdh,028h,08eh,0c5h,03ah,007h,000h,03ch,04fh,03eh,020h,0f3h,0edh	; 8f9f  ....(..:..<O> ..
-	defb 079h,03eh,091h,0edh,079h,00ch,00ch,0edh,061h,0afh,0edh,079h,0edh,069h,008h,007h	; 8faf  y>..y...a..y.i..
-	defb 007h,06fh,0e6h,003h,0edh,079h,0edh,051h,0afh,0edh,079h,0edh,059h,07dh,05fh,007h	; 8fbf  .o...y.Q..y.Y}_.
-	defb 007h,0e6h,003h,0edh,079h,0e1h,0edh,061h,0afh,0edh,079h,0edh,069h,0edh,079h,0edh	; 8fcf  ....y..a..y.i.y.
-	defb 079h,0edh,079h,07bh,01fh,01fh,0e6h,00fh,0f6h,090h,0edh,079h,0fbh,0c9h,008h,0cdh	; 8fdf  y.y{.......y....
-	defb 028h,08eh,0c5h,03ah,007h,000h,03ch,04fh,03eh,024h,0f3h,0edh,079h,03eh,091h,0edh	; 8fef  (..:..<O>$..y>..
-	defb 079h,00ch,00ch,0edh,051h,0afh,0edh,079h,0edh,059h,008h,0edh,079h,0d1h,0edh,051h	; 8fff  y...Q..y.Y..y..Q
-	defb 0afh,0edh,079h,0edh,059h,0edh,079h,07eh,023h,0edh,079h,0afh,0edh,079h,03eh,0f0h	; 900f  ..y.Y.y~#.y..y>.
-	defb 0edh,079h,00dh,00dh,03eh,0ach,0edh,079h,03eh,091h,0edh,079h,00ch,00ch,03eh,002h	; 901f  .y..>..y>..y..>.
-	defb 0cdh,032h,08eh,01fh,0d0h,087h,087h,030h,0f5h,07eh,023h,0edh,079h,018h,0efh	; 902f  .2.....0.~#.y..
+; DATOS sin identificar  0x8fed..0x903e  (81 bytes)
+DATA_8FED:
+	defb 008h,0cdh,028h,08eh,0c5h,03ah,007h,000h,03ch,04fh,03eh,024h,0f3h,0edh,079h,03eh	; 8fed  ..(..:..<O>$..y>
+	defb 091h,0edh,079h,00ch,00ch,0edh,051h,0afh,0edh,079h,0edh,059h,008h,0edh,079h,0d1h	; 8ffd  ..y...Q..y.Y..y.
+	defb 0edh,051h,0afh,0edh,079h,0edh,059h,0edh,079h,07eh,023h,0edh,079h,0afh,0edh,079h	; 900d  .Q..y.Y.y~#.y..y
+	defb 03eh,0f0h,0edh,079h,00dh,00dh,03eh,0ach,0edh,079h,03eh,091h,0edh,079h,00ch,00ch	; 901d  >..y..>..y>..y..
+	defb 03eh,002h,0cdh,032h,08eh,01fh,0d0h,087h,087h,030h,0f5h,07eh,023h,0edh,079h,018h	; 902d  >..2.....0.~#.y.
+	defb 0efh	; 903d
 
 ; ======================================================================
 ; CODIGO 0x903e..0x9048  (10 bytes)

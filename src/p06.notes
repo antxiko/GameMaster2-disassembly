@@ -1,1 +1,8 @@
 # Notas del banco 06
+
+# --- BLOQUES QUE LEE EL CODIGO (seccion que reescribe tools/bloques.py; no editar a mano) ---
+D 0xA28C 0xA29C saltos_A28C  tabla de 8 palabras del despachador (call 0x408D en 0xA289); lo leen el despachador (16 bytes)
+F 0xA28C 2
+D 0xA442 0xC000 relleno_ff  7102 bytes a 0xFF hasta el final del banco: relleno; lo leen nadie (7102 bytes)
+F 0xA442 16
+# --- fin de los bloques de bloques.py ---

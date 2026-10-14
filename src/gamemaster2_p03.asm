@@ -10,63 +10,299 @@
 
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa000..0xa125  (293 bytes)
+; DATOS sin identificar  0xa000..0xa002  (2 bytes)
 DATA_A000:
-	defb 023h,0a0h,03ah,001h,0d3h,0feh,010h,028h,003h,021h,02bh,0a0h,078h,0cdh,0e6h,0a3h	; a000  #.:....(.!+.x...
-	defb 0ebh,0f1h,047h,087h,080h,021h,050h,0e0h,0cdh,0e6h,0a3h,0ebh,013h,001h,002h,000h	; a010  ..G..!P.........
-	defb 0edh,0b0h,0c9h,014h,000h,006h,000h,080h,000h,055h,000h,015h,000h,075h,000h,002h	; a020  .........U...u..
-	defb 030h,004h,030h,0cdh,022h,0a1h,03ah,01ah,0d3h,06fh,0d6h,005h,038h,006h,03ch,00eh	; a030  0.0.".:..o..8.<.
-	defb 005h,0cdh,01eh,0a2h,07dh,032h,052h,0e0h,0c9h,0cdh,022h,0a1h,03ah,01ah,0d3h,047h	; a040  ....}2R...".:..G
-	defb 03dh,032h,05ch,0e0h,0feh,008h,038h,002h,03eh,008h,021h,080h,0a0h,0cdh,0e6h,0a3h	; a050  =2\...8.>.!.....
-	defb 07eh,032h,05dh,0e0h,03eh,08ah,032h,056h,0e0h,078h,00eh,009h,0cdh,01eh,0a2h,07dh	; a060  ~2].>.2V.x.....}
-	defb 087h,021h,089h,0a0h,0cdh,0e6h,0a3h,011h,054h,0e0h,001h,002h,000h,0edh,0b0h,0c9h	; a070  .!......T.......
+	defb 023h,0a0h	; a000
+
+; ======================================================================
+; CODIGO 0xa002..0xa023  (33 bytes)
+; ======================================================================
+
+
+L_A002:
+	ld a,(0d301h)		;a002
+	cp 010h		;a005
+	jr z,L_A00C		;a007
+	ld hl,0a02bh		;a009
+L_A00C:
+	ld a,b			;a00c
+	call L_A3E6		;a00d
+	ex de,hl			;a010
+	pop af			;a011
+	ld b,a			;a012
+	add a,a			;a013
+	add a,b			;a014
+	ld hl,0e050h		;a015
+	call L_A3E6		;a018
+	ex de,hl			;a01b
+	inc de			;a01c
+	ld bc,00002h		;a01d
+	ldir		;a020
+	ret			;a022
+
+; ----------------------------------------------------------------------
+; DATOS sin identificar  0xa023..0xa033  (16 bytes)
+DATA_A023:
+	defb 014h,000h,006h,000h,080h,000h,055h,000h,015h,000h,075h,000h,002h,030h,004h,030h	; a023  ......U...u..0.0
+
+; ======================================================================
+; CODIGO 0xa033..0xa080  (77 bytes)
+; ======================================================================
+
+
+L_A033:
+	call L_A122		;a033
+	ld a,(0d31ah)		;a036
+	ld l,a			;a039
+	sub 005h		;a03a
+	jr c,L_A044		;a03c
+	inc a			;a03e
+	ld c,005h		;a03f
+	call L_A21E		;a041
+L_A044:
+	ld a,l			;a044
+	ld (0e052h),a		;a045
+	ret			;a048
+L_A049:
+	call L_A122		;a049
+	ld a,(0d31ah)		;a04c
+	ld b,a			;a04f
+	dec a			;a050
+	ld (0e05ch),a		;a051
+	cp 008h		;a054
+	jr c,L_A05A		;a056
+	ld a,008h		;a058
+L_A05A:
+	ld hl,0a080h		;a05a
+	call L_A3E6		;a05d
+	ld a,(hl)			;a060
+	ld (0e05dh),a		;a061
+	ld a,08ah		;a064
+	ld (0e056h),a		;a066
+	ld a,b			;a069
+	ld c,009h		;a06a
+	call L_A21E		;a06c
+	ld a,l			;a06f
+	add a,a			;a070
+	ld hl,0a089h		;a071
+	call L_A3E6		;a074
+	ld de,0e054h		;a077
+	ld bc,00002h		;a07a
+	ldir		;a07d
+	ret			;a07f
+
+; ----------------------------------------------------------------------
+; DATOS sin identificar  0xa080..0xa09b  (27 bytes)
+DATA_A080:
 	defb 077h,033h,0bbh,0eeh,011h,0bbh,0eeh,011h,011h,000h,000h,070h,00ch,020h,01ah,050h	; a080  w3.........p. .P
-	defb 028h,030h,036h,0e0h,043h,040h,052h,0c0h,061h,0d0h,06eh,0c3h,022h,0a1h,03ah,01ah	; a090  (06.C@R.a.n.".:.
-	defb 0d3h,03dh,0c3h,025h,0a1h,03ah,01ah,0d3h,00eh,003h,0cdh,01eh,0a2h,07dh,0c3h,025h	; a0a0  .=.%.:.......}.%
-	defb 0a1h,03ah,01ah,0d3h,00eh,00dh,0cdh,01eh,0a2h,07dh,03ch,032h,060h,0e0h,03dh,087h	; a0b0  .:.......}<2`.=.
-	defb 021h,0cfh,0a0h,0cdh,0e6h,0a3h,011h,05bh,0e0h,001h,002h,000h,0edh,0b0h,0c9h,006h	; a0c0  !......[........
-	defb 080h,006h,070h,006h,070h,006h,070h,006h,060h,006h,050h,006h,050h,006h,050h,006h	; a0d0  ..p.p.p.`.P.P.P.
-	defb 060h,006h,060h,006h,050h,006h,050h,000h,080h,03ah,01ah,0d3h,00eh,008h,0cdh,01eh	; a0e0  `.`.P.P..:......
-	defb 0a2h,065h,02eh,000h,022h,0b8h,0e1h,0c3h,022h,0a1h,0cdh,022h,0a1h,03ah,01ah,0d3h	; a0f0  .e.."..."..".:..
-	defb 0f5h,00eh,005h,0cdh,01eh,0a2h,07dh,032h,054h,0e0h,0f1h,0feh,006h,0d8h,047h,0d6h	; a100  ......}2T.....G.
-	defb 005h,0feh,004h,038h,002h,03eh,003h,032h,056h,0e0h,078h,03dh,0e6h,003h,032h,059h	; a110  ...8.>.2V.x=..2Y
-	defb 0e0h,0c9h,03ah,01bh,0d3h	; a120
+	defb 028h,030h,036h,0e0h,043h,040h,052h,0c0h,061h,0d0h,06eh	; a090  (06.C@R.a.n
 
 ; ======================================================================
-; CODIGO 0xa125..0xa12a  (5 bytes)
+; CODIGO 0xa09b..0xa0cf  (52 bytes)
 ; ======================================================================
 
 
+L_A09B:
+	jp L_A122		;a09b
+L_A09E:
+	ld a,(0d31ah)		;a09e
+	dec a			;a0a1
+	jp L_A125		;a0a2
+L_A0A5:
+	ld a,(0d31ah)		;a0a5
+	ld c,003h		;a0a8
+	call L_A21E		;a0aa
+	ld a,l			;a0ad
+	jp L_A125		;a0ae
+L_A0B1:
+	ld a,(0d31ah)		;a0b1
+	ld c,00dh		;a0b4
+	call L_A21E		;a0b6
+	ld a,l			;a0b9
+	inc a			;a0ba
+	ld (0e060h),a		;a0bb
+	dec a			;a0be
+	add a,a			;a0bf
+	ld hl,0a0cfh		;a0c0
+	call L_A3E6		;a0c3
+	ld de,0e05bh		;a0c6
+	ld bc,00002h		;a0c9
+	ldir		;a0cc
+	ret			;a0ce
+
+; ----------------------------------------------------------------------
+; DATOS sin identificar  0xa0cf..0xa0e9  (26 bytes)
+DATA_A0CF:
+	defb 006h,080h,006h,070h,006h,070h,006h,070h,006h,060h,006h,050h,006h,050h,006h,050h	; a0cf  ...p.p.p.`.P.P.P
+	defb 006h,060h,006h,060h,006h,050h,006h,050h,000h,080h	; a0df  .`.`.P.P..
+
+; ======================================================================
+; CODIGO 0xa0e9..0xa15b  (114 bytes)
+; ======================================================================
+
+
+L_A0E9:
+	ld a,(0d31ah)		;a0e9
+	ld c,008h		;a0ec
+	call L_A21E		;a0ee
+	ld h,l			;a0f1
+	ld l,000h		;a0f2
+	ld (0e1b8h),hl		;a0f4
+	jp L_A122		;a0f7
+L_A0FA:
+	call L_A122		;a0fa
+	ld a,(0d31ah)		;a0fd
+	push af			;a100
+	ld c,005h		;a101
+	call L_A21E		;a103
+	ld a,l			;a106
+	ld (0e054h),a		;a107
+	pop af			;a10a
+	cp 006h		;a10b
+	ret c			;a10d
+	ld b,a			;a10e
+	sub 005h		;a10f
+	cp 004h		;a111
+	jr c,L_A117		;a113
+	ld a,003h		;a115
+L_A117:
+	ld (0e056h),a		;a117
+	ld a,b			;a11a
+	dec a			;a11b
+	and 003h		;a11c
+	ld (0e059h),a		;a11e
+	ret			;a121
+L_A122:
+	ld a,(0d31bh)		;a122
 L_A125:
 	ld hl,(0d30ah)		;a125
 	ld (hl),a			;a128
 	ret			;a129
+L_A12A:
+	ld a,(0d31ah)		;a12a
+	ld c,00fh		;a12d
+	call L_A21E		;a12f
+	ld a,e			;a132
+	ld (0e058h),a		;a133
+	ld a,l			;a136
+	inc a			;a137
+	ld (0e055h),a		;a138
+	dec a			;a13b
+	ld (0e054h),a		;a13c
+	ld hl,0a15bh		;a13f
+	add a,a			;a142
+	call L_A3E6		;a143
+	ld a,(hl)			;a146
+	ld (0e056h),a		;a147
+	inc hl			;a14a
+	ld a,(hl)			;a14b
+	ld (0e057h),a		;a14c
+	ld a,(0e055h)		;a14f
+	cp 001h		;a152
+	jr z,L_A157		;a154
+	xor a			;a156
+L_A157:
+	ld (0e051h),a		;a157
+	ret			;a15a
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa12a..0xa21e  (244 bytes)
-DATA_A12A:
-	defb 03ah,01ah,0d3h,00eh,00fh,0cdh,01eh,0a2h,07bh,032h,058h,0e0h,07dh,03ch,032h,055h	; a12a  :.......{2X.}<2U
-	defb 0e0h,03dh,032h,054h,0e0h,021h,05bh,0a1h,087h,0cdh,0e6h,0a3h,07eh,032h,056h,0e0h	; a13a  .=2T.![.....~2V.
-	defb 023h,07eh,032h,057h,0e0h,03ah,055h,0e0h,0feh,001h,028h,001h,0afh,032h,051h,0e0h	; a14a  #~2W.:U...(..2Q.
-	defb 0c9h,008h,000h,004h,008h,004h,008h,001h,008h,008h,004h,008h,004h,004h,004h,004h	; a15a  ................
-	defb 008h,001h,008h,008h,004h,008h,004h,004h,004h,004h,008h,004h,008h,001h,002h,008h	; a16a  ................
-	defb 004h,03ah,01ah,0d3h,0feh,033h,038h,002h,0d6h,032h,03dh,032h,053h,0e0h,03ah,01bh	; a17a  .:...38..2=2S.:.
-	defb 0d3h,0feh,051h,038h,003h,0d6h,050h,027h,032h,052h,0e0h,0c9h,03ah,01ah,0d3h,00eh	; a18a  ..Q8..P'2R..:...
-	defb 008h,0cdh,01eh,0a2h,07dh,032h,003h,0e1h,021h,0c0h,000h,022h,0b8h,0e1h,0c9h,03ah	; a19a  ....}2..!.."...:
-	defb 01ah,0d3h,00eh,006h,0cdh,01eh,0a2h,07bh,032h,042h,0e0h,07dh,02ah,00ah,0d3h,077h	; a1aa  .......{2B.}*..w
-	defb 0cdh,03dh,0a2h,03eh,004h,032h,001h,0e0h,03eh,008h,032h,000h,0e0h,0c9h,0cdh,03dh	; a1ba  .=.>.2..>.2....=
-	defb 0a2h,02ah,004h,0d3h,036h,007h,0c9h,03ah,01ah,0d3h,03dh,02ah,00ah,0d3h,077h,0c9h	; a1ca  .*..6..:..=*..w.
-	defb 03ah,01ah,0d3h,03dh,032h,006h,0e2h,0cdh,022h,0a1h,03ah,01ah,0d3h,00eh,003h,0cdh	; a1da  :..=2...".:.....
-	defb 01eh,0a2h,07bh,0e6h,00fh,00fh,00fh,00fh,00fh,085h,032h,007h,0e2h,03eh,009h,02ah	; a1ea  ..{.......2..>.*
-	defb 004h,0d3h,077h,0c3h,03dh,0a2h,03ah,01ah,0d3h,00eh,008h,0cdh,01eh,0a2h,07dh,02ah	; a1fa  ..w.=.:.......}*
-	defb 00ah,0d3h,077h,07bh,0feh,002h,038h,002h,03eh,002h,032h,06ah,0e0h,03ah,01bh,0d3h	; a20a  ..w{..8.>.2j.:..
-	defb 032h,053h,0e0h,0c9h	; a21a
+; DATOS sin identificar  0xa15b..0xa17b  (32 bytes)
+DATA_A15B:
+	defb 008h,000h,004h,008h,004h,008h,001h,008h,008h,004h,008h,004h,004h,004h,004h,008h	; a15b  ................
+	defb 001h,008h,008h,004h,008h,004h,004h,004h,004h,008h,004h,008h,001h,002h,008h,004h	; a16b  ................
 
 ; ======================================================================
-; CODIGO 0xa21e..0xa23d  (31 bytes)
+; CODIGO 0xa17b..0xa2b1  (310 bytes)
 ; ======================================================================
 
 
+L_A17B:
+	ld a,(0d31ah)		;a17b
+	cp 033h		;a17e
+	jr c,L_A184		;a180
+	sub 032h		;a182
+L_A184:
+	dec a			;a184
+	ld (0e053h),a		;a185
+	ld a,(0d31bh)		;a188
+	cp 051h		;a18b
+	jr c,L_A192		;a18d
+	sub 050h		;a18f
+	daa			;a191
+L_A192:
+	ld (0e052h),a		;a192
+	ret			;a195
+L_A196:
+	ld a,(0d31ah)		;a196
+	ld c,008h		;a199
+	call L_A21E		;a19b
+	ld a,l			;a19e
+	ld (0e103h),a		;a19f
+	ld hl,000c0h		;a1a2
+	ld (0e1b8h),hl		;a1a5
+	ret			;a1a8
+L_A1A9:
+	ld a,(0d31ah)		;a1a9
+	ld c,006h		;a1ac
+	call L_A21E		;a1ae
+	ld a,e			;a1b1
+	ld (0e042h),a		;a1b2
+	ld a,l			;a1b5
+	ld hl,(0d30ah)		;a1b6
+	ld (hl),a			;a1b9
+	call L_A23D		;a1ba
+	ld a,004h		;a1bd
+	ld (0e001h),a		;a1bf
+	ld a,008h		;a1c2
+	ld (0e000h),a		;a1c4
+	ret			;a1c7
+L_A1C8:
+	call L_A23D		;a1c8
+	ld hl,(0d304h)		;a1cb
+	ld (hl),007h		;a1ce
+	ret			;a1d0
+L_A1D1:
+	ld a,(0d31ah)		;a1d1
+	dec a			;a1d4
+	ld hl,(0d30ah)		;a1d5
+	ld (hl),a			;a1d8
+	ret			;a1d9
+L_A1DA:
+	ld a,(0d31ah)		;a1da
+	dec a			;a1dd
+	ld (0e206h),a		;a1de
+	call L_A122		;a1e1
+	ld a,(0d31ah)		;a1e4
+	ld c,003h		;a1e7
+	call L_A21E		;a1e9
+	ld a,e			;a1ec
+	and 00fh		;a1ed
+	rrca			;a1ef
+	rrca			;a1f0
+	rrca			;a1f1
+	rrca			;a1f2
+	add a,l			;a1f3
+	ld (0e207h),a		;a1f4
+	ld a,009h		;a1f7
+	ld hl,(0d304h)		;a1f9
+	ld (hl),a			;a1fc
+	jp L_A23D		;a1fd
+L_A200:
+	ld a,(0d31ah)		;a200
+	ld c,008h		;a203
+	call L_A21E		;a205
+	ld a,l			;a208
+	ld hl,(0d30ah)		;a209
+	ld (hl),a			;a20c
+	ld a,e			;a20d
+	cp 002h		;a20e
+	jr c,L_A214		;a210
+	ld a,002h		;a212
+L_A214:
+	ld (0e06ah),a		;a214
+	ld a,(0d31bh)		;a217
+	ld (0e053h),a		;a21a
+	ret			;a21d
 L_A21E:
 	dec a			;a21e
 	ld e,a			;a21f
@@ -91,18 +327,14 @@ L_A238:
 	djnz L_A229		;a239
 	exx			;a23b
 	ret			;a23c
-
-; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa23d..0xa24f  (18 bytes)
-DATA_A23D:
-	defb 021h,000h,038h,0afh,001h,000h,003h,0cdh,056h,000h,021h,000h,03bh,03eh,0d0h,0c3h	; a23d  !.8.....V.!..>..
-	defb 04dh,000h	; a24d
-
-; ======================================================================
-; CODIGO 0xa24f..0xa2b1  (98 bytes)
-; ======================================================================
-
-
+L_A23D:
+	ld hl,03800h		;a23d
+	xor a			;a240
+	ld bc,00300h		;a241
+	call 00056h		;a244   ; BIOS FILVRM - Fills VRAM with value
+	ld hl,03b00h		;a247
+	ld a,0d0h		;a24a
+	jp 0004dh		;a24c   ; BIOS WRTVRM - Writes data in VRAM
 L_A24F:
 	call L_A2DE		;a24f
 	call L_A263		;a252
@@ -285,7 +517,7 @@ DATA_A392:
 	defb 008h,0d3h,00ch,0d3h,00eh,0d3h,010h,0d3h,006h,0d3h,014h,0d3h	; a392  ............
 
 ; ======================================================================
-; CODIGO 0xa39e..0xa3eb  (77 bytes)
+; CODIGO 0xa39e..0xa423  (133 bytes)
 ; ======================================================================
 
 
@@ -339,20 +571,100 @@ L_A3E6:
 	ret nc			;a3e8
 	inc h			;a3e9
 	ret			;a3ea
+L_A3EB:
+	add a,e			;a3eb
+	ld e,a			;a3ec
+	ret nc			;a3ed
+	inc d			;a3ee
+	ret			;a3ef
+L_A3F0:
+	push bc			;a3f0
+	push hl			;a3f1
+	ld b,a			;a3f2
+	ld a,(00007h)		;a3f3
+	inc a			;a3f6
+	ld c,a			;a3f7
+	di			;a3f8
+	out (c),b		;a3f9
+	ld a,090h		;a3fb
+	out (c),a		;a3fd
+	inc c			;a3ff
+	out (c),d		;a400
+	push af			;a402
+	pop af			;a403
+	out (c),e		;a404
+	pop hl			;a406
+	pop bc			;a407
+	ei			;a408
+	ret			;a409
+L_A40A:
+	ld a,(0002dh)		;a40a
+	and a			;a40d
+	ret z			;a40e
+	ld hl,0a423h		;a40f
+	ld b,010h		;a412
+	ld a,000h		;a414
+L_A416:
+	ld d,(hl)			;a416
+	inc hl			;a417
+	ld e,(hl)			;a418
+	inc hl			;a419
+	push af			;a41a
+	call L_A3F0		;a41b
+	pop af			;a41e
+	inc a			;a41f
+	djnz L_A416		;a420
+	ret			;a422
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa3eb..0xa47f  (148 bytes)
-DATA_A3EB:
-	defb 083h,05fh,0d0h,014h,0c9h,0c5h,0e5h,047h,03ah,007h,000h,03ch,04fh,0f3h,0edh,041h	; a3eb  ._.....G:..<O..A
-	defb 03eh,090h,0edh,079h,00ch,0edh,051h,0f5h,0f1h,0edh,059h,0e1h,0c1h,0fbh,0c9h,03ah	; a3fb  >..y..Q...Y....:
-	defb 02dh,000h,0a7h,0c8h,021h,023h,0a4h,006h,010h,03eh,000h,056h,023h,05eh,023h,0f5h	; a40b  -...!#...>.V#^#.
-	defb 0cdh,0f0h,0a3h,0f1h,03ch,010h,0f4h,0c9h,000h,000h,000h,000h,011h,006h,033h,007h	; a41b  ....<.........3.
-	defb 017h,001h,027h,003h,051h,001h,027h,006h,071h,001h,073h,003h,061h,006h,064h,006h	; a42b  ..'.Q.'.q.s.a.d.
-	defb 011h,004h,065h,002h,055h,005h,077h,007h,07eh,023h,03ch,0c8h,03dh,056h,023h,05eh	; a43b  ..e.U.w.~#<.=V#^
-	defb 023h,0cdh,0f0h,0a3h,018h,0f2h,021h,077h,0a4h,001h,000h,008h,0c5h,046h,0cdh,047h	; a44b  #.....!w.....F.G
-	defb 000h,0c1h,023h,00ch,010h,0f6h,03ah,02dh,000h,0a7h,0c8h,001h,017h,000h,0cdh,047h	; a45b  ..#...:-.......G
-	defb 000h,03ah,0e8h,0ffh,0e6h,07fh,047h,00eh,009h,0c3h,047h,000h,002h,0e2h,00eh,07fh	; a46b  .:....G...G.....
-	defb 007h,076h,003h,0e1h	; a47b
+; DATOS sin identificar  0xa423..0xa443  (32 bytes)
+DATA_A423:
+	defb 000h,000h,000h,000h,011h,006h,033h,007h,017h,001h,027h,003h,051h,001h,027h,006h	; a423  ......3...'.Q.'.
+	defb 071h,001h,073h,003h,061h,006h,064h,006h,011h,004h,065h,002h,055h,005h,077h,007h	; a433  q.s.a.d...e.U.w.
+
+; ======================================================================
+; CODIGO 0xa443..0xa477  (52 bytes)
+; ======================================================================
+
+
+L_A443:
+	ld a,(hl)			;a443
+	inc hl			;a444
+	inc a			;a445
+	ret z			;a446
+	dec a			;a447
+	ld d,(hl)			;a448
+	inc hl			;a449
+	ld e,(hl)			;a44a
+	inc hl			;a44b
+	call L_A3F0		;a44c
+	jr L_A443		;a44f
+L_A451:
+	ld hl,0a477h		;a451
+	ld bc,00800h		;a454
+L_A457:
+	push bc			;a457
+	ld b,(hl)			;a458
+	call 00047h		;a459   ; BIOS WRTVDP - Writes data in the VDP-register
+	pop bc			;a45c
+	inc hl			;a45d
+	inc c			;a45e
+	djnz L_A457		;a45f
+	ld a,(0002dh)		;a461
+	and a			;a464
+	ret z			;a465
+	ld bc,00017h		;a466
+	call 00047h		;a469   ; BIOS WRTVDP - Writes data in the VDP-register
+	ld a,(0ffe8h)		;a46c
+	and 07fh		;a46f
+	ld b,a			;a471
+	ld c,009h		;a472
+	jp 00047h		;a474   ; BIOS WRTVDP - Writes data in the VDP-register
+
+; ----------------------------------------------------------------------
+; DATOS sin identificar  0xa477..0xa47f  (8 bytes)
+DATA_A477:
+	defb 002h,0e2h,00eh,07fh,007h,076h,003h,0e1h	; a477  .....v..
 
 ; ======================================================================
 ; CODIGO 0xa47f..0xa4b8  (57 bytes)
@@ -485,7 +797,7 @@ DATA_A51C:
 	defb 00eh,000h,018h,006h	; a51c
 
 ; ======================================================================
-; CODIGO 0xa520..0xa54b  (43 bytes)
+; CODIGO 0xa520..0xa64b  (299 bytes)
 ; ======================================================================
 
 
@@ -524,19 +836,38 @@ L_A53B:
 	pop bc			;a547
 	djnz L_A53B		;a548
 	ret			;a54a
-
-; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa54b..0xa56e  (35 bytes)
-DATA_A54B:
-	defb 006h,010h,011h,000h,000h,029h,07bh,08fh,027h,05fh,07ah,08fh,027h,057h,010h,0f5h	; a54b  .....){.'_z.'W..
-	defb 0c9h,04fh,0e6h,0f0h,00fh,00fh,00fh,00fh,087h,047h,087h,087h,080h,047h,079h,0e6h	; a55b  .O.......G...Gy.
-	defb 00fh,080h,0c9h	; a56b
-
-; ======================================================================
-; CODIGO 0xa56e..0xa64b  (221 bytes)
-; ======================================================================
-
-
+L_A54B:
+	ld b,010h		;a54b
+	ld de,00000h		;a54d
+L_A550:
+	add hl,hl			;a550
+	ld a,e			;a551
+	adc a,a			;a552
+	daa			;a553
+	ld e,a			;a554
+	ld a,d			;a555
+	adc a,a			;a556
+	daa			;a557
+	ld d,a			;a558
+	djnz L_A550		;a559
+	ret			;a55b
+L_A55C:
+	ld c,a			;a55c
+	and 0f0h		;a55d
+	rrca			;a55f
+	rrca			;a560
+	rrca			;a561
+	rrca			;a562
+	add a,a			;a563
+	ld b,a			;a564
+	add a,a			;a565
+	add a,a			;a566
+	add a,b			;a567
+	ld b,a			;a568
+	ld a,c			;a569
+	and 00fh		;a56a
+	add a,b			;a56c
+	ret			;a56d
 L_A56E:
 	ld bc,00613h		;a56e
 	ld hl,(0d16eh)		;a571
@@ -1066,9 +1397,14 @@ L_A92B:
 	call L_A510		;a93e
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa941..0xa949  (8 bytes)
-DATA_A941:
-	defb 053h,0a9h,059h,0a9h,05fh,0a9h,049h,0a9h	; a941  S.Y._.I.
+; DATOS saltos_A941: tabla de 4 palabras del despachador (call 0x408D en
+;   0xA93E); lo leen el despachador (8 bytes)
+;   0xa941..0xa949  (8 bytes)
+DATA_saltos_A941:
+	defb 053h,0a9h	; a941
+	defb 059h,0a9h	; a943
+	defb 05fh,0a9h	; a945
+	defb 049h,0a9h	; a947
 
 ; ======================================================================
 ; CODIGO 0xa949..0xa98c  (67 bytes)
@@ -1111,8 +1447,10 @@ L_A968:
 	ret			;a98b
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0xa98c..0xc000  (5748 bytes)
-DATA_A98C:
+; DATOS relleno_ff: 5748 bytes a 0xFF hasta el final del banco: relleno; lo
+;   leen nadie (5748 bytes)
+;   0xa98c..0xc000  (5748 bytes)
+DATA_relleno_ff:
 	defb 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh	; a98c  ................
 	defb 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh	; a99c  ................
 	defb 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh	; a9ac  ................

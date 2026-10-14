@@ -103,9 +103,18 @@ L_8088:
 	call L_802E		;8091
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0x8094..0x80a4  (16 bytes)
-DATA_8094:
-	defb 0a4h,080h,0f1h,080h,033h,081h,0c6h,081h,0e4h,081h,039h,082h,039h,083h,067h,083h	; 8094  ....3.....9.9.g.
+; DATOS saltos_8094: tabla de 8 palabras del despachador (call 0x408D en
+;   0x8091); lo leen el despachador (16 bytes)
+;   0x8094..0x80a4  (16 bytes)
+DATA_saltos_8094:
+	defb 0a4h,080h	; 8094
+	defb 0f1h,080h	; 8096
+	defb 033h,081h	; 8098
+	defb 0c6h,081h	; 809a
+	defb 0e4h,081h	; 809c
+	defb 039h,082h	; 809e
+	defb 039h,083h	; 80a0
+	defb 067h,083h	; 80a2
 
 ; ======================================================================
 ; CODIGO 0x80a4..0x8139  (149 bytes)
@@ -190,9 +199,14 @@ L_8133:
 	call L_802E		;8136
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0x8139..0x8141  (8 bytes)
-DATA_8139:
-	defb 041h,081h,09ah,081h,0a2h,081h,0b2h,081h	; 8139  A.......
+; DATOS saltos_8139: tabla de 4 palabras del despachador (call 0x408D en
+;   0x8136); lo leen el despachador (8 bytes)
+;   0x8139..0x8141  (8 bytes)
+DATA_saltos_8139:
+	defb 041h,081h	; 8139
+	defb 09ah,081h	; 813b
+	defb 0a2h,081h	; 813d
+	defb 0b2h,081h	; 813f
 
 ; ======================================================================
 ; CODIGO 0x8141..0x8176  (53 bytes)
@@ -1265,9 +1279,13 @@ L_8AE1:
 	call L_802E		;8aeb
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0x8aee..0x8af4  (6 bytes)
-DATA_8AEE:
-	defb 0f4h,08ah,00eh,08bh,02bh,08bh	; 8aee
+; DATOS saltos_8AEE: tabla de 3 palabras del despachador (call 0x408D en
+;   0x8AEB); lo leen el despachador (6 bytes)
+;   0x8aee..0x8af4  (6 bytes)
+DATA_saltos_8AEE:
+	defb 0f4h,08ah	; 8aee
+	defb 00eh,08bh	; 8af0
+	defb 02bh,08bh	; 8af2
 
 ; ======================================================================
 ; CODIGO 0x8af4..0x8b65  (113 bytes)
@@ -1342,9 +1360,13 @@ L_8B58:
 	call L_802E		;8b62
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0x8b65..0x8b6b  (6 bytes)
-DATA_8B65:
-	defb 06bh,08bh,085h,08bh,02bh,08bh	; 8b65
+; DATOS saltos_8B65: tabla de 3 palabras del despachador (call 0x408D en
+;   0x8B62); lo leen el despachador (6 bytes)
+;   0x8b65..0x8b6b  (6 bytes)
+DATA_saltos_8B65:
+	defb 06bh,08bh	; 8b65
+	defb 085h,08bh	; 8b67
+	defb 02bh,08bh	; 8b69
 
 ; ======================================================================
 ; CODIGO 0x8b6b..0x8bcf  (100 bytes)
@@ -1823,10 +1845,26 @@ L_8E44:
 	call L_802E		;8e47
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0x8e4a..0x8e6a  (32 bytes)
-DATA_8E4A:
-	defb 06ah,08eh,07dh,08eh,07dh,08eh,07dh,08eh,0ach,08eh,0bfh,08eh,0bfh,08eh,0bfh,08eh	; 8e4a  j.}.}.}.........
-	defb 0eeh,08eh,001h,08fh,001h,08fh,001h,08fh,030h,08fh,043h,08fh,043h,08fh,043h,08fh	; 8e5a  ........0.C.C.C.
+; DATOS saltos_8E4A: tabla de 16 palabras del despachador (call 0x408D en
+;   0x8E47); lo leen el despachador (32 bytes)
+;   0x8e4a..0x8e6a  (32 bytes)
+DATA_saltos_8E4A:
+	defb 06ah,08eh	; 8e4a
+	defb 07dh,08eh	; 8e4c
+	defb 07dh,08eh	; 8e4e
+	defb 07dh,08eh	; 8e50
+	defb 0ach,08eh	; 8e52
+	defb 0bfh,08eh	; 8e54
+	defb 0bfh,08eh	; 8e56
+	defb 0bfh,08eh	; 8e58
+	defb 0eeh,08eh	; 8e5a
+	defb 001h,08fh	; 8e5c
+	defb 001h,08fh	; 8e5e
+	defb 001h,08fh	; 8e60
+	defb 030h,08fh	; 8e62
+	defb 043h,08fh	; 8e64
+	defb 043h,08fh	; 8e66
+	defb 043h,08fh	; 8e68
 
 ; ======================================================================
 ; CODIGO 0x8e6a..0x9024  (442 bytes)

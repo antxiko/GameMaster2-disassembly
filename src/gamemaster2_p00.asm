@@ -16,7 +16,7 @@ DATA_4000:
 	defb 059h,05ah,000h,000h,000h,000h,000h,000h,0c3h,0e5h,056h,000h,000h,000h,000h,000h	; 4010  YZ........V.....
 
 ; ======================================================================
-; CODIGO 0x4020..0x40ae  (142 bytes)
+; CODIGO 0x4020..0x4123  (259 bytes)
 ; ======================================================================
 
 
@@ -57,23 +57,23 @@ L_4058:
 L_4061:
 	call L_40D6		;4061
 	call 080d2h		;4064
-	jr $+126		;4067
+	jr L_40E5		;4067
 L_4069:
 	call L_40D6		;4069
 	call 08117h		;406c
-	jr $+118		;406f
+	jr L_40E5		;406f
 L_4071:
 	call L_40D6		;4071
 	call 08133h		;4074
-	jr $+110		;4077
+	jr L_40E5		;4077
 L_4079:
 	call L_40D6		;4079
 	call 08134h		;407c
-	jr $+102		;407f
+	jr L_40E5		;407f
 L_4081:
 	call L_40D6		;4081
 	call 082cah		;4084
-	jr $+94		;4087
+	jr L_40E5		;4087
 L_4089:
 	call L_40D6		;4089
 	call 0846dh		;408c
@@ -84,27 +84,33 @@ L_4089:
 L_4095:
 	call L_40D6		;4095
 	call 08191h		;4098
-	jr $+74		;409b
+	jr L_40E5		;409b
 L_409D:
 	call L_40D6		;409d
 	ld hl,0483fh		;40a0
 	ld de,03180h		;40a3
 	ld bc,00158h		;40a6
 	call 0005ch		;40a9   ; BIOS LDIRVM - Block transfers to VRAM from memory
-	jr $+57		;40ac
-
-; ----------------------------------------------------------------------
-; DATOS sin identificar  0x40ae..0x40d6  (40 bytes)
-DATA_40AE:
-	defb 0cdh,0d6h,040h,021h,08fh,048h,001h,008h,000h,03ah,012h,0f1h,0b7h,020h,011h,03ah	; 40ae  ..@!.H...:... .:
-	defb 0e6h,0f2h,0a7h,011h,0d0h,021h,028h,003h,011h,080h,020h,0cdh,00dh,073h,018h,017h	; 40be  .....!(... ..s..
-	defb 011h,0d0h,031h,0cdh,05ch,000h,018h,00fh	; 40ce  ..1.\...
-
-; ======================================================================
-; CODIGO 0x40d6..0x4123  (77 bytes)
-; ======================================================================
-
-
+	jr L_40E5		;40ac
+L_40AE:
+	call L_40D6		;40ae
+	ld hl,0488fh		;40b1
+	ld bc,00008h		;40b4
+	ld a,(0f112h)		;40b7
+	or a			;40ba
+	jr nz,L_40CE		;40bb
+	ld a,(0f2e6h)		;40bd
+	and a			;40c0
+	ld de,021d0h		;40c1
+	jr z,L_40C9		;40c4
+	ld de,02080h		;40c6
+L_40C9:
+	call 0730dh		;40c9
+	jr L_40E5		;40cc
+L_40CE:
+	ld de,031d0h		;40ce
+	call 0005ch		;40d1   ; BIOS LDIRVM - Block transfers to VRAM from memory
+	jr L_40E5		;40d4
 L_40D6:
 	ld a,001h		;40d6
 	ld (06000h),a		;40d8
@@ -912,18 +918,32 @@ L_4BA0:
 	jp L_4FF3		;4bc7
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0x4bca..0x4bfc  (50 bytes)
+; DATOS sin identificar  0x4bca..0x4bcd  (3 bytes)
 DATA_4BCA:
-	defb 056h,052h,04dh,0edh,073h,04ah,098h,0cdh,0a0h,04fh,0cdh,022h,051h,0cdh,0d6h,050h	; 4bca  VRM.sJ...O."Q..P
-	defb 0cdh,0adh,069h,0cdh,0a1h,04ch,0cdh,032h,051h,0c3h,0f3h,04fh,0edh,073h,04ah,098h	; 4bda  ..i..L.2Q..O.sJ.
-	defb 0cdh,0a0h,04fh,0cdh,022h,051h,0cdh,0d6h,050h,0cdh,0afh,04ch,0cdh,032h,051h,0c3h	; 4bea  ..O."Q..P..L.2Q.
-	defb 0f3h,04fh	; 4bfa
+	defb 056h,052h,04dh	; 4bca
 
 ; ======================================================================
-; CODIGO 0x4bfc..0x4c4f  (83 bytes)
+; CODIGO 0x4bcd..0x4d11  (324 bytes)
 ; ======================================================================
 
 
+L_4BCD:
+	ld (0984ah),sp		;4bcd
+	call L_4FA0		;4bd1
+	call L_5122		;4bd4
+	call L_50D6		;4bd7
+	call 069adh		;4bda
+	call L_4CA1		;4bdd
+	call L_5132		;4be0
+	jp L_4FF3		;4be3
+L_4BE6:
+	ld (0984ah),sp		;4be6
+	call L_4FA0		;4bea
+	call L_5122		;4bed
+	call L_50D6		;4bf0
+	call L_4CAF		;4bf3
+	call L_5132		;4bf6
+	jp L_4FF3		;4bf9
 L_4BFC:
 	ld (0984ah),sp		;4bfc
 	call L_4FA0		;4c00
@@ -954,19 +974,21 @@ L_4C37:
 	call L_4FF3		;4c4a
 	scf			;4c4d
 	ret			;4c4e
-
-; ----------------------------------------------------------------------
-; DATOS sin identificar  0x4c4f..0x4c78  (41 bytes)
-DATA_4C4F:
-	defb 0edh,073h,04ah,098h,0cdh,0a0h,04fh,0cdh,012h,051h,0cdh,0d6h,050h,0cdh,0e0h,04ch	; 4c4f  .sJ...O..Q..P..L
-	defb 0cdh,00bh,069h,0c3h,0f3h,04fh,0edh,073h,04ah,098h,0cdh,0a0h,04fh,0cdh,012h,051h	; 4c5f  ..i..O.sJ...O..Q
-	defb 0cdh,0d6h,050h,0cdh,0eeh,04ch,0c3h,0f3h,04fh	; 4c6f  ..P..L..O
-
-; ======================================================================
-; CODIGO 0x4c78..0x4ca1  (41 bytes)
-; ======================================================================
-
-
+L_4C4F:
+	ld (0984ah),sp		;4c4f
+	call L_4FA0		;4c53
+	call L_5112		;4c56
+	call L_50D6		;4c59
+	call L_4CE0		;4c5c
+	call 0690bh		;4c5f
+	jp L_4FF3		;4c62
+L_4C65:
+	ld (0984ah),sp		;4c65
+	call L_4FA0		;4c69
+	call L_5112		;4c6c
+	call L_50D6		;4c6f
+	call L_4CEE		;4c72
+	jp L_4FF3		;4c75
 L_4C78:
 	ld hl,0ac80h		;4c78
 	ld b,067h		;4c7b
@@ -991,19 +1013,22 @@ L_4C8E:
 	pop hl			;4c9c
 	call L_5152		;4c9d
 	ret			;4ca0
-
-; ----------------------------------------------------------------------
-; DATOS sin identificar  0x4ca1..0x4cc4  (35 bytes)
-DATA_4CA1:
-	defb 011h,039h,092h,00eh,01ah,0cdh,07dh,0f3h,021h,095h,000h,0c3h,052h,051h,02ah,00ch	; 4ca1  .9....}.!...RQ*.
-	defb 0dfh,001h,080h,013h,0a7h,0edh,042h,0ebh,00eh,01ah,0cdh,07dh,0f3h,021h,003h,000h	; 4cb1  ......B....}.!..
-	defb 0c3h,052h,051h	; 4cc1
-
-; ======================================================================
-; CODIGO 0x4cc4..0x4ce0  (28 bytes)
-; ======================================================================
-
-
+L_4CA1:
+	ld de,09239h		;4ca1
+	ld c,01ah		;4ca4
+	call 0f37dh		;4ca6
+	ld hl,00095h		;4ca9
+	jp L_5152		;4cac
+L_4CAF:
+	ld hl,(0df0ch)		;4caf
+	ld bc,01380h		;4cb2
+	and a			;4cb5
+	sbc hl,bc		;4cb6
+	ex de,hl			;4cb8
+	ld c,01ah		;4cb9
+	call 0f37dh		;4cbb
+	ld hl,00003h		;4cbe
+	jp L_5152		;4cc1
 L_4CC4:
 	ld de,0ac80h		;4cc4
 	ld b,067h		;4cc7
@@ -1021,14 +1046,33 @@ L_4CC9:
 	pop bc			;4cdc
 	djnz L_4CC9		;4cdd
 	ret			;4cdf
+L_4CE0:
+	ld de,09239h		;4ce0
+	ld c,01ah		;4ce3
+	call 0f37dh		;4ce5
+	ld hl,00095h		;4ce8
+	jp L_5142		;4ceb
+L_4CEE:
+	ld hl,(0df0ch)		;4cee
+	ld bc,01380h		;4cf1
+	and a			;4cf4
+	sbc hl,bc		;4cf5
+	ex de,hl			;4cf7
+	ld c,01ah		;4cf8
+	call 0f37dh		;4cfa
+	ld hl,00003h		;4cfd
+	jp L_5142		;4d00
+L_4D03:
+	ld de,08000h		;4d03
+	ld c,01ah		;4d06
+	call 0f37dh		;4d08
+	ld hl,01000h		;4d0b
+	jp L_5152		;4d0e
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0x4ce0..0x4d1f  (63 bytes)
-DATA_4CE0:
-	defb 011h,039h,092h,00eh,01ah,0cdh,07dh,0f3h,021h,095h,000h,0c3h,042h,051h,02ah,00ch	; 4ce0  .9....}.!...BQ*.
-	defb 0dfh,001h,080h,013h,0a7h,0edh,042h,0ebh,00eh,01ah,0cdh,07dh,0f3h,021h,003h,000h	; 4cf0  ......B....}.!..
-	defb 0c3h,042h,051h,011h,000h,080h,00eh,01ah,0cdh,07dh,0f3h,021h,000h,010h,0c3h,052h	; 4d00  .BQ......}.!...R
-	defb 051h,011h,000h,080h,00eh,01ah,0cdh,07dh,0f3h,021h,000h,010h,0c3h,042h,051h	; 4d10  Q......}.!...BQ
+; DATOS sin identificar  0x4d11..0x4d1f  (14 bytes)
+DATA_4D11:
+	defb 011h,000h,080h,00eh,01ah,0cdh,07dh,0f3h,021h,000h,010h,0c3h,042h,051h	; 4d11  ......}.!...BQ
 
 ; ======================================================================
 ; CODIGO 0x4d1f..0x5095  (886 bytes)
@@ -2750,9 +2794,18 @@ L_5A15:
 	call 0737bh		;5a2f
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0x5a32..0x5a3b  (9 bytes)
-DATA_5A32:
-	defb 0a2h,05ah,05bh,05bh,009h,05ch,010h,020h,000h	; 5a32  .Z[[.\. .
+; DATOS saltos_5A32: tabla de 3 palabras del despachador (call 0x408D en
+;   0x5A2F); lo leen el despachador (6 bytes)
+;   0x5a32..0x5a38  (6 bytes)
+DATA_saltos_5A32:
+	defb 0a2h,05ah	; 5a32
+	defb 05bh,05bh	; 5a34
+	defb 009h,05ch	; 5a36
+
+; ----------------------------------------------------------------------
+; DATOS sin identificar  0x5a38..0x5a3b  (3 bytes)
+DATA_5A38:
+	defb 010h,020h,000h	; 5a38
 
 ; ======================================================================
 ; CODIGO 0x5a3b..0x5acb  (144 bytes)
@@ -2841,12 +2894,21 @@ L_5AA2:
 	call 0737bh		;5ac8
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0x5acb..0x5ad4  (9 bytes)
-DATA_5ACB:
-	defb 0e3h,05ah,0d4h,05ah,015h,05ah,011h,012h,000h	; 5acb  .Z.Z.Z...
+; DATOS saltos_5ACB: tabla de 3 palabras del despachador (call 0x408D en
+;   0x5AC8); lo leen el despachador (6 bytes)
+;   0x5acb..0x5ad1  (6 bytes)
+DATA_saltos_5ACB:
+	defb 0e3h,05ah	; 5acb
+	defb 0d4h,05ah	; 5acd
+	defb 015h,05ah	; 5acf
+
+; ----------------------------------------------------------------------
+; DATOS sin identificar  0x5ad1..0x5ad4  (3 bytes)
+DATA_5AD1:
+	defb 011h,012h,000h	; 5ad1
 
 ; ======================================================================
-; CODIGO 0x5ad4..0x5af2  (30 bytes)
+; CODIGO 0x5ad4..0x5b3a  (102 bytes)
 ; ======================================================================
 
 
@@ -2862,19 +2924,25 @@ L_5AE3:
 	call 074bfh		;5ae9
 	call L_4B64		;5aec
 	jp L_5A12		;5aef
-
-; ----------------------------------------------------------------------
-; DATOS sin identificar  0x5af2..0x5b1f  (45 bytes)
-DATA_5AF2:
-	defb 02ah,08ch,0f2h,07ch,0b5h,0cah,0a2h,05ah,0cdh,01fh,05bh,0cah,0a2h,05ah,0cdh,0bfh	; 5af2  *..|...Z..[..Z..
-	defb 074h,0cdh,0e6h,04bh,0c3h,012h,05ah,03ah,0c7h,092h,0b7h,0cah,0a2h,05ah,0cdh,01fh	; 5b02  t..K..Z:.....Z..
-	defb 05bh,0cah,0a2h,05ah,0cdh,0bfh,074h,0cdh,0cdh,04bh,0c3h,012h,05ah	; 5b12  [..Z..t..K..Z
-
-; ======================================================================
-; CODIGO 0x5b1f..0x5b3a  (27 bytes)
-; ======================================================================
-
-
+L_5AF2:
+	ld hl,(0f28ch)		;5af2
+	ld a,h			;5af5
+	or l			;5af6
+	jp z,L_5AA2		;5af7
+	call L_5B1F		;5afa
+	jp z,L_5AA2		;5afd
+	call 074bfh		;5b00
+	call L_4BE6		;5b03
+	jp L_5A12		;5b06
+L_5B09:
+	ld a,(092c7h)		;5b09
+	or a			;5b0c
+	jp z,L_5AA2		;5b0d
+	call L_5B1F		;5b10
+	jp z,L_5AA2		;5b13
+	call 074bfh		;5b16
+	call L_4BCD		;5b19
+	jp L_5A12		;5b1c
 L_5B1F:
 	call L_5D56		;5b1f
 	call L_5B2B		;5b22
@@ -2918,12 +2986,20 @@ L_5B5B:
 	call 0737bh		;5b7b
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0x5b7e..0x5b84  (6 bytes)
-DATA_5B7E:
-	defb 084h,05bh,015h,05ah,022h,000h	; 5b7e
+; DATOS saltos_5B7E: tabla de 2 palabras del despachador (call 0x408D en
+;   0x5B7B); lo leen el despachador (4 bytes)
+;   0x5b7e..0x5b82  (4 bytes)
+DATA_saltos_5B7E:
+	defb 084h,05bh	; 5b7e
+	defb 015h,05ah	; 5b80
+
+; ----------------------------------------------------------------------
+; DATOS sin identificar  0x5b82..0x5b84  (2 bytes)
+DATA_5B82:
+	defb 022h,000h	; 5b82
 
 ; ======================================================================
-; CODIGO 0x5b84..0x5b92  (14 bytes)
+; CODIGO 0x5b84..0x5beb  (103 bytes)
 ; ======================================================================
 
 
@@ -2933,19 +3009,25 @@ L_5B84:
 	call 074bfh		;5b89
 	call L_4BFC		;5b8c
 	jp L_5A12		;5b8f
-
-; ----------------------------------------------------------------------
-; DATOS sin identificar  0x5b92..0x5bbd  (43 bytes)
-DATA_5B92:
-	defb 02ah,08ch,0f2h,07ch,0b5h,0cah,05bh,05bh,0cdh,0bdh,05bh,038h,0bch,0cdh,0bfh,074h	; 5b92  *..|..[[..[8...t
-	defb 0cdh,065h,04ch,0c3h,012h,05ah,03ah,0c7h,092h,0b7h,0cah,05bh,05bh,0cdh,0bdh,05bh	; 5ba2  .eL..Z:....[[..[
-	defb 038h,0a7h,0cdh,0bfh,074h,0cdh,04fh,04ch,0c3h,012h,05ah	; 5bb2  8...t.OL..Z
-
-; ======================================================================
-; CODIGO 0x5bbd..0x5bd3  (22 bytes)
-; ======================================================================
-
-
+L_5B92:
+	ld hl,(0f28ch)		;5b92
+	ld a,h			;5b95
+	or l			;5b96
+	jp z,L_5B5B		;5b97
+	call L_5BBD		;5b9a
+	jr c,$-66		;5b9d
+	call 074bfh		;5b9f
+	call L_4C65		;5ba2
+	jp L_5A12		;5ba5
+L_5BA8:
+	ld a,(092c7h)		;5ba8
+	or a			;5bab
+	jp z,L_5B5B		;5bac
+	call L_5BBD		;5baf
+	jr c,$-87		;5bb2
+	call 074bfh		;5bb4
+	call L_4C4F		;5bb7
+	jp L_5A12		;5bba
 L_5BBD:
 	ld hl,052bah		;5bbd
 	call L_5265		;5bc0
@@ -2955,20 +3037,41 @@ L_5BBD:
 	ret c			;5bcc
 	ld hl,052a1h		;5bcd
 	jp L_5265		;5bd0
+L_5BD3:
+	ld a,(092c7h)		;5bd3
+	or a			;5bd6
+	jp z,L_5A15		;5bd7
+	call L_5DB0		;5bda
+	call L_5CFE		;5bdd
+	ld hl,05ddfh		;5be0
+	ld b,003h		;5be3
+	call 07690h		;5be5
+	call 0737bh		;5be8
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0x5bd3..0x5c09  (54 bytes)
-DATA_5BD3:
-	defb 03ah,0c7h,092h,0b7h,0cah,015h,05ah,0cdh,0b0h,05dh,0cdh,0feh,05ch,021h,0dfh,05dh	; 5bd3  :.....Z..]..\!.]
-	defb 006h,003h,0cdh,090h,076h,0cdh,07bh,073h,000h,05ch,0f1h,05bh,015h,05ah,0cdh,0d6h	; 5be3  ....v.{s.\.[.Z..
-	defb 074h,0cdh,02ah,05ch,0cdh,0feh,05ch,0cdh,04ah,068h,0c3h,015h,05ah,0cdh,0adh,069h	; 5bf3  t.*\..\.Jh..Z..i
-	defb 0cdh,0a0h,06ah,0c3h,015h,05ah	; 5c03
+; DATOS saltos_5BEB: tabla de 3 palabras del despachador (call 0x408D en
+;   0x5BE8); lo leen el despachador (6 bytes)
+;   0x5beb..0x5bf1  (6 bytes)
+DATA_saltos_5BEB:
+	defb 000h,05ch	; 5beb
+	defb 0f1h,05bh	; 5bed
+	defb 015h,05ah	; 5bef
 
 ; ======================================================================
-; CODIGO 0x5c09..0x5c72  (105 bytes)
+; CODIGO 0x5bf1..0x5c72  (129 bytes)
 ; ======================================================================
 
 
+L_5BF1:
+	call 074d6h		;5bf1
+	call L_5C2A		;5bf4
+	call L_5CFE		;5bf7
+	call 0684ah		;5bfa
+	jp L_5A15		;5bfd
+L_5C00:
+	call 069adh		;5c00
+	call 06aa0h		;5c03
+	jp L_5A15		;5c06
 L_5C09:
 	call 074bfh		;5c09
 	xor a			;5c0c
@@ -3120,13 +3223,27 @@ L_5D9A:
 	jp 0738bh		;5da1
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0x5da4..0x5de5  (65 bytes)
+; DATOS sin identificar  0x5da4..0x5db0  (12 bytes)
 DATA_5DA4:
-	defb 053h,045h,041h,052h,043h,048h,000h,046h,049h,04ch,045h,0ffh,0cdh,0d6h,074h,021h	; 5da4  SEARCH.FILE...t!
-	defb 0bch,05dh,0cdh,08fh,073h,0c3h,02ah,05ch,02ch,03ah,044h,049h,053h,050h,04ch,041h	; 5db4  .]..s.*\,:DISPLA
-	defb 059h,000h,044h,041h,054h,041h,0feh,04ch,03ah,043h,048h,041h,04eh,047h,045h,000h	; 5dc4  Y.DATA.L:CHANGE.
-	defb 04eh,041h,04dh,045h,0feh,0cch,03ah,045h,04eh,044h,0ffh,02bh,03ah,04bh,03ah,0cbh	; 5dd4  NAME..:END.+:K:.
-	defb 03ah	; 5de4
+	defb 053h,045h,041h,052h,043h,048h,000h,046h,049h,04ch,045h,0ffh	; 5da4  SEARCH.FILE.
+
+; ======================================================================
+; CODIGO 0x5db0..0x5dbc  (12 bytes)
+; ======================================================================
+
+
+L_5DB0:
+	call 074d6h		;5db0
+	ld hl,05dbch		;5db3
+	call 0738fh		;5db6
+	jp L_5C2A		;5db9
+
+; ----------------------------------------------------------------------
+; DATOS sin identificar  0x5dbc..0x5de5  (41 bytes)
+DATA_5DBC:
+	defb 02ch,03ah,044h,049h,053h,050h,04ch,041h,059h,000h,044h,041h,054h,041h,0feh,04ch	; 5dbc  ,:DISPLAY.DATA.L
+	defb 03ah,043h,048h,041h,04eh,047h,045h,000h,04eh,041h,04dh,045h,0feh,0cch,03ah,045h	; 5dcc  :CHANGE.NAME..:E
+	defb 04eh,044h,0ffh,02bh,03ah,04bh,03ah,0cbh,03ah	; 5ddc  ND.+:K:.:
 
 ; ======================================================================
 ; CODIGO 0x5de5..0x5e0d  (40 bytes)
@@ -3152,9 +3269,15 @@ L_5DEE:
 	call 0737bh		;5e0a
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0x5e0d..0x5e17  (10 bytes)
-DATA_5E0D:
-	defb 01ah,05fh,089h,05eh,04ah,05eh,017h,05eh,098h,05eh	; 5e0d  ._.^J^.^.^
+; DATOS saltos_5E0D: tabla de 5 palabras del despachador (call 0x408D en
+;   0x5E0A); lo leen el despachador (10 bytes)
+;   0x5e0d..0x5e17  (10 bytes)
+DATA_saltos_5E0D:
+	defb 01ah,05fh	; 5e0d
+	defb 089h,05eh	; 5e0f
+	defb 04ah,05eh	; 5e11
+	defb 017h,05eh	; 5e13
+	defb 098h,05eh	; 5e15
 
 ; ======================================================================
 ; CODIGO 0x5e17..0x5eac  (149 bytes)
@@ -3325,9 +3448,12 @@ L_5F70:
 	call 0737bh		;5f81
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0x5f84..0x5f88  (4 bytes)
-DATA_5F84:
-	defb 088h,05fh,093h,05fh	; 5f84
+; DATOS saltos_5F84: tabla de 2 palabras del despachador (call 0x408D en
+;   0x5F81); lo leen el despachador (4 bytes)
+;   0x5f84..0x5f88  (4 bytes)
+DATA_saltos_5F84:
+	defb 088h,05fh	; 5f84
+	defb 093h,05fh	; 5f86
 
 ; ======================================================================
 ; CODIGO 0x5f88..0x5f96  (14 bytes)

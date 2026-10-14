@@ -47,10 +47,24 @@ L_802B:
 	call L_866E		;8030
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0x8033..0x804f  (28 bytes)
-DATA_8033:
-	defb 07fh,080h,0f9h,080h,069h,081h,0adh,081h,0bch,081h,00fh,082h,03eh,082h,072h,082h	; 8033  ....i.......>.r.
-	defb 0b9h,082h,047h,083h,090h,084h,072h,084h,0b1h,084h,0fbh,084h	; 8043  ..G...r.....
+; DATOS saltos_8033: tabla de 14 palabras del despachador (call 0x408D en
+;   0x8030); lo leen el despachador (28 bytes)
+;   0x8033..0x804f  (28 bytes)
+DATA_saltos_8033:
+	defb 07fh,080h	; 8033
+	defb 0f9h,080h	; 8035
+	defb 069h,081h	; 8037
+	defb 0adh,081h	; 8039
+	defb 0bch,081h	; 803b
+	defb 00fh,082h	; 803d
+	defb 03eh,082h	; 803f
+	defb 072h,082h	; 8041
+	defb 0b9h,082h	; 8043
+	defb 047h,083h	; 8045
+	defb 090h,084h	; 8047
+	defb 072h,084h	; 8049
+	defb 0b1h,084h	; 804b
+	defb 0fbh,084h	; 804d
 
 ; ======================================================================
 ; CODIGO 0x804f..0x806b  (28 bytes)
@@ -1000,8 +1014,10 @@ L_8675:
 	jp (hl)			;8679
 
 ; ----------------------------------------------------------------------
-; DATOS sin identificar  0x867a..0xa000  (6534 bytes)
-DATA_867A:
+; DATOS relleno_ff: 6534 bytes a 0xFF hasta el final del banco: relleno; lo
+;   leen nadie (6534 bytes)
+;   0x867a..0xa000  (6534 bytes)
+DATA_relleno_ff:
 	defb 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh	; 867a  ................
 	defb 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh	; 868a  ................
 	defb 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh	; 869a  ................

@@ -11,14 +11,35 @@
 # encuentra tools/z80trace.py solo, siguiendo el flujo.
 #
 # Este fichero lo regenera `make semillas` (tools/bancos.py escribe).
-0xA125   # p02:9F87 jp
-0xA21E   # p02:9F82 call
+0xA002   # p02:9FFF sigue de largo (el codigo cruza la frontera de banco)
+0xA033   # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 12
+0xA049   # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 13
+0xA09B   # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 14
+0xA09E   # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 15
+0xA0A5   # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 17
+0xA0B1   # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 18
+0xA0E9   # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 21
+0xA0FA   # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 25
+0xA12A   # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 27
+0xA17B   # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 28
+0xA196   # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 29
+0xA1A9   # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 30
+0xA1C8   # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 32
+0xA1D1   # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 33
+0xA1DA   # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 36
+0xA200   # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 37
 0xA24F   # p02:8345 call
+0xA3EB   # huerfana: de += a (como p03:A3E6 con hl)
+0xA40A   # huerfana: paleta del MSX2 (16 colores de p03:A423 por p03:A3F0); la misma rutina esta en p01:725B y p05:8299
+0xA443   # huerfana: paleta desde una lista [color, d, e] que acaba en 0xFF
+0xA451   # huerfana: los 8 registros del VDP de p03:A477 y, en MSX2, R#23 y R#9
 0xA47F   # p02:9942 call
 0xA4CF   # p02:92B1 call
 0xA510   # p02:9949 call
 0xA520   # p02:9559 call
 0xA524   # p02:87E3 call
+0xA54B   # p02:9F97 call
+0xA55C   # p02:9FA6 call
 0xA56E   # p02:873C call
 0xA63C   # p02:9545 call
 0xA644   # p02:9566 call

@@ -61,3 +61,76 @@ p05 0x8BA5 1 5 6    # tabla p05:8B29 (MSX2), estado 3
 p05 0x8BCF 1 5 6    # tabla p05:8B29 (MSX2), estado 4
 p05 0x8C02 1 5 6    # tabla p05:8B29 (MSX2), estado 5
 p05 0x8C2B 1 5 6    # tabla p05:8B29 (MSX2), estado 6
+
+# Saltos DESDE FUERA a codigo copiado a RAM (src/reubica.txt): el destino es la
+# direccion de RAM, y se lleva a su sitio de la ROM con el bloque que la cubre.
+p02 0x8F09 1 2 3    # a mano, call 0xD294 desde p02:9025: bloque p02:8DE5 (en 0xD170) + 0x124
+p02 0x8DBF 1 2 3    # a mano, call 0xD83B desde p02:837C: bloque p02:8D98 (en 0xD814) + 0x27
+p01 0x6455 1 2 3    # a mano, 0xF1AB desde p01:64C0: bloque p01:63DA (en 0xF130) + 0x7B
+p01 0x63BF 1 2 3    # a mano, jp 0xF15A desde p00:56E2: bloque p01:6395 (en 0xF130) + 0x2A; en el otro bloque de 0xF130 (p01:63DA) caeria a mitad de instruccion
+
+# Las dos tablas de rutinas por juego de la copia que corre con el juego
+# puesto (p02; el codigo de juego en 0xD301), las gemelas de p01:6CA6/6CD7.
+# Las recorre p02:9A91 y salta con `jp (hl)` (p02:9AA3).
+p02 0x9F61 1 2 3    # tabla 0x9EE0 (p02:9A6B ld hl,0x9EE0), juegos 00,02,03,04,05,06,12,13,14,16,21,27
+p02 0x9F51 1 2 3    # tabla 0x9EE0 (p02:9A6B ld hl,0x9EE0), juegos 25
+p02 0x9F6E 1 2 3    # tabla 0x9EE0 (p02:9A6B ld hl,0x9EE0), juegos 28
+p02 0x9F69 1 2 3    # tabla 0x9EE0 (p02:9A6B ld hl,0x9EE0), juegos 29,37
+p02 0x9F8A 1 2 3    # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 00,16
+p02 0x9FAF 1 2 3    # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 01
+p02 0x9FEA 1 2 3    # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 10,11
+p03 0xA033 1 2 3    # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 12
+p03 0xA049 1 2 3    # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 13
+p03 0xA09B 1 2 3    # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 14
+p03 0xA09E 1 2 3    # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 15
+p03 0xA0A5 1 2 3    # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 17
+p03 0xA0B1 1 2 3    # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 18
+p03 0xA0E9 1 2 3    # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 21
+p03 0xA0FA 1 2 3    # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 25
+p03 0xA12A 1 2 3    # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 27
+p03 0xA17B 1 2 3    # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 28
+p03 0xA196 1 2 3    # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 29
+p03 0xA1A9 1 2 3    # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 30
+p03 0xA1C8 1 2 3    # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 32
+p03 0xA1D1 1 2 3    # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 33
+p03 0xA1DA 1 2 3    # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 36
+p03 0xA200 1 2 3    # tabla 0x9F11 (p02:9A7C ld hl,0x9F11), juegos 37
+
+# HUERFANAS: codigo al que NINGUNA palabra de la ROM ni ningun salto relativo
+# apunta (medido con una busqueda de los dos bytes en los 128 KB y de todos los
+# jr/djnz de su banco). Empiezan detras de una instruccion que no sigue (ret o
+# jp) y se leen como codigo de principio a fin. Que nada las apunte NO prueba
+# que no se usen (una direccion se puede calcular); por eso van aqui con lo
+# medido y no con un "sin uso". Las de los menus tienen su gemela en la otra
+# copia del menu (p00/p01 con la RAM en 0xF2xx, p02/p03 en 0xD3xx).
+p00 0x40AE 1 2 3    # huerfana: la pasarela de 0x4095 con otro bloque (hl=0x488F, bc=8)
+p00 0x5AF2 1 2 3    # huerfana: gestor de menu como p00:5AE3; gemela p02:8504
+p00 0x5B09 1 2 3    # huerfana: gestor de menu como p00:5AE3; gemela p02:851B
+p00 0x5B92 1 2 3    # huerfana: gestor de menu como p00:5B84; gemela p02:85A4
+p00 0x5BD3 1 2 3    # huerfana: gestor de menu; gemela p02:85E5
+p01 0x6713 1 2 3    # huerfana: borra la VRAM segun 0x002D; gemela p02:99A8
+p02 0x8504 1 2 3    # huerfana: gemela de p00:5AF2
+p02 0x851B 1 2 3    # huerfana: gemela de p00:5B09
+p02 0x85A4 1 2 3    # huerfana: gemela de p00:5B92
+p02 0x85E5 1 2 3    # huerfana: gemela de p00:5BD3
+p02 0x8908 1 2 3    # huerfana: menu de dos opciones (hl=0x8996, b=2, call 0xA7B2)
+p02 0x8C94 1 2 3    # huerfana: copia 16 filas de 0x8CCD a la VRAM 0x3800
+p02 0x99A8 1 2 3    # huerfana: gemela de p01:6713
+p00 0x5BA8 1 2 3    # huerfana: gestor de menu como p00:5B92; gemela p02:85BA
+p00 0x4D03 1 2 3    # huerfana: graba 0x1000 bytes de 0x8000 por BDOS (c=0x1A, jp p00:5152); gemela p02:9273
+p02 0x85BA 1 2 3    # huerfana: gemela de p00:5BA8
+p02 0x9273 1 2 3    # huerfana: gemela de p00:4D03
+p03 0xA3EB 1 2 3    # huerfana: de += a (como p03:A3E6 con hl)
+p03 0xA40A 1 2 3    # huerfana: paleta del MSX2 (16 colores de p03:A423 por p03:A3F0); la misma rutina esta en p01:725B y p05:8299
+p03 0xA443 1 2 3    # huerfana: paleta desde una lista [color, d, e] que acaba en 0xFF
+p03 0xA451 1 2 3    # huerfana: los 8 registros del VDP de p03:A477 y, en MSX2, R#23 y R#9
+p05 0x811C 1 5 6    # huerfana: rutina de la biblioteca grafica de p05 (call 0x819C, 0x812F)
+p05 0x81F2 1 5 6    # huerfana: entrada alternativa (ld c,1 / jr p05:81BB)
+p05 0x81F6 1 5 6    # huerfana: entrada alternativa (ld c,1 / jr p05:81C1)
+p05 0x85E5 1 5 6    # huerfana: guarda A en 0xFAF5 y calcula A*8, A*16
+p05 0x8631 1 5 6    # huerfana: rutina de dibujo con la tabla de 0xE090
+p05 0x86CB 1 5 6    # huerfana: recorre una lista de bytes que acaba en 0xFF. Las dos palabras 0x86CB de p08 (A293, A333) no cuentan: con p08 en 0xA000 esta p07 en 0x8000
+p05 0x870E 1 5 6    # huerfana: un caracter de 8x8 por el comando del VDP (p05:8404); gemela p09:8F8F
+p05 0x8DED 1 5 6    # huerfana: call 0x826E / call 0x8261 y 0xE008 = 1
+p05 0x9484 1 5 6    # huerfana: aritmetica con p05:94AE y p05:94A2
+p09 0x8F8F 1 9 10   # huerfana: gemela de p05:870E. Las palabras 0x8F8F que hay en p09 caen en los graficos de p09:9048 (datos), no en codigo

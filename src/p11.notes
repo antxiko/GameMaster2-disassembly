@@ -1,1 +1,6 @@
 # Notas del banco 11
+
+# --- BLOQUES QUE LEE EL CODIGO (seccion que reescribe tools/bloques.py; no editar a mano) ---
+D 0xB45E 0xC000 relleno_ff  2978 bytes a 0xFF hasta el final del banco: relleno; lo leen nadie (2978 bytes)
+F 0xB45E 16
+# --- fin de los bloques de bloques.py ---

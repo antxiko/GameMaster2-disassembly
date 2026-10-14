@@ -1,1 +1,16 @@
 # Notas del banco 00
+
+# --- BLOQUES QUE LEE EL CODIGO (seccion que reescribe tools/bloques.py; no editar a mano) ---
+D 0x5A32 0x5A38 saltos_5A32  tabla de 3 palabras del despachador (call 0x408D en 0x5A2F); lo leen el despachador (6 bytes)
+F 0x5A32 2
+D 0x5ACB 0x5AD1 saltos_5ACB  tabla de 3 palabras del despachador (call 0x408D en 0x5AC8); lo leen el despachador (6 bytes)
+F 0x5ACB 2
+D 0x5B7E 0x5B82 saltos_5B7E  tabla de 2 palabras del despachador (call 0x408D en 0x5B7B); lo leen el despachador (4 bytes)
+F 0x5B7E 2
+D 0x5BEB 0x5BF1 saltos_5BEB  tabla de 3 palabras del despachador (call 0x408D en 0x5BE8); lo leen el despachador (6 bytes)
+F 0x5BEB 2
+D 0x5E0D 0x5E17 saltos_5E0D  tabla de 5 palabras del despachador (call 0x408D en 0x5E0A); lo leen el despachador (10 bytes)
+F 0x5E0D 2
+D 0x5F84 0x5F88 saltos_5F84  tabla de 2 palabras del despachador (call 0x408D en 0x5F81); lo leen el despachador (4 bytes)
+F 0x5F84 2
+# --- fin de los bloques de bloques.py ---

@@ -8,3 +8,148 @@ F 0x8513 16
 D 0x867A 0xA000 relleno_ff  6534 bytes a 0xFF hasta el final del banco: relleno; lo leen nadie (6534 bytes)
 F 0x867A 16
 # --- fin de los bloques de bloques.py ---
+
+# --- ANOTACIONES AUTOMATICAS (seccion que reescribe tools/anota.py; no editar a mano) ---
+L 0x801E sram_orden la orden C: comprueba la SRAM y salta a la de la tabla
+L 0x807F sram_crea crea un fichero en la SRAM
+L 0x80C7 sram_entrada_libre busca en el directorio (0xB000) una entrada libre (0x10)
+L 0x80E2 sram_bloque_libre busca en la tabla de 0xB206 un bloque libre
+L 0x80F9 sram_cierra cierra el fichero de IX
+L 0x8115 sram_tamano el tamano del fichero de IX
+L 0x8132 sram_bloques los bloques del fichero
+L 0x8156 sram_libera_cadena libera la cadena de bloques de un fichero
+L 0x8169 sram_abre abre el fichero de IX
+L 0x81C6 sram_busca busca el nombre de IX en el directorio
+L 0x81CA sram_busca_sigue sigue buscando desde la entrada (ix+0x12)
+L 0x81F3 sram_entrada HL = la entrada (ix+0x12) del directorio (0xB000, 8 bytes)
+L 0x8257 sram_borra borra el fichero: marca la entrada y libera sus bloques
+L 0x82B9 sram_lee lee del fichero a la RAM
+L 0x82EB sram_copia_lee copia de la SRAM a la RAM, bloque a bloque
+L 0x8347 sram_escribe escribe en el fichero desde la RAM
+L 0x8372 sram_copia_escribe copia de la RAM a la SRAM, bloque a bloque
+L 0x83D9 sram_siguiente_bloque pasa al bloque siguiente del fichero
+L 0x83F3 sram_direccion_bloque la direccion en la SRAM del bloque (ix+0x13): mitad 0x10 o 0x30
+L 0x841D sram_situa situa el puntero del fichero (ix+0x09)
+L 0x84C1 sram_borra_todo pone a cero las dos mitades de la SRAM (0x10 y 0x30)
+L 0x84C8 sram_borra_mitad pone a cero 0xB000-0xBFFF de la mitad A
+L 0x84D9 sram_directorio_vacio marca libres las 0x40 entradas del directorio
+L 0x84EC sram_cabecera escribe la cabecera de la SRAM en 0xB200
+L 0x84FB sram_formateada compara la marca de 0xB200 con p04:8513: la SRAM esta formateada
+L 0x8519 sram_enlaza escribe el bloque siguiente de la cadena
+L 0x8521 sram_bloque_siguiente lee el bloque siguiente de la cadena
+L 0x8535 sram_tabla_de_bloques la tabla de bloques: la mitad (0x10 o 0x30) y la posicion
+L 0x8572 sram_bits los bits del bloque en la tabla de 0xA001
+L 0x858E sram_abierto comprueba que el fichero esta abierto (ix+0x18)
+L 0x8597 sram_nombre_valido comprueba el nombre de IX: 5 letras, sin '*' ni '?'
+L 0x85C9 letra_valida lee la letra: Z si es 0 o espacio
+L 0x85CB letra_valida_b Z si A es 0 o espacio
+L 0x85DD sram_compara_nombre compara el nombre de la entrada con el de IX (con comodines)
+L 0x8600 sram_copia_nombre copia el nombre de IX+0x19 (5 letras) a DE
+L 0x860E sram_coincide compara los nombres letra a letra; '*' y '?' valen por cualquiera
+L 0x862B letra_igual compara dos letras (espacio y 0 valen lo mismo)
+L 0x8638 tiene_asterisco busca un '*' en el nombre
+L 0x8664 hl_mas_a HL = HL + A (gemela de p01:7251)
+L 0x8669 de_mas_a DE = DE + A (gemela de p01:7256)
+L 0x866E despacha salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
+C 0x8005 el mapper: pone en 0xA000 el banco de A
+C 0x8010 sram_orden: la orden C: comprueba la SRAM y salta a la de la tabla
+C 0x8016 el mapper: pone en 0xA000 el banco de A
+C 0x8024 sram_formateada: compara la marca de 0xB200 con p04:8513: la SRAM esta formateada
+C 0x8030 despacha: salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
+C 0x8081 el mapper: pone en 0xA000 el banco de A
+C 0x8084 sram_nombre_valido: comprueba el nombre de IX: 5 letras, sin '*' ni '?'
+C 0x808A sram_busca: busca el nombre de IX en el directorio
+C 0x8090 sram_entrada_libre: busca en el directorio (0xB000) una entrada libre (0x10)
+C 0x8096 sram_bloque_libre: busca en la tabla de 0xB206 un bloque libre
+C 0x80BB hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0x80F9 sram_abierto: comprueba que el fichero esta abierto (ix+0x18)
+C 0x8101 el mapper: pone en 0xA000 el banco de A
+C 0x8104 sram_tamano: el tamano del fichero de IX
+C 0x8109 sram_bloques: los bloques del fichero
+C 0x8148 hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0x8161 hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0x816B el mapper: pone en 0xA000 el banco de A
+C 0x816E sram_nombre_valido: comprueba el nombre de IX: 5 letras, sin '*' ni '?'
+C 0x8174 sram_busca: busca el nombre de IX en el directorio
+C 0x81AF el mapper: pone en 0xA000 el banco de A
+C 0x81B2 sram_busca: busca el nombre de IX en el directorio
+C 0x81B8 sram_entrada: HL = la entrada (ix+0x12) del directorio (0xB000, 8 bytes)
+C 0x81BC sram_busca_sigue: sigue buscando desde la entrada (ix+0x12)
+C 0x81C2 sram_entrada: HL = la entrada (ix+0x12) del directorio (0xB000, 8 bytes)
+C 0x81CC el mapper: pone en 0xA000 el banco de A
+C 0x81EA sram_compara_nombre: compara el nombre de la entrada con el de IX (con comodines)
+C 0x8211 el mapper: pone en 0xA000 el banco de A
+C 0x8232 hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0x8240 el mapper: pone en 0xA000 el banco de A
+C 0x8243 sram_busca: busca el nombre de IX en el directorio
+C 0x8249 sram_borra: borra el fichero: marca la entrada y libera sus bloques
+C 0x8250 sram_busca: busca el nombre de IX en el directorio
+C 0x826A sram_libera_cadena: libera la cadena de bloques de un fichero
+C 0x8274 el mapper: pone en 0xA000 el banco de A
+C 0x8277 sram_nombre_valido: comprueba el nombre de IX: 5 letras, sin '*' ni '?'
+C 0x827D sram_busca: busca el nombre de IX en el directorio
+C 0x8290 hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0x8298 sram_nombre_valido: comprueba el nombre de IX: 5 letras, sin '*' ni '?'
+C 0x82A0 sram_busca: busca el nombre de IX en el directorio
+C 0x82B9 sram_abierto: comprueba que el fichero esta abierto (ix+0x18)
+C 0x82C1 el mapper: pone en 0xA000 el banco de A
+C 0x82D8 sram_siguiente_bloque: pasa al bloque siguiente del fichero
+C 0x82DD sram_copia_lee: copia de la SRAM a la RAM, bloque a bloque
+C 0x82E6 el mapper: pone en 0xA000 el banco de A
+C 0x8322 sram_siguiente_bloque: pasa al bloque siguiente del fichero
+C 0x8332 el mapper: pone en 0xA000 el banco de A
+C 0x8342 el mapper: pone en 0xA000 el banco de A
+C 0x8347 sram_abierto: comprueba que el fichero esta abierto (ix+0x18)
+C 0x834F el mapper: pone en 0xA000 el banco de A
+C 0x8356 sram_siguiente_bloque: pasa al bloque siguiente del fichero
+C 0x8362 sram_copia_escribe: copia de la RAM a la SRAM, bloque a bloque
+C 0x836D el mapper: pone en 0xA000 el banco de A
+C 0x83A5 sram_enlaza: escribe el bloque siguiente de la cadena
+C 0x83A8 sram_siguiente_bloque: pasa al bloque siguiente del fichero
+C 0x83CF sram_enlaza: escribe el bloque siguiente de la cadena
+C 0x83D4 el mapper: pone en 0xA000 el banco de A
+C 0x83DB el mapper: pone en 0xA000 el banco de A
+C 0x83DE sram_situa: situa el puntero del fichero (ix+0x09)
+C 0x83E8 sram_bloque_siguiente: lee el bloque siguiente de la cadena
+C 0x83EE sram_direccion_bloque: la direccion en la SRAM del bloque (ix+0x13): mitad 0x10 o 0x30
+C 0x8419 el mapper: pone en 0xA000 el banco de A
+C 0x843B hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0x8461 sram_tamano: el tamano del fichero de IX
+C 0x8474 el mapper: pone en 0xA000 el banco de A
+C 0x8477 sram_abre: abre el fichero de IX
+C 0x8488 sram_lee: lee del fichero a la RAM
+C 0x848C sram_cierra: cierra el fichero de IX
+C 0x8492 el mapper: pone en 0xA000 el banco de A
+C 0x8495 sram_crea: crea un fichero en la SRAM
+C 0x84A5 sram_abre: abre el fichero de IX
+C 0x84A9 sram_escribe: escribe en el fichero desde la RAM
+C 0x84AD sram_cierra: cierra el fichero de IX
+C 0x84B3 el mapper: pone en 0xA000 el banco de A
+C 0x84B6 sram_borra_todo: pone a cero las dos mitades de la SRAM (0x10 y 0x30)
+C 0x84B9 sram_directorio_vacio: marca libres las 0x40 entradas del directorio
+C 0x84BC sram_cabecera: escribe la cabecera de la SRAM en 0xB200
+C 0x84C3 sram_borra_mitad: pone a cero 0xB000-0xBFFF de la mitad A
+C 0x84C8 el mapper: pone en 0xA000 el banco de A
+C 0x84DB el mapper: pone en 0xA000 el banco de A
+C 0x84FD el mapper: pone en 0xA000 el banco de A
+C 0x8519 sram_tabla_de_bloques: la tabla de bloques: la mitad (0x10 o 0x30) y la posicion
+C 0x8521 sram_tabla_de_bloques: la tabla de bloques: la mitad (0x10 o 0x30) y la posicion
+C 0x8526 sram_bits: los bits del bloque en la tabla de 0xA001
+C 0x852C sram_bits: los bits del bloque en la tabla de 0xA001
+C 0x8544 el mapper: pone en 0xA000 el banco de A
+C 0x855A sram_bits: los bits del bloque en la tabla de 0xA001
+C 0x8569 de_mas_a: DE = DE + A (gemela de p01:7256)
+C 0x856E el mapper: pone en 0xA000 el banco de A
+C 0x85B8 letra_valida: lee la letra: Z si es 0 o espacio
+C 0x85C0 letra_valida: lee la letra: Z si es 0 o espacio
+C 0x85D3 letra_valida: lee la letra: Z si es 0 o espacio
+C 0x85DE sram_copia_nombre: copia el nombre de IX+0x19 (5 letras) a DE
+C 0x85E6 sram_coincide: compara los nombres letra a letra; '*' y '?' valen por cualquiera
+C 0x85ED tiene_asterisco: busca un '*' en el nombre
+C 0x8605 de_mas_a: DE = DE + A (gemela de p01:7256)
+C 0x8615 hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0x8621 letra_igual: compara dos letras (espacio y 0 valen lo mismo)
+C 0x8630 letra_valida_b: Z si A es 0 o espacio
+C 0x8635 letra_valida_b: Z si A es 0 o espacio
+C 0x863D hl_mas_a: HL = HL + A (gemela de p01:7251)
+# --- fin de las anotaciones de anota.py ---

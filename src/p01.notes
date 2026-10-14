@@ -52,3 +52,474 @@ F 0x79CF 2
 D 0x7A1A 0x8000 relleno_ff  1510 bytes a 0xFF hasta el final del banco: relleno; lo leen nadie (1510 bytes)
 F 0x7A1A 16
 # --- fin de los bloques de bloques.py ---
+
+# --- ANOTACIONES AUTOMATICAS (seccion que reescribe tools/anota.py; no editar a mano) ---
+L 0x6065 sin_juego Z si no se reconocio el juego (0xF281 = 0xFF)
+L 0x623B modify_mode el MODIFY MODE MENU: limpia y pinta (gemela de p02:8BFC)
+L 0x62CC menu_dos menu de 2 opciones (p01:750E)
+L 0x62D3 borra_sprites borra la tabla de sprites (0x3880, 0x200 bytes)
+L 0x62DD teclado_a_nibble pasa la tecla del bufer (0x920B) a un nibble
+L 0x6304 teclado_a_nibble_b pasa las teclas del bufer (0x920B) a un byte
+L 0x632A engancha_al_juego copia p01:6395 a 0xF130 y cambia el gancho del juego por el suyo
+L 0x6353 busca_gancho busca en la copia del INIT del juego el `ld (0xFD9B),hl` (9B FD)
+L 0x6371 copia_del_juego copia BC bytes de HL del cartucho del juego (RDSLT) a DE
+L 0x6389 copia_f230 copia p01:64C6 a 0xF230 (22 bytes)
+L 0x6468 vuelve_tras_menu devuelve la RAM a la pagina 2 y sigue segun 0xF10A
+L 0x6534 silencia_psg pone a cero los tres volumenes del PSG (y el SCC del juego si lo tiene)
+L 0x656C guarda_volumenes guarda los tres volumenes del PSG en 0xF100
+L 0x65A1 congela congela el juego: silencio y espera la tecla
+L 0x65C6 bio_borra_estado pone a cero 0xE006 y 0xE004 (gemela de p05:9924)
+L 0x65EA devuelve_volumenes devuelve los tres volumenes del PSG (y el SCC)
+L 0x662E lee_teclas las teclas del Game Master (SNSMAT 1, 6 y 7) en 0xF10D: C = las recien pulsadas
+L 0x66A9 pon_opcion copia 0xF111 a 0xE000
+L 0x672D bancos_9_10 el cartucho en la pagina 2 y los bancos 9-10
+L 0x673F bancos_2_3_y_ram los bancos 2-3 y devuelve la RAM (0xF2A0) a la pagina 2
+L 0x6756 espera_tecla espera una tecla (CHSNS) HL x B veces
+L 0x6762 pinta_paleta_prueba pinta los 16 colores en 0x3800 y 0x3A80
+L 0x6774 pinta_16_colores pinta 16 casillas con los colores 1-15
+L 0x67F3 truco_vidas las vidas: la rutina del juego de la tabla de p01:6CA6
+L 0x6804 truco_fase la fase: la rutina del juego de la tabla de p01:6CD7
+L 0x6819 truco_propio llama por CALSLT a la rutina del juego de 0xF294
+L 0x6827 busca_en_tabla_y_salta busca 0xF281 en la tabla [codigo, direccion] de HL y salta
+L 0x683A busca_en_tabla busca 0xF281 en la tabla [codigo, direccion] de HL
+L 0x684A menu_ranking la pantalla del RANKING
+L 0x68D3 menu_ocho menu de 8 opciones (p01:750E)
+L 0x68DA borra_3 pone a cero 3 bytes en HL
+L 0x68E1 hay_ranking Z si el juego no tiene ranking (0xF290, 0xF286)
+L 0x690B ranking_quita_1_y_2 quita las marcas 1 y 2 del ranking
+L 0x6912 ranking_quita_marca quita la marca A de las 10 filas del ranking (0x9257)
+L 0x6926 pinta_ranking pinta la cabecera y las filas del ranking
+L 0x69AD ranking_entra mete la puntuacion en el ranking
+L 0x69BE ranking_busca_marca busca la marca A en el ranking
+L 0x6A14 ranking_ordena ordena el ranking
+L 0x6A2B ranking_compara compara dos filas del ranking
+L 0x6A59 ranking_mueve mueve una fila del ranking
+L 0x6AA0 ranking_nombre pide el nombre para el ranking
+L 0x6B32 rellena_vram rellena la VRAM con A (letra a letra si la pantalla es de texto)
+L 0x6B48 copia_a_vram copia BC bytes de HL a la VRAM DE (letra a letra si es de texto)
+L 0x6B62 ranking_edita edita el nombre del ranking
+L 0x6C38 fila_de_ranking HL = la fila A del ranking (0x9257, 9 bytes)
+L 0x6C46 puntos_de_ranking HL = los puntos de la fila A (0x9239, 3 bytes)
+L 0x6D2F truco_6d2f pone 0xF29A en la variable del juego
+L 0x6D41 truco_6d41 calcula el valor que se escribe en el juego (p01:706C)
+L 0x6DB1 busca_juego_6dc9 busca el juego (0xF280) en la tabla de p01:6DC9
+L 0x6F70 pon_valor escribe 0xF29C en la variable del juego (0xF28A)
+L 0x706C multiplica HL = (A - 1) * ... (multiplicacion de 16 bits)
+L 0x7071 divide DE / BC: cociente en DE y resto en HL (gemela de p05:9430)
+L 0x708B borra_pantalla_b borra la tabla de nombres y esconde los sprites
+L 0x709D reconoce_juego reconoce el juego del otro cartucho y prepara su ficha
+L 0x70AA lee_cabecera_juego lee la cabecera de 0x4028 del juego y sus opciones
+L 0x7112 ficha_del_juego busca la ficha del juego (p00:44BE) y la copia a 0xF280
+L 0x7136 busca_ficha copia la ficha por defecto (p00:45D0) y busca la del juego por su suma
+L 0x71D7 rc_751_o_752 compara el RC del juego (0xE000, al reves) con 0x751 y 0x752
+L 0x7251 hl_mas_a HL = HL + A
+L 0x7256 de_mas_a DE = DE + A
+L 0x725B pon_color MSX2: el color B de la paleta con D y E (R#16 y puerto 2)
+L 0x7275 paleta_msx2 MSX2: los 16 colores de p01:728E
+L 0x727A paleta_bio MSX2: los 16 colores de p05:82D7 (gemela de p05:82C3)
+L 0x727D paleta_desde MSX2: los 16 colores de HL (gemela de p05:82C6)
+L 0x72AE paleta_lista MSX2: colores de una lista [color, d, e] que acaba en 0xFF
+L 0x72BC registros_vdp los 8 registros del VDP de p01:72E2 y, en MSX2, R#23 y R#9
+L 0x72EA borra_nombres borra la tabla de nombres y esconde los sprites (0xD0 en 0x3B00)
+L 0x72FC rellena_tercios FILVRM en los tres tercios de la pantalla
+L 0x730D copia_tercios LDIRVM en los tres tercios de la pantalla
+L 0x7323 descomprime_tercios descomprime HL en los tres tercios de la pantalla
+L 0x7336 descomprime_con_direccion descomprime a la VRAM de la palabra de HL
+L 0x733A descomprime descomprime HL a la VRAM DE: n & 0x7F repeticiones o copias
+L 0x736A vram_escribe_en SETWRT (o NSTWRT en MSX2) en HL
+L 0x737B despacha salta a la palabra A de la tabla pegada detras del `call`
+L 0x738B pinta_texto_en pinta el texto de HL en la VRAM DE
+L 0x738F pinta_texto pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
+L 0x73AB pinta_texto_grafico pinta el texto en modo grafico
+L 0x73B5 modo_de_texto Z si la pantalla es de texto (0xFCAF < 5)
+L 0x73E1 rellena_ventana rellena una ventana de B filas por C columnas con A
+L 0x7467 hl_otra_mitad H xor 0x80
+L 0x746C binario_a_bcd HL a BCD en DE
+L 0x747D bcd_a_binario A en BCD a binario
+L 0x748F borra_ventana borra la ventana de 0x9237
+L 0x7499 p02_8000_si si 0xF112: p02:8000 con el cartucho en la pagina 2
+L 0x749E p02_8000 p02:8000 con el cartucho en la pagina 2 y vuelta a la RAM
+L 0x74BA p02_80e4_si si 0xF112: p02:80E4
+L 0x74BF p02_80e4 p02:80E4 con el cartucho en la pagina 2 y vuelta a la RAM
+L 0x74D6 borra_segun_modo borra la pantalla segun el modo
+L 0x74FD cartucho_en_8000 pone el cartucho (0xF103) en la pagina 2
+L 0x750E menu menu de B opciones con el cursor A: devuelve la elegida
+L 0x75E2 borra_teclado borra el bufer de teclas del menu (0x920B)
+L 0x7600 cursor_apaga quita el cursor
+L 0x760A cursor_apaga_b quita el cursor (gemela de p03:A74F)
+L 0x7633 cursor_pinta pinta el cursor (':' o el de MSX2)
+L 0x7642 cursor_borra borra el cursor
+L 0x7646 pon_letra escribe A en la VRAM HL guardando los registros
+L 0x7652 pon_letra_b escribe A en la VRAM HL (WRTVRM o en modo grafico)
+L 0x766D opcion_cero si no hay opcion elegida, vuelve al menu
+L 0x7676 menu_con_esc menu: espacio elige, ESC sale
+L 0x7690 menu_vertical menu de B opciones: cursores arriba y abajo, espacio elige
+L 0x76AF menu_prepara prepara el menu: opciones, posicion y cursor
+L 0x76C1 menu_cursor mueve el cursor con las flechas (0x1E arriba, 0x1F abajo)
+L 0x76F6 menu_limpia quita el cursor y borra el teclado
+L 0x7707 comprime comprime 0x8802 en 0x8002 (lo contrario de p01:733A)
+L 0x7790 fin_de_8882 compara HL con 0x8882
+L 0x7834 lee_vram_tercios LDIRMV de los tres tercios (0x2000 de paso)
+L 0x788E copia_vram_tercios LDIRVM de los tres tercios (0x2000 de paso)
+L 0x78A0 borra_por_modo borra la pantalla segun el modo de 0xF2A1
+L 0x78BA letra_grafica pinta una letra en modo grafico
+L 0x78D0 posicion_grafica la posicion en modo grafico de la letra
+L 0x790D dibuja_letra dibuja la letra A con la fuente de p00:4837
+L 0x7969 de_otra_mitad D xor 0x80
+L 0x796E letra_grafica_b posicion y letra en modo grafico
+L 0x7973 menu_principal el menu del Game Master: engancha H.TIMI y pinta
+C 0x603A ventana_pequena: las esquinas de una ventana (0x9235, 0x9237)
+C 0x603D pinta_paleta_prueba: pinta los 16 colores en 0x3800 y 0x3A80
+C 0x6040 borra_sprites: borra la tabla de sprites (0x3880, 0x200 bytes)
+C 0x6046 pinta_texto: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
+C 0x604C pinta_numero_de_juego: pinta el numero de juego (0xF281)
+C 0x6054 menu_con_esc: menu: espacio elige, ESC sale
+C 0x605C despacha: salta a la palabra A de la tabla pegada detras del `call`
+C 0x6065 lee el codigo del juego
+C 0x606A sin_juego: Z si no se reconocio el juego (0xF281 = 0xFF)
+C 0x606F lee el truco de vidas del juego
+C 0x6075 lee la variable del juego que se cambia y el byte siguiente (16 bits)
+C 0x6081 busca_en_tabla: busca 0xF281 en la tabla [codigo, direccion] de HL
+C 0x6086 borra_sprites: borra la tabla de sprites (0x3880, 0x200 bytes)
+C 0x608C pinta_texto: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
+C 0x6092 menu_dos: menu de 2 opciones (p01:750E)
+C 0x609B teclado_a_nibble: pasa la tecla del bufer (0x920B) a un nibble
+C 0x60A1 apunta a el valor que se escribe
+C 0x60A4 teclado_a_nibble_b: pasa las teclas del bufer (0x920B) a un byte
+C 0x60A7 lee la rutina propia del juego y el byte siguiente (16 bits)
+C 0x60E4 sin_juego: Z si no se reconocio el juego (0xF281 = 0xFF)
+C 0x60EA lee el truco de vidas del juego
+C 0x60FD busca_en_tabla: busca 0xF281 en la tabla [codigo, direccion] de HL
+C 0x6103 borra_sprites: borra la tabla de sprites (0x3880, 0x200 bytes)
+C 0x6109 pinta_texto: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
+C 0x610F menu_dos: menu de 2 opciones (p01:750E)
+C 0x6118 teclado_a_nibble: pasa la tecla del bufer (0x920B) a un nibble
+C 0x6121 teclado_a_nibble_b: pasa las teclas del bufer (0x920B) a un byte
+C 0x6129 lee la rutina propia del juego y el byte siguiente (16 bits)
+C 0x623B borra_sprites: borra la tabla de sprites (0x3880, 0x200 bytes)
+C 0x623E ventana_pequena: las esquinas de una ventana (0x9235, 0x9237)
+C 0x6241 pinta_opcion: pinta la opcion elegida (0xF10B, nibble alto)
+C 0x6244 pinta_tipo: pinta el tipo elegido (0xF10B, nibble bajo)
+C 0x6247 texto_search: pinta 'SEARCH FILE'
+C 0x624D ventana: abre una ventana de texto con el marco de DE
+C 0x6266 pinta_paleta_prueba: pinta los 16 colores en 0x3800 y 0x3A80
+C 0x6269 borra_sprites: borra la tabla de sprites (0x3880, 0x200 bytes)
+C 0x62D0 menu: menu de B opciones con el cursor A: devuelve la elegida
+C 0x6336 lee la direccion INIT del juego y el byte siguiente (16 bits)
+C 0x633C copia_del_juego: copia BC bytes de HL del cartucho del juego (RDSLT) a DE
+C 0x6347 busca_gancho: busca en la copia del INIT del juego el `ld (0xFD9B),hl` (9B FD)
+C 0x6373 lee el slot del cartucho del juego
+C 0x639C lee el slot del Game Master
+C 0x63B9 lee la direccion INIT del juego y el byte siguiente (16 bits)
+C 0x63BF lee el slot del cartucho del juego
+C 0x63CE lee la direccion INIT del juego y el byte siguiente (16 bits)
+C 0x63E7 lee volumen del PSG, canal C y el byte siguiente (16 bits)
+C 0x643B lee el slot del Game Master
+C 0x6443 vuelve_tras_menu: devuelve la RAM a la pagina 2 y sigue segun 0xF10A
+C 0x6446 lee el slot del cartucho del juego
+C 0x6457 lee el slot del cartucho del juego
+C 0x6468 lee el slot de la RAM de la pagina 2
+C 0x6493 guarda_volumenes: guarda los tres volumenes del PSG en 0xF100
+C 0x6496 silencia_psg: pone a cero los tres volumenes del PSG (y el SCC del juego si lo tiene)
+C 0x64B1 devuelve_volumenes: devuelve los tres volumenes del PSG (y el SCC)
+C 0x64C3 silencia_psg: pone a cero los tres volumenes del PSG (y el SCC del juego si lo tiene)
+C 0x64CB lee volumen del PSG, canal C y el byte siguiente (16 bits)
+C 0x64D2 lee el slot del cartucho del juego
+C 0x64FA lee el slot de la RAM de la pagina 2
+C 0x650B apunta a el codigo de p00:4A9A en RAM
+C 0x6531 guarda_volumenes: guarda los tres volumenes del PSG en 0xF100
+C 0x654A lee el slot del cartucho del juego
+C 0x6555 lee el slot del cartucho del juego
+C 0x6562 lee el slot del cartucho del juego
+C 0x6571 guarda volumen del PSG, canal A
+C 0x6579 guarda volumen del PSG, canal B
+C 0x6581 guarda volumen del PSG, canal C
+C 0x658C devuelve_volumenes: devuelve los tres volumenes del PSG (y el SCC)
+C 0x6599 congela: congela el juego: silencio y espera la tecla
+C 0x65A1 silencia_psg: pone a cero los tres volumenes del PSG (y el SCC del juego si lo tiene)
+C 0x65A8 lee el slot del Game Master y el byte siguiente (16 bits)
+C 0x65B3 lee_teclas: las teclas del Game Master (SNSMAT 1, 6 y 7) en 0xF10D: C = las recien pulsadas
+C 0x65CE devuelve_volumenes: devuelve los tres volumenes del PSG (y el SCC)
+C 0x65D5 lee el slot del cartucho del juego
+C 0x65EA lee volumen del PSG, canal A
+C 0x65F3 lee volumen del PSG, canal B
+C 0x65FC lee volumen del PSG, canal C
+C 0x660C lee el slot del cartucho del juego
+C 0x6617 lee el slot del cartucho del juego
+C 0x6624 lee el slot del cartucho del juego
+C 0x6655 apunta a las teclas del Game Master
+C 0x665E pon_opcion: copia 0xF111 a 0xE000
+C 0x6661 bancos_9_10: el cartucho en la pagina 2 y los bancos 9-10
+C 0x6669 pon_opcion: copia 0xF111 a 0xE000
+C 0x666C bancos_9_10: el cartucho en la pagina 2 y los bancos 9-10
+C 0x6688 bancos_2_3_y_ram: los bancos 2-3 y devuelve la RAM (0xF2A0) a la pagina 2
+C 0x668B pantalla_del_menu: borra la VRAM y pone el modo del menu (MSX1 o MSX2)
+C 0x668E bancos_9_10: el cartucho en la pagina 2 y los bancos 9-10
+C 0x6691 borra_nombres: borra la tabla de nombres y esconde los sprites (0xD0 en 0x3B00)
+C 0x6697 bancos_2_3_y_ram: los bancos 2-3 y devuelve la RAM (0xF2A0) a la pagina 2
+C 0x669B despacha: salta a la palabra A de la tabla pegada detras del `call`
+C 0x66A4 bancos_9_10: el cartucho en la pagina 2 y los bancos 9-10
+C 0x66AC guarda opcion / RC del juego
+C 0x66BC borra_nombres: borra la tabla de nombres y esconde los sprites (0xD0 en 0x3B00)
+C 0x66FC borra_nombres: borra la tabla de nombres y esconde los sprites (0xD0 en 0x3B00)
+C 0x66FF bancos_9_10: el cartucho en la pagina 2 y los bancos 9-10
+C 0x6705 bancos_2_3_y_ram: los bancos 2-3 y devuelve la RAM (0xF2A0) a la pagina 2
+C 0x672D lee el slot del Game Master
+C 0x6737 el mapper: pone en 0x8000 el banco de A
+C 0x673B el mapper: pone en 0xA000 el banco de A
+C 0x6741 el mapper: pone en 0x8000 el banco de A
+C 0x6745 el mapper: pone en 0xA000 el banco de A
+C 0x6748 lee el slot de la RAM de la pagina 2
+C 0x676A pinta_16_colores: pinta 16 casillas con los colores 1-15
+C 0x678F truco_vidas: las vidas: la rutina del juego de la tabla de p01:6CA6
+C 0x6794 truco_fase: la fase: la rutina del juego de la tabla de p01:6CD7
+C 0x6799 truco_propio: llama por CALSLT a la rutina del juego de 0xF294
+C 0x67A0 hay_ranking: Z si el juego no tiene ranking (0xF290, 0xF286)
+C 0x67A5 lee el codigo del juego
+C 0x67DD silencia_psg: pone a cero los tres volumenes del PSG (y el SCC del juego si lo tiene)
+C 0x67E0 p02_8000: p02:8000 con el cartucho en la pagina 2 y vuelta a la RAM
+C 0x67E3 menu_ranking: la pantalla del RANKING
+C 0x67E6 p02_80e4: p02:80E4 con el cartucho en la pagina 2 y vuelta a la RAM
+C 0x67F3 lee el truco de vidas del juego
+C 0x67FF truco_6d2f: pone 0xF29A en la variable del juego
+C 0x6804 lee el truco de vidas del juego
+C 0x680E busca_en_tabla_y_salta: busca 0xF281 en la tabla [codigo, direccion] de HL y salta
+C 0x6814 truco_6d41: calcula el valor que se escribe en el juego (p01:706C)
+C 0x681A lee la rutina propia del juego y el byte siguiente (16 bits)
+C 0x681E lee el slot del Game Master y el byte siguiente (16 bits)
+C 0x682A lee el codigo del juego
+C 0x683E lee el codigo del juego
+C 0x6851 rellena_ventana: rellena una ventana de B filas por C columnas con A
+C 0x6857 pinta_texto: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
+C 0x685A pinta_ranking: pinta la cabecera y las filas del ranking
+C 0x6860 menu_ocho: menu de 8 opciones (p01:750E)
+C 0x6873 borra_3: pone a cero 3 bytes en HL
+C 0x6878 ranking_quita_marca: quita la marca A de las 10 filas del ranking (0x9257)
+C 0x687B pinta_ranking: pinta la cabecera y las filas del ranking
+C 0x687E hay_ranking: Z si el juego no tiene ranking (0xF290, 0xF286)
+C 0x6886 pinta_texto: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
+C 0x6891 rellena_vram: rellena la VRAM con A (letra a letra si la pantalla es de texto)
+C 0x6895 menu_ocho: menu de 8 opciones (p01:750E)
+C 0x68A8 borra_3: pone a cero 3 bytes en HL
+C 0x68AD ranking_quita_marca: quita la marca A de las 10 filas del ranking (0x9257)
+C 0x68B0 pinta_ranking: pinta la cabecera y las filas del ranking
+C 0x68BA rellena_ventana: rellena una ventana de B filas por C columnas con A
+C 0x68C0 pinta_texto: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
+C 0x68C8 menu_vertical: menu de B opciones: cursores arriba y abajo, espacio elige
+C 0x68CB despacha: salta a la palabra A de la tabla pegada detras del `call`
+C 0x68D7 menu: menu de B opciones con el cursor A: devuelve la elegida
+C 0x68ED lee el codigo del juego
+C 0x690D ranking_quita_marca: quita la marca A de las 10 filas del ranking (0x9257)
+C 0x6920 hl_mas_a: HL = HL + A
+C 0x692D rellena_ventana: rellena una ventana de B filas por C columnas con A
+C 0x6933 pinta_texto: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
+C 0x693F copia_a_vram: copia BC bytes de HL a la VRAM DE (letra a letra si es de texto)
+C 0x6942 hay_ranking: Z si el juego no tiene ranking (0xF290, 0xF286)
+C 0x6949 pinta_texto: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
+C 0x6955 copia_a_vram: copia BC bytes de HL a la VRAM DE (letra a letra si es de texto)
+C 0x69B2 ranking_busca_marca: busca la marca A en el ranking
+C 0x69B5 hay_ranking: Z si el juego no tiene ranking (0xF290, 0xF286)
+C 0x69CB hl_mas_a: HL = HL + A
+C 0x69F6 ranking_ordena: ordena el ranking
+C 0x69F9 ranking_mueve: mueve una fila del ranking
+C 0x6A09 ranking_mueve: mueve una fila del ranking
+C 0x6A11 ranking_mueve: mueve una fila del ranking
+C 0x6A1E ranking_compara: compara dos filas del ranking
+C 0x6A63 hl_mas_a: HL = HL + A
+C 0x6A87 hl_mas_a: HL = HL + A
+C 0x6AA7 rellena_ventana: rellena una ventana de B filas por C columnas con A
+C 0x6AAA cursor_apaga: quita el cursor
+C 0x6AC3 cursor_pinta: pinta el cursor (':' o el de MSX2)
+C 0x6AC6 ranking_edita: edita el nombre del ranking
+C 0x6B01 cursor_borra: borra el cursor
+C 0x6B32 modo_de_texto: Z si la pantalla es de texto (0xFCAF < 5)
+C 0x6B3A pon_letra: escribe A en la VRAM HL guardando los registros
+C 0x6B41 lee color guardado
+C 0x6B48 modo_de_texto: Z si la pantalla es de texto (0xFCAF < 5)
+C 0x6B50 pon_letra: escribe A en la VRAM HL guardando los registros
+C 0x6B5B lee color guardado
+C 0x6B65 fila_de_ranking: HL = la fila A del ranking (0x9257, 9 bytes)
+C 0x6B6E puntos_de_ranking: HL = los puntos de la fila A (0x9239, 3 bytes)
+C 0x6B88 rellena_vram: rellena la VRAM con A (letra a letra si la pantalla es de texto)
+C 0x6B8B cursor_pinta: pinta el cursor (':' o el de MSX2)
+C 0x6B96 pon_letra: escribe A en la VRAM HL guardando los registros
+C 0x6B9D pon_letra: escribe A en la VRAM HL guardando los registros
+C 0x6BA3 pon_letra: escribe A en la VRAM HL guardando los registros
+C 0x6BA9 pon_letra: escribe A en la VRAM HL guardando los registros
+C 0x6BB6 copia_a_vram: copia BC bytes de HL a la VRAM DE (letra a letra si es de texto)
+C 0x6BB9 apunta a opcion / RC del juego
+C 0x6BBF byte_a_hex: escribe A en hexadecimal (dos letras) en HL
+C 0x6BC6 byte_a_hex: escribe A en hexadecimal (dos letras) en HL
+C 0x6BCD byte_a_hex: escribe A en hexadecimal (dos letras) en HL
+C 0x6BD5 pon_letra: escribe A en la VRAM HL guardando los registros
+C 0x6BD9 apunta a opcion / RC del juego
+C 0x6BDF lee el codigo del juego
+C 0x6BF7 pon_letra: escribe A en la VRAM HL guardando los registros
+C 0x6C04 copia_a_vram: copia BC bytes de HL a la VRAM DE (letra a letra si es de texto)
+C 0x6C11 pon_letra: escribe A en la VRAM HL guardando los registros
+C 0x6C1C copia_a_vram: copia BC bytes de HL a la VRAM DE (letra a letra si es de texto)
+C 0x6C41 hl_mas_a: HL = HL + A
+C 0x6C4C hl_mas_a: HL = HL + A
+C 0x6D48 multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits)
+C 0x6D4D lee la variable del juego que se cambia y el byte siguiente (16 bits)
+C 0x6D53 busca_juego_6dc9: busca el juego (0xF280) en la tabla de p01:6DC9
+C 0x6D77 hl_mas_a: HL = HL + A
+C 0x6DB4 lee la ficha del juego y el byte siguiente (16 bits)
+C 0x6DE5 binario_a_bcd: HL a BCD en DE
+C 0x6DF4 bcd_a_binario: A en BCD a binario
+C 0x6DFA pon_valor: escribe 0xF29C en la variable del juego (0xF28A)
+C 0x6E02 multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits)
+C 0x6E1A hl_mas_a: HL = HL + A
+C 0x6E21 pon_valor: escribe 0xF29C en la variable del juego (0xF28A)
+C 0x6E3D multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits)
+C 0x6E42 lee la variable del juego que se cambia y el byte siguiente (16 bits)
+C 0x6E50 lee el codigo del juego
+C 0x6E5B hl_mas_a: HL = HL + A
+C 0x6E66 hl_mas_a: HL = HL + A
+C 0x6E81 pon_valor: escribe 0xF29C en la variable del juego (0xF28A)
+C 0x6E8F multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits)
+C 0x6E97 pon_valor: escribe 0xF29C en la variable del juego (0xF28A)
+C 0x6EAB hl_mas_a: HL = HL + A
+C 0x6EBA multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits)
+C 0x6EC2 hl_mas_a: HL = HL + A
+C 0x6EE9 pon_valor: escribe 0xF29C en la variable del juego (0xF28A)
+C 0x6EF8 multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits)
+C 0x6F04 multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits)
+C 0x6F11 hl_mas_a: HL = HL + A
+C 0x6F3C multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits)
+C 0x6F45 pon_valor: escribe 0xF29C en la variable del juego (0xF28A)
+C 0x6F48 pon_valor: escribe 0xF29C en la variable del juego (0xF28A)
+C 0x6F51 multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits)
+C 0x6F70 lee el valor que se escribe
+C 0x6F73 lee la variable del juego que se cambia y el byte siguiente (16 bits)
+C 0x6F7D multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits)
+C 0x6F91 hl_mas_a: HL = HL + A
+C 0x6FD6 lee el valor que se escribe
+C 0x6FE9 multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits)
+C 0x6FFC multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits)
+C 0x7004 lee la variable del juego que se cambia y el byte siguiente (16 bits)
+C 0x7008 borra_pantalla_b: borra la tabla de nombres y esconde los sprites
+C 0x700D guarda fila elegida de la SRAM
+C 0x7012 guarda opcion / RC del juego
+C 0x7016 borra_pantalla_b: borra la tabla de nombres y esconde los sprites
+C 0x7023 lee la variable del juego que se cambia y el byte siguiente (16 bits)
+C 0x702F pon_valor: escribe 0xF29C en la variable del juego (0xF28A)
+C 0x7037 multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits)
+C 0x704B borra_pantalla_b: borra la tabla de nombres y esconde los sprites
+C 0x7053 multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits)
+C 0x7057 lee la variable del juego que se cambia y el byte siguiente (16 bits)
+C 0x7065 lee el valor que se escribe
+C 0x709D ficha_del_juego: busca la ficha del juego (p00:44BE) y la copia a 0xF280
+C 0x70A0 lee_cabecera_juego: lee la cabecera de 0x4028 del juego y sus opciones
+C 0x70AA lee la ficha del juego y el byte siguiente (16 bits)
+C 0x70BF copia_del_juego: copia BC bytes de HL del cartucho del juego (RDSLT) a DE
+C 0x70F4 rc_751_o_752: compara el RC del juego (0xE000, al reves) con 0x751 y 0x752
+C 0x7112 busca_ficha: copia la ficha por defecto (p00:45D0) y busca la del juego por su suma
+C 0x7115 lee el codigo del juego
+C 0x7139 apunta a la ficha del juego
+C 0x7149 lee_palabra_del_juego: DE = la palabra HL del cartucho del juego (RDSLT en 0xF104)
+C 0x7155 apunta a la ficha del juego
+C 0x715B copia_del_juego: copia BC bytes de HL del cartucho del juego (RDSLT) a DE
+C 0x716E apunta a opcion / RC del juego
+C 0x7174 copia_del_juego: copia BC bytes de HL del cartucho del juego (RDSLT) a DE
+C 0x7177 apunta a opcion / RC del juego
+C 0x717A apunta a la ficha del juego
+C 0x7186 lee la ficha del juego y el byte siguiente (16 bits)
+C 0x71AE apunta a la variable del juego que se cambia
+C 0x71D7 lee opcion / RC del juego y el byte siguiente (16 bits)
+C 0x71F9 lee el slot del cartucho del juego
+C 0x7242 apunta a la ficha del juego
+C 0x7286 pon_color: MSX2: el color B de la paleta con D y E (R#16 y puerto 2)
+C 0x72B7 pon_color: MSX2: el color B de la paleta con D y E (R#16 y puerto 2)
+C 0x7328 descomprime: descomprime HL a la VRAM DE: n & 0x7F repeticiones o copias
+C 0x733B vram_escribe_en: SETWRT (o NSTWRT en MSX2) en HL
+C 0x7395 modo_de_texto: Z si la pantalla es de texto (0xFCAF < 5)
+C 0x73AB letra_grafica: pinta una letra en modo grafico
+C 0x73AE lee color guardado
+C 0x73C2 guarda color guardado
+C 0x73E1 modo_de_texto: Z si la pantalla es de texto (0xFCAF < 5)
+C 0x7435 hl_otra_mitad: H xor 0x80
+C 0x7445 vram_escribe_en: SETWRT (o NSTWRT en MSX2) en HL
+C 0x745A hl_otra_mitad: H xor 0x80
+C 0x7460 lee color guardado
+C 0x7496 rellena_ventana: rellena una ventana de B filas por C columnas con A
+C 0x7499 lee hay menu en pantalla
+C 0x749E cartucho_en_8000: pone el cartucho (0xF103) en la pagina 2
+C 0x74A3 el mapper: pone en 0x8000 el banco de A
+C 0x74A6 guarda_pantalla: guarda la pantalla del juego antes del menu (segun el modo de 0xF3DF/0xF3E0)
+C 0x74AD lee el slot de la RAM de la pagina 2
+C 0x74BA lee hay menu en pantalla
+C 0x74BF cartucho_en_8000: pone el cartucho (0xF103) en la pagina 2
+C 0x74C4 el mapper: pone en 0x8000 el banco de A
+C 0x74F4 cartucho_en_8000: pone el cartucho (0xF103) en la pagina 2
+C 0x7501 lee el slot del Game Master
+C 0x7520 cursor_pinta: pinta el cursor (':' o el de MSX2)
+C 0x7523 borra_teclado: borra el bufer de teclas del menu (0x920B)
+C 0x753E opcion_cero: si no hay opcion elegida, vuelve al menu
+C 0x7547 hl_mas_a: HL = HL + A
+C 0x7556 cursor_borra: borra el cursor
+C 0x755D cursor_pinta: pinta el cursor (':' o el de MSX2)
+C 0x756F opcion_cero: si no hay opcion elegida, vuelve al menu
+C 0x75C0 pon_letra: escribe A en la VRAM HL guardando los registros
+C 0x75CB pon_letra: escribe A en la VRAM HL guardando los registros
+C 0x75D2 cursor_pinta: pinta el cursor (':' o el de MSX2)
+C 0x75DB hl_mas_a: HL = HL + A
+C 0x75EF cursor_apaga: quita el cursor
+C 0x7600 modo_de_texto: Z si la pantalla es de texto (0xFCAF < 5)
+C 0x7603 lee color guardado
+C 0x7610 lee hay menu en pantalla
+C 0x7622 copia_tercios: LDIRVM en los tres tercios de la pantalla
+C 0x764A pon_letra_b: escribe A en la VRAM HL (WRTVRM o en modo grafico)
+C 0x7653 modo_de_texto: Z si la pantalla es de texto (0xFCAF < 5)
+C 0x765E cartucho_en_8000: pone el cartucho (0xF103) en la pagina 2
+C 0x7661 letra_grafica_b: posicion y letra en modo grafico
+C 0x7664 lee color guardado
+C 0x7676 menu_prepara: prepara el menu: opciones, posicion y cursor
+C 0x7679 menu_limpia: quita el cursor y borra el teclado
+C 0x7688 menu_cursor: mueve el cursor con las flechas (0x1E arriba, 0x1F abajo)
+C 0x7690 menu_prepara: prepara el menu: opciones, posicion y cursor
+C 0x7693 menu_limpia: quita el cursor y borra el teclado
+C 0x769E cursor_borra: borra el cursor
+C 0x76A9 menu_cursor: mueve el cursor con las flechas (0x1E arriba, 0x1F abajo)
+C 0x76BE cursor_pinta: pinta el cursor (':' o el de MSX2)
+C 0x76E4 hl_mas_a: HL = HL + A
+C 0x76EC cursor_borra: borra el cursor
+C 0x76F3 cursor_pinta: pinta el cursor (':' o el de MSX2)
+C 0x76F6 cursor_apaga: quita el cursor
+C 0x771C fin_de_8882: compara HL con 0x8882
+C 0x7730 fin_de_8882: compara HL con 0x8882
+C 0x773A fin_de_8882: compara HL con 0x8882
+C 0x7769 fin_de_8882: compara HL con 0x8882
+C 0x77C3 lee el slot de la RAM de la pagina 2
+C 0x77D4 lee_vram_tercios: LDIRMV de los tres tercios (0x2000 de paso)
+C 0x77E0 lee_vram_tercios: LDIRMV de los tres tercios (0x2000 de paso)
+C 0x77EC lee_vram_tercios: LDIRMV de los tres tercios (0x2000 de paso)
+C 0x7812 borra_por_modo: borra la pantalla segun el modo de 0xF2A1
+C 0x7847 lee el slot de la RAM de la pagina 2
+C 0x784F borra_por_modo: borra la pantalla segun el modo de 0xF2A1
+C 0x785B copia_vram_tercios: LDIRVM de los tres tercios (0x2000 de paso)
+C 0x7867 copia_vram_tercios: LDIRVM de los tres tercios (0x2000 de paso)
+C 0x7873 copia_vram_tercios: LDIRVM de los tres tercios (0x2000 de paso)
+C 0x78A7 borra_segun_modo: borra la pantalla segun el modo
+C 0x78AE borra_segun_modo: borra la pantalla segun el modo
+C 0x78B1 borra_nombres: borra la tabla de nombres y esconde los sprites (0xD0 en 0x3B00)
+C 0x78BA posicion_grafica: la posicion en modo grafico de la letra
+C 0x78C7 dibuja_letra: dibuja la letra A con la fuente de p00:4837
+C 0x7907 de_otra_mitad: D xor 0x80
+C 0x795F de_otra_mitad: D xor 0x80
+C 0x796E posicion_grafica: la posicion en modo grafico de la letra
+C 0x7987 borra_pantalla: borra la tabla de nombres (0x3800, 0x300 bytes)
+C 0x798A apunta a opcion / RC del juego
+C 0x798D apunta a fila elegida de la SRAM
+C 0x79A0 copia_tercios: LDIRVM en los tres tercios de la pantalla
+C 0x79AB rellena_tercios: FILVRM en los tres tercios de la pantalla
+C 0x79AE lee el slot del Game Master
+C 0x79B1 guarda opcion / RC del juego
+C 0x79BC pinta_texto: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
+C 0x79C4 menu_vertical: menu de B opciones: cursores arriba y abajo, espacio elige
+C 0x79C8 borra_zona_3ac0: borra 0x3AC0 (0x20 bytes) letra a letra
+C 0x79CC despacha: salta a la palabra A de la tabla pegada detras del `call`
+C 0x79E1 menu_sram: el menu de la SRAM: limpia 0xE010, pinta y lee teclas
+C 0x79E7 menu_borrar: pide el nombre de 5 letras a borrar (0xE250) y lo busca
+C 0x79ED pregunta_formatear: pregunta si se formatea (Y/N) y llama a la SRAM
+# --- fin de las anotaciones de anota.py ---

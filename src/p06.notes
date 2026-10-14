@@ -14,3 +14,89 @@ F 0xA417 16
 D 0xA442 0xC000 relleno_ff  7102 bytes a 0xFF hasta el final del banco: relleno; lo leen nadie (7102 bytes)
 F 0xA442 16
 # --- fin de los bloques de bloques.py ---
+
+# --- ANOTACIONES AUTOMATICAS (seccion que reescribe tools/anota.py; no editar a mano) ---
+L 0xA010 bio_marco dibuja los marcos de la grafica
+L 0xA050 bio_eje dibuja el eje de la grafica
+L 0xA05B bio_rejilla dibuja la rejilla de la grafica
+L 0xA0CC bio_texto_a19d pinta el texto de p06:A19D
+L 0xA0DB bio_casilla pinta una casilla con el comando del VDP
+L 0xA122 bio_borra_zona borra la zona de la grafica (comando del VDP)
+L 0xA13B bio_texto_a1b2 pinta el texto de p06:A1B2
+L 0xA142 bio_texto_a1bd pinta el texto de p06:A1BD
+L 0xA149 bio_texto_a1cb pinta el texto de p06:A1CB
+L 0xA150 bio_texto_a1da pinta el texto de p06:A1DA
+L 0xA31E bio_avanza_dia pasa el dia (0xE061) cada 64 cuadros
+L 0xA325 bio_dia_sube sube el dia mostrado (0xE054) (gemela de p05:9B8D)
+L 0xA360 bio_valores los tres valores del dia (0xE05A..) a 0xE070
+L 0xA375 bio_pinta_letras pinta P, S e I (fisico, sensibilidad, intelecto) en su altura
+L 0xA392 bio_pinta_marca pinta la marca de un ciclo en su altura
+L 0xA3A0 bio_coordenada HL = 0x1200 + A
+L 0xA3B1 bio_niveles clasifica los tres ciclos (0xE05A, 0xE05C, 0xE05E)
+L 0xA3CD bio_nivel B = el nivel de A (umbrales 0xA8, 0x94, 0x7E...)
+L 0xA3EA bio_pinta_niveles pinta el nivel de cada ciclo
+L 0xA40F bio_texto_nivel el texto del nivel A (tabla de p06:A417)
+L 0xA421 tabla_palabra DE = la palabra A de la tabla de HL
+L 0xA429 bio_pinta_texto pinta el texto del nivel en DE
+L 0xA436 bio_borra_texto borra la zona del texto (comando del VDP)
+C 0xA006 bio_marco: dibuja los marcos de la grafica
+C 0xA009 bio_eje: dibuja el eje de la grafica
+C 0xA00C bio_rejilla: dibuja la rejilla de la grafica
+C 0xA01A vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
+C 0xA03E vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
+C 0xA04C bio_texto_a19d: pinta el texto de p06:A19D
+C 0xA057 vdp_linea: traza una linea con el comando del VDP (desde R#36)
+C 0xA062 vdp_punto: pinta un punto con el comando del VDP (desde R#36)
+C 0xA070 vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
+C 0xA07D vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
+C 0xA09C vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
+C 0xA0A9 vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
+C 0xA0C8 vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
+C 0xA0E9 vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
+C 0xA100 vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
+C 0xA10D vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
+C 0xA12C vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
+C 0xA245 vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
+C 0xA252 vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
+C 0xA27A vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
+C 0xA289 despacha: salta a la palabra A de la tabla pegada detras del `call`
+C 0xA29C bio_borra_zona: borra la zona de la grafica (comando del VDP)
+C 0xA29F bio_texto_a1b2: pinta el texto de p06:A1B2
+C 0xA2A5 bio_borra_zona: borra la zona de la grafica (comando del VDP)
+C 0xA2A8 bio_texto_a1bd: pinta el texto de p06:A1BD
+C 0xA2AE bio_borra_zona: borra la zona de la grafica (comando del VDP)
+C 0xA2B1 bio_texto_a1cb: pinta el texto de p06:A1CB
+C 0xA2B7 bio_avanza_dia: pasa el dia (0xE061) cada 64 cuadros
+C 0xA2CD pon_color: MSX2: el color B de la paleta con D y E (R#16 y puerto 2)
+C 0xA2D3 bio_avanza_dia: pasa el dia (0xE061) cada 64 cuadros
+C 0xA2F1 pon_color: MSX2: el color B de la paleta con D y E (R#16 y puerto 2)
+C 0xA2F7 bio_avanza_dia: pasa el dia (0xE061) cada 64 cuadros
+C 0xA30B pon_color: MSX2: el color B de la paleta con D y E (R#16 y puerto 2)
+C 0xA314 bio_borra_zona: borra la zona de la grafica (comando del VDP)
+C 0xA317 bio_texto_a1da: pinta el texto de p06:A1DA
+C 0xA31E lee fila elegida de la SRAM
+C 0xA336 bio_valores: los tres valores del dia (0xE05A..) a 0xE070
+C 0xA339 bio_pinta_letras: pinta P, S e I (fisico, sensibilidad, intelecto) en su altura
+C 0xA36E hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0xA37E bio_pinta_marca: pinta la marca de un ciclo en su altura
+C 0xA386 bio_pinta_marca: pinta la marca de un ciclo en su altura
+C 0xA38E bio_pinta_marca: pinta la marca de un ciclo en su altura
+C 0xA392 bio_coordenada: HL = 0x1200 + A
+C 0xA397 bio_casilla: pinta una casilla con el comando del VDP
+C 0xA39C pinta_letra_8x8: copia la letra A de 8x8 de la hoja de letras a DE (LMMM)
+C 0xA3AA bio_niveles: clasifica los tres ciclos (0xE05A, 0xE05C, 0xE05E)
+C 0xA3AD bio_pinta_niveles: pinta el nivel de cada ciclo
+C 0xA3B7 bio_nivel: B = el nivel de A (umbrales 0xA8, 0x94, 0x7E...)
+C 0xA3C0 bio_nivel: B = el nivel de A (umbrales 0xA8, 0x94, 0x7E...)
+C 0xA3C9 bio_nivel: B = el nivel de A (umbrales 0xA8, 0x94, 0x7E...)
+C 0xA3ED bio_texto_nivel: el texto del nivel A (tabla de p06:A417)
+C 0xA3F3 bio_pinta_texto: pinta el texto del nivel en DE
+C 0xA3F9 bio_texto_nivel: el texto del nivel A (tabla de p06:A417)
+C 0xA3FF bio_pinta_texto: pinta el texto del nivel en DE
+C 0xA405 bio_texto_nivel: el texto del nivel A (tabla de p06:A417)
+C 0xA40B bio_pinta_texto: pinta el texto del nivel en DE
+C 0xA412 tabla_palabra: DE = la palabra A de la tabla de HL
+C 0xA422 hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0xA42B bio_borra_texto: borra la zona del texto (comando del VDP)
+C 0xA43E vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
+# --- fin de las anotaciones de anota.py ---

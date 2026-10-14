@@ -19,8 +19,8 @@ L_8000:
 	ld hl,00000h		;8001
 	add hl,sp			;8004
 	ld (0f0f6h),hl		;8005
-	ld hl,0e000h		;8008
-	ld de,0e001h		;800b
+	ld hl,0e000h		;8008   ; apunta a opcion / RC del juego
+	ld de,0e001h		;800b   ; apunta a fila elegida de la SRAM
 	ld bc,010f4h		;800e
 	ld (hl),000h		;8011
 	ldir		;8013
@@ -31,8 +31,8 @@ L_8000:
 	ld a,(0002dh)		;8020
 	nop			;8023
 	ld (0f0f5h),a		;8024
-	call L_8056		;8027
-	call L_8062		;802a
+	call bio_pantalla		;8027   ; bio_pantalla: prepara la pantalla: MSX1 (p05:873D) o MSX2 (p05:8768) segun 0xF0F5
+	call bio_graficos		;802a   ; bio_graficos: los graficos: MSX1 (p05:8C73) o MSX2 (p05:8D22) segun 0xF0F5
 	jp L_8B14		;802d
 L_8030:
 	jp L_8033		;8030
@@ -52,42 +52,42 @@ L_8033:
 	ld hl,(0f0f6h)		;8051
 	ld sp,hl			;8054
 	ret			;8055
-L_8056:
+bio_pantalla:		; prepara la pantalla: MSX1 (p05:873D) o MSX2 (p05:8768) segun 0xF0F5
 	ld a,(0f0f5h)		;8056
 	and a			;8059
 	jr nz,L_805F		;805a
 	jp L_873D		;805c
 L_805F:
 	jp L_8768		;805f
-L_8062:
+bio_graficos:		; los graficos: MSX1 (p05:8C73) o MSX2 (p05:8D22) segun 0xF0F5
 	ld a,(0f0f5h)		;8062
 	and a			;8065
 	jr nz,L_806B		;8066
 	jp L_8C73		;8068
 L_806B:
 	jp L_8D22		;806b
-L_806E:
+hl_mas_a:		; HL = HL + A (gemela de p01:7251)
 	add a,l			;806e
 	ld l,a			;806f
 	ret nc			;8070
 	inc h			;8071
 	ret			;8072
-L_8073:
+de_mas_a:		; DE = DE + A (gemela de p01:7256)
 	add a,e			;8073
 	ld e,a			;8074
 	ret nc			;8075
 	inc d			;8076
 	ret			;8077
-L_8078:
+despacha:		; salta a la palabra A de la tabla pegada detras del `call`
 	pop hl			;8078
 	add a,a			;8079
-	call L_806E		;807a
+	call hl_mas_a		;807a   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld e,(hl)			;807d
 	inc hl			;807e
 	ld d,(hl)			;807f
 	ex de,hl			;8080
 	jp (hl)			;8081
-L_8082:
+th_vram_escribe:		; SETWRT en HL y C = el puerto de datos del VDP (gemela de p07:85E2)
 	ex af,af'			;8082
 	call 00053h		;8083   ; BIOS SETWRT - Enables VDP to write
 	exx			;8086
@@ -103,7 +103,7 @@ L_808E:
 	ld c,a			;8095
 	exx			;8096
 	ret			;8097
-L_8098:
+copia_a_vram_de:		; LDIRVM de DE a HL
 	ex de,hl			;8098
 	jp 0005ch		;8099   ; BIOS LDIRVM - Block transfers to VRAM from memory
 L_809C:
@@ -113,7 +113,7 @@ L_809F:
 	exx			;809f
 	push bc			;80a0
 	push de			;80a1
-	call L_8098		;80a2
+	call copia_a_vram_de		;80a2   ; copia_a_vram_de: LDIRVM de DE a HL
 	ld de,00800h		;80a5
 	add hl,de			;80a8
 	pop de			;80a9
@@ -121,7 +121,7 @@ L_809F:
 	exx			;80ab
 	djnz L_809F		;80ac
 	ret			;80ae
-L_80AF:
+th_rellena_tercios:		; FILVRM en los tres tercios (gemela de p07:8605)
 	ld d,003h		;80af
 L_80B1:
 	push bc			;80b1
@@ -134,22 +134,22 @@ L_80B1:
 	dec d			;80bc
 	jr nz,L_80B1		;80bd
 	ret			;80bf
-L_80C0:
+th_descomprime_tercios:		; descomprime DE en los tres tercios (gemela de p07:8616)
 	ld b,003h		;80c0
 L_80C2:
 	push bc			;80c2
 	push de			;80c3
-	call L_80F7		;80c4
+	call th_descomprime		;80c4   ; th_descomprime: descomprime DE a la VRAM HL: n & 0x7F repeticiones o copias, 0 acaba (gemela de p07:8647)
 	ld de,00800h		;80c7
 	add hl,de			;80ca
 	pop de			;80cb
 	pop bc			;80cc
 	djnz L_80C2		;80cd
 	ret			;80cf
-L_80D0:
-	call L_80D4		;80d0
+pinta_texto_bio:		; pinta un texto [direccion][letras]; 0x80 acaba, 0x81 otra direccion
+	call pinta_texto_bio_b		;80d0   ; pinta_texto_bio_b: pinta un texto con la mascara C
 	ret			;80d3
-L_80D4:
+pinta_texto_bio_b:		; pinta un texto con la mascara C
 	ld c,0ffh		;80d4
 L_80D6:
 	ex de,hl			;80d6
@@ -158,7 +158,7 @@ L_80D6:
 	ld d,(hl)			;80d9
 	ex de,hl			;80da
 	inc de			;80db
-L_80DC:
+pinta_letras_bio:		; pinta letras hasta 0x80 (0x81 trae otra direccion)
 	ld a,(de)			;80dc
 	inc de			;80dd
 	cp 080h		;80de
@@ -168,10 +168,10 @@ L_80DC:
 	and c			;80e5
 	ld (hl),a			;80e6
 	inc hl			;80e7
-	jr L_80DC		;80e8
+	jr pinta_letras_bio		;80e8
 L_80EA:
-	call L_80ED		;80ea
-L_80ED:
+	call pinta_texto_bio_c		;80ea   ; pinta_texto_bio_c: pinta un texto con la mascara 0
+pinta_texto_bio_c:		; pinta un texto con la mascara 0
 	ld c,000h		;80ed
 	jr L_80D6		;80ef
 L_80F1:
@@ -181,8 +181,8 @@ L_80F1:
 	ld d,(hl)			;80f4
 	ex de,hl			;80f5
 	inc de			;80f6
-L_80F7:
-	call L_8082		;80f7
+th_descomprime:		; descomprime DE a la VRAM HL: n & 0x7F repeticiones o copias, 0 acaba (gemela de p07:8647)
+	call th_vram_escribe		;80f7   ; th_vram_escribe: SETWRT en HL y C = el puerto de datos del VDP (gemela de p07:85E2)
 L_80FA:
 	ld a,(de)			;80fa
 	and a			;80fb
@@ -213,8 +213,8 @@ L_8114:
 	djnz L_8114		;8118
 	jr L_80FA		;811a
 L_811C:
-	call L_819C		;811c
-	call L_812F		;811f
+	call vram_situa_lee		;811c   ; vram_situa_lee: pone la direccion de 17 bits de la VRAM para leer
+	call cuenta_otir		;811f   ; cuenta_otir: A y B para un OTIR de BC bytes (gemela de p09:8DEE)
 	ex af,af'			;8122
 	ld a,(00006h)		;8123
 	ld c,a			;8126
@@ -225,7 +225,7 @@ L_8128:
 	jr nz,L_8128		;812b
 	ex de,hl			;812d
 	ret			;812e
-L_812F:
+cuenta_otir:		; A y B para un OTIR de BC bytes (gemela de p09:8DEE)
 	ex de,hl			;812f
 	ld a,c			;8130
 	or a			;8131
@@ -234,10 +234,10 @@ L_812F:
 	ret z			;8134
 	inc a			;8135
 	ret			;8136
-L_8137:
+escribe_vram_otir:		; escribe BC bytes de HL en la VRAM DE con OTIR (gemela de p09:8DF6)
 	ex de,hl			;8137
-	call L_817D		;8138
-	call L_812F		;813b
+	call vram_situa_128k		;8138   ; vram_situa_128k: pone la direccion de 17 bits de la VRAM (R
+	call cuenta_otir		;813b   ; cuenta_otir: A y B para un OTIR de BC bytes (gemela de p09:8DEE)
 	ex af,af'			;813e
 	ld a,(00007h)		;813f
 	ld c,a			;8142
@@ -247,10 +247,10 @@ L_8144:
 	dec a			;8146
 	jr nz,L_8144		;8147
 	ret			;8149
-L_814A:
+rellena_vram_128k:		; rellena BC bytes de la VRAM HL (128 KB) con A
 	push de			;814a
 	push af			;814b
-	call L_817D		;814c
+	call vram_situa_128k		;814c   ; vram_situa_128k: pone la direccion de 17 bits de la VRAM (R
 	ld d,c			;814f
 	ld a,c			;8150
 	or a			;8151
@@ -267,25 +267,25 @@ L_815A:
 	djnz L_815A		;815f
 	pop de			;8161
 	ret			;8162
-L_8163:
+lee_vram_byte:		; lee el byte de la VRAM HL (128 KB)
 	push bc			;8163
-	call L_819C		;8164
+	call vram_situa_lee		;8164   ; vram_situa_lee: pone la direccion de 17 bits de la VRAM para leer
 	ld a,(00006h)		;8167
 	ld c,a			;816a
 	in a,(c)		;816b
 	pop bc			;816d
 	ret			;816e
-L_816F:
+escribe_vram_byte:		; escribe A en la VRAM HL (128 KB)
 	push bc			;816f
 	push af			;8170
-	call L_817D		;8171
+	call vram_situa_128k		;8171   ; vram_situa_128k: pone la direccion de 17 bits de la VRAM (R
 	ld a,(00007h)		;8174
 	ld c,a			;8177
 	pop af			;8178
 	out (c),a		;8179
 	pop bc			;817b
 	ret			;817c
-L_817D:
+vram_situa_128k:		; pone la direccion de 17 bits de la VRAM (R
 	push bc			;817d
 	ld a,(00007h)		;817e
 	inc a			;8181
@@ -307,7 +307,7 @@ L_817D:
 	pop bc			;8199
 	ei			;819a
 	ret			;819b
-L_819C:
+vram_situa_lee:		; pone la direccion de 17 bits de la VRAM para leer
 	push bc			;819c
 	ld a,(00007h)		;819d
 	inc a			;81a0
@@ -338,7 +338,7 @@ L_81BB:
 	inc hl			;81bf
 	ex de,hl			;81c0
 L_81C1:
-	call L_817D		;81c1
+	call vram_situa_128k		;81c1   ; vram_situa_128k: pone la direccion de 17 bits de la VRAM (R
 	exx			;81c4
 	ld a,(00007h)		;81c5
 	ld c,a			;81c8
@@ -356,21 +356,21 @@ L_81CA:
 	jr z,L_81B9		;81d5
 	ld b,a			;81d7
 L_81D8:
-	call L_8238		;81d8
+	call lee_y_espeja		;81d8   ; lee_y_espeja: lee el byte de DE y, si C lleva el bit 0, le da la vuelta
 	exx			;81db
 	out (c),a		;81dc
 	exx			;81de
 	djnz L_81D8		;81df
 	jr L_81CA		;81e1
 L_81E3:
-	call L_8238		;81e3
+	call lee_y_espeja		;81e3   ; lee_y_espeja: lee el byte de DE y, si C lleva el bit 0, le da la vuelta
 L_81E6:
 	exx			;81e6
 	out (c),a		;81e7
 	exx			;81e9
 	djnz L_81E6		;81ea
 	jr L_81CA		;81ec
-L_81EE:
+descomprime_bio:		; descomprime en la VRAM con C = 0
 	ld c,000h		;81ee
 	jr L_81C1		;81f0
 L_81F2:
@@ -380,36 +380,36 @@ L_81F6:
 	ld c,001h		;81f6
 	jr L_81C1		;81f8
 L_81FA:
-	call L_821C		;81fa
+	call espejo_16		;81fa   ; espejo_16: escribe 16 bytes de la VRAM dados la vuelta (bit a bit)
 	ld a,020h		;81fd
-	call L_8073		;81ff
+	call de_mas_a		;81ff   ; de_mas_a: DE = DE + A (gemela de p01:7256)
 	dec c			;8202
 	jr nz,L_81FA		;8203
 	ret			;8205
 L_8206:
-	call L_821C		;8206
+	call espejo_16		;8206   ; espejo_16: escribe 16 bytes de la VRAM dados la vuelta (bit a bit)
 	ld a,0e0h		;8209
 	add a,e			;820b
 	ld e,a			;820c
 	jr c,L_8210		;820d
 	dec d			;820f
 L_8210:
-	call L_821C		;8210
+	call espejo_16		;8210   ; espejo_16: escribe 16 bytes de la VRAM dados la vuelta (bit a bit)
 	ld a,060h		;8213
-	call L_8073		;8215
+	call de_mas_a		;8215   ; de_mas_a: DE = DE + A (gemela de p01:7256)
 	dec c			;8218
 	jr nz,L_8206		;8219
 	ret			;821b
-L_821C:
+espejo_16:		; escribe 16 bytes de la VRAM dados la vuelta (bit a bit)
 	push de			;821c
 L_821D:
 	ld b,010h		;821d
 L_821F:
 	ex de,hl			;821f
-	call L_8163		;8220
+	call lee_vram_byte		;8220   ; lee_vram_byte: lee el byte de la VRAM HL (128 KB)
 	ex de,hl			;8223
-	call L_823D		;8224
-	call L_816F		;8227
+	call espeja_byte		;8224   ; espeja_byte: da la vuelta a los 8 bits de A
+	call escribe_vram_byte		;8227   ; escribe_vram_byte: escribe A en la VRAM HL (128 KB)
 	inc e			;822a
 	inc hl			;822b
 	djnz L_821F		;822c
@@ -420,12 +420,12 @@ L_821F:
 	jr z,L_821D		;8234
 	pop de			;8236
 	ret			;8237
-L_8238:
+lee_y_espeja:		; lee el byte de DE y, si C lleva el bit 0, le da la vuelta
 	ld a,(de)			;8238
 	inc de			;8239
 	bit 0,c		;823a
 	ret z			;823c
-L_823D:
+espeja_byte:		; da la vuelta a los 8 bits de A
 	push bc			;823d
 	ld c,a			;823e
 	ld b,008h		;823f
@@ -436,47 +436,47 @@ L_8241:
 	pop bc			;8246
 	ret			;8247
 L_8248:
-	call L_827B		;8248
-	call L_826E		;824b
+	call esconde_sprites_msx2		;8248   ; esconde_sprites_msx2: 0xD8 en la tabla de sprites del MSX2 (0xF600)
+	call pantalla_apagada		;824b   ; pantalla_apagada: R#1 sin el bit 6: pantalla apagada
 	ld hl,00000h		;824e
 	ld bc,00000h		;8251
 	xor a			;8254
 	ld d,000h		;8255
-	call L_83C8		;8257
+	call vdp_hmmv		;8257   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 	ld b,000h		;825a
 	ld c,017h		;825c
 	call 00047h		;825e   ; BIOS WRTVDP - Writes data in the VDP-register
-L_8261:
+pantalla_encendida:		; R#1 con el bit 6: pantalla encendida
 	ld a,(0f3e0h)		;8261
 	or 040h		;8264
 	ld b,a			;8266
 	ld c,001h		;8267
 	call 00047h		;8269   ; BIOS WRTVDP - Writes data in the VDP-register
-	jr L_828E		;826c
-L_826E:
+	jr sprites_encendidos		;826c
+pantalla_apagada:		; R#1 sin el bit 6: pantalla apagada
 	ld a,(0f3e0h)		;826e
 	and 0bfh		;8271
 	ld b,a			;8273
 	ld c,001h		;8274
 	call 00047h		;8276   ; BIOS WRTVDP - Writes data in the VDP-register
-	jr L_8283		;8279
-L_827B:
+	jr sprites_apagados		;8279
+esconde_sprites_msx2:		; 0xD8 en la tabla de sprites del MSX2 (0xF600)
 	ld hl,0f600h		;827b
 	ld a,0d8h		;827e
-	jp L_816F		;8280
-L_8283:
+	jp escribe_vram_byte		;8280   ; escribe_vram_byte: escribe A en la VRAM HL (128 KB)
+sprites_apagados:		; R
 	ld a,(0ffe7h)		;8283
 	or 002h		;8286
 	ld b,a			;8288
 	ld c,008h		;8289
 	jp 00047h		;828b   ; BIOS WRTVDP - Writes data in the VDP-register
-L_828E:
+sprites_encendidos:		; R
 	ld a,(0ffe7h)		;828e
 	and 0fdh		;8291
 	ld b,a			;8293
 	ld c,008h		;8294
 	jp 00047h		;8296   ; BIOS WRTVDP - Writes data in the VDP-register
-L_8299:
+pon_color:		; MSX2: el color B de la paleta con D y E (R#16 y puerto 2)
 	push bc			;8299
 	push hl			;829a
 	ld b,a			;829b
@@ -498,7 +498,7 @@ L_8299:
 	add a,a			;82b4
 	add a,l			;82b5
 	ld l,a			;82b6
-	call L_817D		;82b7
+	call vram_situa_128k		;82b7   ; vram_situa_128k: pone la direccion de 17 bits de la VRAM (R
 	dec c			;82ba
 	out (c),d		;82bb
 	out (c),e		;82bd
@@ -506,9 +506,9 @@ L_8299:
 	pop bc			;82c0
 	ei			;82c1
 	ret			;82c2
-L_82C3:
+paleta_bio:		; MSX2: los 16 colores de p05:82D7
 	ld hl,082d7h		;82c3
-L_82C6:
+paleta_desde:		; MSX2: los 16 colores de HL
 	ld b,010h		;82c6
 	ld a,000h		;82c8
 L_82CA:
@@ -517,7 +517,7 @@ L_82CA:
 	ld e,(hl)			;82cc
 	inc hl			;82cd
 	push af			;82ce
-	call L_8299		;82cf
+	call pon_color		;82cf   ; pon_color: MSX2: el color B de la paleta con D y E (R#16 y puerto 2)
 	pop af			;82d2
 	inc a			;82d3
 	djnz L_82CA		;82d4
@@ -538,13 +538,13 @@ DATA_resto_82D7:
 ; ======================================================================
 
 
-L_8305:
+espera_vdp:		; espera a que el VDP acabe el comando (bit 0 de S#2)
 	ld a,002h		;8305
-	call L_830F		;8307
+	call lee_estado_vdp		;8307   ; lee_estado_vdp: lee el registro de estado A del VDP (R
 	rra			;830a
-	jp c,L_8305		;830b
+	jp c,espera_vdp		;830b   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 	ret			;830e
-L_830F:
+lee_estado_vdp:		; lee el registro de estado A del VDP (R
 	push bc			;830f
 	push hl			;8310
 	ld hl,(00006h)		;8311
@@ -568,8 +568,8 @@ L_830F:
 	pop bc			;832c
 	ei			;832d
 	ret			;832e
-L_832F:
-	call L_8305		;832f
+vdp_linea:		; traza una linea con el comando del VDP (desde R#36)
+	call espera_vdp		;832f   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 	push bc			;8332
 	ld a,(00007h)		;8333
 	inc a			;8336
@@ -603,8 +603,8 @@ L_8354:
 	out (c),a		;8361
 	ei			;8363
 	ret			;8364
-L_8365:
-	call L_8305		;8365
+vdp_punto:		; pinta un punto con el comando del VDP (desde R#36)
+	call espera_vdp		;8365   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 	push bc			;8368
 	ld a,(00007h)		;8369
 	inc a			;836c
@@ -641,42 +641,42 @@ L_838A:
 	ret			;839b
 L_839C:
 	ld b,e			;839c
-	call L_83B4		;839d
+	call vdp_punto_guardando		;839d   ; vdp_punto_guardando: vdp_punto guardando HL, DE y BC
 	ld b,d			;83a0
-	call L_83BE		;83a1
+	call vdp_linea_guardando		;83a1   ; vdp_linea_guardando: vdp_linea guardando HL, DE y BC
 	push hl			;83a4
 	ld a,l			;83a5
 	add a,e			;83a6
 	ld l,a			;83a7
 	ld b,d			;83a8
-	call L_83BE		;83a9
+	call vdp_linea_guardando		;83a9   ; vdp_linea_guardando: vdp_linea guardando HL, DE y BC
 	pop hl			;83ac
 	ld a,h			;83ad
 	add a,d			;83ae
 	ld h,a			;83af
 	ld b,e			;83b0
-	jp L_83B4		;83b1
-L_83B4:
+	jp vdp_punto_guardando		;83b1   ; vdp_punto_guardando: vdp_punto guardando HL, DE y BC
+vdp_punto_guardando:		; vdp_punto guardando HL, DE y BC
 	push hl			;83b4
 	push de			;83b5
 	push bc			;83b6
-	call L_8365		;83b7
+	call vdp_punto		;83b7   ; vdp_punto: pinta un punto con el comando del VDP (desde R#36)
 	pop bc			;83ba
 	pop de			;83bb
 	pop hl			;83bc
 	ret			;83bd
-L_83BE:
+vdp_linea_guardando:		; vdp_linea guardando HL, DE y BC
 	push hl			;83be
 	push de			;83bf
 	push bc			;83c0
-	call L_832F		;83c1
+	call vdp_linea		;83c1   ; vdp_linea: traza una linea con el comando del VDP (desde R#36)
 	pop bc			;83c4
 	pop de			;83c5
 	pop hl			;83c6
 	ret			;83c7
-L_83C8:
+vdp_hmmv:		; rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 	ex af,af'			;83c8
-	call L_8305		;83c9
+	call espera_vdp		;83c9   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 	push bc			;83cc
 	ld a,(00007h)		;83cd
 	inc a			;83d0
@@ -715,9 +715,9 @@ L_83F6:
 	out (c),a		;8400
 	ei			;8402
 	ret			;8403
-L_8404:
+vdp_hmmm:		; copia rapida de VRAM a VRAM (HMMM): origen HL, destino DE, tamano BC, paginas en A (gemela de p09:8E52)
 	ex af,af'			;8404
-	call L_8305		;8405
+	call espera_vdp		;8405   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 	push bc			;8408
 	ld a,(00007h)		;8409
 	inc a			;840c
@@ -758,9 +758,9 @@ L_8404:
 	out (c),a		;8444
 	ei			;8446
 	ret			;8447
-L_8448:
+vdp_rellena:		; rellena un rectangulo con el comando del VDP (desde R#36)
 	ex af,af'			;8448
-	call L_8305		;8449
+	call espera_vdp		;8449   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 	push bc			;844c
 	ld a,(00007h)		;844d
 	inc a			;8450
@@ -801,7 +801,7 @@ L_8448:
 	inc c			;8487
 L_8488:
 	ld a,002h		;8488
-	call L_830F		;848a
+	call lee_estado_vdp		;848a   ; lee_estado_vdp: lee el registro de estado A del VDP (R
 	rra			;848d
 	ret nc			;848e
 	add a,a			;848f
@@ -813,7 +813,7 @@ L_8488:
 	jr L_8488		;8497
 L_8499:
 	ex af,af'			;8499
-	call L_8305		;849a
+	call espera_vdp		;849a   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 	ld a,(00007h)		;849d
 	inc a			;84a0
 	ld c,a			;84a1
@@ -856,7 +856,7 @@ L_84CE:
 	ret			;84da
 L_84DB:
 	ex af,af'			;84db
-	call L_8305		;84dc
+	call espera_vdp		;84dc   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 	push bc			;84df
 	ld a,(00007h)		;84e0
 	inc a			;84e3
@@ -907,7 +907,7 @@ L_850B:
 	inc c			;8526
 L_8527:
 	ld a,002h		;8527
-	call L_830F		;8529
+	call lee_estado_vdp		;8529   ; lee_estado_vdp: lee el registro de estado A del VDP (R
 	rra			;852c
 	ret nc			;852d
 	add a,a			;852e
@@ -919,9 +919,9 @@ L_8527:
 	jr L_8527		;8536
 L_8538:
 	ex af,af'			;8538
-	call L_8305		;8539
+	call espera_vdp		;8539   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 	ld a,007h		;853c
-	call L_830F		;853e
+	call lee_estado_vdp		;853e   ; lee_estado_vdp: lee el registro de estado A del VDP (R
 	push de			;8541
 	push bc			;8542
 	ld a,(00007h)		;8543
@@ -968,20 +968,20 @@ L_8576:
 	pop de			;8584
 L_8585:
 	ld a,002h		;8585
-	call L_830F		;8587
+	call lee_estado_vdp		;8587   ; lee_estado_vdp: lee el registro de estado A del VDP (R
 	rra			;858a
 	ret nc			;858b
 	add a,a			;858c
 	add a,a			;858d
 	jr nc,L_8585		;858e
 	ld a,007h		;8590
-	call L_830F		;8592
+	call lee_estado_vdp		;8592   ; lee_estado_vdp: lee el registro de estado A del VDP (R
 	ld (de),a			;8595
 	inc de			;8596
 	jr L_8585		;8597
-L_8599:
+vdp_lmmm:		; copia de VRAM a VRAM con operacion logica (LMMM, desde R#32)
 	ex af,af'			;8599
-	call L_8305		;859a
+	call espera_vdp		;859a   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 	push bc			;859d
 	ld a,(00007h)		;859e
 	inc a			;85a1
@@ -1068,30 +1068,30 @@ L_85E5:
 	ld c,006h		;8622
 	call 00047h		;8624   ; BIOS WRTVDP - Writes data in the VDP-register
 	ret			;8627
-L_8628:
-	call L_867F		;8628
-	call L_8733		;862b
-	djnz L_8628		;862e
+letras_1bit_a_4bit:		; pinta B letras de 1 bit en SCREEN 5 (4 bits)
+	call letra_1bit_a_4bit		;8628   ; letra_1bit_a_4bit: pasa una letra de 1 bit a 4 bits (0xE100) y la escribe (gemela de p09:8EEB)
+	call siguiente_letra		;862b   ; siguiente_letra: D += 8; al pasar de fila, E += 8 (gemela de p09:903E)
+	djnz letras_1bit_a_4bit		;862e
 	ret			;8630
 L_8631:
 	push bc			;8631
 	push de			;8632
 	push hl			;8633
 	push de			;8634
-	call L_864F		;8635
+	call letra_expande		;8635   ; letra_expande: expande los 8 bytes de la letra a 32 con el color C (0xE090)
 	pop de			;8638
 	ld hl,0e090h		;8639
 	ld bc,00808h		;863c
 	ld a,001h		;863f
-	call L_8448		;8641
-	call L_8305		;8644
+	call vdp_rellena		;8641   ; vdp_rellena: rellena un rectangulo con el comando del VDP (desde R#36)
+	call espera_vdp		;8644   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 	pop hl			;8647
 	ld bc,00008h		;8648
 	add hl,bc			;864b
 	pop de			;864c
 	pop bc			;864d
 	ret			;864e
-L_864F:
+letra_expande:		; expande los 8 bytes de la letra a 32 con el color C (0xE090)
 	ld b,008h		;864f
 	ld de,0e090h		;8651
 L_8654:
@@ -1130,12 +1130,12 @@ L_8671:
 	pop bc			;867b
 	djnz L_8654		;867c
 	ret			;867e
-L_867F:
+letra_1bit_a_4bit:		; pasa una letra de 1 bit a 4 bits (0xE100) y la escribe (gemela de p09:8EEB)
 	push bc			;867f
 	push de			;8680
 	push hl			;8681
 	push de			;8682
-	call L_864F		;8683
+	call letra_expande		;8683   ; letra_expande: expande los 8 bytes de la letra a 32 con el color C (0xE090)
 	pop de			;8686
 	ld b,d			;8687
 	ld d,e			;8688
@@ -1150,7 +1150,7 @@ L_867F:
 L_8697:
 	push bc			;8697
 	ld bc,00004h		;8698
-	call L_8137		;869b
+	call escribe_vram_otir		;869b   ; escribe_vram_otir: escribe BC bytes de HL en la VRAM DE con OTIR (gemela de p09:8DF6)
 	ex de,hl			;869e
 	ld bc,00080h		;869f
 	add hl,bc			;86a2
@@ -1182,7 +1182,7 @@ L_86B9:
 	inc b			;86be
 	jr z,L_86AF		;86bf
 	and c			;86c1
-	call L_86FC		;86c2
+	call pinta_letra_8x8		;86c2   ; pinta_letra_8x8: copia la letra A de 8x8 de la hoja de letras a DE (LMMM)
 	ld a,d			;86c5
 	add a,008h		;86c6
 	ld d,a			;86c8
@@ -1202,10 +1202,10 @@ L_86CB:
 	push bc			;86d8
 	push hl			;86d9
 	push de			;86da
-	call L_8720		;86db
+	call letra_a_coordenadas		;86db   ; letra_a_coordenadas: H, L = la columna y la fila de la letra A - 0x20
 	ld bc,00808h		;86de
 	ld a,001h		;86e1
-	call L_8404		;86e3
+	call vdp_hmmm		;86e3   ; vdp_hmmm: copia rapida de VRAM a VRAM (HMMM): origen HL, destino DE, tamano BC, paginas en A (gemela de p09:8E52)
 	pop de			;86e6
 	pop hl			;86e7
 	pop bc			;86e8
@@ -1214,39 +1214,39 @@ L_86EA:
 	push bc			;86ea
 	push hl			;86eb
 	push de			;86ec
-	call L_8720		;86ed
+	call letra_a_coordenadas		;86ed   ; letra_a_coordenadas: H, L = la columna y la fila de la letra A - 0x20
 	ld bc,00808h		;86f0
 	ld a,001h		;86f3
-	call L_8404		;86f5
+	call vdp_hmmm		;86f5   ; vdp_hmmm: copia rapida de VRAM a VRAM (HMMM): origen HL, destino DE, tamano BC, paginas en A (gemela de p09:8E52)
 	pop de			;86f8
 	pop hl			;86f9
 	pop bc			;86fa
 	ret			;86fb
-L_86FC:
+pinta_letra_8x8:		; copia la letra A de 8x8 de la hoja de letras a DE (LMMM)
 	push bc			;86fc
 	push hl			;86fd
 	push de			;86fe
-	call L_8720		;86ff
+	call letra_a_coordenadas		;86ff   ; letra_a_coordenadas: H, L = la columna y la fila de la letra A - 0x20
 	ld bc,00808h		;8702
 	ld a,048h		;8705
-	call L_8599		;8707
+	call vdp_lmmm		;8707   ; vdp_lmmm: copia de VRAM a VRAM con operacion logica (LMMM, desde R#32)
 	pop de			;870a
 	pop hl			;870b
 	pop bc			;870c
 	ret			;870d
-L_870E:
+letra_8x8_en_pagina_1:		; copia la letra A de 8x8 dentro de la pagina 1 (HMMM) (gemela de p09:8E96)
 	push bc			;870e
 	push hl			;870f
 	push de			;8710
-	call L_8720		;8711
+	call letra_a_coordenadas		;8711   ; letra_a_coordenadas: H, L = la columna y la fila de la letra A - 0x20
 	ld bc,00808h		;8714
 	ld a,005h		;8717
-	call L_8404		;8719
+	call vdp_hmmm		;8719   ; vdp_hmmm: copia rapida de VRAM a VRAM (HMMM): origen HL, destino DE, tamano BC, paginas en A (gemela de p09:8E52)
 	pop de			;871c
 	pop hl			;871d
 	pop bc			;871e
 	ret			;871f
-L_8720:
+letra_a_coordenadas:		; H, L = la columna y la fila de la letra A - 0x20
 	and a			;8720
 	jr z,L_8725		;8721
 	sub 020h		;8723
@@ -1263,7 +1263,7 @@ L_8725:
 	rrca			;8730
 	ld l,a			;8731
 	ret			;8732
-L_8733:
+siguiente_letra:		; D += 8; al pasar de fila, E += 8 (gemela de p09:903E)
 	ld a,d			;8733
 	add a,008h		;8734
 	ld d,a			;8736
@@ -1302,7 +1302,7 @@ DATA_resto_8758:
 ; ======================================================================
 
 
-L_8760:
+pon_color_fondo:		; el color 7 del fondo (R#7)
 	ld c,007h		;8760
 	jp L_8765		;8762
 L_8765:
@@ -1311,6 +1311,7 @@ L_8768:
 	ld a,(0f0f5h)		;8768
 	and a			;876b
 	jr nz,$+27		;876c
+registros_vdp_menu:		; los 8 registros del VDP de p02:8170 (gemela de p02:815F)
 	ld hl,0877fh		;876e
 	ld bc,00800h		;8771
 L_8774:
@@ -1355,10 +1356,10 @@ L_8799:
 	pop hl			;87a2
 	pop bc			;87a3
 	djnz L_8799		;87a4
-	call L_82C3		;87a6
+	call paleta_bio		;87a6   ; paleta_bio: MSX2: los 16 colores de p05:82D7
 	ld bc,00007h		;87a9
 	call 00047h		;87ac   ; BIOS WRTVDP - Writes data in the VDP-register
-	jp L_8283		;87af
+	jp sprites_apagados		;87af   ; sprites_apagados: R
 
 ; ----------------------------------------------------------------------
 ; DATOS resto_87B2: lo apuntan con el banco puesto p05:8796 (0x87B2); el
@@ -1373,21 +1374,21 @@ DATA_resto_87B2:
 ; ======================================================================
 
 
-L_87BA:
-	call L_87D2		;87ba
+bio_fuente_msx1:		; la fuente (p05:8808) en 0x2080 y su color
+	call th_patrones		;87ba   ; th_patrones: los patrones del campo (gemela de p07:883A)
 	ld de,08808h		;87bd
 	ld hl,02080h		;87c0
-	call L_80C0		;87c3
+	call th_descomprime_tercios		;87c3   ; th_descomprime_tercios: descomprime DE en los tres tercios (gemela de p07:8616)
 	ld a,0f4h		;87c6
 	ld hl,00080h		;87c8
 	ld bc,00780h		;87cb
-	call L_80AF		;87ce
+	call th_rellena_tercios		;87ce   ; th_rellena_tercios: FILVRM en los tres tercios (gemela de p07:8605)
 	ret			;87d1
-L_87D2:
+th_patrones:		; los patrones del campo (gemela de p07:883A)
 	ld hl,02000h		;87d2
 	ld bc,00080h		;87d5
 	xor a			;87d8
-	call L_80AF		;87d9
+	call th_rellena_tercios		;87d9   ; th_rellena_tercios: FILVRM en los tres tercios (gemela de p07:8605)
 	ld hl,00000h		;87dc
 	ld de,00008h		;87df
 	ld b,010h		;87e2
@@ -1395,21 +1396,21 @@ L_87E4:
 	push bc			;87e4
 	ld bc,00008h		;87e5
 	push hl			;87e8
-	call L_80AF		;87e9
+	call th_rellena_tercios		;87e9   ; th_rellena_tercios: FILVRM en los tres tercios (gemela de p07:8605)
 	pop hl			;87ec
 	add hl,de			;87ed
 	inc a			;87ee
 	pop bc			;87ef
 	djnz L_87E4		;87f0
 	ret			;87f2
-L_87F3:
+bio_cifras_msx1:		; las cifras (p05:8951) en 0x2500 y su color
 	ld hl,02500h		;87f3
 	ld de,08951h		;87f6
-	call L_80F7		;87f9
+	call th_descomprime		;87f9   ; th_descomprime: descomprime DE a la VRAM HL: n & 0x7F repeticiones o copias, 0 acaba (gemela de p07:8647)
 	ld a,0f4h		;87fc
 	ld hl,00500h		;87fe
 	ld bc,000c0h		;8801
-	call L_80AF		;8804
+	call th_rellena_tercios		;8804   ; th_rellena_tercios: FILVRM en los tres tercios (gemela de p07:8605)
 	ret			;8807
 
 ; ----------------------------------------------------------------------
@@ -1447,7 +1448,7 @@ DATA_resto_8808:
 ; ======================================================================
 
 
-L_896E:
+bio_fuente_msx2:		; la fuente de p05:8B0C en la hoja de letras del MSX2
 	ld a,001h		;896e
 	ld (0faf6h),a		;8970
 	ld de,00000h		;8973
@@ -1456,25 +1457,25 @@ L_8979:
 	push bc			;8979
 	push de			;897a
 	ld hl,08b0ch		;897b
-	call L_867F		;897e
+	call letra_1bit_a_4bit		;897e   ; letra_1bit_a_4bit: pasa una letra de 1 bit a 4 bits (0xE100) y la escribe (gemela de p09:8EEB)
 	pop de			;8981
-	call L_8733		;8982
+	call siguiente_letra		;8982   ; siguiente_letra: D += 8; al pasar de fila, E += 8 (gemela de p09:903E)
 	pop bc			;8985
 	inc c			;8986
 	djnz L_8979		;8987
 	ld de,00008h		;8989
 	ld a,020h		;898c
-	call L_89A8		;898e
+	call letra_en_bios		;898e   ; letra_en_bios: HL = la letra A de la fuente de la BIOS (0x0004)
 	ld bc,0600fh		;8991
-	call L_8628		;8994
+	call letras_1bit_a_4bit		;8994   ; letras_1bit_a_4bit: pinta B letras de 1 bit en SCREEN 5 (4 bits)
 	ld de,08000h		;8997
 	ld hl,089b4h		;899a
 	ld bc,02b0fh		;899d
-	call L_8628		;89a0
+	call letras_1bit_a_4bit		;89a0   ; letras_1bit_a_4bit: pinta B letras de 1 bit en SCREEN 5 (4 bits)
 	xor a			;89a3
 	ld (0faf6h),a		;89a4
 	ret			;89a7
-L_89A8:
+letra_en_bios:		; HL = la letra A de la fuente de la BIOS (0x0004)
 	ld l,a			;89a8
 	ld h,000h		;89a9
 	ld bc,(00004h)		;89ab
@@ -1519,8 +1520,8 @@ DATA_resto_89B4:
 
 
 L_8B14:
-	call L_8B58		;8b14
-	call L_8B40		;8b17
+	call bio_cuenta		;8b14   ; bio_cuenta: sube el contador de cuadros (0xE001)
+	call bio_estado		;8b17   ; bio_estado: la rutina del estado 0xE002 (tabla p05:8B1B en MSX1, p05:8B29 en MSX2)
 	jp (hl)			;8b1a
 
 ; ----------------------------------------------------------------------
@@ -1538,7 +1539,7 @@ DATA_resto_8B1B:
 ; ======================================================================
 
 
-L_8B40:
+bio_estado:		; la rutina del estado 0xE002 (tabla p05:8B1B en MSX1, p05:8B29 en MSX2)
 	ld hl,08b1bh		;8b40
 	ld a,(0f0f5h)		;8b43
 	and a			;8b46
@@ -1547,105 +1548,105 @@ L_8B40:
 L_8B4C:
 	ld a,(0e002h)		;8b4c
 	add a,a			;8b4f
-	call L_806E		;8b50
+	call hl_mas_a		;8b50   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld e,(hl)			;8b53
 	inc hl			;8b54
 	ld d,(hl)			;8b55
 	ex de,hl			;8b56
 	ret			;8b57
-L_8B58:
-	ld hl,0e001h		;8b58
+bio_cuenta:		; sube el contador de cuadros (0xE001)
+	ld hl,0e001h		;8b58   ; apunta a fila elegida de la SRAM
 	inc (hl)			;8b5b
 	ret			;8b5c
 L_8B5D:
-	call L_95B7		;8b5d
+	call bio_estado_fecha		;8b5d   ; bio_estado_fecha: el estado de pedir una fecha (MSX1)
 	jp c,L_8C59		;8b60
 	jp L_8C6A		;8b63
 L_8B66:
-	call L_9701		;8b66
+	call bio_estado_fecha_msx2		;8b66   ; bio_estado_fecha_msx2: el estado de pedir una fecha (MSX2)
 	jp c,L_8C59		;8b69
 	jp L_8C6A		;8b6c
 L_8B6F:
-	call L_8E34		;8b6f
-	call L_9386		;8b72
+	call bio_calcula		;8b6f   ; bio_calcula: el calculo entero: los dias vividos y los tres ciclos
+	call bio_dias_del_mes_b		;8b72   ; bio_dias_del_mes_b: los dias del mes (tabla p05:959E), con febrero segun el bisiesto
 	jp L_8C59		;8b75
 L_8B78:
-	call L_9DE1		;8b78
-	call L_9DFE		;8b7b
-	call L_8D07		;8b7e
+	call bio_textos_grafica		;8b78   ; bio_textos_grafica: los textos de la grafica y su marco
+	call bio_pinta_marcas		;8b7b   ; bio_pinta_marcas: pinta las marcas de los tres ciclos (p06:A33D)
+	call bio_vuelca_nombres		;8b7e   ; bio_vuelca_nombres: vuelca la copia de la tabla de nombres (0xE300) a 0x3800
 	jp L_8C59		;8b81
 L_8B84:
-	call L_9FEC		;8b84
+	call bio_pantalla_msx2		;8b84   ; bio_pantalla_msx2: los marcos, el eje y la rejilla (p06:A006) y los textos
 	call 0a336h		;8b87
 	jp L_8C59		;8b8a
 L_8B8D:
-	ld a,(0e001h)		;8b8d
+	ld a,(0e001h)		;8b8d   ; lee fila elegida de la SRAM
 	and 03fh		;8b90
 	jr nz,L_8BA2		;8b92
-	call L_90B8		;8b94
-	call L_9179		;8b97
+	call bio_avanza_grafica		;8b94   ; bio_avanza_grafica: un paso de la grafica: alturas, puntos y dia siguiente
+	call bio_dia_mas		;8b97   ; bio_dia_mas: pasa al dia siguiente: los tres angulos suben
 	ld a,(0e03fh)		;8b9a
 	cp 0c0h		;8b9d
 	jp nc,L_8C59		;8b9f
 L_8BA2:
 	jp L_8C6A		;8ba2
 L_8BA5:
-	ld a,(0e001h)		;8ba5
+	ld a,(0e001h)		;8ba5   ; lee fila elegida de la SRAM
 	and 07fh		;8ba8
 	jr nz,L_8BBA		;8baa
-	call L_923E		;8bac
-	call L_9179		;8baf
+	call bio_avanza_grafica_msx2		;8bac   ; bio_avanza_grafica_msx2: un paso de la grafica en MSX2
+	call bio_dia_mas		;8baf   ; bio_dia_mas: pasa al dia siguiente: los tres angulos suben
 	ld a,(0e03fh)		;8bb2
 	cp 0c0h		;8bb5
 	jp nc,L_8C59		;8bb7
 L_8BBA:
 	jp L_8C6A		;8bba
 L_8BBD:
-	call L_9DF1		;8bbd
-	call L_9CCB		;8bc0
-	call L_9D21		;8bc3
-	call L_9D55		;8bc6
-	call L_8D07		;8bc9
+	call bio_textos_9f0a		;8bbd   ; bio_textos_9f0a: pinta los textos de p05:9F0A y p05:9F29
+	call bio_recalcula		;8bc0   ; bio_recalcula: vuelve a los angulos de hoy y recalcula las alturas
+	call bio_fecha_a_nombres		;8bc3   ; bio_fecha_a_nombres: la fecha a la copia de nombres (ano, mes y dia)
+	call bio_pinta_niveles		;8bc6   ; bio_pinta_niveles: pinta los niveles de los tres ciclos
+	call bio_vuelca_nombres		;8bc9   ; bio_vuelca_nombres: vuelca la copia de la tabla de nombres (0xE300) a 0x3800
 	jp L_8C59		;8bcc
 L_8BCF:
-	call L_9FF6		;8bcf
-	call L_9CCB		;8bd2
+	call bio_actualiza_msx2		;8bcf   ; bio_actualiza_msx2: actualiza la grafica en MSX2 (p06)
+	call bio_recalcula		;8bd2   ; bio_recalcula: vuelve a los angulos de hoy y recalcula las alturas
 	call 0a3a4h		;8bd5
 	jp L_8C59		;8bd8
 L_8BDB:
-	ld a,(0e001h)		;8bdb
+	ld a,(0e001h)		;8bdb   ; lee fila elegida de la SRAM
 	and 007h		;8bde
 	jr nz,L_8BFF		;8be0
-	call L_8D07		;8be2
-	call L_8CFA		;8be5
-	call L_8C2F		;8be8
+	call bio_vuelca_nombres		;8be2   ; bio_vuelca_nombres: vuelca la copia de la tabla de nombres (0xE300) a 0x3800
+	call bio_vuelca_sprites		;8be5   ; bio_vuelca_sprites: vuelca la copia de sprites (0xE280) a 0x3B00
+	call bio_teclas		;8be8   ; bio_teclas: las teclas recien pulsadas (0xE057)
 	ld a,(0e058h)		;8beb
 	cp 001h		;8bee
 	jr z,L_8C59		;8bf0
 	cp 004h		;8bf2
 	jr z,L_8C2E		;8bf4
-	call L_9D16		;8bf6
-	call L_8C2F		;8bf9
+	call bio_estado_grafica_msx2		;8bf6   ; bio_estado_grafica_msx2: el estado de la grafica en MSX2
+	call bio_teclas		;8bf9   ; bio_teclas: las teclas recien pulsadas (0xE057)
 	ld a,(0e058h)		;8bfc
 L_8BFF:
 	jp L_8C6A		;8bff
 L_8C02:
-	ld a,(0e001h)		;8c02
+	ld a,(0e001h)		;8c02   ; lee fila elegida de la SRAM
 	and 00fh		;8c05
 	jr nz,L_8C20		;8c07
-	call L_8DD5		;8c09
+	call bio_vuelca_sprites_msx2		;8c09   ; bio_vuelca_sprites_msx2: vuelca la copia de sprites a 0xF600 y sus colores a 0xF400
 	call 0a27eh		;8c0c
-	call L_8C2F		;8c0f
+	call bio_teclas		;8c0f   ; bio_teclas: las teclas recien pulsadas (0xE057)
 	ld a,(0e058h)		;8c12
 	cp 001h		;8c15
 	jr z,L_8C59		;8c17
 	cp 004h		;8c19
 	jr z,L_8C2E		;8c1b
-	call L_9B3E		;8c1d
+	call bio_estado_grafica		;8c1d   ; bio_estado_grafica: el estado de la grafica: teclas, dia y textos
 L_8C20:
-	call L_8C26		;8c20
+	call pausa_corta		;8c20   ; pausa_corta: espera 16 vueltas
 	jp L_8C6A		;8c23
-L_8C26:
+pausa_corta:		; espera 16 vueltas
 	ld b,010h		;8c26
 L_8C28:
 	djnz L_8C28		;8c28
@@ -1654,9 +1655,9 @@ L_8C2B:
 	jp L_8000		;8c2b
 L_8C2E:
 	ret			;8c2e
-L_8C2F:
+bio_teclas:		; las teclas recien pulsadas (0xE057)
 	ld hl,0e057h		;8c2f
-	call L_8C3D		;8c32
+	call bio_lee_teclas		;8c32   ; bio_lee_teclas: lee las teclas del biorritmo (SNSMAT 8 y 7)
 	ld (hl),a			;8c35
 	inc hl			;8c36
 	ld b,(hl)			;8c37
@@ -1665,7 +1666,7 @@ L_8C2F:
 	and c			;8c3a
 	ld (hl),a			;8c3b
 	ret			;8c3c
-L_8C3D:
+bio_lee_teclas:		; lee las teclas del biorritmo (SNSMAT 8 y 7)
 	ld a,008h		;8c3d
 	call 00141h		;8c3f   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
 	cpl			;8c42
@@ -1686,7 +1687,7 @@ L_8C52:
 L_8C59:
 	ld hl,0e002h		;8c59
 	inc (hl)			;8c5c
-	call L_8C6D		;8c5d
+	call bio_borra_e003		;8c5d   ; bio_borra_e003: pone a cero 0xE003
 	jp L_8B14		;8c60
 L_8C63:
 	ld hl,0e003h		;8c63
@@ -1694,26 +1695,26 @@ L_8C63:
 	jp L_8B14		;8c67
 L_8C6A:
 	jp L_8B14		;8c6a
-L_8C6D:
+bio_borra_e003:		; pone a cero 0xE003
 	xor a			;8c6d
 	ld hl,0e003h		;8c6e
 	ld (hl),a			;8c71
 	ret			;8c72
 L_8C73:
-	call L_8C8C		;8c73
-	call L_8D14		;8c76
-	call L_87BA		;8c79
-	call L_87F3		;8c7c
-	call L_8CA1		;8c7f
-	call L_8CD1		;8c82
-	call L_8CB7		;8c85
-	call L_8C92		;8c88
+	call bio_color_negro		;8c73   ; bio_color_negro: el fondo a 0
+	call bio_esconde_sprites		;8c76   ; bio_esconde_sprites: pone 0xE0 en la copia de sprites (0xE280)
+	call bio_fuente_msx1		;8c79   ; bio_fuente_msx1: la fuente (p05:8808) en 0x2080 y su color
+	call bio_cifras_msx1		;8c7c   ; bio_cifras_msx1: las cifras (p05:8951) en 0x2500 y su color
+	call bio_borra_patrones		;8c7f   ; bio_borra_patrones: borra los patrones y pone el color 0xF4
+	call bio_patrones_msx1		;8c82   ; bio_patrones_msx1: descomprime p05:8DCC en 0x1800
+	call bio_tabla_e400		;8c85   ; bio_tabla_e400: rellena 0xE400 con 0, 1, 2... dos veces
+	call bio_borra_nombres		;8c88   ; bio_borra_nombres: llena la copia de la tabla de nombres (0xE300) con 4
 	ret			;8c8b
-L_8C8C:
+bio_color_negro:		; el fondo a 0
 	ld b,000h		;8c8c
-	call L_8760		;8c8e
+	call pon_color_fondo		;8c8e   ; pon_color_fondo: el color 7 del fondo (R#7)
 	ret			;8c91
-L_8C92:
+bio_borra_nombres:		; llena la copia de la tabla de nombres (0xE300) con 4
 	ld hl,0e300h		;8c92
 	ld de,0e301h		;8c95
 	ld bc,0013fh		;8c98
@@ -1721,7 +1722,7 @@ L_8C92:
 	ld (hl),a			;8c9d
 	ldir		;8c9e
 	ret			;8ca0
-L_8CA1:
+bio_borra_patrones:		; borra los patrones y pone el color 0xF4
 	ld hl,02a00h		;8ca1
 	ld bc,00dffh		;8ca4
 	xor a			;8ca7
@@ -1731,7 +1732,7 @@ L_8CA1:
 	ld a,0f4h		;8cb1
 	call 00056h		;8cb3   ; BIOS FILVRM - Fills VRAM with value
 	ret			;8cb6
-L_8CB7:
+bio_tabla_e400:		; rellena 0xE400 con 0, 1, 2... dos veces
 	ld hl,0e400h		;8cb7
 	ld b,002h		;8cba
 L_8CBC:
@@ -1751,14 +1752,14 @@ L_8CCC:
 	inc hl			;8ccd
 	djnz L_8CCC		;8cce
 	ret			;8cd0
-L_8CD1:
+bio_patrones_msx1:		; descomprime p05:8DCC en 0x1800
 	ld hl,01800h		;8cd1
 	ld de,08dcch		;8cd4
-	call L_80F7		;8cd7
+	call th_descomprime		;8cd7   ; th_descomprime: descomprime DE a la VRAM HL: n & 0x7F repeticiones o copias, 0 acaba (gemela de p07:8647)
 	ret			;8cda
-L_8CDB:
+bio_sprites_8ce2:		; copia los sprites de p05:8CE2 a 0xE280
 	ld hl,08ce2h		;8cdb
-	call L_8DA1		;8cde
+	call copia_sprites		;8cde   ; copia_sprites: copia 0x18 bytes de HL a la copia de sprites (0xE280)
 	ret			;8ce1
 
 ; ----------------------------------------------------------------------
@@ -1775,19 +1776,19 @@ DATA_resto_8CE2:
 ; ======================================================================
 
 
-L_8CFA:
+bio_vuelca_sprites:		; vuelca la copia de sprites (0xE280) a 0x3B00
 	ld hl,03b00h		;8cfa
 	ld de,0e280h		;8cfd
 	ld bc,0001eh		;8d00
-	call L_8098		;8d03
+	call copia_a_vram_de		;8d03   ; copia_a_vram_de: LDIRVM de DE a HL
 	ret			;8d06
-L_8D07:
+bio_vuelca_nombres:		; vuelca la copia de la tabla de nombres (0xE300) a 0x3800
 	ld hl,03800h		;8d07
 	ld de,0e300h		;8d0a
 	ld bc,00300h		;8d0d
-	call L_8098		;8d10
+	call copia_a_vram_de		;8d10   ; copia_a_vram_de: LDIRVM de DE a HL
 	ret			;8d13
-L_8D14:
+bio_esconde_sprites:		; pone 0xE0 en la copia de sprites (0xE280)
 	ld hl,0e280h		;8d14
 	ld de,0e281h		;8d17
 	ld bc,0007fh		;8d1a
@@ -1795,35 +1796,35 @@ L_8D14:
 	ldir		;8d1f
 	ret			;8d21
 L_8D22:
-	call L_827B		;8d22
-	call L_8D70		;8d25
-	call L_8D61		;8d28
-	call L_8D38		;8d2b
-	call L_896E		;8d2e
-	call L_8DF9		;8d31
-	call L_8261		;8d34
+	call esconde_sprites_msx2		;8d22   ; esconde_sprites_msx2: 0xD8 en la tabla de sprites del MSX2 (0xF600)
+	call bio_paleta		;8d25   ; bio_paleta: MSX2: la paleta de p05:8D77
+	call bio_esconde_sprites_msx2		;8d28   ; bio_esconde_sprites_msx2: pone 0xD8 en la copia de sprites (0xE280)
+	call bio_tres_casillas		;8d2b   ; bio_tres_casillas: pinta tres casillas de 8x8 (0x0000, 0x0040, 0x0080)
+	call bio_fuente_msx2		;8d2e   ; bio_fuente_msx2: la fuente de p05:8B0C en la hoja de letras del MSX2
+	call bio_pinta_letras		;8d31   ; bio_pinta_letras: pinta las letras de p05:8E06
+	call pantalla_encendida		;8d34   ; pantalla_encendida: R#1 con el bit 6: pantalla encendida
 	ret			;8d37
-L_8D38:
+bio_tres_casillas:		; pinta tres casillas de 8x8 (0x0000, 0x0040, 0x0080)
 	ld hl,00000h		;8d38
-	call L_8D4A		;8d3b
+	call bio_casilla		;8d3b   ; bio_casilla: pinta una casilla de 8x8 con el comando del VDP
 	ld hl,00040h		;8d3e
-	call L_8D4A		;8d41
+	call bio_casilla		;8d41   ; bio_casilla: pinta una casilla de 8x8 con el comando del VDP
 	ld hl,00080h		;8d44
-	call L_8D4A		;8d47
-L_8D4A:
+	call bio_casilla		;8d47   ; bio_casilla: pinta una casilla de 8x8 con el comando del VDP
+bio_casilla:		; pinta una casilla de 8x8 con el comando del VDP
 	ld bc,00808h		;8d4a
 	ld a,001h		;8d4d
 	ld d,a			;8d4f
-	jp L_83C8		;8d50
+	jp vdp_hmmv		;8d50   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 L_8D53:
 	xor a			;8d53
-	ld hl,0e000h		;8d54
-	ld de,0e001h		;8d57
+	ld hl,0e000h		;8d54   ; apunta a opcion / RC del juego
+	ld de,0e001h		;8d57   ; apunta a fila elegida de la SRAM
 	ld bc,000ffh		;8d5a
 	ld (hl),a			;8d5d
 	ldir		;8d5e
 	ret			;8d60
-L_8D61:
+bio_esconde_sprites_msx2:		; pone 0xD8 en la copia de sprites (0xE280)
 	ld a,0d8h		;8d61
 	ld hl,0e280h		;8d63
 	ld de,0e281h		;8d66
@@ -1831,9 +1832,9 @@ L_8D61:
 	ld (hl),a			;8d6c
 	ldir		;8d6d
 	ret			;8d6f
-L_8D70:
+bio_paleta:		; MSX2: la paleta de p05:8D77
 	ld hl,08d77h		;8d70
-	call L_82C6		;8d73
+	call paleta_desde		;8d73   ; paleta_desde: MSX2: los 16 colores de HL
 	ret			;8d76
 
 ; ----------------------------------------------------------------------
@@ -1850,12 +1851,12 @@ DATA_resto_8D77:
 ; ======================================================================
 
 
-L_8D97:
+bio_sprites_msx2:		; los sprites de p05:8DAA y sus patrones
 	ld hl,08daah		;8d97
-	call L_8DA1		;8d9a
-	call L_8DC2		;8d9d
+	call copia_sprites		;8d9a   ; copia_sprites: copia 0x18 bytes de HL a la copia de sprites (0xE280)
+	call bio_patrones_sprites		;8d9d   ; bio_patrones_sprites: descomprime p05:8DCC en 0xF800
 	ret			;8da0
-L_8DA1:
+copia_sprites:		; copia 0x18 bytes de HL a la copia de sprites (0xE280)
 	ld de,0e280h		;8da1
 	ld bc,00018h		;8da4
 	ldir		;8da7
@@ -1875,10 +1876,10 @@ DATA_resto_8DAA:
 ; ======================================================================
 
 
-L_8DC2:
+bio_patrones_sprites:		; descomprime p05:8DCC en 0xF800
 	ld hl,0f800h		;8dc2
 	ld de,08dcch		;8dc5
-	call L_81EE		;8dc8
+	call descomprime_bio		;8dc8   ; descomprime_bio: descomprime en la VRAM con C = 0
 	ret			;8dcb
 
 ; ----------------------------------------------------------------------
@@ -1894,27 +1895,27 @@ DATA_resto_8DCC:
 ; ======================================================================
 
 
-L_8DD5:
+bio_vuelca_sprites_msx2:		; vuelca la copia de sprites a 0xF600 y sus colores a 0xF400
 	ld de,0f600h		;8dd5
 	ld hl,0e280h		;8dd8
 	ld bc,0001ch		;8ddb
-	call L_8137		;8dde
+	call escribe_vram_otir		;8dde   ; escribe_vram_otir: escribe BC bytes de HL en la VRAM DE con OTIR (gemela de p09:8DF6)
 	ld hl,0f400h		;8de1
 	ld bc,000e0h		;8de4
 	ld a,00fh		;8de7
-	call L_814A		;8de9
+	call rellena_vram_128k		;8de9   ; rellena_vram_128k: rellena BC bytes de la VRAM HL (128 KB) con A
 	ret			;8dec
 L_8DED:
-	call L_826E		;8ded
-	call L_8261		;8df0
+	call pantalla_apagada		;8ded   ; pantalla_apagada: R#1 sin el bit 6: pantalla apagada
+	call pantalla_encendida		;8df0   ; pantalla_encendida: R#1 con el bit 6: pantalla encendida
 	ld a,001h		;8df3
 	ld (0e008h),a		;8df5
 	ret			;8df8
-L_8DF9:
+bio_pinta_letras:		; pinta las letras de p05:8E06
 	ld de,00018h		;8df9
 	ld hl,08e06h		;8dfc
 	ld bc,0020fh		;8dff
-	call L_8628		;8e02
+	call letras_1bit_a_4bit		;8e02   ; letras_1bit_a_4bit: pinta B letras de 1 bit en SCREEN 5 (4 bits)
 	ret			;8e05
 
 ; ----------------------------------------------------------------------
@@ -1932,82 +1933,82 @@ DATA_resto_8E06:
 ; ======================================================================
 
 
-L_8E34:
-	call L_8E56		;8e34
-	call L_8E7E		;8e37
-	call L_8E91		;8e3a
-	call L_8EA4		;8e3d
-	call L_8EB7		;8e40
-	call L_8F83		;8e43
-	call L_8F98		;8e46
-	call L_8FCC		;8e49
-	call L_901A		;8e4c
-	call L_9049		;8e4f
-	call L_9055		;8e52
+bio_calcula:		; el calculo entero: los dias vividos y los tres ciclos
+	call bio_dias_del_ano		;8e34   ; bio_dias_del_ano: los dias de cada fecha por 365 (0x16D)
+	call bio_bisiestos_4		;8e37   ; bio_bisiestos_4: suma los anos divisibles por 4
+	call bio_bisiestos_100		;8e3a   ; bio_bisiestos_100: resta los anos divisibles por 100
+	call bio_bisiestos_400		;8e3d   ; bio_bisiestos_400: suma los anos divisibles por 400
+	call bio_dias_del_mes		;8e40   ; bio_dias_del_mes: suma los dias de los meses (tabla p05:959E)
+	call bio_dias_vividos		;8e43   ; bio_dias_vividos: los dias vividos: la fecha de hoy menos la de nacimiento
+	call bio_tres_restos		;8e46   ; bio_tres_restos: los dias modulo 23, 28 y 33 (0xE02D, 0xE02F, 0xE031)
+	call bio_tres_angulos		;8e49   ; bio_tres_angulos: pasa cada resto a grados (x 360 / ciclo)
+	call bio_retrasa		;8e4c   ; bio_retrasa: resta a los tres angulos la tabla de p05:9043
+	call bio_guarda_angulos		;8e4f   ; bio_guarda_angulos: copia los tres angulos a 0xE033
+	call bio_angulos_validos		;8e52   ; bio_angulos_validos: deja los tres angulos entre 0 y 359 y calcula sus alturas
 	ret			;8e55
-L_8E56:
+bio_dias_del_ano:		; los dias de cada fecha por 365 (0x16D)
 	ld ix,0e018h		;8e56
-	ld hl,(0e010h)		;8e5a
-	call L_8E6B		;8e5d
+	ld hl,(0e010h)		;8e5a   ; lee la lista de la SRAM y el byte siguiente (16 bits)
+	call por_365		;8e5d   ; por_365: multiplica HL por 365 en IX (32 bits)
 	ld ix,0e01ch		;8e60
 	ld hl,(0e012h)		;8e64
-	call L_8E6B		;8e67
+	call por_365		;8e67   ; por_365: multiplica HL por 365 en IX (32 bits)
 	ret			;8e6a
-L_8E6B:
+por_365:		; multiplica HL por 365 en IX (32 bits)
 	ld de,0016dh		;8e6b
-	call L_9405		;8e6e
+	call multiplica_32		;8e6e   ; multiplica_32: DE:HL = HL x DE
 	ld (ix+000h),e		;8e71
 	ld (ix+001h),d		;8e74
 	ld (ix+002h),l		;8e77
 	ld (ix+003h),h		;8e7a
 	ret			;8e7d
-L_8E7E:
-	ld hl,(0e010h)		;8e7e
+bio_bisiestos_4:		; suma los anos divisibles por 4
+	ld hl,(0e010h)		;8e7e   ; lee la lista de la SRAM y el byte siguiente (16 bits)
 	ld de,0e018h		;8e81
-	call L_8ED2		;8e84
+	call bio_divide_4		;8e84   ; bio_divide_4: suma (ano - 1) / 4
 	ld hl,(0e012h)		;8e87
 	ld de,0e01ch		;8e8a
-	call L_8ED2		;8e8d
+	call bio_divide_4		;8e8d   ; bio_divide_4: suma (ano - 1) / 4
 	ret			;8e90
-L_8E91:
-	ld hl,(0e010h)		;8e91
+bio_bisiestos_100:		; resta los anos divisibles por 100
+	ld hl,(0e010h)		;8e91   ; lee la lista de la SRAM y el byte siguiente (16 bits)
 	ld de,0e018h		;8e94
-	call L_8EF1		;8e97
+	call bio_divide_100		;8e97   ; bio_divide_100: resta (ano - 1) / 100
 	ld hl,(0e012h)		;8e9a
 	ld de,0e01ch		;8e9d
-	call L_8EF1		;8ea0
+	call bio_divide_100		;8ea0   ; bio_divide_100: resta (ano - 1) / 100
 	ret			;8ea3
-L_8EA4:
-	ld hl,(0e010h)		;8ea4
+bio_bisiestos_400:		; suma los anos divisibles por 400
+	ld hl,(0e010h)		;8ea4   ; lee la lista de la SRAM y el byte siguiente (16 bits)
 	ld de,0e018h		;8ea7
-	call L_8F08		;8eaa
+	call bio_divide_400		;8eaa   ; bio_divide_400: suma (ano - 1) / 400
 	ld hl,(0e012h)		;8ead
 	ld de,0e01ch		;8eb0
-	call L_8F08		;8eb3
+	call bio_divide_400		;8eb3   ; bio_divide_400: suma (ano - 1) / 400
 	ret			;8eb6
-L_8EB7:
-	ld hl,0e010h		;8eb7
+bio_dias_del_mes:		; suma los dias de los meses (tabla p05:959E)
+	ld hl,0e010h		;8eb7   ; apunta a la lista de la SRAM
 	ld ix,0e014h		;8eba
 	ld de,0e018h		;8ebe
-	call L_8F1F		;8ec1
+	call bio_dias_hasta_el_mes		;8ec1   ; bio_dias_hasta_el_mes: suma los dias de los meses anteriores (tabla p05:959E)
 	ld hl,0e012h		;8ec4
 	ld ix,0e015h		;8ec7
 	ld de,0e01ch		;8ecb
-	call L_8F1F		;8ece
+	call bio_dias_hasta_el_mes		;8ece   ; bio_dias_hasta_el_mes: suma los dias de los meses anteriores (tabla p05:959E)
 	ret			;8ed1
-L_8ED2:
+bio_divide_4:		; suma (ano - 1) / 4
 	push de			;8ed2
 	ld de,00004h		;8ed3
-	call L_8EE5		;8ed6
+	call ano_menos_uno		;8ed6   ; ano_menos_uno: HL = HL - 1 y C si no llega a DE
 	pop de			;8ed9
 	jr c,L_8EE4		;8eda
-	call L_94CF		;8edc
+	call divide_por_4		;8edc   ; divide_por_4: DE = DE / 4
 	ex de,hl			;8edf
-	call L_93F0		;8ee0
+	call suma_24		;8ee0   ; suma_24: suma DE a los 24 bits de HL
 	ret			;8ee3
 L_8EE4:
 	ret			;8ee4
-L_8EE5:
+ano_menos_uno:		; HL = HL - 1 y C si no llega a DE
 	dec hl			;8ee5
 	ld a,h			;8ee6
 	and 080h		;8ee7
@@ -2018,50 +2019,50 @@ L_8EE5:
 L_8EEF:
 	scf			;8eef
 	ret			;8ef0
-L_8EF1:
+bio_divide_100:		; resta (ano - 1) / 100
 	push de			;8ef1
 	ld de,00064h		;8ef2
-	call L_8EE5		;8ef5
+	call ano_menos_uno		;8ef5   ; ano_menos_uno: HL = HL - 1 y C si no llega a DE
 	pop de			;8ef8
 	jr c,L_8F07		;8ef9
 	push de			;8efb
 	ex de,hl			;8efc
 	ld bc,00064h		;8efd
-	call L_9430		;8f00
+	call divide		;8f00   ; divide: DE / BC: cociente en DE y resto en HL
 	pop hl			;8f03
-	call L_93A7		;8f04
+	call resta_24		;8f04   ; resta_24: resta DE de los 24 bits de HL
 L_8F07:
 	ret			;8f07
-L_8F08:
+bio_divide_400:		; suma (ano - 1) / 400
 	push de			;8f08
 	ld de,00190h		;8f09
-	call L_8EE5		;8f0c
+	call ano_menos_uno		;8f0c   ; ano_menos_uno: HL = HL - 1 y C si no llega a DE
 	pop de			;8f0f
 	jr c,L_8F1E		;8f10
 	push de			;8f12
 	ex de,hl			;8f13
 	ld bc,00190h		;8f14
-	call L_9430		;8f17
+	call divide		;8f17   ; divide: DE / BC: cociente en DE y resto en HL
 	pop hl			;8f1a
-	call L_93F0		;8f1b
+	call suma_24		;8f1b   ; suma_24: suma DE a los 24 bits de HL
 L_8F1E:
 	ret			;8f1e
-L_8F1F:
+bio_dias_hasta_el_mes:		; suma los dias de los meses anteriores (tabla p05:959E)
 	push de			;8f1f
 	push hl			;8f20
 	ld a,(ix+000h)		;8f21
 	dec a			;8f24
 	ld hl,0959eh		;8f25
 	add a,a			;8f28
-	call L_806E		;8f29
+	call hl_mas_a		;8f29   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld d,(hl)			;8f2c
 	inc hl			;8f2d
 	ld e,(hl)			;8f2e
 	ld a,(ix+002h)		;8f2f
-	call L_8073		;8f32
+	call de_mas_a		;8f32   ; de_mas_a: DE = DE + A (gemela de p01:7256)
 	pop hl			;8f35
 	push de			;8f36
-	call L_8F4A		;8f37
+	call bio_es_bisiesto		;8f37   ; bio_es_bisiesto: mira si el ano es bisiesto (4, 100 y 400): 0xE041
 	pop de			;8f3a
 	jr nc,L_8F45		;8f3b
 	ld a,002h		;8f3d
@@ -2070,9 +2071,9 @@ L_8F1F:
 	inc de			;8f44
 L_8F45:
 	pop hl			;8f45
-	call L_93F0		;8f46
+	call suma_24		;8f46   ; suma_24: suma DE a los 24 bits de HL
 	ret			;8f49
-L_8F4A:
+bio_es_bisiesto:		; mira si el ano es bisiesto (4, 100 y 400): 0xE041
 	xor a			;8f4a
 	ld (0e041h),a		;8f4b
 	ld e,(hl)			;8f4e
@@ -2080,20 +2081,20 @@ L_8F4A:
 	ld d,(hl)			;8f50
 	ld bc,00004h		;8f51
 	push de			;8f54
-	call L_9430		;8f55
+	call divide		;8f55   ; divide: DE / BC: cociente en DE y resto en HL
 	pop de			;8f58
 	ld a,l			;8f59
 	and a			;8f5a
 	jr nz,L_8F7E		;8f5b
 	ld bc,00064h		;8f5d
 	push de			;8f60
-	call L_9430		;8f61
+	call divide		;8f61   ; divide: DE / BC: cociente en DE y resto en HL
 	pop de			;8f64
 	ld a,l			;8f65
 	and a			;8f66
 	jr nz,L_8F77		;8f67
 	ld bc,00190h		;8f69
-	call L_9430		;8f6c
+	call divide		;8f6c   ; divide: DE / BC: cociente en DE y resto en HL
 	ld a,h			;8f6f
 	and a			;8f70
 	jr nz,L_8F7E		;8f71
@@ -2109,69 +2110,69 @@ L_8F7E:
 	xor a			;8f7e
 	ld (0e041h),a		;8f7f
 	ret			;8f82
-L_8F83:
+bio_dias_vividos:		; los dias vividos: la fecha de hoy menos la de nacimiento
 	ld hl,0e01ch		;8f83
 	ld de,0e020h		;8f86
 	ld bc,00004h		;8f89
 	ldir		;8f8c
 	ld hl,0e020h		;8f8e
 	ld de,0e018h		;8f91
-	call L_93B8		;8f94
+	call resta_32		;8f94   ; resta_32: resta los 32 bits de HL de los de DE
 	ret			;8f97
-L_8F98:
+bio_tres_restos:		; los dias modulo 23, 28 y 33 (0xE02D, 0xE02F, 0xE031)
 	ld hl,(0e020h)		;8f98
 	ld de,(0e022h)		;8f9b
 	ld ix,0e02dh		;8f9f
 	ld bc,00017h		;8fa3
-	call L_8FEB		;8fa6
+	call bio_resto		;8fa6   ; bio_resto: el resto de dividir por BC
 	ld hl,(0e020h)		;8fa9
 	ld de,(0e022h)		;8fac
 	ld ix,0e02fh		;8fb0
 	ld bc,0001ch		;8fb4
-	call L_8FEB		;8fb7
+	call bio_resto		;8fb7   ; bio_resto: el resto de dividir por BC
 	ld hl,(0e020h)		;8fba
 	ld de,(0e022h)		;8fbd
 	ld ix,0e031h		;8fc1
 	ld bc,00021h		;8fc5
-	call L_8FEB		;8fc8
+	call bio_resto		;8fc8   ; bio_resto: el resto de dividir por BC
 	ret			;8fcb
-L_8FCC:
+bio_tres_angulos:		; pasa cada resto a grados (x 360 / ciclo)
 	ld ix,0e02dh		;8fcc
 	ld bc,00017h		;8fd0
-	call L_8FFB		;8fd3
+	call bio_angulo		;8fd3   ; bio_angulo: el angulo del ciclo: resto x 360 / BC
 	ld ix,0e02fh		;8fd6
 	ld bc,0001ch		;8fda
-	call L_8FFB		;8fdd
+	call bio_angulo		;8fdd   ; bio_angulo: el angulo del ciclo: resto x 360 / BC
 	ld ix,0e031h		;8fe0
 	ld bc,00021h		;8fe4
-	call L_8FFB		;8fe7
+	call bio_angulo		;8fe7   ; bio_angulo: el angulo del ciclo: resto x 360 / BC
 	ret			;8fea
-L_8FEB:
-	call L_90A0		;8feb
+bio_resto:		; el resto de dividir por BC
+	call cabe_en_b		;8feb   ; cabe_en_b: C si DE:HL es menor que B
 	jr c,L_8FF4		;8fee
-	call L_944A		;8ff0
+	call divide_32		;8ff0   ; divide_32: divide 32 bits por BC
 	ex de,hl			;8ff3
 L_8FF4:
 	ld (ix+000h),e		;8ff4
 	ld (ix+001h),d		;8ff7
 	ret			;8ffa
-L_8FFB:
+bio_angulo:		; el angulo del ciclo: resto x 360 / BC
 	ld e,(ix+000h)		;8ffb
 	ld d,(ix+001h)		;8ffe
-	call L_90AC		;9001
+	call de_es_cero		;9001   ; de_es_cero: Z si DE es 0
 	jr z,L_9012		;9004
 	push bc			;9006
 	ld bc,00168h		;9007
-	call L_93DB		;900a
+	call multiplica		;900a   ; multiplica: HL = DE x BC
 	ex de,hl			;900d
 	pop bc			;900e
-	call L_9430		;900f
+	call divide		;900f   ; divide: DE / BC: cociente en DE y resto en HL
 L_9012:
 	ex de,hl			;9012
 	ld (ix+000h),l		;9013
 	ld (ix+001h),h		;9016
 	ret			;9019
-L_901A:
+bio_retrasa:		; resta a los tres angulos la tabla de p05:9043
 	ld b,003h		;901a
 	ld ix,0e02dh		;901c
 	ld iy,09043h		;9020
@@ -2203,35 +2204,35 @@ DATA_resto_9043:
 ; ======================================================================
 
 
-L_9049:
+bio_guarda_angulos:		; copia los tres angulos a 0xE033
 	ld hl,0e02dh		;9049
 	ld de,0e033h		;904c
 	ld bc,00006h		;904f
 	ldir		;9052
 	ret			;9054
-L_9055:
+bio_angulos_validos:		; deja los tres angulos entre 0 y 359 y calcula sus alturas
 	ld hl,(0e02dh)		;9055
-	call L_9085		;9058
+	call angulo_0_359		;9058   ; angulo_0_359: suma o resta 360 hasta que HL este entre 0 y 359
 	ld (0e02dh),hl		;905b
-	call L_92A9		;905e
+	call bio_alturas		;905e   ; bio_alturas: las alturas de los tres ciclos (sin desplazar)
 	ld (0e039h),a		;9061
 	ld hl,(0e02fh)		;9064
-	call L_9085		;9067
-	call L_92A9		;906a
+	call angulo_0_359		;9067   ; angulo_0_359: suma o resta 360 hasta que HL este entre 0 y 359
+	call bio_alturas		;906a   ; bio_alturas: las alturas de los tres ciclos (sin desplazar)
 	ld (0e03bh),a		;906d
 	ld hl,(0e031h)		;9070
-	call L_9085		;9073
-	call L_92A9		;9076
+	call angulo_0_359		;9073   ; angulo_0_359: suma o resta 360 hasta que HL este entre 0 y 359
+	call bio_alturas		;9076   ; bio_alturas: las alturas de los tres ciclos (sin desplazar)
 	ld (0e03dh),a		;9079
 	ret			;907c
 L_907D:
 	push af			;907d
 	push de			;907e
-	call L_9085		;907f
+	call angulo_0_359		;907f   ; angulo_0_359: suma o resta 360 hasta que HL este entre 0 y 359
 	pop de			;9082
 	pop af			;9083
 	ret			;9084
-L_9085:
+angulo_0_359:		; suma o resta 360 hasta que HL este entre 0 y 359
 	ld a,h			;9085
 	add a,080h		;9086
 	jr nc,L_9095		;9088
@@ -2251,7 +2252,7 @@ L_9095:
 	ex de,hl			;909e
 L_909F:
 	ret			;909f
-L_90A0:
+cabe_en_b:		; C si DE:HL es menor que B
 	ld a,d			;90a0
 	add a,e			;90a1
 	and a			;90a2
@@ -2264,7 +2265,7 @@ L_90A0:
 	ret nc			;90a9
 	ex de,hl			;90aa
 	ret			;90ab
-L_90AC:
+de_es_cero:		; Z si DE es 0
 	ld a,d			;90ac
 	or e			;90ad
 	and a			;90ae
@@ -2272,30 +2273,30 @@ L_90AC:
 L_90B0:
 	ex de,hl			;90b0
 	ld bc,00010h		;90b1
-	call L_9430		;90b4
+	call divide		;90b4   ; divide: DE / BC: cociente en DE y resto en HL
 	ret			;90b7
-L_90B8:
-	call L_9265		;90b8
-	call L_90C3		;90bb
+bio_avanza_grafica:		; un paso de la grafica: alturas, puntos y dia siguiente
+	call bio_alturas_mas		;90b8   ; bio_alturas_mas: las alturas de los tres ciclos (desplazamientos 4, 3, 2)
+	call bio_pinta_tres		;90bb   ; bio_pinta_tres: pinta un punto de cada ciclo con su color
 	ld hl,0e03fh		;90be
 	inc (hl)			;90c1
 	ret			;90c2
-L_90C3:
+bio_pinta_tres:		; pinta un punto de cada ciclo con su color
 	ld hl,(0e05ah)		;90c3
 	ld bc,001f0h		;90c6
-	call L_90DF		;90c9
+	call bio_pinta_punto		;90c9   ; bio_pinta_punto: pinta el punto de un ciclo
 	ld hl,(0e05ch)		;90cc
 	ld bc,00180h		;90cf
-	call L_90DF		;90d2
+	call bio_pinta_punto		;90d2   ; bio_pinta_punto: pinta el punto de un ciclo
 	ld hl,(0e05eh)		;90d5
 	ld bc,001c0h		;90d8
-	call L_90DF		;90db
+	call bio_pinta_punto		;90db   ; bio_pinta_punto: pinta el punto de un ciclo
 	ret			;90de
-L_90DF:
-	call L_90FD		;90df
-	call L_9145		;90e2
+bio_pinta_punto:		; pinta el punto de un ciclo
+	call bio_posicion		;90df   ; bio_posicion: la posicion en la pantalla del punto (0xE08C)
+	call bit_de_pixel		;90e2   ; bit_de_pixel: A = el bit del pixel
 	ld c,0f0h		;90e5
-	call L_914F		;90e7
+	call bio_pon_color		;90e7   ; bio_pon_color: pone el color del punto si la casilla esta libre (0xF0)
 	ret			;90ea
 L_90EB:
 	ld a,l			;90eb
@@ -2312,7 +2313,7 @@ L_90F9:
 L_90FB:
 	xor a			;90fb
 	ret			;90fc
-L_90FD:
+bio_posicion:		; la posicion en la pantalla del punto (0xE08C)
 	ld a,h			;90fd
 	ld h,a			;90fe
 	ld a,l			;90ff
@@ -2323,25 +2324,25 @@ L_90FD:
 	push de			;9105
 	ld l,e			;9106
 	ld c,008h		;9107
-	call L_94C1		;9109
+	call divide_8		;9109   ; divide_8: L / C: cociente en L y resto en H
 	ld a,h			;910c
 	ld (0e088h),hl		;910d
 	ld b,000h		;9110
 	ld c,l			;9112
 	ld de,00100h		;9113
-	call L_93DB		;9116
+	call multiplica		;9116   ; multiplica: HL = DE x BC
 	ld a,(0e089h)		;9119
-	call L_806E		;911c
+	call hl_mas_a		;911c   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld (0e08ch),hl		;911f
 	pop de			;9122
 	ld l,d			;9123
 	ld c,008h		;9124
-	call L_94C1		;9126
+	call divide_8		;9126   ; divide_8: L / C: cociente en L y resto en H
 	ld (0e088h),hl		;9129
 	ld b,000h		;912c
 	ld c,l			;912e
 	ld de,00008h		;912f
-	call L_93DB		;9132
+	call multiplica		;9132   ; multiplica: HL = DE x BC
 	ex de,hl			;9135
 	ld hl,(0e08ch)		;9136
 	add hl,de			;9139
@@ -2351,7 +2352,7 @@ L_90FD:
 	ld a,007h		;9141
 	sub b			;9143
 	ret			;9144
-L_9145:
+bit_de_pixel:		; A = el bit del pixel
 	inc a			;9145
 	ld b,a			;9146
 	ld a,001h		;9147
@@ -2360,7 +2361,7 @@ L_9149:
 	djnz L_9149		;914b
 	rra			;914d
 	ret			;914e
-L_914F:
+bio_pon_color:		; pone el color del punto si la casilla esta libre (0xF0)
 	ld b,a			;914f
 	ld hl,(0e08ch)		;9150
 	call 0004ah		;9153   ; BIOS RDVRM - Reads the content of VRAM
@@ -2382,37 +2383,37 @@ L_915C:
 	add hl,de			;9174
 	call 0004dh		;9175   ; BIOS WRTVRM - Writes data in VRAM
 	ret			;9178
-L_9179:
-	call L_9183		;9179
-	call L_9197		;917c
-	call L_91B7		;917f
+bio_dia_mas:		; pasa al dia siguiente: los tres angulos suben
+	call bio_sube_sensibilidad		;9179   ; bio_sube_sensibilidad: sube el angulo de la sensibilidad
+	call bio_sube_fisico		;917c   ; bio_sube_fisico: sube el angulo del fisico
+	call bio_sube_intelecto		;917f   ; bio_sube_intelecto: sube el angulo del intelecto
 	ret			;9182
-L_9183:
+bio_sube_sensibilidad:		; sube el angulo de la sensibilidad
 	ld a,(0e03fh)		;9183
 	ld hl,0e06ch		;9186
 	ld c,006h		;9189
-	call L_9C61		;918b
+	call sube_con_tope		;918b   ; sube_con_tope: sube (HL); si llega a C vuelve a 0
 	ret nc			;918e
 	ld hl,(0e02fh)		;918f
 	inc hl			;9192
 	ld (0e02fh),hl		;9193
 	ret			;9196
-L_9197:
+bio_sube_fisico:		; sube el angulo del fisico
 	ld a,(0e03fh)		;9197
 	ld hl,0e06bh		;919a
 	ld c,004h		;919d
-	call L_9C61		;919f
+	call sube_con_tope		;919f   ; sube_con_tope: sube (HL); si llega a C vuelve a 0
 	ret nc			;91a2
 	ld a,(0e03fh)		;91a3
 	ld hl,0e06dh		;91a6
 	ld c,014h		;91a9
-	call L_9C61		;91ab
+	call sube_con_tope		;91ab   ; sube_con_tope: sube (HL); si llega a C vuelve a 0
 	ret nc			;91ae
 	ld hl,(0e02dh)		;91af
 	dec hl			;91b2
 	ld (0e02dh),hl		;91b3
 	ret			;91b6
-L_91B7:
+bio_sube_intelecto:		; sube el angulo del intelecto
 	ld a,(0e06bh)		;91b7
 	and a			;91ba
 	ret z			;91bb
@@ -2420,36 +2421,36 @@ L_91B7:
 	inc hl			;91bf
 	ld (0e031h),hl		;91c0
 	ret			;91c3
-L_91C4:
-	call L_91CE		;91c4
-	call L_91E2		;91c7
-	call L_91FF		;91ca
+bio_dia_menos:		; pasa al dia anterior: los tres angulos bajan
+	call bio_baja_sensibilidad		;91c4   ; bio_baja_sensibilidad: baja el angulo de la sensibilidad
+	call bio_baja_fisico		;91c7   ; bio_baja_fisico: baja el angulo del fisico
+	call bio_baja_intelecto		;91ca   ; bio_baja_intelecto: baja el angulo del intelecto
 	ret			;91cd
-L_91CE:
+bio_baja_sensibilidad:		; baja el angulo de la sensibilidad
 	ld a,(0e03fh)		;91ce
 	ld hl,0e06ch		;91d1
 	ld c,006h		;91d4
-	call L_9C48		;91d6
+	call baja_con_tope		;91d6   ; baja_con_tope: baja (HL); si llega a -C vuelve a 0
 	ret nc			;91d9
 	ld hl,(0e02fh)		;91da
 	dec hl			;91dd
 	ld (0e02fh),hl		;91de
 	ret			;91e1
-L_91E2:
+bio_baja_fisico:		; baja el angulo del fisico
 	ld a,(0e03fh)		;91e2
 	ld hl,0e06bh		;91e5
 	ld c,004h		;91e8
-	call L_9C48		;91ea
+	call baja_con_tope		;91ea   ; baja_con_tope: baja (HL); si llega a -C vuelve a 0
 	ret nc			;91ed
 	ld hl,0e06dh		;91ee
 	ld c,014h		;91f1
-	call L_9C48		;91f3
+	call baja_con_tope		;91f3   ; baja_con_tope: baja (HL); si llega a -C vuelve a 0
 	ret nc			;91f6
 	ld hl,(0e02dh)		;91f7
 	inc hl			;91fa
 	ld (0e02dh),hl		;91fb
 	ret			;91fe
-L_91FF:
+bio_baja_intelecto:		; baja el angulo del intelecto
 	ld a,(0e06bh)		;91ff
 	and a			;9202
 	ret z			;9203
@@ -2457,7 +2458,7 @@ L_91FF:
 	dec hl			;9207
 	ld (0e031h),hl		;9208
 	ret			;920b
-L_920C:
+or_en_color:		; OR de A en el color de B casillas (VRAM + 0x2000)
 	ld de,02000h		;920c
 L_920F:
 	add hl,de			;920f
@@ -2470,7 +2471,7 @@ L_920F:
 	ld de,00008h		;921a
 	djnz L_920F		;921d
 	ret			;921f
-L_9220:
+or_en_color_8:		; OR de A en 8 filas de color de B casillas
 	ld de,02000h		;9220
 	add hl,de			;9223
 L_9224:
@@ -2492,76 +2493,76 @@ L_9228:
 	pop bc			;923a
 	djnz L_9224		;923b
 	ret			;923d
-L_923E:
-	call L_9265		;923e
-	call L_9249		;9241
+bio_avanza_grafica_msx2:		; un paso de la grafica en MSX2
+	call bio_alturas_mas		;923e   ; bio_alturas_mas: las alturas de los tres ciclos (desplazamientos 4, 3, 2)
+	call bio_pinta_tres_msx2		;9241   ; bio_pinta_tres_msx2: pinta un punto de cada ciclo en MSX2 (comando del VDP)
 	ld hl,0e03fh		;9244
 	inc (hl)			;9247
 	ret			;9248
-L_9249:
+bio_pinta_tres_msx2:		; pinta un punto de cada ciclo en MSX2 (comando del VDP)
 	ld hl,(0e05ah)		;9249
 	ld bc,0010ch		;924c
-	call L_931C		;924f
+	call vdp_punto_b		;924f   ; vdp_punto_b: pinta un punto (p05:8365)
 	ld hl,(0e05ch)		;9252
 	ld bc,0010dh		;9255
-	call L_931C		;9258
+	call vdp_punto_b		;9258   ; vdp_punto_b: pinta un punto (p05:8365)
 	ld hl,(0e05eh)		;925b
 	ld bc,0010eh		;925e
-	call L_931C		;9261
+	call vdp_punto_b		;9261   ; vdp_punto_b: pinta un punto (p05:8365)
 	ret			;9264
-L_9265:
+bio_alturas_mas:		; las alturas de los tres ciclos (desplazamientos 4, 3, 2)
 	ld hl,0e02dh		;9265
 	ld de,0e05ah		;9268
 	ld a,004h		;926b
-	call L_92C8		;926d
+	call bio_altura		;926d   ; bio_altura: la altura de un ciclo: el seno del angulo
 	ld hl,0e02fh		;9270
 	ld de,0e05ch		;9273
 	ld a,003h		;9276
-	call L_92C8		;9278
+	call bio_altura		;9278   ; bio_altura: la altura de un ciclo: el seno del angulo
 	ld hl,0e031h		;927b
 	ld de,0e05eh		;927e
 	ld a,002h		;9281
-	call L_92C8		;9283
+	call bio_altura		;9283   ; bio_altura: la altura de un ciclo: el seno del angulo
 	ret			;9286
-L_9287:
+bio_alturas_menos:		; las alturas de los tres ciclos (desplazamientos -4, -3, -2)
 	ld hl,0e02dh		;9287
 	ld de,0e05ah		;928a
 	ld a,0fch		;928d
-	call L_92C8		;928f
+	call bio_altura		;928f   ; bio_altura: la altura de un ciclo: el seno del angulo
 	ld hl,0e02fh		;9292
 	ld de,0e05ch		;9295
 	ld a,0fdh		;9298
-	call L_92C8		;929a
+	call bio_altura		;929a   ; bio_altura: la altura de un ciclo: el seno del angulo
 	ld hl,0e031h		;929d
 	ld de,0e05eh		;92a0
 	ld a,0feh		;92a3
-	call L_92C8		;92a5
+	call bio_altura		;92a5   ; bio_altura: la altura de un ciclo: el seno del angulo
 	ret			;92a8
-L_92A9:
+bio_alturas:		; las alturas de los tres ciclos (sin desplazar)
 	ld hl,0e02dh		;92a9
 	ld de,0e05ah		;92ac
 	xor a			;92af
-	call L_92C8		;92b0
+	call bio_altura		;92b0   ; bio_altura: la altura de un ciclo: el seno del angulo
 	ld hl,0e02fh		;92b3
 	ld de,0e05ch		;92b6
 	xor a			;92b9
-	call L_92C8		;92ba
+	call bio_altura		;92ba   ; bio_altura: la altura de un ciclo: el seno del angulo
 	ld hl,0e031h		;92bd
 	ld de,0e05eh		;92c0
 	xor a			;92c3
-	call L_92C8		;92c4
+	call bio_altura		;92c4   ; bio_altura: la altura de un ciclo: el seno del angulo
 	ret			;92c7
-L_92C8:
+bio_altura:		; la altura de un ciclo: el seno del angulo
 	push de			;92c8
 	push hl			;92c9
-	call L_92E3		;92ca
+	call bio_angulo_desplazado		;92ca   ; bio_angulo_desplazado: el angulo mas el desplazamiento A
 	pop hl			;92cd
-	call L_930E		;92ce
+	call bio_seno		;92ce   ; bio_seno: la altura del angulo (p05:932F) y la columna (0xE03F)
 	pop de			;92d1
 	ex de,hl			;92d2
-	call L_92D7		;92d3
+	call bio_a_pantalla		;92d3   ; bio_a_pantalla: pasa la altura a la pantalla (+0x88, +0x20)
 	ret			;92d6
-L_92D7:
+bio_a_pantalla:		; pasa la altura a la pantalla (+0x88, +0x20)
 	ld a,e			;92d7
 	add a,088h		;92d8
 	ld e,a			;92da
@@ -2572,30 +2573,30 @@ L_92D7:
 	ld d,a			;92e0
 	ld (hl),d			;92e1
 	ret			;92e2
-L_92E3:
+bio_angulo_desplazado:		; el angulo mas el desplazamiento A
 	push hl			;92e3
 	ld e,(hl)			;92e4
 	inc hl			;92e5
 	ld d,(hl)			;92e6
-	call L_92F4		;92e7
+	call suma_con_signo		;92e7   ; suma_con_signo: DE + A con signo
 	ex de,hl			;92ea
-	call L_9085		;92eb
+	call angulo_0_359		;92eb   ; angulo_0_359: suma o resta 360 hasta que HL este entre 0 y 359
 	ex de,hl			;92ee
 	pop hl			;92ef
 	ld (hl),e			;92f0
 	inc hl			;92f1
 	ld (hl),d			;92f2
 	ret			;92f3
-L_92F4:
+suma_con_signo:		; DE + A con signo
 	add a,080h		;92f4
 	jr nc,L_92FC		;92f6
-	call L_9302		;92f8
+	call resta_negativo		;92f8   ; resta_negativo: DE - (-A)
 	ret			;92fb
 L_92FC:
 	add a,080h		;92fc
-	call L_8073		;92fe
+	call de_mas_a		;92fe   ; de_mas_a: DE = DE + A (gemela de p01:7256)
 	ret			;9301
-L_9302:
+resta_negativo:		; DE - (-A)
 	add a,080h		;9302
 	neg		;9304
 	ld b,a			;9306
@@ -2606,19 +2607,19 @@ L_9302:
 	dec d			;930c
 L_930D:
 	ret			;930d
-L_930E:
+bio_seno:		; la altura del angulo (p05:932F) y la columna (0xE03F)
 	ld e,(hl)			;930e
 	inc hl			;930f
 	ld d,(hl)			;9310
 	ex de,hl			;9311
-	call L_932F		;9312
+	call seno		;9312   ; seno: el seno del angulo HL: el cuadrante (90, 180, 270) y la tabla
 	ld e,a			;9315
 	ld a,(0e03fh)		;9316
 	ld d,a			;9319
 	ex de,hl			;931a
 	ret			;931b
-L_931C:
-	call L_8365		;931c
+vdp_punto_b:		; pinta un punto (p05:8365)
+	call vdp_punto		;931c   ; vdp_punto: pinta un punto con el comando del VDP (desde R#36)
 	ret			;931f
 L_9320:
 	scf			;9320
@@ -2630,7 +2631,7 @@ L_9320:
 	srl d		;932a
 	rr e		;932c
 	ret			;932e
-L_932F:
+seno:		; el seno del angulo HL: el cuadrante (90, 180, 270) y la tabla
 	ld de,0010eh		;932f
 	rst 20h			;9332
 	jr nc,L_9374		;9333
@@ -2643,7 +2644,7 @@ L_932F:
 	ld a,l			;9341
 	add a,a			;9342
 	ld hl,094e8h		;9343
-	call L_806E		;9346
+	call hl_mas_a		;9346   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;9349
 	neg		;934a
 	inc hl			;934c
@@ -2656,7 +2657,7 @@ L_934F:
 	ld a,l			;9355
 	add a,a			;9356
 	ld hl,094e8h		;9357
-	call L_806E		;935a
+	call hl_mas_a		;935a   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;935d
 	neg		;935e
 	inc hl			;9360
@@ -2668,7 +2669,7 @@ L_9363:
 	ld a,l			;9368
 	add a,a			;9369
 	ld hl,094e8h		;936a
-	call L_806E		;936d
+	call hl_mas_a		;936d   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;9370
 	inc hl			;9371
 	ld b,(hl)			;9372
@@ -2680,13 +2681,13 @@ L_9374:
 	ld a,l			;937a
 	add a,a			;937b
 	ld hl,094e8h		;937c
-	call L_806E		;937f
+	call hl_mas_a		;937f   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;9382
 	inc hl			;9383
 	ld b,(hl)			;9384
 	ret			;9385
-L_9386:
-	call L_8F4A		;9386
+bio_dias_del_mes_b:		; los dias del mes (tabla p05:959E), con febrero segun el bisiesto
+	call bio_es_bisiesto		;9386   ; bio_es_bisiesto: mira si el ano es bisiesto (4, 100 y 400): 0xE041
 	ld a,000h		;9389
 	jr nc,L_9392		;938b
 	ld a,001h		;938d
@@ -2695,16 +2696,16 @@ L_9392:
 	ld hl,0959eh		;9392
 	dec a			;9395
 	add a,a			;9396
-	call L_806E		;9397
+	call hl_mas_a		;9397   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld d,(hl)			;939a
 	inc hl			;939b
 	ld e,(hl)			;939c
 	dec a			;939d
 	ld b,a			;939e
-	call L_8073		;939f
+	call de_mas_a		;939f   ; de_mas_a: DE = DE + A (gemela de p01:7256)
 	ld (0e042h),de		;93a2
 	ret			;93a6
-L_93A7:
+resta_24:		; resta DE de los 24 bits de HL
 	ld a,(hl)			;93a7
 	sub e			;93a8
 	ld (hl),a			;93a9
@@ -2721,7 +2722,7 @@ L_93A7:
 	dec (hl)			;93b6
 L_93B7:
 	ret			;93b7
-L_93B8:
+resta_32:		; resta los 32 bits de HL de los de DE
 	ex de,hl			;93b8
 	ld a,(de)			;93b9
 	ld b,(hl)			;93ba
@@ -2757,7 +2758,7 @@ L_93D3:
 	inc hl			;93d7
 	djnz L_93D3		;93d8
 	ret			;93da
-L_93DB:
+multiplica:		; HL = DE x BC
 	ld hl,00000h		;93db
 L_93DE:
 	ld a,c			;93de
@@ -2773,7 +2774,7 @@ L_93E9:
 	jr L_93DE		;93ed
 L_93EF:
 	ret			;93ef
-L_93F0:
+suma_24:		; suma DE a los 24 bits de HL
 	xor a			;93f0
 	ld a,(hl)			;93f1
 	add a,e			;93f2
@@ -2794,7 +2795,7 @@ L_93F0:
 	ld (hl),a			;9403
 L_9404:
 	ret			;9404
-L_9405:
+multiplica_32:		; DE:HL = HL x DE
 	push ix		;9405
 	push af			;9407
 	push bc			;9408
@@ -2824,7 +2825,7 @@ L_9428:
 	pop af			;942c
 	pop ix		;942d
 	ret			;942f
-L_9430:
+divide:		; DE / BC: cociente en DE y resto en HL
 	ld hl,00000h		;9430
 	exx			;9433
 	ld b,010h		;9434
@@ -2844,7 +2845,7 @@ L_9445:
 	djnz L_9436		;9446
 	exx			;9448
 	ret			;9449
-L_944A:
+divide_32:		; divide 32 bits por BC
 	push hl			;944a
 	ld hl,00000h		;944b
 	exx			;944e
@@ -2886,17 +2887,17 @@ L_947B:
 	ld (0e08ch),de		;947f
 	ret			;9483
 L_9484:
-	call L_94AE		;9484
+	call signo_de_division		;9484   ; signo_de_division: el signo del resultado (B y D)
 	push af			;9487
 	ld l,c			;9488
 	ld h,b			;9489
-	call L_94A2		;948a
+	call valor_absoluto		;948a   ; valor_absoluto: HL = |HL|
 	ld c,l			;948d
 	ld b,h			;948e
 	ex de,hl			;948f
-	call L_94A2		;9490
+	call valor_absoluto		;9490   ; valor_absoluto: HL = |HL|
 	ex de,hl			;9493
-	call L_9430		;9494
+	call divide		;9494   ; divide: DE / BC: cociente en DE y resto en HL
 	pop af			;9497
 	jr c,L_94A1		;9498
 	ld a,d			;949a
@@ -2908,7 +2909,7 @@ L_9484:
 	inc de			;94a0
 L_94A1:
 	ret			;94a1
-L_94A2:
+valor_absoluto:		; HL = |HL|
 	ld a,h			;94a2
 	or a			;94a3
 	jp p,L_94AD		;94a4
@@ -2920,7 +2921,7 @@ L_94A2:
 	inc hl			;94ac
 L_94AD:
 	ret			;94ad
-L_94AE:
+signo_de_division:		; el signo del resultado (B y D)
 	ld a,b			;94ae
 	or a			;94af
 	jp m,L_94BA		;94b0
@@ -2936,7 +2937,7 @@ L_94BF:
 	scf			;94bf
 L_94C0:
 	ret			;94c0
-L_94C1:
+divide_8:		; L / C: cociente en L y resto en H
 	ld b,008h		;94c1
 	ld h,000h		;94c3
 L_94C5:
@@ -2949,20 +2950,20 @@ L_94C5:
 L_94CC:
 	djnz L_94C5		;94cc
 	ret			;94ce
-L_94CF:
+divide_por_4:		; DE = DE / 4
 	push de			;94cf
 	ex de,hl			;94d0
 	ld bc,00004h		;94d1
-	call L_9430		;94d4
+	call divide		;94d4   ; divide: DE / BC: cociente en DE y resto en HL
 	ex de,hl			;94d7
 	pop de			;94d8
 	ret			;94d9
 L_94DA:
 	ex de,hl			;94da
 	ld bc,00010h		;94db
-	call L_9430		;94de
+	call divide		;94de   ; divide: DE / BC: cociente en DE y resto en HL
 	ret			;94e1
-L_94E2:
+por_10:		; A x 10
 	add a,a			;94e2
 	ld b,a			;94e3
 	add a,a			;94e4
@@ -2997,9 +2998,9 @@ DATA_resto_94E8:
 ; ======================================================================
 
 
-L_95B7:
+bio_estado_fecha:		; el estado de pedir una fecha (MSX1)
 	ld a,(0e005h)		;95b7
-	call L_8078		;95ba
+	call despacha		;95ba   ; despacha: salta a la palabra A de la tabla pegada detras del `call`
 
 ; ----------------------------------------------------------------------
 ; DATOS saltos_95BD: tabla de 8 palabras del despachador (call 0x408D en
@@ -3021,16 +3022,16 @@ DATA_saltos_95BD:
 
 
 L_95CD:
-	call L_9617		;95cd
-	call L_9674		;95d0
+	call bio_si_mes_o_dia		;95cd   ; bio_si_mes_o_dia: si el cursor esta en el mes (8) o el dia (0x10), su texto
+	call bio_pide_fecha		;95d0   ; bio_pide_fecha: lee teclas hasta una buena y la mete en la fecha
 	jp c,L_97E4		;95d3
-	call L_977E		;95d6
+	call bio_segun_campo		;95d6   ; bio_segun_campo: salta segun el campo del cursor (p05:97C6)
 	jp L_9915		;95d9
 L_95DC:
-	call L_961E		;95dc
-	call L_9674		;95df
+	call bio_si_dia		;95dc   ; bio_si_dia: si el cursor esta en el dia (0x10), su texto
+	call bio_pide_fecha		;95df   ; bio_pide_fecha: lee teclas hasta una buena y la mete en la fecha
 	jp c,L_97E4		;95e2
-	call L_977E		;95e5
+	call bio_segun_campo		;95e5   ; bio_segun_campo: salta segun el campo del cursor (p05:97C6)
 	jp L_9915		;95e8
 L_95EB:
 	ld b,010h		;95eb
@@ -3042,73 +3043,73 @@ L_95F0:
 	djnz L_95F0		;95f4
 	jp L_9905		;95f6
 L_95F9:
-	call L_9DDA		;95f9
+	call bio_texto_9e50		;95f9   ; bio_texto_9e50: pinta el texto de p05:9E50
 	jp L_9905		;95fc
 L_95FF:
-	call L_97BD		;95ff
+	call bio_cursor_al_mes		;95ff   ; bio_cursor_al_mes: el cursor y su tope al mes (8)
 	jp L_9905		;9602
 L_9605:
-	call L_9E37		;9605
+	call bio_texto_9e47		;9605   ; bio_texto_9e47: pinta el texto de p05:9E47
 	jp L_9905		;9608
 L_960B:
-	call L_9794		;960b
+	call bio_guarda_fecha		;960b   ; bio_guarda_fecha: copia la fecha tecleada (0xE098...) a 0xE062
 	scf			;960e
 	ret			;960f
-L_9610:
-	call L_8D07		;9610
-	call L_9628		;9613
+bio_vuelca:		; vuelca la copia de la tabla de nombres y las cifras
+	call bio_vuelca_nombres		;9610   ; bio_vuelca_nombres: vuelca la copia de la tabla de nombres (0xE300) a 0x3800
+	call bio_cifras_a_nombres		;9613   ; bio_cifras_a_nombres: las cifras de las dos fechas (0xE090...) a la copia de nombres
 	ret			;9616
-L_9617:
+bio_si_mes_o_dia:		; si el cursor esta en el mes (8) o el dia (0x10), su texto
 	ld a,(0e07ah)		;9617
 	cp 008h		;961a
 	jr z,L_9624		;961c
-L_961E:
+bio_si_dia:		; si el cursor esta en el dia (0x10), su texto
 	ld a,(0e07ah)		;961e
 	cp 010h		;9621
 	ret nz			;9623
 L_9624:
-	call L_9E30		;9624
+	call bio_texto_9e3e		;9624   ; bio_texto_9e3e: pinta el texto de p05:9E3E
 	ret			;9627
-L_9628:
+bio_cifras_a_nombres:		; las cifras de las dos fechas (0xE090...) a la copia de nombres
 	ld de,0e090h		;9628
 	ld hl,0e34fh		;962b
 	ld b,004h		;962e
-	call L_966B		;9630
+	call cifras_a_letras		;9630   ; cifras_a_letras: B cifras de DE a letras (+0x10) en HL
 	ld de,0e094h		;9633
 	ld hl,0e356h		;9636
 	ld b,002h		;9639
-	call L_966B		;963b
+	call cifras_a_letras		;963b   ; cifras_a_letras: B cifras de DE a letras (+0x10) en HL
 	ld de,0e096h		;963e
 	ld hl,0e35bh		;9641
 	ld b,002h		;9644
-	call L_966B		;9646
+	call cifras_a_letras		;9646   ; cifras_a_letras: B cifras de DE a letras (+0x10) en HL
 	ld de,0e098h		;9649
 	ld hl,0e3afh		;964c
 	ld b,004h		;964f
-	call L_966B		;9651
+	call cifras_a_letras		;9651   ; cifras_a_letras: B cifras de DE a letras (+0x10) en HL
 	ld de,0e09ch		;9654
 	ld hl,0e3b6h		;9657
 	ld b,002h		;965a
-	call L_966B		;965c
+	call cifras_a_letras		;965c   ; cifras_a_letras: B cifras de DE a letras (+0x10) en HL
 	ld de,0e09eh		;965f
 	ld hl,0e3bbh		;9662
 	ld b,002h		;9665
-	call L_966B		;9667
+	call cifras_a_letras		;9667   ; cifras_a_letras: B cifras de DE a letras (+0x10) en HL
 	ret			;966a
-L_966B:
+cifras_a_letras:		; B cifras de DE a letras (+0x10) en HL
 	ld a,(de)			;966b
 	add a,010h		;966c
 	ld (hl),a			;966e
 	inc hl			;966f
 	inc de			;9670
-	djnz L_966B		;9671
+	djnz cifras_a_letras		;9671
 	ret			;9673
-L_9674:
-	call L_968A		;9674
-	call L_99AC		;9677
-	jr c,L_9674		;967a
+bio_pide_fecha:		; lee teclas hasta una buena y la mete en la fecha
+	call bio_espera_tecla		;9674   ; bio_espera_tecla: vuelca, anima el cursor y espera una tecla (0xE058)
+	call bio_tecla		;9677   ; bio_tecla: B = la orden de la tecla A: RETURN, flechas o cifra
+	jr c,bio_pide_fecha		;967a
 	ld a,b			;967c
-	call L_8078		;967d
+	call despacha		;967d   ; despacha: salta a la palabra A de la tabla pegada detras del `call`
 
 ; ----------------------------------------------------------------------
 ; DATOS saltos_9680: tabla de 5 palabras del despachador (call 0x408D en
@@ -3126,12 +3127,12 @@ DATA_saltos_9680:
 ; ======================================================================
 
 
-L_968A:
-	call L_9610		;968a
-	call L_99D7		;968d
-	call L_96AD		;9690
+bio_espera_tecla:		; vuelca, anima el cursor y espera una tecla (0xE058)
+	call bio_vuelca		;968a   ; bio_vuelca: vuelca la copia de la tabla de nombres y las cifras
+	call bio_parpadeo		;968d   ; bio_parpadeo: cada 16 cuadros cambia el parpadeo (0xE00D)
+	call bio_cursor		;9690   ; bio_cursor: pinta el cursor parpadeando en su cifra (tabla p05:96D2)
 	call 0009ch		;9693   ; BIOS CHSNS - Tests the status of the keyboard buffer
-	jr z,L_968A		;9696
+	jr z,bio_espera_tecla		;9696
 	call 0009fh		;9698   ; BIOS CHGET - One character input (waiting)
 	ld (0e058h),a		;969b
 	ret			;969e
@@ -3148,20 +3149,20 @@ L_96A8:
 	ld a,0f4h		;96a9
 	ld (hl),a			;96ab
 	ret			;96ac
-L_96AD:
-	call L_9AC3		;96ad
+bio_cursor:		; pinta el cursor parpadeando en su cifra (tabla p05:96D2)
+	call bio_cursor_al_final		;96ad   ; bio_cursor_al_final: Z si el cursor esta en la ultima cifra
 	jr z,L_96D1		;96b0
 	ld hl,0e07ah		;96b2
 	ld a,(hl)			;96b5
 	ld c,a			;96b6
 	add a,a			;96b7
 	ld hl,096d2h		;96b8
-	call L_806E		;96bb
+	call hl_mas_a		;96bb   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld e,(hl)			;96be
 	inc hl			;96bf
 	ld d,(hl)			;96c0
 	ld b,004h		;96c1
-	call L_96F2		;96c3
+	call bio_cifra_del_cursor		;96c3   ; bio_cifra_del_cursor: B = la cifra que hay bajo el cursor
 	ld a,(0e00dh)		;96c6
 	bit 2,a		;96c9
 	jr nz,L_96CF		;96cb
@@ -3186,18 +3187,18 @@ DATA_resto_96D2:
 ; ======================================================================
 
 
-L_96F2:
+bio_cifra_del_cursor:		; B = la cifra que hay bajo el cursor
 	ld hl,0e090h		;96f2
 	ld a,(0e07ah)		;96f5
-	call L_806E		;96f8
+	call hl_mas_a		;96f8   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld b,(hl)			;96fb
 	ld a,b			;96fc
 	add a,010h		;96fd
 	ld b,a			;96ff
 	ret			;9700
-L_9701:
+bio_estado_fecha_msx2:		; el estado de pedir una fecha (MSX2)
 	ld a,(0e005h)		;9701
-	call L_8078		;9704
+	call despacha		;9704   ; despacha: salta a la palabra A de la tabla pegada detras del `call`
 
 ; ----------------------------------------------------------------------
 ; DATOS saltos_9707: tabla de 8 palabras del despachador (call 0x408D en
@@ -3230,50 +3231,50 @@ L_971C:
 	ld (0e004h),a		;9723
 	jp L_9905		;9726
 L_9729:
-	call L_976D		;9729
-	call L_9ACC		;972c
-	call L_9984		;972f
+	call bio_si_mes_o_dia_msx2		;9729   ; bio_si_mes_o_dia_msx2: si el cursor esta en el mes o el dia, su texto (MSX2)
+	call bio_pinta_fecha_1		;972c   ; bio_pinta_fecha_1: pinta la fecha de nacimiento (MSX2)
+	call bio_pide_fecha_msx2		;972f   ; bio_pide_fecha_msx2: lee teclas hasta una buena (MSX2)
 	jp c,L_97E4		;9732
-	call L_977E		;9735
+	call bio_segun_campo		;9735   ; bio_segun_campo: salta segun el campo del cursor (p05:97C6)
 	jp L_9915		;9738
 L_973B:
-	call L_9774		;973b
-	call L_9AE0		;973e
-	call L_9984		;9741
+	call bio_si_dia_msx2		;973b   ; bio_si_dia_msx2: si el cursor esta en el dia, su texto (MSX2)
+	call bio_pinta_fecha_2		;973e   ; bio_pinta_fecha_2: pinta la fecha de hoy (MSX2)
+	call bio_pide_fecha_msx2		;9741   ; bio_pide_fecha_msx2: lee teclas hasta una buena (MSX2)
 	jp c,L_97E4		;9744
-	call L_977E		;9747
+	call bio_segun_campo		;9747   ; bio_segun_campo: salta segun el campo del cursor (p05:97C6)
 	jp L_9915		;974a
 L_974D:
-	call L_9FE8		;974d
+	call bio_a066		;974d   ; bio_a066: llama a p06:A066
 	jp L_9905		;9750
 L_9753:
-	call L_9ACC		;9753
+	call bio_pinta_fecha_1		;9753   ; bio_pinta_fecha_1: pinta la fecha de nacimiento (MSX2)
 	call 0a092h		;9756
-	call L_97BD		;9759
+	call bio_cursor_al_mes		;9759   ; bio_cursor_al_mes: el cursor y su tope al mes (8)
 	jp L_9905		;975c
 L_975F:
 	call 0a270h		;975f
 	jp L_9905		;9762
 L_9765:
-	call L_9AE0		;9765
-	call L_9794		;9768
+	call bio_pinta_fecha_2		;9765   ; bio_pinta_fecha_2: pinta la fecha de hoy (MSX2)
+	call bio_guarda_fecha		;9768   ; bio_guarda_fecha: copia la fecha tecleada (0xE098...) a 0xE062
 	scf			;976b
 	ret			;976c
-L_976D:
+bio_si_mes_o_dia_msx2:		; si el cursor esta en el mes o el dia, su texto (MSX2)
 	ld a,(0e07ah)		;976d
 	cp 008h		;9770
 	jr z,L_977A		;9772
-L_9774:
+bio_si_dia_msx2:		; si el cursor esta en el dia, su texto (MSX2)
 	ld a,(0e07ah)		;9774
 	cp 010h		;9777
 	ret nz			;9779
 L_977A:
 	call 0a23bh		;977a
 	ret			;977d
-L_977E:
-	call L_97C6		;977e
+bio_segun_campo:		; salta segun el campo del cursor (p05:97C6)
+	call bio_campo		;977e   ; bio_campo: B = el campo del cursor: ano (4), mes (6), dia (8)...
 	ld a,b			;9781
-	call L_8078		;9782
+	call despacha		;9782   ; despacha: salta a la palabra A de la tabla pegada detras del `call`
 
 ; ----------------------------------------------------------------------
 ; DATOS saltos_9785: tabla de 7 palabras del despachador (call 0x408D en
@@ -3295,33 +3296,33 @@ DATA_saltos_9785:
 
 L_9793:
 	ret			;9793
-L_9794:
+bio_guarda_fecha:		; copia la fecha tecleada (0xE098...) a 0xE062
 	ld b,004h		;9794
 	ld de,0e098h		;9796
 	ld hl,0e062h		;9799
-	call L_97B6		;979c
+	call copia_b		;979c   ; copia_b: copia B bytes de DE a HL
 	ld b,002h		;979f
 	ld de,0e09ch		;97a1
 	ld hl,0e066h		;97a4
-	call L_97B6		;97a7
+	call copia_b		;97a7   ; copia_b: copia B bytes de DE a HL
 	ld b,002h		;97aa
 	ld de,0e09eh		;97ac
 	ld hl,0e068h		;97af
-	call L_97B6		;97b2
+	call copia_b		;97b2   ; copia_b: copia B bytes de DE a HL
 	ret			;97b5
-L_97B6:
+copia_b:		; copia B bytes de DE a HL
 	ld a,(de)			;97b6
 	ld (hl),a			;97b7
 	inc hl			;97b8
 	inc de			;97b9
-	djnz L_97B6		;97ba
+	djnz copia_b		;97ba
 	ret			;97bc
-L_97BD:
+bio_cursor_al_mes:		; el cursor y su tope al mes (8)
 	ld a,008h		;97bd
 	ld (0e078h),a		;97bf
 	ld (0e07ah),a		;97c2
 	ret			;97c5
-L_97C6:
+bio_campo:		; B = el campo del cursor: ano (4), mes (6), dia (8)...
 	ld b,000h		;97c6
 	ld a,(0e07ah)		;97c8
 	cp 004h		;97cb
@@ -3344,106 +3345,106 @@ L_97C6:
 	inc b			;97e2
 	ret			;97e3
 L_97E4:
-	call L_97ED		;97e4
+	call bio_comprueba_fecha		;97e4   ; bio_comprueba_fecha: comprueba la fecha: ano, mes y dia
 	jp c,L_9915		;97e7
 	jp L_9905		;97ea
-L_97ED:
+bio_comprueba_fecha:		; comprueba la fecha: ano, mes y dia
 	ld a,(0e005h)		;97ed
 	cp 002h		;97f0
 	jr nz,L_9800		;97f2
-	call L_980C		;97f4
+	call bio_comprueba_ano		;97f4   ; bio_comprueba_ano: comprueba el ano de nacimiento (0xE010)
 	ret c			;97f7
-	call L_982C		;97f8
+	call bio_comprueba_mes		;97f8   ; bio_comprueba_mes: comprueba el mes de nacimiento
 	ret c			;97fb
-	call L_984A		;97fc
+	call bio_comprueba_dia		;97fc   ; bio_comprueba_dia: comprueba el dia de nacimiento
 	ret			;97ff
 L_9800:
-	call L_981C		;9800
+	call bio_comprueba_ano_2		;9800   ; bio_comprueba_ano_2: comprueba el ano de hoy (0xE012)
 	ret c			;9803
-	call L_983B		;9804
+	call bio_comprueba_mes_2		;9804   ; bio_comprueba_mes_2: comprueba el mes de hoy
 	ret c			;9807
-	call L_9859		;9808
+	call bio_comprueba_dia_2		;9808   ; bio_comprueba_dia_2: comprueba el dia de hoy
 	ret			;980b
-L_980C:
+bio_comprueba_ano:		; comprueba el ano de nacimiento (0xE010)
 	ld a,000h		;980c
 	ld (0e07bh),a		;980e
 	ld ix,0e090h		;9811
-	ld hl,0e010h		;9815
-	call L_9868		;9818
+	ld hl,0e010h		;9815   ; apunta a la lista de la SRAM
+	call bio_lee_ano		;9818   ; bio_lee_ano: pasa las 4 cifras del ano a binario
 	ret			;981b
-L_981C:
+bio_comprueba_ano_2:		; comprueba el ano de hoy (0xE012)
 	ld a,008h		;981c
 	ld (0e07bh),a		;981e
 	ld ix,0e098h		;9821
 	ld hl,0e012h		;9825
-	call L_9868		;9828
+	call bio_lee_ano		;9828   ; bio_lee_ano: pasa las 4 cifras del ano a binario
 	ret			;982b
-L_982C:
+bio_comprueba_mes:		; comprueba el mes de nacimiento
 	ld a,004h		;982c
 	ld (0e07bh),a		;982e
 	ld hl,0e094h		;9831
 	ld de,0e014h		;9834
-	call L_9879		;9837
+	call bio_lee_mes		;9837   ; bio_lee_mes: pasa las 2 cifras del mes a binario y lo comprueba (1-12)
 	ret			;983a
-L_983B:
+bio_comprueba_mes_2:		; comprueba el mes de hoy
 	ld a,00ch		;983b
 	ld (0e07bh),a		;983d
 	ld hl,0e09ch		;9840
 	ld de,0e015h		;9843
-	call L_9879		;9846
+	call bio_lee_mes		;9846   ; bio_lee_mes: pasa las 2 cifras del mes a binario y lo comprueba (1-12)
 	ret			;9849
-L_984A:
+bio_comprueba_dia:		; comprueba el dia de nacimiento
 	ld a,006h		;984a
 	ld (0e07bh),a		;984c
 	ld hl,0e096h		;984f
 	ld de,0e016h		;9852
-	call L_9884		;9855
+	call bio_lee_dia		;9855   ; bio_lee_dia: pasa las 2 cifras del dia a binario y lo comprueba
 	ret			;9858
-L_9859:
+bio_comprueba_dia_2:		; comprueba el dia de hoy
 	ld a,00eh		;9859
 	ld (0e07bh),a		;985b
 	ld hl,0e09eh		;985e
 	ld de,0e017h		;9861
-	call L_9884		;9864
+	call bio_lee_dia		;9864   ; bio_lee_dia: pasa las 2 cifras del dia a binario y lo comprueba
 	ret			;9867
-L_9868:
+bio_lee_ano:		; pasa las 4 cifras del ano a binario
 	push hl			;9868
-	call L_993B		;9869
+	call cuatro_cifras		;9869   ; cuatro_cifras: las 4 cifras de IX a binario (x1000, x100, x10)
 	pop hl			;986c
 	ld de,(0e088h)		;986d
 	ld (hl),e			;9871
 	inc hl			;9872
 	ld (hl),d			;9873
 	dec hl			;9874
-	call L_988C		;9875
+	call bio_ano_valido		;9875   ; bio_ano_valido: comprueba el ano (y que hoy no sea antes del nacimiento)
 	ret			;9878
-L_9879:
-	call L_996F		;9879
+bio_lee_mes:		; pasa las 2 cifras del mes a binario y lo comprueba (1-12)
+	call dos_cifras		;9879   ; dos_cifras: las 2 cifras de HL a binario (x10)
 	ld (de),a			;987c
 	ld (0e04eh),a		;987d
-	call L_98A6		;9880
+	call bio_mes_valido		;9880   ; bio_mes_valido: C si el mes no esta entre 1 y 12
 	ret			;9883
-L_9884:
-	call L_996F		;9884
+bio_lee_dia:		; pasa las 2 cifras del dia a binario y lo comprueba
+	call dos_cifras		;9884   ; dos_cifras: las 2 cifras de HL a binario (x10)
 	ld (de),a			;9887
-	call L_98B1		;9888
+	call bio_dia_valido		;9888   ; bio_dia_valido: C si el dia no cabe en el mes (tabla p05:9978, febrero con el bisiesto)
 	ret			;988b
-L_988C:
-	call L_8F4A		;988c
+bio_ano_valido:		; comprueba el ano (y que hoy no sea antes del nacimiento)
+	call bio_es_bisiesto		;988c   ; bio_es_bisiesto: mira si el ano es bisiesto (4, 100 y 400): 0xE041
 	xor a			;988f
 	ld a,(0e005h)		;9890
 	cp 002h		;9893
 	jr z,L_989A		;9895
-	call L_989B		;9897
+	call bio_hoy_despues		;9897   ; bio_hoy_despues: C si el ano de hoy es menor que el de nacimiento
 L_989A:
 	ret			;989a
-L_989B:
-	ld de,(0e010h)		;989b
+bio_hoy_despues:		; C si el ano de hoy es menor que el de nacimiento
+	ld de,(0e010h)		;989b   ; lee la lista de la SRAM y el byte siguiente (16 bits)
 	ld hl,(0e012h)		;989f
 	rst 20h			;98a2
 	jr c,L_98DD		;98a3
 	ret			;98a5
-L_98A6:
+bio_mes_valido:		; C si el mes no esta entre 1 y 12
 	cp 001h		;98a6
 	jr c,L_98AF		;98a8
 	ld b,a			;98aa
@@ -3452,7 +3453,7 @@ L_98A6:
 	ret nc			;98ae
 L_98AF:
 	jr L_98E5		;98af
-L_98B1:
+bio_dia_valido:		; C si el dia no cabe en el mes (tabla p05:9978, febrero con el bisiesto)
 	cp 001h		;98b1
 	jr c,L_98D9		;98b3
 	ld b,a			;98b5
@@ -3462,7 +3463,7 @@ L_98B1:
 	jr z,L_98C8		;98be
 	dec a			;98c0
 	ld c,a			;98c1
-	call L_806E		;98c2
+	call hl_mas_a		;98c2   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;98c5
 	cp b			;98c6
 	ret nc			;98c7
@@ -3480,7 +3481,7 @@ L_98D5:
 	cp b			;98d7
 	ret nc			;98d8
 L_98D9:
-	call L_98ED		;98d9
+	call bio_cursor_al_error		;98d9   ; bio_cursor_al_error: lleva el cursor al campo que esta mal (0xE07B)
 	ret			;98dc
 L_98DD:
 	ld a,(0e07bh)		;98dd
@@ -3492,7 +3493,7 @@ L_98E5:
 	ld hl,0e07ah		;98e8
 	ld (hl),a			;98eb
 	ret			;98ec
-L_98ED:
+bio_cursor_al_error:		; lleva el cursor al campo que esta mal (0xE07B)
 	ld a,(0e07bh)		;98ed
 	ld hl,0e07ah		;98f0
 	ld (hl),a			;98f3
@@ -3508,56 +3509,56 @@ L_98FD:
 	ret			;98fd
 L_98FE:
 	ld a,(hl)			;98fe
-	call L_94E2		;98ff
+	call por_10		;98ff   ; por_10: A x 10
 	inc hl			;9902
 	add a,(hl)			;9903
 	ret			;9904
 L_9905:
-	call L_9924		;9905
+	call bio_borra_estado		;9905   ; bio_borra_estado: pone a cero 0xE006 y 0xE004
 	ld hl,0e005h		;9908
 	inc (hl)			;990b
 	ret			;990c
 L_990D:
-	call L_992B		;990d
+	call nada		;990d   ; nada: `ret`
 	ld hl,0e006h		;9910
 	inc (hl)			;9913
 	ret			;9914
 L_9915:
-	call L_992B		;9915
+	call nada		;9915   ; nada: `ret`
 	xor a			;9918
 	ret			;9919
 L_991A:
-	call L_9924		;991a
+	call bio_borra_estado		;991a   ; bio_borra_estado: pone a cero 0xE006 y 0xE004
 	ld hl,0e005h		;991d
 	ld a,001h		;9920
 	ld (hl),a			;9922
 	ret			;9923
-L_9924:
+bio_borra_estado:		; pone a cero 0xE006 y 0xE004
 	xor a			;9924
 	ld (0e006h),a		;9925
 	ld (0e004h),a		;9928
-L_992B:
+nada:		; `ret`
 	ret			;992b
 L_992C:
 	ld a,b			;992c
 	ld b,000h		;992d
 	ld de,0e062h		;992f
-	call L_8073		;9932
+	call de_mas_a		;9932   ; de_mas_a: DE = DE + A (gemela de p01:7256)
 	ld hl,0e084h		;9935
 	ldir		;9938
 	ret			;993a
-L_993B:
+cuatro_cifras:		; las 4 cifras de IX a binario (x1000, x100, x10)
 	ld a,(ix+000h)		;993b
 	ld b,000h		;993e
 	ld c,a			;9940
 	ld de,003e8h		;9941
-	call L_93DB		;9944
+	call multiplica		;9944   ; multiplica: HL = DE x BC
 	push hl			;9947
 	ld a,(ix+001h)		;9948
 	ld b,000h		;994b
 	ld c,a			;994d
 	ld de,00064h		;994e
-	call L_93DB		;9951
+	call multiplica		;9951   ; multiplica: HL = DE x BC
 	pop de			;9954
 	add hl,de			;9955
 	push hl			;9956
@@ -3565,17 +3566,17 @@ L_993B:
 	ld b,000h		;995a
 	ld c,a			;995c
 	ld de,0000ah		;995d
-	call L_93DB		;9960
+	call multiplica		;9960   ; multiplica: HL = DE x BC
 	pop de			;9963
 	add hl,de			;9964
 	ld a,(ix+003h)		;9965
-	call L_806E		;9968
+	call hl_mas_a		;9968   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld (0e088h),hl		;996b
 	ret			;996e
-L_996F:
+dos_cifras:		; las 2 cifras de HL a binario (x10)
 	push de			;996f
 	ld a,(hl)			;9970
-	call L_94E2		;9971
+	call por_10		;9971   ; por_10: A x 10
 	inc hl			;9974
 	add a,(hl)			;9975
 	pop de			;9976
@@ -3594,12 +3595,12 @@ DATA_resto_9978:
 ; ======================================================================
 
 
-L_9984:
-	call L_999A		;9984
-	call L_99AC		;9987
-	jr c,L_9984		;998a
+bio_pide_fecha_msx2:		; lee teclas hasta una buena (MSX2)
+	call bio_espera_tecla_msx2		;9984   ; bio_espera_tecla_msx2: anima el cursor y espera una tecla (MSX2)
+	call bio_tecla		;9987   ; bio_tecla: B = la orden de la tecla A: RETURN, flechas o cifra
+	jr c,bio_pide_fecha_msx2		;998a
 	ld a,b			;998c
-	call L_8078		;998d
+	call despacha		;998d   ; despacha: salta a la palabra A de la tabla pegada detras del `call`
 
 ; ----------------------------------------------------------------------
 ; DATOS saltos_9990: tabla de 5 palabras del despachador (call 0x408D en
@@ -3617,15 +3618,15 @@ DATA_saltos_9990:
 ; ======================================================================
 
 
-L_999A:
-	call L_99D7		;999a
-	call L_9A6F		;999d
+bio_espera_tecla_msx2:		; anima el cursor y espera una tecla (MSX2)
+	call bio_parpadeo		;999a   ; bio_parpadeo: cada 16 cuadros cambia el parpadeo (0xE00D)
+	call bio_cursor_msx2		;999d   ; bio_cursor_msx2: pinta el cursor parpadeando (MSX2, tabla p05:9AA3)
 	call 0009ch		;99a0   ; BIOS CHSNS - Tests the status of the keyboard buffer
-	jr z,L_999A		;99a3
+	jr z,bio_espera_tecla_msx2		;99a3
 	call 0009fh		;99a5   ; BIOS CHGET - One character input (waiting)
 	ld (0e058h),a		;99a8
 	ret			;99ab
-L_99AC:
+bio_tecla:		; B = la orden de la tecla A: RETURN, flechas o cifra
 	ld b,000h		;99ac
 	cp 008h		;99ae
 	jp z,L_99CA		;99b0
@@ -3639,12 +3640,12 @@ L_99AC:
 	cp 00dh		;99c0
 	jp z,L_99CA		;99c2
 	inc b			;99c5
-	call L_99CC		;99c6
+	call es_cifra		;99c6   ; es_cifra: C si A no es una cifra (0x30-0x39)
 	ret c			;99c9
 L_99CA:
 	ld a,b			;99ca
 	ret			;99cb
-L_99CC:
+es_cifra:		; C si A no es una cifra (0x30-0x39)
 	cp 040h		;99cc
 	jr nc,L_99D5		;99ce
 	cp 030h		;99d0
@@ -3653,7 +3654,7 @@ L_99CC:
 L_99D5:
 	scf			;99d5
 	ret			;99d6
-L_99D7:
+bio_parpadeo:		; cada 16 cuadros cambia el parpadeo (0xE00D)
 	ld hl,0e007h		;99d7
 	ld a,(hl)			;99da
 	inc a			;99db
@@ -3664,7 +3665,7 @@ L_99D7:
 	inc (hl)			;99e3
 	ret			;99e4
 L_99E5:
-	call L_9A1D		;99e5
+	call bio_mete_cifra		;99e5   ; bio_mete_cifra: mete la cifra tecleada en su sitio
 	jr L_9A18		;99e8
 L_99EA:
 	ld a,(0e078h)		;99ea
@@ -3677,7 +3678,7 @@ L_99EA:
 L_99F6:
 	jr L_9A18		;99f6
 L_99F8:
-	call L_9A51		;99f8
+	call bio_primer_campo		;99f8   ; bio_primer_campo: B = la primera cifra: 0 o 8 segun 0xE005
 	ld a,b			;99fb
 	ld hl,0e07ah		;99fc
 	ld b,(hl)			;99ff
@@ -3690,7 +3691,7 @@ L_99F8:
 L_9A08:
 	jr L_9A18		;9a08
 L_9A0A:
-	call L_9A5D		;9a0a
+	call bio_ultimo_campo		;9a0a   ; bio_ultimo_campo: B = la ultima cifra: 8 o 16 segun 0xE005
 	ld a,(0e078h)		;9a0d
 	cp b			;9a10
 	jr z,L_9A16		;9a11
@@ -3704,8 +3705,8 @@ L_9A18:
 	ret			;9a1a
 L_9A1B:
 	jr L_9A18		;9a1b
-L_9A1D:
-	call L_9A69		;9a1d
+bio_mete_cifra:		; mete la cifra tecleada en su sitio
+	call bio_estado_5		;9a1d   ; bio_estado_5: compara 0xE005 con 5
 	jr nc,L_9A28		;9a20
 	ld a,(0e07ah)		;9a22
 	cp 008h		;9a25
@@ -3713,19 +3714,19 @@ L_9A1D:
 L_9A28:
 	ld a,(0e07ah)		;9a28
 	ld hl,0e090h		;9a2b
-	call L_806E		;9a2e
+	call hl_mas_a		;9a2e   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(0e058h)		;9a31
 	sub 030h		;9a34
 	ld (hl),a			;9a36
-	call L_9A3B		;9a37
+	call bio_cursor_derecha		;9a37   ; bio_cursor_derecha: el cursor una cifra a la derecha
 	ret			;9a3a
-L_9A3B:
+bio_cursor_derecha:		; el cursor una cifra a la derecha
 	ld hl,0e078h		;9a3b
 	ld b,(hl)			;9a3e
 	ld a,(0e07ah)		;9a3f
 	cp b			;9a42
 	jr c,L_9A4C		;9a43
-	call L_9A5D		;9a45
+	call bio_ultimo_campo		;9a45   ; bio_ultimo_campo: B = la ultima cifra: 8 o 16 segun 0xE005
 	ld a,(hl)			;9a48
 	cp b			;9a49
 	ret nc			;9a4a
@@ -3734,7 +3735,7 @@ L_9A4C:
 	ld hl,0e07ah		;9a4c
 	inc (hl)			;9a4f
 	ret			;9a50
-L_9A51:
+bio_primer_campo:		; B = la primera cifra: 0 o 8 segun 0xE005
 	ld b,000h		;9a51
 	ld a,(0e005h)		;9a53
 	cp 002h		;9a56
@@ -3742,7 +3743,7 @@ L_9A51:
 	ld b,008h		;9a5a
 L_9A5C:
 	ret			;9a5c
-L_9A5D:
+bio_ultimo_campo:		; B = la ultima cifra: 8 o 16 segun 0xE005
 	ld b,008h		;9a5d
 	ld a,(0e005h)		;9a5f
 	cp 002h		;9a62
@@ -3750,39 +3751,39 @@ L_9A5D:
 	ld b,010h		;9a66
 L_9A68:
 	ret			;9a68
-L_9A69:
+bio_estado_5:		; compara 0xE005 con 5
 	ld a,(0e005h)		;9a69
 	cp 005h		;9a6c
 	ret			;9a6e
-L_9A6F:
-	call L_9AC3		;9a6f
+bio_cursor_msx2:		; pinta el cursor parpadeando (MSX2, tabla p05:9AA3)
+	call bio_cursor_al_final		;9a6f   ; bio_cursor_al_final: Z si el cursor esta en la ultima cifra
 	jr z,L_9AA2		;9a72
 	ld hl,0e07ah		;9a74
 	ld a,(hl)			;9a77
 	ld c,a			;9a78
 	add a,a			;9a79
 	ld hl,09aa3h		;9a7a
-	call L_806E		;9a7d
+	call hl_mas_a		;9a7d   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld e,(hl)			;9a80
 	inc hl			;9a81
 	ld d,(hl)			;9a82
 	ld a,c			;9a83
-	call L_9B1D		;9a84
+	call bio_cifra		;9a84   ; bio_cifra: A = la cifra A de 0xE090
 	ld c,a			;9a87
 	ld a,(0e00dh)		;9a88
 	bit 6,a		;9a8b
 	jr nz,L_9A96		;9a8d
 	ex de,hl			;9a8f
 	ld c,0ffh		;9a90
-	call L_9B34		;9a92
+	call bio_casilla_8x8_c		;9a92   ; bio_casilla_8x8_c: pinta una casilla de 8x8 con el color C
 	ret			;9a95
 L_9A96:
 	and 01fh		;9a96
 	ret nz			;9a98
-	call L_9B25		;9a99
+	call bio_borra_casilla		;9a99   ; bio_borra_casilla: borra la casilla de la cifra
 	ld a,c			;9a9c
 	add a,030h		;9a9d
-	call L_86FC		;9a9f
+	call pinta_letra_8x8		;9a9f   ; pinta_letra_8x8: copia la letra A de 8x8 de la hoja de letras a DE (LMMM)
 L_9AA2:
 	ret			;9aa2
 
@@ -3800,92 +3801,92 @@ DATA_resto_9AA3:
 ; ======================================================================
 
 
-L_9AC3:
-	call L_9A5D		;9ac3
+bio_cursor_al_final:		; Z si el cursor esta en la ultima cifra
+	call bio_ultimo_campo		;9ac3   ; bio_ultimo_campo: B = la ultima cifra: 8 o 16 segun 0xE005
 	ld hl,0e07ah		;9ac6
 	ld a,(hl)			;9ac9
 	cp b			;9aca
 	ret			;9acb
-L_9ACC:
+bio_pinta_fecha_1:		; pinta la fecha de nacimiento (MSX2)
 	xor a			;9acc
 	ld de,03020h		;9acd
-	call L_9AF5		;9ad0
+	call bio_pinta_4_cifras		;9ad0   ; bio_pinta_4_cifras: pinta 4 cifras
 	ld de,06820h		;9ad3
-	call L_9AFB		;9ad6
+	call bio_pinta_2_cifras		;9ad6   ; bio_pinta_2_cifras: pinta 2 cifras
 	ld de,09020h		;9ad9
-	call L_9B01		;9adc
+	call bio_pinta_2_cifras_b		;9adc   ; bio_pinta_2_cifras_b: pinta 2 cifras
 	ret			;9adf
-L_9AE0:
+bio_pinta_fecha_2:		; pinta la fecha de hoy (MSX2)
 	ld a,008h		;9ae0
 	ld de,04038h		;9ae2
-	call L_9AF5		;9ae5
+	call bio_pinta_4_cifras		;9ae5   ; bio_pinta_4_cifras: pinta 4 cifras
 	ld de,07838h		;9ae8
-	call L_9AFB		;9aeb
+	call bio_pinta_2_cifras		;9aeb   ; bio_pinta_2_cifras: pinta 2 cifras
 	ld de,0a038h		;9aee
-	call L_9B01		;9af1
+	call bio_pinta_2_cifras_b		;9af1   ; bio_pinta_2_cifras_b: pinta 2 cifras
 	ret			;9af4
-L_9AF5:
+bio_pinta_4_cifras:		; pinta 4 cifras
 	ld b,004h		;9af5
-	call L_9B07		;9af7
+	call bio_pinta_cifras		;9af7   ; bio_pinta_cifras: pinta B cifras de 0xE090 con LMMM
 	ret			;9afa
-L_9AFB:
+bio_pinta_2_cifras:		; pinta 2 cifras
 	ld b,002h		;9afb
-	call L_9B07		;9afd
+	call bio_pinta_cifras		;9afd   ; bio_pinta_cifras: pinta B cifras de 0xE090 con LMMM
 	ret			;9b00
-L_9B01:
+bio_pinta_2_cifras_b:		; pinta 2 cifras
 	ld b,002h		;9b01
-	call L_9B07		;9b03
+	call bio_pinta_cifras		;9b03   ; bio_pinta_cifras: pinta B cifras de 0xE090 con LMMM
 	ret			;9b06
-L_9B07:
+bio_pinta_cifras:		; pinta B cifras de 0xE090 con LMMM
 	push af			;9b07
-	call L_9B25		;9b08
-	call L_9B1D		;9b0b
+	call bio_borra_casilla		;9b08   ; bio_borra_casilla: borra la casilla de la cifra
+	call bio_cifra		;9b0b   ; bio_cifra: A = la cifra A de 0xE090
 	add a,030h		;9b0e
-	call L_86FC		;9b10
+	call pinta_letra_8x8		;9b10   ; pinta_letra_8x8: copia la letra A de 8x8 de la hoja de letras a DE (LMMM)
 	ld a,008h		;9b13
 	add a,d			;9b15
 	ld d,a			;9b16
 	inc hl			;9b17
 	pop af			;9b18
 	inc a			;9b19
-	djnz L_9B07		;9b1a
+	djnz bio_pinta_cifras		;9b1a
 	ret			;9b1c
-L_9B1D:
+bio_cifra:		; A = la cifra A de 0xE090
 	ld hl,0e090h		;9b1d
-	call L_806E		;9b20
+	call hl_mas_a		;9b20   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;9b23
 	ret			;9b24
-L_9B25:
+bio_borra_casilla:		; borra la casilla de la cifra
 	push af			;9b25
 	push bc			;9b26
 	push hl			;9b27
 	push de			;9b28
 	ex de,hl			;9b29
-	call L_9B32		;9b2a
+	call bio_casilla_8x8		;9b2a   ; bio_casilla_8x8: pinta una casilla de 8x8 con el color 0x55
 	pop de			;9b2d
 	pop hl			;9b2e
 	pop bc			;9b2f
 	pop af			;9b30
 	ret			;9b31
-L_9B32:
+bio_casilla_8x8:		; pinta una casilla de 8x8 con el color 0x55
 	ld c,055h		;9b32
-L_9B34:
+bio_casilla_8x8_c:		; pinta una casilla de 8x8 con el color C
 	ld d,000h		;9b34
 	ld a,c			;9b36
 	ld bc,00808h		;9b37
-	call L_83C8		;9b3a
+	call vdp_hmmv		;9b3a   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 	ret			;9b3d
-L_9B3E:
-	call L_9B55		;9b3e
+bio_estado_grafica:		; el estado de la grafica: teclas, dia y textos
+	call bio_tecla_grafica		;9b3e   ; bio_tecla_grafica: la tecla de la grafica: 0, 0x80 o 0x10
 	ret c			;9b41
-	call L_9B63		;9b42
-	call L_9BDA		;9b45
-	call L_9BF3		;9b48
-	call L_9C0E		;9b4b
-	call L_9C6D		;9b4e
+	call bio_si_tecla_5c		;9b42   ; bio_si_tecla_5c: si la tecla de 0xE281 es 0x5C, recalcula
+	call bio_dia_en_cifras		;9b45   ; bio_dia_en_cifras: pasa el dia mostrado (0xE054, con signo) a dos cifras
+	call bio_signo_del_dia		;9b48   ; bio_signo_del_dia: el signo del dia mostrado
+	call bio_pinta_dia		;9b4b   ; bio_pinta_dia: pinta el dia mostrado (0xE04C) con LMMM
+	call bio_pinta_signo		;9b4e   ; bio_pinta_signo: pinta el signo del dia ('<' o ';')
 	call 0a3a4h		;9b51
 	ret			;9b54
-L_9B55:
+bio_tecla_grafica:		; la tecla de la grafica: 0, 0x80 o 0x10
 	and a			;9b55
 	jr z,L_9B61		;9b56
 	cp 080h		;9b58
@@ -3896,10 +3897,10 @@ L_9B55:
 L_9B61:
 	scf			;9b61
 	ret			;9b62
-L_9B63:
+bio_si_tecla_5c:		; si la tecla de 0xE281 es 0x5C, recalcula
 	ld a,(0e281h)		;9b63
 	cp 05ch		;9b66
-	jp z,L_9CCB		;9b68
+	jp z,bio_recalcula		;9b68   ; bio_recalcula: vuelve a los angulos de hoy y recalcula las alturas
 	ret			;9b6b
 L_9B6C:
 	ld a,(0e052h)		;9b6c
@@ -3907,30 +3908,30 @@ L_9B6C:
 	jr z,L_9B8B		;9b71
 	inc a			;9b73
 	ld (0e052h),a		;9b74
-	call L_9C58		;9b77
+	call bio_sube_e06a		;9b77   ; bio_sube_e06a: sube 0xE06A con tope 4
 	jr nc,L_9B7F		;9b7a
-	call L_9B8D		;9b7c
+	call bio_dia_sube		;9b7c   ; bio_dia_sube: sube el dia mostrado (0xE054)
 L_9B7F:
-	call L_9B94		;9b7f
+	call bio_dia_siguiente		;9b7f   ; bio_dia_siguiente: dia siguiente: columna, alturas y angulos
 	ld hl,0e281h		;9b82
 	ld a,(hl)			;9b85
 	inc a			;9b86
-	call L_9BD0		;9b87
+	call rellena_cada_4		;9b87   ; rellena_cada_4: pone A en B bytes de HL, de 4 en 4
 	ret			;9b8a
 L_9B8B:
 	scf			;9b8b
 	ret			;9b8c
-L_9B8D:
+bio_dia_sube:		; sube el dia mostrado (0xE054)
 	ld hl,0e054h		;9b8d
 	ld a,(hl)			;9b90
 	inc a			;9b91
 	ld (hl),a			;9b92
 	ret			;9b93
-L_9B94:
+bio_dia_siguiente:		; dia siguiente: columna, alturas y angulos
 	ld hl,0e03fh		;9b94
 	inc (hl)			;9b97
-	call L_9265		;9b98
-	call L_9179		;9b9b
+	call bio_alturas_mas		;9b98   ; bio_alturas_mas: las alturas de los tres ciclos (desplazamientos 4, 3, 2)
+	call bio_dia_mas		;9b9b   ; bio_dia_mas: pasa al dia siguiente: los tres angulos suben
 	ret			;9b9e
 L_9B9F:
 	ld a,(0e052h)		;9b9f
@@ -3938,29 +3939,29 @@ L_9B9F:
 	jr z,L_9B8B		;9ba4
 	dec a			;9ba6
 	ld (0e052h),a		;9ba7
-	call L_9C3F		;9baa
+	call bio_baja_e06a		;9baa   ; bio_baja_e06a: baja 0xE06A con tope 4
 	jr nc,L_9BB2		;9bad
-	call L_9BBE		;9baf
+	call bio_dia_baja		;9baf   ; bio_dia_baja: baja el dia mostrado (0xE054)
 L_9BB2:
-	call L_9BC5		;9bb2
+	call bio_dia_anterior		;9bb2   ; bio_dia_anterior: dia anterior: columna, alturas y angulos
 	ld hl,0e281h		;9bb5
 	ld a,(hl)			;9bb8
 	dec a			;9bb9
-	call L_9BD0		;9bba
+	call rellena_cada_4		;9bba   ; rellena_cada_4: pone A en B bytes de HL, de 4 en 4
 	ret			;9bbd
-L_9BBE:
+bio_dia_baja:		; baja el dia mostrado (0xE054)
 	ld hl,0e054h		;9bbe
 	ld a,(hl)			;9bc1
 	dec a			;9bc2
 	ld (hl),a			;9bc3
 	ret			;9bc4
-L_9BC5:
+bio_dia_anterior:		; dia anterior: columna, alturas y angulos
 	ld hl,0e03fh		;9bc5
 	dec (hl)			;9bc8
-	call L_9287		;9bc9
-	call L_91C4		;9bcc
+	call bio_alturas_menos		;9bc9   ; bio_alturas_menos: las alturas de los tres ciclos (desplazamientos -4, -3, -2)
+	call bio_dia_menos		;9bcc   ; bio_dia_menos: pasa al dia anterior: los tres angulos bajan
 	ret			;9bcf
-L_9BD0:
+rellena_cada_4:		; pone A en B bytes de HL, de 4 en 4
 	ld b,006h		;9bd0
 L_9BD2:
 	ld (hl),a			;9bd2
@@ -3968,7 +3969,7 @@ L_9BD2:
 	add hl,de			;9bd6
 	djnz L_9BD2		;9bd7
 	ret			;9bd9
-L_9BDA:
+bio_dia_en_cifras:		; pasa el dia mostrado (0xE054, con signo) a dos cifras
 	ld hl,0e04ch		;9bda
 	ld a,(0e054h)		;9bdd
 	bit 7,a		;9be0
@@ -3978,14 +3979,14 @@ L_9BE6:
 	push hl			;9be6
 	ld l,a			;9be7
 	ld c,00ah		;9be8
-	call L_94C1		;9bea
+	call divide_8		;9bea   ; divide_8: L / C: cociente en L y resto en H
 	ex de,hl			;9bed
 	pop hl			;9bee
 	ld (hl),d			;9bef
 	inc hl			;9bf0
 	ld (hl),e			;9bf1
 	ret			;9bf2
-L_9BF3:
+bio_signo_del_dia:		; el signo del dia mostrado
 	ld de,0e048h		;9bf3
 	ld hl,0e04dh		;9bf6
 	ld a,(hl)			;9bf9
@@ -4001,39 +4002,39 @@ L_9C06:
 	call 0a0d3h		;9c06
 	ret			;9c09
 L_9C0A:
-	call L_9C30		;9c0a
+	call bio_borra_casilla_b		;9c0a   ; bio_borra_casilla_b: borra la casilla de 8x8 de DE
 	ret			;9c0d
-L_9C0E:
+bio_pinta_dia:		; pinta el dia mostrado (0xE04C) con LMMM
 	ld ix,0e04ch		;9c0e
 	ld de,0b848h		;9c12
-	call L_9C30		;9c15
+	call bio_borra_casilla_b		;9c15   ; bio_borra_casilla_b: borra la casilla de 8x8 de DE
 	ld a,(ix+001h)		;9c18
 	add a,030h		;9c1b
-	call L_86FC		;9c1d
+	call pinta_letra_8x8		;9c1d   ; pinta_letra_8x8: copia la letra A de 8x8 de la hoja de letras a DE (LMMM)
 	ld a,008h		;9c20
 	add a,d			;9c22
 	ld d,a			;9c23
-	call L_9C30		;9c24
+	call bio_borra_casilla_b		;9c24   ; bio_borra_casilla_b: borra la casilla de 8x8 de DE
 	ld a,(ix+000h)		;9c27
 	add a,030h		;9c2a
-	call L_86FC		;9c2c
+	call pinta_letra_8x8		;9c2c   ; pinta_letra_8x8: copia la letra A de 8x8 de la hoja de letras a DE (LMMM)
 	ret			;9c2f
-L_9C30:
+bio_borra_casilla_b:		; borra la casilla de 8x8 de DE
 	push de			;9c30
 	ex de,hl			;9c31
 	ld c,055h		;9c32
 	ld d,000h		;9c34
 	ld a,c			;9c36
 	ld bc,00808h		;9c37
-	call L_83C8		;9c3a
+	call vdp_hmmv		;9c3a   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 	pop de			;9c3d
 	ret			;9c3e
-L_9C3F:
+bio_baja_e06a:		; baja 0xE06A con tope 4
 	ld hl,0e06ah		;9c3f
 	ld c,004h		;9c42
-	call L_9C48		;9c44
+	call baja_con_tope		;9c44   ; baja_con_tope: baja (HL); si llega a -C vuelve a 0
 	ret			;9c47
-L_9C48:
+baja_con_tope:		; baja (HL); si llega a -C vuelve a 0
 	ld a,(hl)			;9c48
 	dec a			;9c49
 	ld b,a			;9c4a
@@ -4049,12 +4050,12 @@ L_9C54:
 	ld (hl),a			;9c55
 	scf			;9c56
 	ret			;9c57
-L_9C58:
+bio_sube_e06a:		; sube 0xE06A con tope 4
 	ld hl,0e06ah		;9c58
 	ld c,004h		;9c5b
-	call L_9C61		;9c5d
+	call sube_con_tope		;9c5d   ; sube_con_tope: sube (HL); si llega a C vuelve a 0
 	ret			;9c60
-L_9C61:
+sube_con_tope:		; sube (HL); si llega a C vuelve a 0
 	ld a,(hl)			;9c61
 	inc a			;9c62
 	cp c			;9c63
@@ -4067,9 +4068,9 @@ L_9C69:
 	ld (hl),a			;9c6a
 	scf			;9c6b
 	ret			;9c6c
-L_9C6D:
+bio_pinta_signo:		; pinta el signo del dia ('<' o ';')
 	ld de,0b048h		;9c6d
-	call L_9C30		;9c70
+	call bio_borra_casilla_b		;9c70   ; bio_borra_casilla_b: borra la casilla de 8x8 de DE
 	ld a,(0e054h)		;9c73
 	cp 020h		;9c76
 	jr z,L_9C83		;9c78
@@ -4081,61 +4082,61 @@ L_9C83:
 	ld b,03bh		;9c83
 L_9C85:
 	ld a,b			;9c85
-	call L_86FC		;9c86
+	call pinta_letra_8x8		;9c86   ; pinta_letra_8x8: copia la letra A de 8x8 de la hoja de letras a DE (LMMM)
 	ret			;9c89
 L_9C8A:
-	call L_9C94		;9c8a
-	call L_9C9E		;9c8d
-	call L_9CA7		;9c90
+	call bio_pinta_ano		;9c8a   ; bio_pinta_ano: pinta las 4 cifras del ano
+	call bio_pinta_mes		;9c8d   ; bio_pinta_mes: pinta las 2 cifras del mes
+	call bio_pinta_dia_b		;9c90   ; bio_pinta_dia_b: pinta las 2 cifras del dia
 	ret			;9c93
-L_9C94:
+bio_pinta_ano:		; pinta las 4 cifras del ano
 	xor a			;9c94
 	ld de,03820h		;9c95
 	ld b,004h		;9c98
-	call L_9CB0		;9c9a
+	call bio_pinta_cifras_b		;9c9a   ; bio_pinta_cifras_b: pinta B cifras de 0xE062
 	ret			;9c9d
-L_9C9E:
+bio_pinta_mes:		; pinta las 2 cifras del mes
 	ld de,07020h		;9c9e
 	ld b,002h		;9ca1
-	call L_9CB0		;9ca3
+	call bio_pinta_cifras_b		;9ca3   ; bio_pinta_cifras_b: pinta B cifras de 0xE062
 	ret			;9ca6
-L_9CA7:
+bio_pinta_dia_b:		; pinta las 2 cifras del dia
 	ld de,09820h		;9ca7
 	ld b,002h		;9caa
-	call L_9CB0		;9cac
+	call bio_pinta_cifras_b		;9cac   ; bio_pinta_cifras_b: pinta B cifras de 0xE062
 	ret			;9caf
-L_9CB0:
+bio_pinta_cifras_b:		; pinta B cifras de 0xE062
 	push af			;9cb0
-	call L_9CC3		;9cb1
+	call bio_cifra_e062		;9cb1   ; bio_cifra_e062: A = la cifra A de 0xE062
 	add a,030h		;9cb4
-	call L_86FC		;9cb6
+	call pinta_letra_8x8		;9cb6   ; pinta_letra_8x8: copia la letra A de 8x8 de la hoja de letras a DE (LMMM)
 	ld a,008h		;9cb9
 	add a,d			;9cbb
 	ld d,a			;9cbc
 	inc hl			;9cbd
 	pop af			;9cbe
 	inc a			;9cbf
-	djnz L_9CB0		;9cc0
+	djnz bio_pinta_cifras_b		;9cc0
 	ret			;9cc2
-L_9CC3:
+bio_cifra_e062:		; A = la cifra A de 0xE062
 	ld hl,0e062h		;9cc3
-	call L_806E		;9cc6
+	call hl_mas_a		;9cc6   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;9cc9
 	ret			;9cca
-L_9CCB:
-	call L_9CDB		;9ccb
-	call L_9CE7		;9cce
-	call L_9D0F		;9cd1
-	call L_92A9		;9cd4
-	call L_9055		;9cd7
+bio_recalcula:		; vuelve a los angulos de hoy y recalcula las alturas
+	call bio_angulos_de_hoy		;9ccb   ; bio_angulos_de_hoy: copia los angulos guardados (0xE033) a 0xE02D
+	call bio_adelanta		;9cce   ; bio_adelanta: suma a los tres angulos la tabla de p05:9043
+	call bio_columna_inicial		;9cd1   ; bio_columna_inicial: la columna de la grafica a 0x3C
+	call bio_alturas		;9cd4   ; bio_alturas: las alturas de los tres ciclos (sin desplazar)
+	call bio_angulos_validos		;9cd7   ; bio_angulos_validos: deja los tres angulos entre 0 y 359 y calcula sus alturas
 	ret			;9cda
-L_9CDB:
+bio_angulos_de_hoy:		; copia los angulos guardados (0xE033) a 0xE02D
 	ld hl,0e033h		;9cdb
 	ld de,0e02dh		;9cde
 	ld bc,00006h		;9ce1
 	ldir		;9ce4
 	ret			;9ce6
-L_9CE7:
+bio_adelanta:		; suma a los tres angulos la tabla de p05:9043
 	ld b,003h		;9ce7
 	ld ix,0e02dh		;9ce9
 	ld iy,09043h		;9ced
@@ -4153,83 +4154,83 @@ L_9CF1:
 	add iy,de		;9d0a
 	djnz L_9CF1		;9d0c
 	ret			;9d0e
-L_9D0F:
+bio_columna_inicial:		; la columna de la grafica a 0x3C
 	ld hl,0003ch		;9d0f
 	ld (0e03fh),hl		;9d12
 	ret			;9d15
-L_9D16:
-	call L_9B55		;9d16
+bio_estado_grafica_msx2:		; el estado de la grafica en MSX2
+	call bio_tecla_grafica		;9d16   ; bio_tecla_grafica: la tecla de la grafica: 0, 0x80 o 0x10
 	ret c			;9d19
-	call L_9B63		;9d1a
-	call L_9D55		;9d1d
+	call bio_si_tecla_5c		;9d1a   ; bio_si_tecla_5c: si la tecla de 0xE281 es 0x5C, recalcula
+	call bio_pinta_niveles		;9d1d   ; bio_pinta_niveles: pinta los niveles de los tres ciclos
 	ret			;9d20
-L_9D21:
-	call L_9D2B		;9d21
-	call L_9D35		;9d24
-	call L_9D3E		;9d27
+bio_fecha_a_nombres:		; la fecha a la copia de nombres (ano, mes y dia)
+	call bio_ano_a_nombres		;9d21   ; bio_ano_a_nombres: el ano a 0xE34F
+	call bio_mes_a_nombres		;9d24   ; bio_mes_a_nombres: el mes a 0xE356
+	call bio_dia_a_nombres		;9d27   ; bio_dia_a_nombres: el dia a 0xE35B
 	ret			;9d2a
-L_9D2B:
+bio_ano_a_nombres:		; el ano a 0xE34F
 	xor a			;9d2b
 	ld de,0e34fh		;9d2c
 	ld b,004h		;9d2f
-	call L_9D47		;9d31
+	call cifras_a_nombres		;9d31   ; cifras_a_nombres: B cifras de 0xE062 a letras (+0x10) en DE
 	ret			;9d34
-L_9D35:
+bio_mes_a_nombres:		; el mes a 0xE356
 	ld de,0e356h		;9d35
 	ld b,002h		;9d38
-	call L_9D47		;9d3a
+	call cifras_a_nombres		;9d3a   ; cifras_a_nombres: B cifras de 0xE062 a letras (+0x10) en DE
 	ret			;9d3d
-L_9D3E:
+bio_dia_a_nombres:		; el dia a 0xE35B
 	ld de,0e35bh		;9d3e
 	ld b,002h		;9d41
-	call L_9D47		;9d43
+	call cifras_a_nombres		;9d43   ; cifras_a_nombres: B cifras de 0xE062 a letras (+0x10) en DE
 	ret			;9d46
-L_9D47:
+cifras_a_nombres:		; B cifras de 0xE062 a letras (+0x10) en DE
 	push af			;9d47
-	call L_9CC3		;9d48
+	call bio_cifra_e062		;9d48   ; bio_cifra_e062: A = la cifra A de 0xE062
 	add a,010h		;9d4b
 	ld (de),a			;9d4d
 	inc hl			;9d4e
 	inc de			;9d4f
 	pop af			;9d50
 	inc a			;9d51
-	djnz L_9D47		;9d52
+	djnz cifras_a_nombres		;9d52
 	ret			;9d54
-L_9D55:
-	call L_9D89		;9d55
-	call L_9D5C		;9d58
+bio_pinta_niveles:		; pinta los niveles de los tres ciclos
+	call bio_niveles		;9d55   ; bio_niveles: clasifica los tres ciclos (0xE05A, 0xE05C, 0xE05E) (gemela de p06:A3B1)
+	call L_9D5C		;9d58   ; bio_pinta_niveles: pinta los niveles de los tres ciclos
 	ret			;9d5b
 L_9D5C:
 	ld a,(0e075h)		;9d5c
-	call L_9D81		;9d5f
+	call bio_texto_nivel		;9d5f   ; bio_texto_nivel: el texto del nivel A (tabla de p05:9DC2)
 	ld de,0e36ah		;9d62
-	call L_9DCC		;9d65
+	call bio_pinta_texto_nivel		;9d65   ; bio_pinta_texto_nivel: pinta el texto del nivel
 	ld a,(0e074h)		;9d68
-	call L_9D81		;9d6b
+	call bio_texto_nivel		;9d6b   ; bio_texto_nivel: el texto del nivel A (tabla de p05:9DC2)
 	ld de,0e38ah		;9d6e
-	call L_9DCC		;9d71
+	call bio_pinta_texto_nivel		;9d71   ; bio_pinta_texto_nivel: pinta el texto del nivel
 	ld a,(0e073h)		;9d74
-	call L_9D81		;9d77
+	call bio_texto_nivel		;9d77   ; bio_texto_nivel: el texto del nivel A (tabla de p05:9DC2)
 	ld de,0e3aah		;9d7a
-	call L_9DCC		;9d7d
+	call bio_pinta_texto_nivel		;9d7d   ; bio_pinta_texto_nivel: pinta el texto del nivel
 	ret			;9d80
-L_9D81:
+bio_texto_nivel:		; el texto del nivel A (tabla de p05:9DC2)
 	ld hl,09dc2h		;9d81
-	call 0a421h		;9d84
+	call 0a421h		;9d84   ; tabla_palabra: DE = la palabra A de la tabla de HL
 	ex de,hl			;9d87
 	ret			;9d88
-L_9D89:
+bio_niveles:		; clasifica los tres ciclos (0xE05A, 0xE05C, 0xE05E) (gemela de p06:A3B1)
 	ld a,(0e05ah)		;9d89
 	ld hl,0e075h		;9d8c
-	call L_9DA5		;9d8f
+	call bio_nivel		;9d8f   ; bio_nivel: B = el nivel de A (umbrales 0xA0, 0x90, 0x80...)
 	ld a,(0e05ch)		;9d92
 	ld hl,0e074h		;9d95
-	call L_9DA5		;9d98
+	call bio_nivel		;9d98   ; bio_nivel: B = el nivel de A (umbrales 0xA0, 0x90, 0x80...)
 	ld a,(0e05eh)		;9d9b
 	ld hl,0e073h		;9d9e
-	call L_9DA5		;9da1
+	call bio_nivel		;9da1   ; bio_nivel: B = el nivel de A (umbrales 0xA0, 0x90, 0x80...)
 	ret			;9da4
-L_9DA5:
+bio_nivel:		; B = el nivel de A (umbrales 0xA0, 0x90, 0x80...)
 	ld b,000h		;9da5
 	cp 0a0h		;9da7
 	jr nc,L_9DC0		;9da9
@@ -4264,34 +4265,34 @@ DATA_resto_9DC2:
 ; ======================================================================
 
 
-L_9DCC:
+bio_pinta_texto_nivel:		; pinta el texto del nivel
 	ex de,hl			;9dcc
 	ld c,0ffh		;9dcd
 	push de			;9dcf
 	push hl			;9dd0
-	call L_9F72		;9dd1
+	call pon_4_cada_3		;9dd1   ; pon_4_cada_3: pone 4 en 5 bytes de HL + 3
 	pop hl			;9dd4
 	pop de			;9dd5
-	call L_80DC		;9dd6
+	call pinta_letras_bio		;9dd6   ; pinta_letras_bio: pinta letras hasta 0x80 (0x81 trae otra direccion)
 	ret			;9dd9
-L_9DDA:
+bio_texto_9e50:		; pinta el texto de p05:9E50
 	ld de,09e50h		;9dda
-	call L_80D0		;9ddd
+	call pinta_texto_bio		;9ddd   ; pinta_texto_bio: pinta un texto [direccion][letras]; 0x80 acaba, 0x81 otra direccion
 	ret			;9de0
-L_9DE1:
+bio_textos_grafica:		; los textos de la grafica y su marco
 	ld de,09edch		;9de1
-	call L_80D0		;9de4
-	call L_9F97		;9de7
-	call L_9F7F		;9dea
-	call L_8CDB		;9ded
+	call pinta_texto_bio		;9de4   ; pinta_texto_bio: pinta un texto [direccion][letras]; 0x80 acaba, 0x81 otra direccion
+	call bio_lineas_guia		;9de7   ; bio_lineas_guia: pinta las lineas guia de la grafica
+	call bio_borra_grafica		;9dea   ; bio_borra_grafica: borra la zona de la grafica (12 filas)
+	call bio_sprites_8ce2		;9ded   ; bio_sprites_8ce2: copia los sprites de p05:8CE2 a 0xE280
 	ret			;9df0
-L_9DF1:
+bio_textos_9f0a:		; pinta los textos de p05:9F0A y p05:9F29
 	ld de,09f0ah		;9df1
-	call L_80D0		;9df4
+	call pinta_texto_bio		;9df4   ; pinta_texto_bio: pinta un texto [direccion][letras]; 0x80 acaba, 0x81 otra direccion
 	ld de,09f29h		;9df7
-	call L_80D0		;9dfa
+	call pinta_texto_bio		;9dfa   ; pinta_texto_bio: pinta un texto [direccion][letras]; 0x80 acaba, 0x81 otra direccion
 	ret			;9dfd
-L_9DFE:
+bio_pinta_marcas:		; pinta las marcas de los tres ciclos (p06:A33D)
 	ld ix,0e05ah		;9dfe
 	ld h,(ix+000h)		;9e02
 	ld d,(ix+002h)		;9e05
@@ -4310,15 +4311,15 @@ L_9DFE:
 	ld hl,0e481h		;9e25
 	ld (hl),a			;9e28
 	ld de,09ef9h		;9e29
-	call L_80D0		;9e2c
+	call pinta_texto_bio		;9e2c   ; pinta_texto_bio: pinta un texto [direccion][letras]; 0x80 acaba, 0x81 otra direccion
 	ret			;9e2f
-L_9E30:
+bio_texto_9e3e:		; pinta el texto de p05:9E3E
 	ld de,09e3eh		;9e30
-	call L_80D0		;9e33
+	call pinta_texto_bio		;9e33   ; pinta_texto_bio: pinta un texto [direccion][letras]; 0x80 acaba, 0x81 otra direccion
 	ret			;9e36
-L_9E37:
+bio_texto_9e47:		; pinta el texto de p05:9E47
 	ld de,09e47h		;9e37
-	call L_80D0		;9e3a
+	call pinta_texto_bio		;9e3a   ; pinta_texto_bio: pinta un texto [direccion][letras]; 0x80 acaba, 0x81 otra direccion
 	ret			;9e3d
 
 ; ----------------------------------------------------------------------
@@ -4355,7 +4356,7 @@ DATA_resto_9E3E:
 ; ======================================================================
 
 
-L_9F72:
+pon_4_cada_3:		; pone 4 en 5 bytes de HL + 3
 	ld b,005h		;9f72
 	ld de,00003h		;9f74
 	add hl,de			;9f77
@@ -4365,7 +4366,7 @@ L_9F7A:
 	inc hl			;9f7b
 	djnz L_9F7A		;9f7c
 	ret			;9f7e
-L_9F7F:
+bio_borra_grafica:		; borra la zona de la grafica (12 filas)
 	ld b,00ch		;9f7f
 	ld hl,00a18h		;9f81
 L_9F84:
@@ -4380,51 +4381,51 @@ L_9F84:
 	add hl,de			;9f93
 	djnz L_9F84		;9f94
 	ret			;9f96
-L_9F97:
+bio_lineas_guia:		; pinta las lineas guia de la grafica
 	ld hl,00a18h		;9f97
 	ld b,01ah		;9f9a
 	ld a,0ffh		;9f9c
-	call L_920C		;9f9e
+	call or_en_color		;9f9e   ; or_en_color: OR de A en el color de B casillas (VRAM + 0x2000)
 	ld hl,01018h		;9fa1
 	ld b,01ah		;9fa4
 	ld a,0cch		;9fa6
-	call L_920C		;9fa8
+	call or_en_color		;9fa8   ; or_en_color: OR de A en el color de B casillas (VRAM + 0x2000)
 	ld hl,01618h		;9fab
 	ld b,01ah		;9fae
 	ld a,0ffh		;9fb0
-	call L_920C		;9fb2
+	call or_en_color		;9fb2   ; or_en_color: OR de A en el color de B casillas (VRAM + 0x2000)
 	ld hl,00919h		;9fb5
 	ld b,01ah		;9fb8
 	ld a,0ffh		;9fba
-	call L_920C		;9fbc
+	call or_en_color		;9fbc   ; or_en_color: OR de A en el color de B casillas (VRAM + 0x2000)
 	ld hl,01619h		;9fbf
 	ld b,01ah		;9fc2
 	ld a,0ffh		;9fc4
-	call L_920C		;9fc6
+	call or_en_color		;9fc6   ; or_en_color: OR de A en el color de B casillas (VRAM + 0x2000)
 	ld hl,00a18h		;9fc9
 	ld b,00ch		;9fcc
 	ld a,0c0h		;9fce
-	call L_9220		;9fd0
+	call or_en_color_8		;9fd0   ; or_en_color_8: OR de A en 8 filas de color de B casillas
 	ld hl,00a58h		;9fd3
 	ld b,00ch		;9fd6
 	ld a,010h		;9fd8
-	call L_9220		;9fda
+	call or_en_color_8		;9fda   ; or_en_color_8: OR de A en 8 filas de color de B casillas
 	ld hl,00ae0h		;9fdd
 	ld b,00ch		;9fe0
 	ld a,003h		;9fe2
-	call L_9220		;9fe4
+	call or_en_color_8		;9fe4   ; or_en_color_8: OR de A en 8 filas de color de B casillas
 	ret			;9fe7
-L_9FE8:
+bio_a066:		; llama a p06:A066
 	call 0a066h		;9fe8
 	ret			;9feb
-L_9FEC:
+bio_pantalla_msx2:		; los marcos, el eje y la rejilla (p06:A006) y los textos
 	call 0a006h		;9fec
 	call 0a0dah		;9fef
-	call L_8D97		;9ff2
+	call bio_sprites_msx2		;9ff2   ; bio_sprites_msx2: los sprites de p05:8DAA y sus patrones
 	ret			;9ff5
-L_9FF6:
+bio_actualiza_msx2:		; actualiza la grafica en MSX2 (p06)
 	call 0a0f6h		;9ff6
-	call 0a122h		;9ff9
+	call 0a122h		;9ff9   ; bio_borra_zona: borra la zona de la grafica (comando del VDP)
 	call 0a034h		;9ffc
 
 ; ----------------------------------------------------------------------

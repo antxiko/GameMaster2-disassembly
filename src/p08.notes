@@ -10,3 +10,28 @@ F 0xA3CE 16
 D 0xAF1B 0xC000 relleno_ff  4325 bytes a 0xFF hasta el final del banco: relleno; lo leen nadie (4325 bytes)
 F 0xAF1B 16
 # --- fin de los bloques de bloques.py ---
+
+# --- ANOTACIONES AUTOMATICAS (seccion que reescribe tools/anota.py; no editar a mano) ---
+L 0xA229 palabra_y_retrocede HL = la palabra siguiente - 1
+L 0xA2BF sonido_al_psg manda al PSG los registros de los canales
+L 0xA30E tres_registros_psg escribe tres registros del PSG desde HL
+L 0xA32C sonido_ruido el periodo del ruido (R#6) si hay que cambiarlo
+L 0xA356 sonido_envolvente la envolvente (R#11-13) si hay que cambiarla
+L 0xA384 sonido_mezclador el mezclador del PSG (R#7) segun los canales
+L 0xA3C7 tabla_por_dos_bits HL = HL + (A and 3)
+C 0xA20A palabra_y_retrocede: HL = la palabra siguiente - 1
+C 0xA244 palabra_y_retrocede: HL = la palabra siguiente - 1
+C 0xA24F palabra_y_retrocede: HL = la palabra siguiente - 1
+C 0xA2B2 sonido_al_psg: manda al PSG los registros de los canales
+C 0xA2B5 sonido_ruido: el periodo del ruido (R#6) si hay que cambiarlo
+C 0xA2B8 sonido_envolvente: la envolvente (R#11-13) si hay que cambiarla
+C 0xA2BB sonido_mezclador: el mezclador del PSG (R#7) segun los canales
+C 0xA2C6 tres_registros_psg: escribe tres registros del PSG desde HL
+C 0xA2E0 tres_registros_psg: escribe tres registros del PSG desde HL
+C 0xA2E9 tres_registros_psg: escribe tres registros del PSG desde HL
+C 0xA303 tres_registros_psg: escribe tres registros del PSG desde HL
+C 0xA30A tres_registros_psg: escribe tres registros del PSG desde HL
+C 0xA38B tabla_por_dos_bits: HL = HL + (A and 3)
+C 0xA3A1 tabla_por_dos_bits: HL = HL + (A and 3)
+C 0xA3B7 tabla_por_dos_bits: HL = HL + (A and 3)
+# --- fin de las anotaciones de anota.py ---

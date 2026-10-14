@@ -25,16 +25,16 @@ L_A002:
 	call 09c8ah		;a002
 	ret			;a005
 L_A006:
-	call L_A010		;a006
-	call L_A050		;a009
-	call L_A05B		;a00c
+	call bio_marco		;a006   ; bio_marco: dibuja los marcos de la grafica
+	call bio_eje		;a009   ; bio_eje: dibuja el eje de la grafica
+	call bio_rejilla		;a00c   ; bio_rejilla: dibuja la rejilla de la grafica
 	ret			;a00f
-L_A010:
+bio_marco:		; dibuja los marcos de la grafica
 	ld hl,01858h		;a010
 	ld bc,0d060h		;a013
 	ld a,001h		;a016
 	ld d,000h		;a018
-	call 083c8h		;a01a
+	call 083c8h		;a01a   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 	ld hl,01858h		;a01d
 	ld de,0d060h		;a020
 	ld c,00fh		;a023
@@ -49,36 +49,36 @@ L_A034:
 	ld bc,04010h		;a037
 	ld a,055h		;a03a
 	ld d,000h		;a03c
-	call 083c8h		;a03e
+	call 083c8h		;a03e   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 	ld hl,0ac44h		;a041
 	ld de,04010h		;a044
 	ld c,00fh		;a047
 	call 0839ch		;a049
-	call L_A0CC		;a04c
+	call bio_texto_a19d		;a04c   ; bio_texto_a19d: pinta el texto de p06:A19D
 	ret			;a04f
-L_A050:
+bio_eje:		; dibuja el eje de la grafica
 	ld hl,01888h		;a050
 	ld b,0d0h		;a053
 	ld c,00fh		;a055
-	call 0832fh		;a057
+	call 0832fh		;a057   ; vdp_linea: traza una linea con el comando del VDP (desde R#36)
 	ret			;a05a
-L_A05B:
+bio_rejilla:		; dibuja la rejilla de la grafica
 	ld hl,05c58h		;a05b
 	ld b,060h		;a05e
 	ld c,00fh		;a060
-	call 08365h		;a062
+	call 08365h		;a062   ; vdp_punto: pinta un punto con el comando del VDP (desde R#36)
 	ret			;a065
 L_A066:
 	ld hl,01e16h		;a066
 	ld bc,08c1ch		;a069
 	ld a,099h		;a06c
 	ld d,000h		;a06e
-	call 083c8h		;a070
+	call 083c8h		;a070   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 	ld hl,01a12h		;a073
 	ld bc,08c1ch		;a076
 	ld a,055h		;a079
 	ld d,000h		;a07b
-	call 083c8h		;a07d
+	call 083c8h		;a07d   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 	ld hl,01a12h		;a080
 	ld de,08c1ch		;a083
 	ld c,00fh		;a086
@@ -91,12 +91,12 @@ L_A092:
 	ld bc,08c1ch		;a095
 	ld a,099h		;a098
 	ld d,000h		;a09a
-	call 083c8h		;a09c
+	call 083c8h		;a09c   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 	ld hl,02a2ah		;a09f
 	ld bc,08c1ch		;a0a2
 	ld a,055h		;a0a5
 	ld d,000h		;a0a7
-	call 083c8h		;a0a9
+	call 083c8h		;a0a9   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 	ld hl,02a2ah		;a0ac
 	ld de,08c1ch		;a0af
 	ld c,00fh		;a0b2
@@ -109,9 +109,9 @@ L_A0BE:
 	ld bc,09020h		;a0c1
 	ld a,044h		;a0c4
 	ld d,000h		;a0c6
-	call 083c8h		;a0c8
+	call 083c8h		;a0c8   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 	ret			;a0cb
-L_A0CC:
+bio_texto_a19d:		; pinta el texto de p06:A19D
 	ld hl,0a19dh		;a0cc
 	call 086afh		;a0cf
 	ret			;a0d2
@@ -121,7 +121,7 @@ L_A0D3:
 	ret			;a0d9
 L_A0DA:
 	ret			;a0da
-L_A0DB:
+bio_casilla:		; pinta una casilla con el comando del VDP
 	xor a			;a0db
 	ld de,00101h		;a0dc
 	sbc hl,de		;a0df
@@ -129,7 +129,7 @@ L_A0DB:
 	ld bc,00c0ah		;a0e2
 	ld a,055h		;a0e5
 	ld d,000h		;a0e7
-	call 083c8h		;a0e9
+	call 083c8h		;a0e9   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 	pop hl			;a0ec
 	ld de,00a0ah		;a0ed
 	ld c,00fh		;a0f0
@@ -140,12 +140,12 @@ L_A0F6:
 	ld bc,0ce3ch		;a0f9
 	ld a,099h		;a0fc
 	ld d,000h		;a0fe
-	call 083c8h		;a100
+	call 083c8h		;a100   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 	ld hl,01812h		;a103
 	ld bc,0ce3ch		;a106
 	ld a,055h		;a109
 	ld d,000h		;a10b
-	call 083c8h		;a10d
+	call 083c8h		;a10d   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 	ld hl,01812h		;a110
 	ld de,0ce3ch		;a113
 	ld c,00fh		;a116
@@ -153,30 +153,30 @@ L_A0F6:
 	ld hl,0a1ebh		;a11b
 	call 086afh		;a11e
 	ret			;a121
-L_A122:
+bio_borra_zona:		; borra la zona de la grafica (comando del VDP)
 	ld hl,04eb8h		;a122
 	ld bc,0740ch		;a125
 	ld a,055h		;a128
 	ld d,000h		;a12a
-	call 083c8h		;a12c
+	call 083c8h		;a12c   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 	ld hl,04eb8h		;a12f
 	ld de,0740ch		;a132
 	ld c,00fh		;a135
 	call 0839ch		;a137
 	ret			;a13a
-L_A13B:
+bio_texto_a1b2:		; pinta el texto de p06:A1B2
 	ld hl,0a1b2h		;a13b
 	call 086afh		;a13e
 	ret			;a141
-L_A142:
+bio_texto_a1bd:		; pinta el texto de p06:A1BD
 	ld hl,0a1bdh		;a142
 	call 086afh		;a145
 	ret			;a148
-L_A149:
+bio_texto_a1cb:		; pinta el texto de p06:A1CB
 	ld hl,0a1cbh		;a149
 	call 086afh		;a14c
 	ret			;a14f
-L_A150:
+bio_texto_a1da:		; pinta el texto de p06:A1DA
 	ld hl,0a1dah		;a150
 	call 086afh		;a153
 	ret			;a156
@@ -218,12 +218,12 @@ L_A23B:
 	ld bc,03810h		;a23e
 	ld a,099h		;a241
 	ld d,000h		;a243
-	call 083c8h		;a245
+	call 083c8h		;a245   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 	ld hl,0b4a4h		;a248
 	ld bc,03810h		;a24b
 	ld a,055h		;a24e
 	ld d,000h		;a250
-	call 083c8h		;a252
+	call 083c8h		;a252   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 	ld hl,0b4a4h		;a255
 	ld de,03810h		;a258
 	ld c,00fh		;a25b
@@ -250,7 +250,7 @@ L_A270:
 	ld bc,03c14h		;a273
 	ld a,044h		;a276
 	ld d,000h		;a278
-	call 083c8h		;a27a
+	call 083c8h		;a27a   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 	ret			;a27d
 L_A27E:
 	ld hl,0e06eh		;a27e
@@ -259,7 +259,7 @@ L_A27E:
 	and 00fh		;a283
 	ret nz			;a285
 	ld a,(0e003h)		;a286
-	call 08078h		;a289
+	call 08078h		;a289   ; despacha: salta a la palabra A de la tabla pegada detras del `call`
 
 ; ----------------------------------------------------------------------
 ; DATOS saltos_A28C: tabla de 8 palabras del despachador (call 0x408D en
@@ -281,19 +281,19 @@ DATA_saltos_A28C:
 
 
 L_A29C:
-	call L_A122		;a29c
-	call L_A13B		;a29f
+	call bio_borra_zona		;a29c   ; bio_borra_zona: borra la zona de la grafica (comando del VDP)
+	call bio_texto_a1b2		;a29f   ; bio_texto_a1b2: pinta el texto de p06:A1B2
 	jp L_A32C		;a2a2
 L_A2A5:
-	call L_A122		;a2a5
-	call L_A142		;a2a8
+	call bio_borra_zona		;a2a5   ; bio_borra_zona: borra la zona de la grafica (comando del VDP)
+	call bio_texto_a1bd		;a2a8   ; bio_texto_a1bd: pinta el texto de p06:A1BD
 	jp L_A32C		;a2ab
 L_A2AE:
-	call L_A122		;a2ae
-	call L_A149		;a2b1
+	call bio_borra_zona		;a2ae   ; bio_borra_zona: borra la zona de la grafica (comando del VDP)
+	call bio_texto_a1cb		;a2b1   ; bio_texto_a1cb: pinta el texto de p06:A1CB
 	jp L_A32C		;a2b4
 L_A2B7:
-	call L_A31E		;a2b7
+	call bio_avanza_dia		;a2b7   ; bio_avanza_dia: pasa el dia (0xE061) cada 64 cuadros
 	ld hl,0e061h		;a2ba
 	ld a,(hl)			;a2bd
 	cp 013h		;a2be
@@ -304,10 +304,10 @@ L_A2B7:
 	and d			;a2c9
 	ld d,a			;a2ca
 	ld a,00ch		;a2cb
-	call 08299h		;a2cd
+	call 08299h		;a2cd   ; pon_color: MSX2: el color B de la paleta con D y E (R#16 y puerto 2)
 	jp L_A335		;a2d0
 L_A2D3:
-	call L_A31E		;a2d3
+	call bio_avanza_dia		;a2d3   ; bio_avanza_dia: pasa el dia (0xE061) cada 64 cuadros
 	ld hl,0e061h		;a2d6
 	ld a,(hl)			;a2d9
 	cp 013h		;a2da
@@ -322,10 +322,10 @@ L_A2D3:
 	and d			;a2ed
 	ld d,a			;a2ee
 	ld a,00dh		;a2ef
-	call 08299h		;a2f1
+	call 08299h		;a2f1   ; pon_color: MSX2: el color B de la paleta con D y E (R#16 y puerto 2)
 	jp L_A335		;a2f4
 L_A2F7:
-	call L_A31E		;a2f7
+	call bio_avanza_dia		;a2f7   ; bio_avanza_dia: pasa el dia (0xE061) cada 64 cuadros
 	ld hl,0e061h		;a2fa
 	ld a,(hl)			;a2fd
 	cp 013h		;a2fe
@@ -335,20 +335,21 @@ L_A2F7:
 	and e			;a307
 	ld e,a			;a308
 	ld a,00eh		;a309
-	call 08299h		;a30b
+	call 08299h		;a30b   ; pon_color: MSX2: el color B de la paleta con D y E (R#16 y puerto 2)
 	jp L_A335		;a30e
 L_A311:
 	jp L_A32C		;a311
 L_A314:
-	call L_A122		;a314
-	call L_A150		;a317
+	call bio_borra_zona		;a314   ; bio_borra_zona: borra la zona de la grafica (comando del VDP)
+	call bio_texto_a1da		;a317   ; bio_texto_a1da: pinta el texto de p06:A1DA
 	jp L_A32C		;a31a
 L_A31D:
 	ret			;a31d
-L_A31E:
-	ld a,(0e001h)		;a31e
+bio_avanza_dia:		; pasa el dia (0xE061) cada 64 cuadros
+	ld a,(0e001h)		;a31e   ; lee fila elegida de la SRAM
 	and 03fh		;a321
 	jr nz,L_A32B		;a323
+bio_dia_sube:		; sube el dia mostrado (0xE054) (gemela de p05:9B8D)
 	ld hl,0e061h		;a325
 	ld a,(hl)			;a328
 	inc a			;a329
@@ -364,8 +365,8 @@ L_A32C:
 L_A335:
 	ret			;a335
 L_A336:
-	call L_A360		;a336
-	call L_A375		;a339
+	call bio_valores		;a336   ; bio_valores: los tres valores del dia (0xE05A..) a 0xE070
+	call bio_pinta_letras		;a339   ; bio_pinta_letras: pinta P, S e I (fisico, sensibilidad, intelecto) en su altura
 	ret			;a33c
 L_A33D:
 	ld a,h			;a33d
@@ -394,7 +395,7 @@ L_A352:
 	ld (ix+001h),e		;a359
 	ld (ix+002h),l		;a35c
 	ret			;a35f
-L_A360:
+bio_valores:		; los tres valores del dia (0xE05A..) a 0xE070
 	ld hl,0e05ah		;a360
 	ld de,0e070h		;a363
 	ld b,003h		;a366
@@ -403,32 +404,32 @@ L_A368:
 	and 0f8h		;a369
 	ld (de),a			;a36b
 	ld a,002h		;a36c
-	call 0806eh		;a36e
+	call 0806eh		;a36e   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	inc de			;a371
 	djnz L_A368		;a372
 	ret			;a374
-L_A375:
+bio_pinta_letras:		; pinta P, S e I (fisico, sensibilidad, intelecto) en su altura
 	ld ix,0e070h		;a375
 	ld a,(ix+000h)		;a379
 	ld b,050h		;a37c
-	call L_A392		;a37e
+	call bio_pinta_marca		;a37e   ; bio_pinta_marca: pinta la marca de un ciclo en su altura
 	ld a,(ix+001h)		;a381
 	ld b,053h		;a384
-	call L_A392		;a386
+	call bio_pinta_marca		;a386   ; bio_pinta_marca: pinta la marca de un ciclo en su altura
 	ld a,(ix+002h)		;a389
 	ld b,049h		;a38c
-	call L_A392		;a38e
+	call bio_pinta_marca		;a38e   ; bio_pinta_marca: pinta la marca de un ciclo en su altura
 	ret			;a391
-L_A392:
-	call L_A3A0		;a392
+bio_pinta_marca:		; pinta la marca de un ciclo en su altura
+	call bio_coordenada		;a392   ; bio_coordenada: HL = 0x1200 + A
 	push bc			;a395
 	push hl			;a396
-	call L_A0DB		;a397
+	call bio_casilla		;a397   ; bio_casilla: pinta una casilla con el comando del VDP
 	pop de			;a39a
 	pop af			;a39b
-	call 086fch		;a39c
+	call 086fch		;a39c   ; pinta_letra_8x8: copia la letra A de 8x8 de la hoja de letras a DE (LMMM)
 	ret			;a39f
-L_A3A0:
+bio_coordenada:		; HL = 0x1200 + A
 	ld l,a			;a3a0
 	ld h,012h		;a3a1
 	ret			;a3a3
@@ -436,22 +437,22 @@ L_A3A4:
 	ld a,(0e06ah)		;a3a4
 	and a			;a3a7
 	jr nz,L_A3B0		;a3a8
-	call L_A3B1		;a3aa
-	call L_A3EA		;a3ad
+	call bio_niveles		;a3aa   ; bio_niveles: clasifica los tres ciclos (0xE05A, 0xE05C, 0xE05E)
+	call bio_pinta_niveles		;a3ad   ; bio_pinta_niveles: pinta el nivel de cada ciclo
 L_A3B0:
 	ret			;a3b0
-L_A3B1:
+bio_niveles:		; clasifica los tres ciclos (0xE05A, 0xE05C, 0xE05E)
 	ld a,(0e05ah)		;a3b1
 	ld hl,0e075h		;a3b4
-	call L_A3CD		;a3b7
+	call bio_nivel		;a3b7   ; bio_nivel: B = el nivel de A (umbrales 0xA8, 0x94, 0x7E...)
 	ld a,(0e05ch)		;a3ba
 	ld hl,0e074h		;a3bd
-	call L_A3CD		;a3c0
+	call bio_nivel		;a3c0   ; bio_nivel: B = el nivel de A (umbrales 0xA8, 0x94, 0x7E...)
 	ld a,(0e05eh)		;a3c3
 	ld hl,0e073h		;a3c6
-	call L_A3CD		;a3c9
+	call bio_nivel		;a3c9   ; bio_nivel: B = el nivel de A (umbrales 0xA8, 0x94, 0x7E...)
 	ret			;a3cc
-L_A3CD:
+bio_nivel:		; B = el nivel de A (umbrales 0xA8, 0x94, 0x7E...)
 	ld b,000h		;a3cd
 	cp 0a8h		;a3cf
 	jr nc,L_A3E8		;a3d1
@@ -472,23 +473,23 @@ L_A3E7:
 L_A3E8:
 	ld (hl),b			;a3e8
 	ret			;a3e9
-L_A3EA:
+bio_pinta_niveles:		; pinta el nivel de cada ciclo
 	ld a,(0e075h)		;a3ea
-	call L_A40F		;a3ed
+	call bio_texto_nivel		;a3ed   ; bio_texto_nivel: el texto del nivel A (tabla de p06:A417)
 	ld de,05030h		;a3f0
-	call L_A429		;a3f3
+	call bio_pinta_texto		;a3f3   ; bio_pinta_texto: pinta el texto del nivel en DE
 	ld a,(0e074h)		;a3f6
-	call L_A40F		;a3f9
+	call bio_texto_nivel		;a3f9   ; bio_texto_nivel: el texto del nivel A (tabla de p06:A417)
 	ld de,0503ah		;a3fc
-	call L_A429		;a3ff
+	call bio_pinta_texto		;a3ff   ; bio_pinta_texto: pinta el texto del nivel en DE
 	ld a,(0e073h)		;a402
-	call L_A40F		;a405
+	call bio_texto_nivel		;a405   ; bio_texto_nivel: el texto del nivel A (tabla de p06:A417)
 	ld de,05044h		;a408
-	call L_A429		;a40b
+	call bio_pinta_texto		;a40b   ; bio_pinta_texto: pinta el texto del nivel en DE
 	ret			;a40e
-L_A40F:
+bio_texto_nivel:		; el texto del nivel A (tabla de p06:A417)
 	ld hl,0a417h		;a40f
-	call L_A421		;a412
+	call tabla_palabra		;a412   ; tabla_palabra: DE = la palabra A de la tabla de HL
 	ex de,hl			;a415
 	ret			;a416
 
@@ -505,28 +506,28 @@ DATA_resto_A417:
 ; ======================================================================
 
 
-L_A421:
+tabla_palabra:		; DE = la palabra A de la tabla de HL
 	add a,a			;a421
-	call 0806eh		;a422
+	call 0806eh		;a422   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld e,(hl)			;a425
 	inc hl			;a426
 	ld d,(hl)			;a427
 	ret			;a428
-L_A429:
+bio_pinta_texto:		; pinta el texto del nivel en DE
 	push de			;a429
 	push hl			;a42a
-	call L_A436		;a42b
+	call bio_borra_texto		;a42b   ; bio_borra_texto: borra la zona del texto (comando del VDP)
 	pop hl			;a42e
 	pop de			;a42f
 	ld c,0ffh		;a430
 	call 086b9h		;a432
 	ret			;a435
-L_A436:
+bio_borra_texto:		; borra la zona del texto (comando del VDP)
 	ex de,hl			;a436
 	ld bc,03808h		;a437
 	ld a,055h		;a43a
 	ld d,000h		;a43c
-	call 083c8h		;a43e
+	call 083c8h		;a43e   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 	ret			;a441
 
 ; ----------------------------------------------------------------------

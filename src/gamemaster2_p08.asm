@@ -348,7 +348,7 @@ L_A202:
 	ret			;a208
 L_A209:
 	pop hl			;a209
-	call L_A229		;a20a
+	call palabra_y_retrocede		;a20a   ; palabra_y_retrocede: HL = la palabra siguiente - 1
 	ld (ix+007h),e		;a20d
 	ld (ix+008h),d		;a210
 	ret			;a213
@@ -365,7 +365,7 @@ L_A21C:
 	cp (hl)			;a222
 	jp z,L_A230		;a223
 	ld (ix+005h),a		;a226
-L_A229:
+palabra_y_retrocede:		; HL = la palabra siguiente - 1
 	inc hl			;a229
 	ld e,(hl)			;a22a
 	inc hl			;a22b
@@ -386,7 +386,7 @@ L_A237:
 	cp (hl)			;a23d
 	jp z,L_A247		;a23e
 	ld (ix+006h),a		;a241
-	jp L_A229		;a244
+	jp palabra_y_retrocede		;a244   ; palabra_y_retrocede: HL = la palabra siguiente - 1
 L_A247:
 	inc hl			;a247
 	inc hl			;a248
@@ -394,7 +394,7 @@ L_A247:
 	ret			;a24d
 L_A24E:
 	pop hl			;a24e
-	jp L_A229		;a24f
+	jp palabra_y_retrocede		;a24f   ; palabra_y_retrocede: HL = la palabra siguiente - 1
 L_A252:
 	pop hl			;a252
 	inc hl			;a253
@@ -446,16 +446,16 @@ L_A2A3:
 	jp c,L_A2B2		;a2ad
 	set 2,(hl)		;a2b0
 L_A2B2:
-	call L_A2BF		;a2b2
-	call L_A32C		;a2b5
-	call L_A356		;a2b8
-	call L_A384		;a2bb
+	call sonido_al_psg		;a2b2   ; sonido_al_psg: manda al PSG los registros de los canales
+	call sonido_ruido		;a2b5   ; sonido_ruido: el periodo del ruido (R#6) si hay que cambiarlo
+	call sonido_envolvente		;a2b8   ; sonido_envolvente: la envolvente (R#11-13) si hay que cambiarla
+	call sonido_mezclador		;a2bb   ; sonido_mezclador: el mezclador del PSG (R#7) segun los canales
 	ret			;a2be
-L_A2BF:
+sonido_al_psg:		; manda al PSG los registros de los canales
 	ld b,000h		;a2bf
 	ld c,008h		;a2c1
 	ld hl,0e20ah		;a2c3
-	call L_A30E		;a2c6
+	call tres_registros_psg		;a2c6   ; tres_registros_psg: escribe tres registros del PSG desde HL
 	ld hl,0e2f6h		;a2c9
 	bit 2,(hl)		;a2cc
 	jp nz,L_A2E6		;a2ce
@@ -466,11 +466,11 @@ L_A2BF:
 	ld (0e238h),a		;a2da
 L_A2DD:
 	ld hl,0e236h		;a2dd
-	call L_A30E		;a2e0
+	call tres_registros_psg		;a2e0   ; tres_registros_psg: escribe tres registros del PSG desde HL
 	jp L_A2EC		;a2e3
 L_A2E6:
 	ld hl,0e2bah		;a2e6
-	call L_A30E		;a2e9
+	call tres_registros_psg		;a2e9   ; tres_registros_psg: escribe tres registros del PSG desde HL
 L_A2EC:
 	ld hl,0e2f6h		;a2ec
 	bit 0,(hl)		;a2ef
@@ -482,13 +482,13 @@ L_A2EC:
 	ld (0e264h),a		;a2fd
 L_A300:
 	ld hl,0e262h		;a300
-	call L_A30E		;a303
+	call tres_registros_psg		;a303   ; tres_registros_psg: escribe tres registros del PSG desde HL
 	ret			;a306
 L_A307:
 	ld hl,0e28eh		;a307
-	call L_A30E		;a30a
+	call tres_registros_psg		;a30a   ; tres_registros_psg: escribe tres registros del PSG desde HL
 	ret			;a30d
-L_A30E:
+tres_registros_psg:		; escribe tres registros del PSG desde HL
 	ld e,(hl)			;a30e
 	ld a,b			;a30f
 	call 00093h		;a310   ; BIOS WRTPSG - Writes data to PSG-register
@@ -510,7 +510,7 @@ L_A30E:
 	ret z			;a328
 	set 3,(hl)		;a329
 	ret			;a32b
-L_A32C:
+sonido_ruido:		; el periodo del ruido (R#6) si hay que cambiarlo
 	ld hl,0e2f2h		;a32c
 	bit 0,(hl)		;a32f
 	jp z,L_A342		;a331
@@ -533,7 +533,7 @@ L_A342:
 	ld a,006h		;a350
 	call 00093h		;a352   ; BIOS WRTPSG - Writes data to PSG-register
 	ret			;a355
-L_A356:
+sonido_envolvente:		; la envolvente (R#11-13) si hay que cambiarla
 	ld hl,0e2f2h		;a356
 	bit 7,(hl)		;a359
 	ret z			;a35b
@@ -557,11 +557,11 @@ L_A356:
 	ld a,00dh		;a37e
 	call 00093h		;a380   ; BIOS WRTPSG - Writes data to PSG-register
 	ret			;a383
-L_A384:
+sonido_mezclador:		; el mezclador del PSG (R#7) segun los canales
 	ld hl,0e20dh		;a384
 	ld a,(hl)			;a387
 	ld hl,0a3ceh		;a388
-	call L_A3C7		;a38b
+	call tabla_por_dos_bits		;a38b   ; tabla_por_dos_bits: HL = HL + (A and 3)
 	ld b,(hl)			;a38e
 	ld a,(0e2f6h)		;a38f
 	bit 2,a		;a392
@@ -571,7 +571,7 @@ L_A384:
 L_A39D:
 	ld a,(hl)			;a39d
 	ld hl,0a3d2h		;a39e
-	call L_A3C7		;a3a1
+	call tabla_por_dos_bits		;a3a1   ; tabla_por_dos_bits: HL = HL + (A and 3)
 	ld c,(hl)			;a3a4
 	ld a,(0e2f6h)		;a3a5
 	bit 0,a		;a3a8
@@ -581,7 +581,7 @@ L_A39D:
 L_A3B3:
 	ld a,(hl)			;a3b3
 	ld hl,0a3d6h		;a3b4
-	call L_A3C7		;a3b7
+	call tabla_por_dos_bits		;a3b7   ; tabla_por_dos_bits: HL = HL + (A and 3)
 	ld a,(hl)			;a3ba
 	or b			;a3bb
 	or c			;a3bc
@@ -591,7 +591,7 @@ L_A3BD:
 	ld a,007h		;a3c1
 	call 00093h		;a3c3   ; BIOS WRTPSG - Writes data to PSG-register
 	ret			;a3c6
-L_A3C7:
+tabla_por_dos_bits:		; HL = HL + (A and 3)
 	and 003h		;a3c7
 	ld e,a			;a3c9
 	ld d,000h		;a3ca

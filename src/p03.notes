@@ -26,3 +26,144 @@ F 0xA941 2
 D 0xA98C 0xC000 relleno_ff  5748 bytes a 0xFF hasta el final del banco: relleno; lo leen nadie (5748 bytes)
 F 0xA98C 16
 # --- fin de los bloques de bloques.py ---
+
+# --- ANOTACIONES AUTOMATICAS (seccion que reescribe tools/anota.py; no editar a mano) ---
+L 0xA122 pon_valor escribe 0xF29C en la variable del juego (0xF28A) (gemela de p01:6F70)
+L 0xA21E multiplica HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
+L 0xA223 divide DE / BC: cociente en DE y resto en HL (gemela de p05:9430)
+L 0xA23D borra_pantalla_b borra la tabla de nombres y esconde los sprites (gemela de p01:708B)
+L 0xA263 lee_cabecera_juego lee la cabecera de 0x4028 del juego y sus opciones (gemela de p01:70AA)
+L 0xA2DE busca_ficha_b copia la ficha por defecto (p00:45D0) a 0xD300 y busca la del juego
+L 0xA2E2 busca_ficha copia la ficha por defecto (p00:45D0) y busca la del juego por su suma (gemela de p01:7136)
+L 0xA370 rc_751_o_752_b compara el RC del juego (0xD351, al reves) con 0x751 y 0x752
+L 0xA3E6 hl_mas_a HL = HL + A (gemela de p01:7251)
+L 0xA3EB de_mas_a DE = DE + A (gemela de p01:7256)
+L 0xA3F0 pon_color MSX2: el color B de la paleta con D y E (R
+L 0xA40A paleta_msx2 MSX2: los 16 colores de p01:728E (gemela de p01:7275)
+L 0xA40F paleta_bio MSX2: los 16 colores de p05:82D7 (gemela de p05:82C3)
+L 0xA412 paleta_desde MSX2: los 16 colores de HL (gemela de p05:82C6)
+L 0xA443 paleta_lista MSX2: colores de una lista [color, d, e] que acaba en 0xFF (gemela de p01:72AE)
+L 0xA451 registros_vdp los 8 registros del VDP de p01:72E2 y, en MSX2, R
+L 0xA47F borra_nombres borra la tabla de nombres y esconde los sprites (0xD0 en 0x3B00) (gemela de p01:72EA)
+L 0xA491 rellena_tercios FILVRM en los tres tercios de la pantalla (gemela de p01:72FC)
+L 0xA4A2 copia_tercios LDIRVM en los tres tercios de la pantalla (gemela de p01:730D)
+L 0xA4B8 descomprime_tercios descomprime HL en los tres tercios de la pantalla (gemela de p01:7323)
+L 0xA4CB descomprime_con_direccion descomprime a la VRAM de la palabra de HL (gemela de p01:7336)
+L 0xA4CF descomprime descomprime HL a la VRAM DE: n & 0x7F repeticiones o copias (gemela de p01:733A)
+L 0xA4FF vram_escribe_en SETWRT (o NSTWRT en MSX2) en HL (gemela de p01:736A)
+L 0xA510 despacha salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
+L 0xA524 pinta_texto_b pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
+L 0xA54B binario_a_bcd HL a BCD en DE (gemela de p01:746C)
+L 0xA55C bcd_a_binario A en BCD a binario (gemela de p01:747D)
+L 0xA56E borra_ventana borra la ventana de 0x9237 (gemela de p01:748F)
+L 0xA5DC lee_vram_tercios LDIRMV de los tres tercios (0x2000 de paso) (gemela de p01:7834)
+L 0xA62A copia_vram_tercios LDIRVM de los tres tercios (0x2000 de paso) (gemela de p01:788E)
+L 0xA655 borra_zona_3a00 borra 0x3A00 (0x100 bytes)
+L 0xA65F menu menu de B opciones con el cursor A: devuelve la elegida (gemela de p01:750E)
+L 0xA731 borra_teclado borra el bufer de teclas del menu (0x920B) (gemela de p01:75E2)
+L 0xA74F cursor_apaga_b quita el cursor
+L 0xA778 cursor_pinta_b pinta el cursor (':' o el de MSX2)
+L 0xA788 cursor_borra_b borra el cursor
+L 0xA78F opcion_cero si no hay opcion elegida, vuelve al menu (gemela de p01:766D)
+L 0xA798 menu_con_esc menu: espacio elige, ESC sale (gemela de p01:7676)
+L 0xA7B2 menu_vertical menu de B opciones: cursores arriba y abajo, espacio elige (gemela de p01:7690)
+L 0xA7D1 menu_prepara prepara el menu: opciones, posicion y cursor (gemela de p01:76AF)
+L 0xA7E3 menu_cursor mueve el cursor con las flechas (0x1E arriba, 0x1F abajo) (gemela de p01:76C1)
+L 0xA818 menu_limpia_b quita el cursor y borra el teclado
+L 0xA829 comprime comprime 0x8802 en 0x8002 (lo contrario de p01:733A) (gemela de p01:7707)
+L 0xA8B2 fin_de_8882 compara HL con 0x8882 (gemela de p01:7790)
+L 0xA8E5 menu_principal el menu del Game Master: engancha H.TIMI y pinta (gemela de p01:7973)
+C 0xA00D hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0xA018 hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0xA033 pon_valor: escribe 0xF29C en la variable del juego (0xF28A) (gemela de p01:6F70)
+C 0xA041 multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
+C 0xA049 pon_valor: escribe 0xF29C en la variable del juego (0xF28A) (gemela de p01:6F70)
+C 0xA05D hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0xA06C multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
+C 0xA074 hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0xA09B pon_valor: escribe 0xF29C en la variable del juego (0xF28A) (gemela de p01:6F70)
+C 0xA0AA multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
+C 0xA0B6 multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
+C 0xA0C3 hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0xA0EE multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
+C 0xA0F7 pon_valor: escribe 0xF29C en la variable del juego (0xF28A) (gemela de p01:6F70)
+C 0xA0FA pon_valor: escribe 0xF29C en la variable del juego (0xF28A) (gemela de p01:6F70)
+C 0xA103 multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
+C 0xA12F multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
+C 0xA143 hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0xA19B multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
+C 0xA1AE multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
+C 0xA1BA borra_pantalla_b: borra la tabla de nombres y esconde los sprites (gemela de p01:708B)
+C 0xA1BF guarda fila elegida de la SRAM
+C 0xA1C4 guarda opcion / RC del juego
+C 0xA1C8 borra_pantalla_b: borra la tabla de nombres y esconde los sprites (gemela de p01:708B)
+C 0xA1E1 pon_valor: escribe 0xF29C en la variable del juego (0xF28A) (gemela de p01:6F70)
+C 0xA1E9 multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
+C 0xA1FD borra_pantalla_b: borra la tabla de nombres y esconde los sprites (gemela de p01:708B)
+C 0xA205 multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
+C 0xA24F busca_ficha_b: copia la ficha por defecto (p00:45D0) a 0xD300 y busca la del juego
+C 0xA252 lee_cabecera_juego: lee la cabecera de 0x4028 del juego y sus opciones (gemela de p01:70AA)
+C 0xA263 lee la ficha del juego (copia) y el byte siguiente (16 bits)
+C 0xA278 copia_del_juego: copia BC bytes de HL del cartucho del juego (RDSLT) a DE (gemela de p01:6371)
+C 0xA2AD rc_751_o_752_b: compara el RC del juego (0xD351, al reves) con 0x751 y 0x752
+C 0xA2E5 apunta a la ficha del juego (copia)
+C 0xA2F5 lee_palabra_del_juego: DE = la palabra HL del cartucho del juego (RDSLT en 0xF104) (gemela de p00:576B)
+C 0xA301 apunta a la ficha del juego (copia)
+C 0xA307 copia_del_juego: copia BC bytes de HL del cartucho del juego (RDSLT) a DE (gemela de p01:6371)
+C 0xA320 copia_del_juego: copia BC bytes de HL del cartucho del juego (RDSLT) a DE (gemela de p01:6371)
+C 0xA323 rc_751_o_752_b: compara el RC del juego (0xD351, al reves) con 0x751 y 0x752
+C 0xA329 apunta a la ficha del juego (copia)
+C 0xA3DB apunta a la ficha del juego (copia)
+C 0xA41B pon_color: MSX2: el color B de la paleta con D y E (R
+C 0xA44C pon_color: MSX2: el color B de la paleta con D y E (R
+C 0xA4BD descomprime: descomprime HL a la VRAM DE: n & 0x7F repeticiones o copias (gemela de p01:733A)
+C 0xA4D0 vram_escribe_en: SETWRT (o NSTWRT en MSX2) en HL (gemela de p01:736A)
+C 0xA589 lee_vram_tercios: LDIRMV de los tres tercios (0x2000 de paso) (gemela de p01:7834)
+C 0xA595 lee_vram_tercios: LDIRMV de los tres tercios (0x2000 de paso) (gemela de p01:7834)
+C 0xA5BB borra_zona_3a00: borra 0x3A00 (0x100 bytes)
+C 0xA5F7 borra_zona_3a00: borra 0x3A00 (0x100 bytes)
+C 0xA603 copia_vram_tercios: LDIRVM de los tres tercios (0x2000 de paso) (gemela de p01:788E)
+C 0xA60F copia_vram_tercios: LDIRVM de los tres tercios (0x2000 de paso) (gemela de p01:788E)
+C 0xA671 cursor_pinta_b: pinta el cursor (':' o el de MSX2)
+C 0xA674 borra_teclado: borra el bufer de teclas del menu (0x920B) (gemela de p01:75E2)
+C 0xA68F opcion_cero: si no hay opcion elegida, vuelve al menu (gemela de p01:766D)
+C 0xA698 hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0xA6A7 cursor_borra_b: borra el cursor
+C 0xA6AE cursor_pinta_b: pinta el cursor (':' o el de MSX2)
+C 0xA6C0 opcion_cero: si no hay opcion elegida, vuelve al menu (gemela de p01:766D)
+C 0xA721 cursor_pinta_b: pinta el cursor (':' o el de MSX2)
+C 0xA72A hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0xA73E cursor_apaga_b: quita el cursor
+C 0xA767 copia_tercios: LDIRVM en los tres tercios de la pantalla (gemela de p01:730D)
+C 0xA798 menu_prepara: prepara el menu: opciones, posicion y cursor (gemela de p01:76AF)
+C 0xA79B menu_limpia_b: quita el cursor y borra el teclado
+C 0xA7AA menu_cursor: mueve el cursor con las flechas (0x1E arriba, 0x1F abajo) (gemela de p01:76C1)
+C 0xA7B2 menu_prepara: prepara el menu: opciones, posicion y cursor (gemela de p01:76AF)
+C 0xA7B5 menu_limpia_b: quita el cursor y borra el teclado
+C 0xA7C0 cursor_borra_b: borra el cursor
+C 0xA7CB menu_cursor: mueve el cursor con las flechas (0x1E arriba, 0x1F abajo) (gemela de p01:76C1)
+C 0xA7E0 cursor_pinta_b: pinta el cursor (':' o el de MSX2)
+C 0xA806 hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0xA80E cursor_borra_b: borra el cursor
+C 0xA815 cursor_pinta_b: pinta el cursor (':' o el de MSX2)
+C 0xA818 cursor_apaga_b: quita el cursor
+C 0xA83E fin_de_8882: compara HL con 0x8882 (gemela de p01:7790)
+C 0xA852 fin_de_8882: compara HL con 0x8882 (gemela de p01:7790)
+C 0xA85C fin_de_8882: compara HL con 0x8882 (gemela de p01:7790)
+C 0xA88B fin_de_8882: compara HL con 0x8882 (gemela de p01:7790)
+C 0xA8E1 guarda el codigo de p00:4A9A en RAM y el byte siguiente (16 bits)
+C 0xA8F9 borra_pantalla: borra la tabla de nombres (0x3800, 0x300 bytes)
+C 0xA8FC apunta a opcion / RC del juego
+C 0xA8FF apunta a fila elegida de la SRAM
+C 0xA912 copia_tercios: LDIRVM en los tres tercios de la pantalla (gemela de p01:730D)
+C 0xA91D rellena_tercios: FILVRM en los tres tercios de la pantalla (gemela de p01:72FC)
+C 0xA920 lee el slot del juego (copia)
+C 0xA923 guarda opcion / RC del juego
+C 0xA92E pinta_texto_b: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
+C 0xA936 menu_vertical: menu de B opciones: cursores arriba y abajo, espacio elige (gemela de p01:7690)
+C 0xA93A borra_zona_3ac0: borra 0x3AC0 (0x20 bytes) letra a letra
+C 0xA93E despacha: salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
+C 0xA953 menu_sram: el menu de la SRAM: limpia 0xE010, pinta y lee teclas
+C 0xA959 menu_borrar: pide el nombre de 5 letras a borrar (0xE250) y lo busca
+C 0xA95F pregunta_formatear: pregunta si se formatea (Y/N) y llama a la SRAM
+# --- fin de las anotaciones de anota.py ---

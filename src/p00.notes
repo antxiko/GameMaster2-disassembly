@@ -68,3 +68,561 @@ F 0x5F84 2
 D 0x5F96 0x6000 resto_5F96  lo apuntan con el banco puesto p00:5F73 (0x5F96), p00:5F79 (0x5FCB), p00:5DF7 (0x5FCF); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p00:5F73, p00:5F79, p00:5DF7 (106 bytes)
 F 0x5F96 16
 # --- fin de los bloques de bloques.py ---
+
+# --- ANOTACIONES AUTOMATICAS (seccion que reescribe tools/anota.py; no editar a mano) ---
+L 0x4020 sram pasarela a la SRAM: el cartucho en 0x8000, banco 4 en 0x8000 y la SRAM en 0xA000 (0x10); llama a p04:8000 con IX = DE y devuelve 2-3
+L 0x404F p09_8043 pasarela: 1-9-10, p09:8043 y vuelve a 2-3
+L 0x4058 p09_801b pasarela: 1-9-10, p09:801B y vuelve a 2-3
+L 0x4061 p09_80d2 pasarela: 1-9-10, p09:80D2 y vuelve a 2-3
+L 0x4069 p09_8117 pasarela: 1-9-10, p09:8117 y vuelve a 2-3
+L 0x4071 p09_8133 pasarela: 1-9-10, p09:8133 y vuelve a 2-3
+L 0x4079 p09_8134 pasarela: 1-9-10, p09:8134 y vuelve a 2-3
+L 0x4081 p09_82ca pasarela: 1-9-10, p09:82CA y vuelve a 2-3
+L 0x4089 p09_846d pasarela: 1-9-10, p09:846D y vuelve a 2-3 guardando AF
+L 0x4095 p09_8191 pasarela: 1-9-10, p09:8191 y vuelve a 2-3
+L 0x409D p09_8191_b pasarela: 1-9-10 y p09:8191 (la llaman por CALSLT, p03:A5BE)
+L 0x40AE p09_8191_c pasarela de 0x4095 con otro bloque (hl=0x488F, bc=8); nada la apunta
+L 0x40D6 bancos_1_9_10 pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
+L 0x40E5 bancos_2_3 pone los bancos 2 y 3 en 0x8000 y 0xA000
+L 0x40F2 banco_7 pone 7-8, llama a p07:8000 y vuelve a 2-3
+L 0x4108 banco_5 pone 5-6, llama a p05:8000, desengancha H.TIMI y vuelve a 2-3
+L 0x417D menu_sram el menu de la SRAM: limpia 0xE010, pinta y lee teclas
+L 0x4209 menu_borrar pide el nombre de 5 letras a borrar (0xE250) y lo busca
+L 0x4267 pinta_nombre pinta en 0x3AB1 las 5 letras de 0xE250 ('-' donde no hay)
+L 0x4333 pregunta_formatear pregunta si se formatea (Y/N) y llama a la SRAM
+L 0x4373 sram_ordenes_c_d SRAM por CALSLT: las ordenes 0x0C y 0x0D (p04:8000)
+L 0x43D6 sram_fila_arriba sube la fila elegida de la lista de la SRAM (0xE001)
+L 0x43E6 sram_fila_abajo baja la fila elegida de la lista de la SRAM (0xE001)
+L 0x43F7 sram_pinta_lista pinta la lista de la SRAM (0xE010, 64 bytes por fila)
+L 0x441A sram_pinta_filas pinta 8 filas de la lista
+L 0x4431 sram_pinta_fila pinta una fila: nombre de 5 letras y sus datos
+L 0x4473 sram_fila_ocupada mira si la fila A de 0xE010 esta ocupada
+L 0x448D borra_pantalla borra la tabla de nombres (0x3800, 0x300 bytes)
+L 0x4495 borra_zona_38a0 borra 0x38A0 (0x100 bytes)
+L 0x449D borra_zona_3a80 borra 0x3A80 (0x40 bytes)
+L 0x44A5 borra_zona_39c0 borra 0x39C0 (0xA0 bytes)
+L 0x44AD borra_zona_3ac0 borra 0x3AC0 (0x20 bytes) letra a letra
+L 0x4997 llama_al_juego llama al juego por CALSLT a 0xD314 con su slot (0xD12E) en la pagina 2
+L 0x4A1C copia_ficha_del_juego copia la ficha del juego (0xF280, 23 bytes) y sus opciones a 0xD300
+L 0x4A7B mapper_del_juego_a_cero pone 0-1-2-3 en 0x4000-0xA000: los registros del mapper del OTRO cartucho
+L 0x4A8C salta_a_c000 copia p00:4A9A a 0xC000 (0x87 bytes) y salta alli
+L 0x4B64 disco_guarda_partida graba en disco: abre, crea, escribe y cierra
+L 0x4B7A disco_guarda_ram graba en disco la RAM del juego (0x8000...)
+L 0x4BA0 disco_guarda_vrm graba un fichero .VRM (la VRAM)
+L 0x4BCD disco_guarda_ranking graba en disco el ranking (p01:69AD)
+L 0x4BE6 disco_guarda_bloque graba en disco el bloque de 0xDF0C
+L 0x4BFC disco_carga_partida carga del disco una partida
+L 0x4C37 disco_carga_vram carga del disco la VRAM
+L 0x4C4F disco_carga_ranking carga del disco el ranking
+L 0x4C65 disco_carga_bloque carga del disco el bloque de 0xDF0C
+L 0x4C78 disco_graba_ac80 graba 0x67 registros de 0x80 bytes desde 0xAC80
+L 0x4C8E disco_graba_registro copia 0x80 bytes a 0x8000 y los graba (BDOS 0x26)
+L 0x4CA1 disco_graba_9239 graba 0x95 registros desde 0x9239
+L 0x4CAF disco_graba_df0c graba 3 registros desde 0xDF0C - 0x1380
+L 0x4CC4 disco_lee_ac80 lee 0x67 registros a 0xAC80
+L 0x4CE0 disco_lee_9239 lee 0x95 registros a 0x9239
+L 0x4CEE disco_lee_df0c lee 3 registros a 0xDF0C - 0x1380
+L 0x4D03 disco_graba_8000 graba 0x1000 registros desde 0x8000; nada la apunta
+L 0x4D1F disco_lee_vram lee del disco la VRAM y los registros del VDP
+L 0x4D58 disco_lee_a_vram lee registros del disco y los pasa a la VRAM
+L 0x4D83 disco_lee_cabecera_vram lee el primer registro: modo y registros del VDP (MSX2)
+L 0x4DFE pon_registros_vdp escribe E registros del VDP desde HL, empezando por C
+L 0x4E0A disco_graba_vram graba en disco la VRAM y los registros del VDP
+L 0x4E41 disco_graba_de_vram lee de la VRAM y lo graba en disco
+L 0x4E6F disco_cabecera_vram prepara el primer registro: modo y registros del VDP
+L 0x4ED8 disco_graba_pantalla graba la pantalla segun el modo (0xF3DF, 0xF3E0)
+L 0x4F3C disco_graba_bload graba la cabecera de BLOAD (0xFE, inicio, fin y ejecucion) (gemela de p02:9336)
+L 0x4F84 disco_graba_100_de_vram lee 0x100 bytes de la VRAM y los graba
+L 0x4F87 disco_graba_bc_de_vram lee BC bytes de la VRAM y los graba
+L 0x4FA0 entra_al_disco pone la RAM en la pagina 2, desengancha la interrupcion y guarda la RAM del juego que pisa el disco
+L 0x4FF3 sale_del_disco espera, devuelve la RAM del juego, los ganchos y la pila (0x984A)
+L 0x507D nombre_de_fichero pone en el FCB (0x982C) el nombre: tipo y numero de juego
+L 0x5099 byte_a_hex escribe A en hexadecimal (dos letras) en HL
+L 0x50AB borra_fcb pone a cero el FCB de 0x982F
+L 0x50B9 hay_disco Z si no hay disco: mira si H.PHYD (0xFFA7) es un `ret`
+L 0x50D6 fcb_prepara registro 0, tamano de registro 1 y bloque actual en el FCB de 0x9848
+L 0x5105 fcb_registro pone HL como registro aleatorio del FCB
+L 0x5112 bdos_abre BDOS 0x0F, abrir fichero; si falla, el error 0
+L 0x5122 bdos_crea BDOS 0x16, crear fichero; si falla, el error 1
+L 0x5132 bdos_cierra BDOS 0x10, cerrar fichero; si falla, el error 2
+L 0x5142 bdos_lee BDOS 0x27, leer HL registros; si falla, el error 3
+L 0x5152 bdos_graba BDOS 0x26, grabar HL registros; si falla, el error 4
+L 0x5162 disco_lee_byte lee un byte del fichero (por la pila)
+L 0x5167 disco_graba_byte graba el byte A en el fichero (por la pila)
+L 0x517C un_registro HL = 1 y salta a la rutina de BC
+L 0x5181 disco_graba_palabra graba HL en el fichero, byte bajo primero
+L 0x518A disco_lee_palabra lee una palabra del fichero en HL
+L 0x51D2 error_de_disco pinta el mensaje del error C (tabla de p00:5209)
+L 0x5265 ventana abre una ventana de texto con el marco de DE
+L 0x5393 pide_nombre_fichero lee el nombre del fichero letra a letra
+L 0x53A8 elige_fichero lista los ficheros del disco y deja elegir uno
+L 0x5485 pinta_fichero pinta el nombre del fichero elegido
+L 0x54D3 borra_lista_ficheros pone a cero la lista de ficheros (0x9103) y el FCB
+L 0x54E0 fcb_comodin FCB con '?' en el nombre para buscar ficheros
+L 0x54FD busca_ficheros busca los ficheros del disco (BDOS 0x11 y 0x12)
+L 0x5550 guarda_fichero_hallado copia el nombre hallado a la lista
+L 0x5557 copia_nombre copia un nombre de la lista
+L 0x5565 fila_de_fichero HL = la fila A de la lista de ficheros
+L 0x5583 init INIT del cartucho: si no se pulsa nada, mira el otro cartucho, guarda los slots y arranca
+L 0x56B7 compara_de_bc Z si DE = BC
+L 0x56D5 vuelve_al_juego apaga el menu y vuelve al juego por 0xF15A
+L 0x5732 mapper_del_juego_a_cero_b pone el cartucho del juego en la pagina 2 y 0-1-2-3 en sus registros
+L 0x5752 mi_slot A = el slot de la pagina 1 (RSLREG y EXPTBL): el del propio cartucho
+L 0x576B lee_palabra_del_juego DE = la palabra HL del cartucho del juego (RDSLT en 0xF104)
+L 0x576F lee_palabra_slot DE = la palabra HL del slot C (RDSLT)
+L 0x5773 lee_byte_slot D = el byte HL del slot C (RDSLT), y avanza HL
+L 0x577F busca_cartuchos copia p00:578D a 0xE010 y la ejecuta
+L 0x5824 salta_a_e000 copia p00:5832 a 0xE000 (0x105 bytes) y salta alli
+L 0x5937 salta_a_e000_b copia p00:5945 a 0xE000 (0x87 bytes) y salta alli
+L 0x5A3B ventana_menu las esquinas de la ventana del menu (0x9235, 0x9237)
+L 0x5A48 pinta_puntos pinta los puntos (0xF28E/0xF290)
+L 0x5A80 copia_3_al_reves copia 3 bytes de HL hacia atras en DE
+L 0x5A89 compara_3 compara 3 bytes (BCD) de HL y DE
+L 0x5B1F pregunta_si pinta la pregunta y espera la respuesta
+L 0x5B2B texto_5b3a pinta el texto de p00:5B3A
+L 0x5B30 texto_5b4a pinta el texto de p00:5B4A
+L 0x5BBD pide_fichero abre la ventana de los ficheros y deja elegir
+L 0x5C21 cabecera_menu pinta la cabecera del menu y el numero de juego
+L 0x5C2A pinta_juego pinta 'GAME' y el numero de juego (0xF281) en hexadecimal
+L 0x5C32 pinta_numero_de_juego pinta el numero de juego (0xF281)
+L 0x5CA6 cabecera_screen pinta la cabecera SCREEN
+L 0x5CB2 cabecera_data pinta la cabecera DATA
+L 0x5CFE pinta_opcion pinta la opcion elegida (0xF10B, nibble alto)
+L 0x5D56 pinta_tipo pinta el tipo elegido (0xF10B, nibble bajo)
+L 0x5D9A texto_search pinta 'SEARCH FILE'
+L 0x5DB0 cabecera_5dbc pinta la cabecera de p00:5DBC
+L 0x5EB8 p09_8191_desde_menu 1-9-10 con el cartucho en la pagina 2, p09:8191 y vuelta
+L 0x5EC2 pantalla_del_menu borra la VRAM y pone el modo del menu (MSX1 o MSX2)
+L 0x5EEA borra_vram borra la VRAM: 16 KB en MSX1, 64 KB en MSX2 (BIGFIL)
+L 0x5F06 borra_16k BIGFIL de 0x4000 bytes desde HL
+L 0x5F0D ventana_pequena las esquinas de una ventana (0x9235, 0x9237)
+L 0x5F70 pregunta_vuelve pregunta y vuelve al menu
+C 0x4026 mi_slot: A = el slot de la pagina 1 (RSLREG y EXPTBL): el del propio cartucho
+C 0x4030 el mapper: pone en 0x8000 el banco de A
+C 0x4035 el mapper: pone en 0xA000 el banco de A
+C 0x4041 el mapper: pone en 0x8000 el banco de A
+C 0x4045 el mapper: pone en 0xA000 el banco de A
+C 0x404F bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
+C 0x4055 bancos_2_3: pone los bancos 2 y 3 en 0x8000 y 0xA000
+C 0x4058 bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
+C 0x405E bancos_2_3: pone los bancos 2 y 3 en 0x8000 y 0xA000
+C 0x4061 bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
+C 0x4069 bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
+C 0x4071 bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
+C 0x4079 bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
+C 0x4081 bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
+C 0x4089 bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
+C 0x4090 bancos_2_3: pone los bancos 2 y 3 en 0x8000 y 0xA000
+C 0x4095 bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
+C 0x409D bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
+C 0x40AE bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
+C 0x40B7 lee hay menu en pantalla
+C 0x40C9 copia_tercios: LDIRVM en los tres tercios de la pantalla
+C 0x40D8 el mapper: pone en 0x6000 el banco de A
+C 0x40DD el mapper: pone en 0x8000 el banco de A
+C 0x40E1 el mapper: pone en 0xA000 el banco de A
+C 0x40E7 el mapper: pone en 0x8000 el banco de A
+C 0x40EB el mapper: pone en 0xA000 el banco de A
+C 0x40F4 el mapper: pone en 0x8000 el banco de A
+C 0x40F8 el mapper: pone en 0xA000 el banco de A
+C 0x4100 el mapper: pone en 0x8000 el banco de A
+C 0x4104 el mapper: pone en 0xA000 el banco de A
+C 0x410A el mapper: pone en 0x8000 el banco de A
+C 0x410E el mapper: pone en 0xA000 el banco de A
+C 0x411B el mapper: pone en 0x8000 el banco de A
+C 0x411F el mapper: pone en 0xA000 el banco de A
+C 0x417D borra_zona_3a80: borra 0x3A80 (0x40 bytes)
+C 0x4180 borra_zona_38a0: borra 0x38A0 (0x100 bytes)
+C 0x4183 apunta a la lista de la SRAM
+C 0x4190 guarda fila elegida de la SRAM
+C 0x4199 apunta a la lista de la SRAM
+C 0x419F lee el slot del Game Master (para CALSLT) y el byte siguiente (16 bits)
+C 0x41B8 sram_pinta_lista: pinta la lista de la SRAM (0xE010, 64 bytes por fila)
+C 0x41CD borra_zona_3a80: borra 0x3A80 (0x40 bytes)
+C 0x41D8 sram_fila_arriba: sube la fila elegida de la lista de la SRAM (0xE001)
+C 0x41DD sram_fila_abajo: baja la fila elegida de la lista de la SRAM (0xE001)
+C 0x4209 borra_zona_39c0: borra 0x39C0 (0xA0 bytes)
+C 0x420C borra_zona_3a80: borra 0x3A80 (0x40 bytes)
+C 0x4219 apunta a el nombre de 5 letras
+C 0x4237 apunta a el nombre de 5 letras
+C 0x4249 pinta_nombre: pinta en 0x3AB1 las 5 letras de 0xE250 ('-' donde no hay)
+C 0x424F apunta a el nombre de 5 letras
+C 0x4261 pinta_nombre: pinta en 0x3AB1 las 5 letras de 0xE250 ('-' donde no hay)
+C 0x426A apunta a el nombre de 5 letras
+C 0x4282 apunta a el nombre de 5 letras
+C 0x4298 lee el slot del Game Master (para CALSLT) y el byte siguiente (16 bits)
+C 0x42B8 borra_zona_3a80: borra 0x3A80 (0x40 bytes)
+C 0x42BB borra_zona_3ac0: borra 0x3AC0 (0x20 bytes) letra a letra
+C 0x42CF borra_zona_3a80: borra 0x3A80 (0x40 bytes)
+C 0x4333 borra_pantalla: borra la tabla de nombres (0x3800, 0x300 bytes)
+C 0x4351 sram_ordenes_c_d: SRAM por CALSLT: las ordenes 0x0C y 0x0D (p04:8000)
+C 0x4356 sram_ordenes_c_d: SRAM por CALSLT: las ordenes 0x0C y 0x0D (p04:8000)
+C 0x4369 borra_zona_38a0: borra 0x38A0 (0x100 bytes)
+C 0x436C borra_zona_39c0: borra 0x39C0 (0xA0 bytes)
+C 0x436F borra_zona_3a80: borra 0x3A80 (0x40 bytes)
+C 0x4379 lee el slot del Game Master (para CALSLT) y el byte siguiente (16 bits)
+C 0x43D6 apunta a fila elegida de la SRAM
+C 0x43DE sram_fila_ocupada: mira si la fila A de 0xE010 esta ocupada
+C 0x43E1 sram_pinta_lista: pinta la lista de la SRAM (0xE010, 64 bytes por fila)
+C 0x43E6 apunta a fila elegida de la SRAM
+C 0x43EF sram_fila_ocupada: mira si la fila A de 0xE010 esta ocupada
+C 0x43F2 sram_pinta_lista: pinta la lista de la SRAM (0xE010, 64 bytes por fila)
+C 0x43F7 borra_zona_38a0: borra 0x38A0 (0x100 bytes)
+C 0x43FA lee fila elegida de la SRAM
+C 0x4402 guarda fila elegida de la SRAM
+C 0x440C apunta a la lista de la SRAM
+C 0x4414 sram_pinta_filas: pinta 8 filas de la lista
+C 0x441F sram_pinta_fila: pinta una fila: nombre de 5 letras y sus datos
+C 0x442A de_mas_a: DE = DE + A
+C 0x447F apunta a la lista de la SRAM
+C 0x44B4 pon_letra: escribe A en la VRAM HL guardando los registros
+C 0x49A3 lee el slot del juego (copia) y el byte siguiente (16 bits)
+C 0x49AA lee el slot del juego (copia)
+C 0x49B3 lee el slot de la RAM de la pagina 2
+C 0x49BE apunta a el codigo de p00:4A9A en RAM
+C 0x49CB copia_ficha_del_juego: copia la ficha del juego (0xF280, 23 bytes) y sus opciones a 0xD300
+C 0x49DC apunta a el codigo de p00:4A9A en RAM
+C 0x49EF mi_slot: A = el slot de la pagina 1 (RSLREG y EXPTBL): el del propio cartucho
+C 0x49F2 guarda el slot del juego (copia)
+C 0x49FA mapper_del_juego_a_cero: pone 0-1-2-3 en 0x4000-0xA000: los registros del mapper del OTRO cartucho
+C 0x4A0B mi_slot: A = el slot de la pagina 1 (RSLREG y EXPTBL): el del propio cartucho
+C 0x4A0E guarda el slot del juego (copia)
+C 0x4A16 mapper_del_juego_a_cero: pone 0-1-2-3 en 0x4000-0xA000: los registros del mapper del OTRO cartucho
+C 0x4A1C apunta a la ficha del juego
+C 0x4A1F apunta a la ficha del juego (copia)
+C 0x4A3A apunta a el codigo de p00:4A9A en RAM
+C 0x4A4C mi_slot: A = el slot de la pagina 1 (RSLREG y EXPTBL): el del propio cartucho
+C 0x4A4F guarda el slot del juego (copia)
+C 0x4A52 salta_a_c000: copia p00:4A9A a 0xC000 (0x87 bytes) y salta alli
+C 0x4A6D lee el slot del juego (copia)
+C 0x4A75 mapper_del_juego_a_cero: pone 0-1-2-3 en 0x4000-0xA000: los registros del mapper del OTRO cartucho
+C 0x4A80 el mapper: pone en 0x6000 el banco de A
+C 0x4A84 el mapper: pone en 0x8000 el banco de A
+C 0x4A88 el mapper: pone en 0xA000 el banco de A
+C 0x4A8F apunta a el codigo de p00:4A9A en RAM
+C 0x4A97 el codigo de p00:4A9A en RAM
+C 0x4ABA lee el slot del juego (copia)
+C 0x4AC9 lee el slot del juego (copia)
+C 0x4B30 lee_palabra_slot: DE = la palabra HL del slot C (RDSLT)
+C 0x4B56 lee el slot del juego (copia)
+C 0x4B68 entra_al_disco: pone la RAM en la pagina 2, desengancha la interrupcion y guarda la RAM del juego que pisa el disco
+C 0x4B6B bdos_crea: BDOS 0x16, crear fichero; si falla, el error 1
+C 0x4B6E fcb_prepara: registro 0, tamano de registro 1 y bloque actual en el FCB de 0x9848
+C 0x4B71 disco_graba_vram: graba en disco la VRAM y los registros del VDP
+C 0x4B74 bdos_cierra: BDOS 0x10, cerrar fichero; si falla, el error 2
+C 0x4B77 sale_del_disco: espera, devuelve la RAM del juego, los ganchos y la pila (0x984A)
+C 0x4B7E entra_al_disco: pone la RAM en la pagina 2, desengancha la interrupcion y guarda la RAM del juego que pisa el disco
+C 0x4B81 bdos_crea: BDOS 0x16, crear fichero; si falla, el error 1
+C 0x4B84 fcb_prepara: registro 0, tamano de registro 1 y bloque actual en el FCB de 0x9848
+C 0x4B87 disco_graba_ac80: graba 0x67 registros de 0x80 bytes desde 0xAC80
+C 0x4B8A disco_graba_vram: graba en disco la VRAM y los registros del VDP
+C 0x4B97 bdos_graba: BDOS 0x26, grabar HL registros; si falla, el error 4
+C 0x4B9A bdos_cierra: BDOS 0x10, cerrar fichero; si falla, el error 2
+C 0x4B9D sale_del_disco: espera, devuelve la RAM del juego, los ganchos y la pila (0x984A)
+C 0x4BA4 entra_al_disco: pone la RAM en la pagina 2, desengancha la interrupcion y guarda la RAM del juego que pisa el disco
+C 0x4BAD borra_fcb: pone a cero el FCB de 0x982F
+C 0x4BBB bdos_crea: BDOS 0x16, crear fichero; si falla, el error 1
+C 0x4BBE fcb_prepara: registro 0, tamano de registro 1 y bloque actual en el FCB de 0x9848
+C 0x4BC1 disco_graba_pantalla: graba la pantalla segun el modo (0xF3DF, 0xF3E0)
+C 0x4BC4 bdos_cierra: BDOS 0x10, cerrar fichero; si falla, el error 2
+C 0x4BC7 sale_del_disco: espera, devuelve la RAM del juego, los ganchos y la pila (0x984A)
+C 0x4BD1 entra_al_disco: pone la RAM en la pagina 2, desengancha la interrupcion y guarda la RAM del juego que pisa el disco
+C 0x4BD4 bdos_crea: BDOS 0x16, crear fichero; si falla, el error 1
+C 0x4BD7 fcb_prepara: registro 0, tamano de registro 1 y bloque actual en el FCB de 0x9848
+C 0x4BDD disco_graba_9239: graba 0x95 registros desde 0x9239
+C 0x4BE0 bdos_cierra: BDOS 0x10, cerrar fichero; si falla, el error 2
+C 0x4BE3 sale_del_disco: espera, devuelve la RAM del juego, los ganchos y la pila (0x984A)
+C 0x4BEA entra_al_disco: pone la RAM en la pagina 2, desengancha la interrupcion y guarda la RAM del juego que pisa el disco
+C 0x4BED bdos_crea: BDOS 0x16, crear fichero; si falla, el error 1
+C 0x4BF0 fcb_prepara: registro 0, tamano de registro 1 y bloque actual en el FCB de 0x9848
+C 0x4BF3 disco_graba_df0c: graba 3 registros desde 0xDF0C - 0x1380
+C 0x4BF6 bdos_cierra: BDOS 0x10, cerrar fichero; si falla, el error 2
+C 0x4BF9 sale_del_disco: espera, devuelve la RAM del juego, los ganchos y la pila (0x984A)
+C 0x4C00 entra_al_disco: pone la RAM en la pagina 2, desengancha la interrupcion y guarda la RAM del juego que pisa el disco
+C 0x4C03 bdos_abre: BDOS 0x0F, abrir fichero; si falla, el error 0
+C 0x4C06 fcb_prepara: registro 0, tamano de registro 1 y bloque actual en el FCB de 0x9848
+C 0x4C0C fcb_registro: pone HL como registro aleatorio del FCB
+C 0x4C0F disco_lee_vram: lee del disco la VRAM y los registros del VDP
+C 0x4C15 bdos_lee: BDOS 0x27, leer HL registros; si falla, el error 3
+C 0x4C24 fcb_registro: pone HL como registro aleatorio del FCB
+C 0x4C27 disco_lee_ac80: lee 0x67 registros a 0xAC80
+C 0x4C31 guarda_volumenes: guarda los tres volumenes del PSG en 0xF100
+C 0x4C34 sale_del_disco: espera, devuelve la RAM del juego, los ganchos y la pila (0x984A)
+C 0x4C3B entra_al_disco: pone la RAM en la pagina 2, desengancha la interrupcion y guarda la RAM del juego que pisa el disco
+C 0x4C3E bdos_abre: BDOS 0x0F, abrir fichero; si falla, el error 0
+C 0x4C41 fcb_prepara: registro 0, tamano de registro 1 y bloque actual en el FCB de 0x9848
+C 0x4C44 disco_lee_vram: lee del disco la VRAM y los registros del VDP
+C 0x4C47 sale_del_disco: espera, devuelve la RAM del juego, los ganchos y la pila (0x984A)
+C 0x4C4A sale_del_disco: espera, devuelve la RAM del juego, los ganchos y la pila (0x984A)
+C 0x4C53 entra_al_disco: pone la RAM en la pagina 2, desengancha la interrupcion y guarda la RAM del juego que pisa el disco
+C 0x4C56 bdos_abre: BDOS 0x0F, abrir fichero; si falla, el error 0
+C 0x4C59 fcb_prepara: registro 0, tamano de registro 1 y bloque actual en el FCB de 0x9848
+C 0x4C5C disco_lee_9239: lee 0x95 registros a 0x9239
+C 0x4C5F ranking_quita_1_y_2: quita las marcas 1 y 2 del ranking
+C 0x4C62 sale_del_disco: espera, devuelve la RAM del juego, los ganchos y la pila (0x984A)
+C 0x4C69 entra_al_disco: pone la RAM en la pagina 2, desengancha la interrupcion y guarda la RAM del juego que pisa el disco
+C 0x4C6C bdos_abre: BDOS 0x0F, abrir fichero; si falla, el error 0
+C 0x4C6F fcb_prepara: registro 0, tamano de registro 1 y bloque actual en el FCB de 0x9848
+C 0x4C72 disco_lee_df0c: lee 3 registros a 0xDF0C - 0x1380
+C 0x4C75 sale_del_disco: espera, devuelve la RAM del juego, los ganchos y la pila (0x984A)
+C 0x4C82 disco_graba_registro: copia 0x80 bytes a 0x8000 y los graba (BDOS 0x26)
+C 0x4C9D bdos_graba: BDOS 0x26, grabar HL registros; si falla, el error 4
+C 0x4CAC bdos_graba: BDOS 0x26, grabar HL registros; si falla, el error 4
+C 0x4CC1 bdos_graba: BDOS 0x26, grabar HL registros; si falla, el error 4
+C 0x4CD3 bdos_lee: BDOS 0x27, leer HL registros; si falla, el error 3
+C 0x4CEB bdos_lee: BDOS 0x27, leer HL registros; si falla, el error 3
+C 0x4D00 bdos_lee: BDOS 0x27, leer HL registros; si falla, el error 3
+C 0x4D0E bdos_graba: BDOS 0x26, grabar HL registros; si falla, el error 4
+C 0x4D1C bdos_lee: BDOS 0x27, leer HL registros; si falla, el error 3
+C 0x4D1F disco_lee_cabecera_vram: lee el primer registro: modo y registros del VDP (MSX2)
+C 0x4D34 disco_lee_a_vram: lee registros del disco y los pasa a la VRAM
+C 0x4D4F disco_lee_a_vram: lee registros del disco y los pasa a la VRAM
+C 0x4D5D disco_lee_palabra: lee una palabra del fichero en HL
+C 0x4D6A bdos_lee: BDOS 0x27, leer HL registros; si falla, el error 3
+C 0x4D8E bdos_lee: BDOS 0x27, leer HL registros; si falla, el error 3
+C 0x4DAB bdos_lee: BDOS 0x27, leer HL registros; si falla, el error 3
+C 0x4DB5 pon_registros_vdp: escribe E registros del VDP desde HL, empezando por C
+C 0x4DE7 bdos_lee: BDOS 0x27, leer HL registros; si falla, el error 3
+C 0x4DF1 pon_registros_vdp: escribe E registros del VDP desde HL, empezando por C
+C 0x4E0A disco_cabecera_vram: prepara el primer registro: modo y registros del VDP
+C 0x4E1E disco_graba_de_vram: lee de la VRAM y lo graba en disco
+C 0x4E39 disco_graba_de_vram: lee de la VRAM y lo graba en disco
+C 0x4E4F comprime: comprime 0x8802 en 0x8002 (lo contrario de p01:733A)
+C 0x4E5F bdos_graba: BDOS 0x26, grabar HL registros; si falla, el error 4
+C 0x4EB9 bdos_graba: BDOS 0x26, grabar HL registros; si falla, el error 4
+C 0x4ED5 bdos_graba: BDOS 0x26, grabar HL registros; si falla, el error 4
+C 0x4EEC disco_graba_byte: graba el byte A en el fichero (por la pila)
+C 0x4EF2 disco_graba_palabra: graba HL en el fichero, byte bajo primero
+C 0x4EF8 disco_graba_palabra: graba HL en el fichero, byte bajo primero
+C 0x4EFE disco_graba_palabra: graba HL en el fichero, byte bajo primero
+C 0x4F07 disco_graba_100_de_vram: lee 0x100 bytes de la VRAM y los graba
+C 0x4F17 disco_graba_bc_de_vram: lee BC bytes de la VRAM y los graba
+C 0x4F23 disco_graba_bc_de_vram: lee BC bytes de la VRAM y los graba
+C 0x4F2C disco_graba_bc_de_vram: lee BC bytes de la VRAM y los graba
+C 0x4F35 disco_graba_100_de_vram: lee 0x100 bytes de la VRAM y los graba
+C 0x4F3E disco_graba_byte: graba el byte A en el fichero (por la pila)
+C 0x4F44 disco_graba_palabra: graba HL en el fichero, byte bajo primero
+C 0x4F4A disco_graba_palabra: graba HL en el fichero, byte bajo primero
+C 0x4F50 disco_graba_palabra: graba HL en el fichero, byte bajo primero
+C 0x4F59 disco_graba_100_de_vram: lee 0x100 bytes de la VRAM y los graba
+C 0x4F65 disco_graba_100_de_vram: lee 0x100 bytes de la VRAM y los graba
+C 0x4F71 disco_graba_100_de_vram: lee 0x100 bytes de la VRAM y los graba
+C 0x4F7D disco_graba_100_de_vram: lee 0x100 bytes de la VRAM y los graba
+C 0x4F99 bdos_graba: BDOS 0x26, grabar HL registros; si falla, el error 4
+C 0x4FA1 lee el slot de la RAM de la pagina 2
+C 0x4FBB apunta a el codigo de p00:4A9A en RAM
+C 0x500D apunta a el slot del Game Master (para CALSLT)
+C 0x5021 apunta a el codigo de p00:4A9A en RAM
+C 0x5076 nombre_de_fichero: pone en el FCB (0x982C) el nombre: tipo y numero de juego
+C 0x5083 lee tipo y opcion del menu de disco
+C 0x508D lee el codigo del juego
+C 0x5091 byte_a_hex: escribe A en hexadecimal (dos letras) en HL
+C 0x5177 un_registro: HL = 1 y salta a la rutina de BC
+C 0x5183 disco_graba_byte: graba el byte A en el fichero (por la pila)
+C 0x518A disco_lee_byte: lee un byte del fichero (por la pila)
+C 0x518F disco_lee_byte: lee un byte del fichero (por la pila)
+C 0x5196 sale_del_disco: espera, devuelve la RAM del juego, los ganchos y la pila (0x984A)
+C 0x5199 p02_8000_si: si 0xF112: p02:8000 con el cartucho en la pagina 2
+C 0x519C pinta_opcion: pinta la opcion elegida (0xF10B, nibble alto)
+C 0x519F pinta_tipo: pinta el tipo elegido (0xF10B, nibble bajo)
+C 0x51A2 pinta_juego: pinta 'GAME' y el numero de juego (0xF281) en hexadecimal
+C 0x51AD pinta_texto_en: pinta el texto de HL en la VRAM DE
+C 0x51B7 error_de_disco: pinta el mensaje del error C (tabla de p00:5209)
+C 0x51BA p02_80e4_si: si 0xF112: p02:80E4
+C 0x528A lee el slot del Game Master
+C 0x53AF borra_lista_ficheros: pone a cero la lista de ficheros (0x9103) y el FCB
+C 0x53B2 busca_ficheros: busca los ficheros del disco (BDOS 0x11 y 0x12)
+C 0x53B8 texto_5b4a: pinta el texto de p00:5B4A
+C 0x53BE pinta_fichero: pinta el nombre del fichero elegido
+C 0x53E2 fila_de_fichero: HL = la fila A de la lista de ficheros
+C 0x53E6 fcb_comodin: FCB con '?' en el nombre para buscar ficheros
+C 0x5488 fila_de_fichero: HL = la fila A de la lista de ficheros
+C 0x54FA nombre_de_fichero: pone en el FCB (0x982C) el nombre: tipo y numero de juego
+C 0x54FD entra_al_disco: pone la RAM en la pagina 2, desengancha la interrupcion y guarda la RAM del juego que pisa el disco
+C 0x551C guarda_fichero_hallado: copia el nombre hallado a la lista
+C 0x5537 copia_nombre: copia un nombre de la lista
+C 0x553A sale_del_disco: espera, devuelve la RAM del juego, los ganchos y la pila (0x984A)
+C 0x5540 sale_del_disco: espera, devuelve la RAM del juego, los ganchos y la pila (0x984A)
+C 0x5557 fila_de_fichero: HL = la fila A de la lista de ficheros
+C 0x5593 mi_slot: A = el slot de la pagina 1 (RSLREG y EXPTBL): el del propio cartucho
+C 0x5596 guarda el slot del Game Master
+C 0x5599 busca_cartuchos: copia p00:578D a 0xE010 y la ejecuta
+C 0x559C lee el slot de la RAM de la pagina 2
+C 0x55B7 lee el slot del Game Master
+C 0x55C3 lee el slot de la RAM de la pagina 2
+C 0x55C9 salta_a_e000_b: copia p00:5945 a 0xE000 (0x87 bytes) y salta alli
+C 0x55ED apunta a el codigo de p00:4A9A en RAM
+C 0x55F9 apunta a volumen del PSG, canal A
+C 0x55FC apunta a volumen del PSG, canal B
+C 0x5620 mi_slot: A = el slot de la pagina 1 (RSLREG y EXPTBL): el del propio cartucho
+C 0x5623 guarda el slot del Game Master
+C 0x5626 busca_cartuchos: copia p00:578D a 0xE010 y la ejecuta
+C 0x5629 mapper_del_juego_a_cero_b: pone el cartucho del juego en la pagina 2 y 0-1-2-3 en sus registros
+C 0x562C salta_a_e000: copia p00:5832 a 0xE000 (0x105 bytes) y salta alli
+C 0x5635 lee_palabra_del_juego: DE = la palabra HL del cartucho del juego (RDSLT en 0xF104)
+C 0x563C guarda la direccion INIT del juego y el byte siguiente (16 bits)
+C 0x563F engancha_al_juego: copia p01:6395 a 0xF130 y cambia el gancho del juego por el suyo
+C 0x5645 copia_f230: copia p01:64C6 a 0xF230 (22 bytes)
+C 0x5648 reconoce_juego: reconoce el juego del otro cartucho y prepara su ficha
+C 0x5661 guarda hay menu en pantalla
+C 0x5668 lee la ficha del juego y el byte siguiente (16 bits)
+C 0x5683 lee_palabra_del_juego: DE = la palabra HL del cartucho del juego (RDSLT en 0xF104)
+C 0x5699 lee_palabra_del_juego: DE = la palabra HL del cartucho del juego (RDSLT en 0xF104)
+C 0x56B0 compara_de_bc: Z si DE = BC
+C 0x56D8 guarda hay menu en pantalla
+C 0x56ED mi_slot: A = el slot de la pagina 1 (RSLREG y EXPTBL): el del propio cartucho
+C 0x56F0 guarda el slot del Game Master
+C 0x56F3 busca_cartuchos: copia p00:578D a 0xE010 y la ejecuta
+C 0x56F6 mapper_del_juego_a_cero_b: pone el cartucho del juego en la pagina 2 y 0-1-2-3 en sus registros
+C 0x56F9 lee el slot de la RAM de la pagina 2
+C 0x5700 apunta a volumen del PSG, canal A
+C 0x5703 apunta a volumen del PSG, canal B
+C 0x571C lee el slot de la RAM de la pagina 2
+C 0x5724 apunta a el codigo de p00:4A9A en RAM
+C 0x5732 lee el slot del Game Master
+C 0x573F el mapper: pone en 0x6000 el banco de A
+C 0x5743 el mapper: pone en 0x8000 el banco de A
+C 0x5747 el mapper: pone en 0xA000 el banco de A
+C 0x574A lee el slot de la RAM de la pagina 2
+C 0x576B lee el slot del cartucho del juego
+C 0x576F lee_byte_slot: D = el byte HL del slot C (RDSLT), y avanza HL
+C 0x5782 apunta a la lista de la SRAM
+C 0x578A la lista de la SRAM
+C 0x5799 lee el slot del Game Master
+C 0x57A1 guarda opcion / RC del juego y el byte siguiente (16 bits)
+C 0x57B1 lee el slot del Game Master
+C 0x57C9 lee fila elegida de la SRAM
+C 0x57D0 apunta a el slot de la RAM de la pagina 2
+C 0x57E1 lee el slot del Game Master
+C 0x57F3 lee opcion / RC del juego y el byte siguiente (16 bits)
+C 0x57FC lee opcion / RC del juego y el byte siguiente (16 bits)
+C 0x5813 salta_a_e000: copia p00:5832 a 0xE000 (0x105 bytes) y salta alli
+C 0x5818 lee la ficha del juego y el byte siguiente (16 bits)
+C 0x5827 apunta a opcion / RC del juego
+C 0x582F opcion / RC del juego
+C 0x5852 lee el slot del Game Master
+C 0x5878 guarda el slot del cartucho del juego
+C 0x58D8 lee el slot del Game Master
+C 0x58FF guarda la ficha del juego y el byte siguiente (16 bits)
+C 0x5902 lee el slot del cartucho del juego
+C 0x591F guarda la ficha del juego y el byte siguiente (16 bits)
+C 0x5922 lee el slot del cartucho del juego
+C 0x5927 lee el slot del Game Master
+C 0x593A apunta a opcion / RC del juego
+C 0x5942 opcion / RC del juego
+C 0x5965 lee el slot del Game Master
+C 0x5974 lee el slot del Game Master
+C 0x59DB lee_palabra_slot: DE = la palabra HL del slot C (RDSLT)
+C 0x5A01 lee el slot del Game Master
+C 0x5A0F ventana_menu: las esquinas de la ventana del menu (0x9235, 0x9237)
+C 0x5A12 p02_8000: p02:8000 con el cartucho en la pagina 2 y vuelta a la RAM
+C 0x5A15 pinta_puntos: pinta los puntos (0xF28E/0xF290)
+C 0x5A18 cabecera_menu: pinta la cabecera del menu y el numero de juego
+C 0x5A20 menu_vertical: menu de B opciones: cursores arriba y abajo, espacio elige
+C 0x5A27 hl_mas_a: HL = HL + A
+C 0x5A2B guarda tipo y opcion del menu de disco
+C 0x5A2F despacha: salta a la palabra A de la tabla pegada detras del `call`
+C 0x5A5D copia_3_al_reves: copia 3 bytes de HL hacia atras en DE
+C 0x5A66 copia_3_al_reves: copia 3 bytes de HL hacia atras en DE
+C 0x5A73 compara_3: compara 3 bytes (BCD) de HL y DE
+C 0x5A7C compara_3: compara 3 bytes (BCD) de HL y DE
+C 0x5AA2 hay_disco: Z si no hay disco: mira si H.PHYD (0xFFA7) es un `ret`
+C 0x5AAB ventana: abre una ventana de texto con el marco de DE
+C 0x5AAE cabecera_screen: pinta la cabecera SCREEN
+C 0x5AB1 pinta_opcion: pinta la opcion elegida (0xF10B, nibble alto)
+C 0x5AC4 guarda tipo y opcion del menu de disco
+C 0x5AD4 pregunta_si: pinta la pregunta y espera la respuesta
+C 0x5ADD disco_guarda_ram: graba en disco la RAM del juego (0x8000...)
+C 0x5AE3 pregunta_si: pinta la pregunta y espera la respuesta
+C 0x5AEC disco_guarda_partida: graba en disco: abre, crea, escribe y cierra
+C 0x5AFA pregunta_si: pinta la pregunta y espera la respuesta
+C 0x5B03 disco_guarda_bloque: graba en disco el bloque de 0xDF0C
+C 0x5B10 pregunta_si: pinta la pregunta y espera la respuesta
+C 0x5B19 disco_guarda_ranking: graba en disco el ranking (p01:69AD)
+C 0x5B1F pinta_tipo: pinta el tipo elegido (0xF10B, nibble bajo)
+C 0x5B22 texto_5b3a: pinta el texto de p00:5B3A
+C 0x5B5B hay_disco: Z si no hay disco: mira si H.PHYD (0xFFA7) es un `ret`
+C 0x5B61 cabecera_data: pinta la cabecera DATA
+C 0x5B64 pinta_opcion: pinta la opcion elegida (0xF10B, nibble alto)
+C 0x5B77 guarda tipo y opcion del menu de disco
+C 0x5B84 pide_fichero: abre la ventana de los ficheros y deja elegir
+C 0x5B8C disco_carga_partida: carga del disco una partida
+C 0x5B9A pide_fichero: abre la ventana de los ficheros y deja elegir
+C 0x5BA2 disco_carga_bloque: carga del disco el bloque de 0xDF0C
+C 0x5BAF pide_fichero: abre la ventana de los ficheros y deja elegir
+C 0x5BB7 disco_carga_ranking: carga del disco el ranking
+C 0x5BC0 ventana: abre una ventana de texto con el marco de DE
+C 0x5BC3 pinta_tipo: pinta el tipo elegido (0xF10B, nibble bajo)
+C 0x5BC6 texto_search: pinta 'SEARCH FILE'
+C 0x5BC9 pide_nombre_fichero: lee el nombre del fichero letra a letra
+C 0x5BD0 ventana: abre una ventana de texto con el marco de DE
+C 0x5BDA cabecera_5dbc: pinta la cabecera de p00:5DBC
+C 0x5BDD pinta_opcion: pinta la opcion elegida (0xF10B, nibble alto)
+C 0x5BF4 pinta_juego: pinta 'GAME' y el numero de juego (0xF281) en hexadecimal
+C 0x5BF7 pinta_opcion: pinta la opcion elegida (0xF10B, nibble alto)
+C 0x5BFA menu_ranking: la pantalla del RANKING
+C 0x5C00 ranking_entra: mete la puntuacion en el ranking
+C 0x5C03 ranking_nombre: pide el nombre para el ranking
+C 0x5C09 p02_80e4: p02:80E4 con el cartucho en la pagina 2 y vuelta a la RAM
+C 0x5C10 guarda tipo y opcion del menu de disco
+C 0x5C32 lee el codigo del juego
+C 0x5C3E lee el codigo del juego
+C 0x5C44 byte_a_hex: escribe A en hexadecimal (dos letras) en HL
+C 0x5C6B lee color guardado
+C 0x5CAF pinta_juego: pinta 'GAME' y el numero de juego (0xF281) en hexadecimal
+C 0x5CBB pinta_juego: pinta 'GAME' y el numero de juego (0xF281) en hexadecimal
+C 0x5D01 lee tipo y opcion del menu de disco
+C 0x5D56 borra_ventana: borra la ventana de 0x9237
+C 0x5D59 lee tipo y opcion del menu de disco
+C 0x5DB9 pinta_juego: pinta 'GAME' y el numero de juego (0xF281) en hexadecimal
+C 0x5DE5 apunta a el codigo del juego
+C 0x5DEE ventana_pequena: las esquinas de una ventana (0x9235, 0x9237)
+C 0x5DF1 pinta_paleta_prueba: pinta los 16 colores en 0x3800 y 0x3A80
+C 0x5DF4 borra_sprites: borra la tabla de sprites (0x3880, 0x200 bytes)
+C 0x5DFA pinta_texto: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
+C 0x5E02 menu_con_esc: menu: espacio elige, ESC sale
+C 0x5E17 lee el slot del Game Master
+C 0x5E21 el mapper: pone en 0x8000 el banco de A
+C 0x5E25 el mapper: pone en 0xA000 el banco de A
+C 0x5E32 el mapper: pone en 0x8000 el banco de A
+C 0x5E36 el mapper: pone en 0xA000 el banco de A
+C 0x5E39 lee el slot de la RAM de la pagina 2
+C 0x5E41 pantalla_del_menu: borra la VRAM y pone el modo del menu (MSX1 o MSX2)
+C 0x5E44 p09_8191_desde_menu: 1-9-10 con el cartucho en la pagina 2, p09:8191 y vuelta
+C 0x5E4A lee el slot del Game Master
+C 0x5E54 el mapper: pone en 0x8000 el banco de A
+C 0x5E58 el mapper: pone en 0xA000 el banco de A
+C 0x5E6B el mapper: pone en 0x8000 el banco de A
+C 0x5E6F el mapper: pone en 0xA000 el banco de A
+C 0x5E75 lee el slot de la RAM de la pagina 2
+C 0x5E89 menu_principal: el menu del Game Master: engancha H.TIMI y pinta
+C 0x5EA2 apunta a el codigo del juego
+C 0x5EAC pregunta_vuelve: pregunta y vuelve al menu
+C 0x5EB2 p09_8191_desde_menu: 1-9-10 con el cartucho en la pagina 2, p09:8191 y vuelta
+C 0x5EC2 borra_vram: borra la VRAM: 16 KB en MSX1, 64 KB en MSX2 (BIGFIL)
+C 0x5EC9 registros_vdp: los 8 registros del VDP de p01:72E2 y, en MSX2, R#23 y R#9
+C 0x5ECC lee el slot del Game Master
+C 0x5ED4 sprites_encendidos: R
+C 0x5ED7 lee el slot de la RAM de la pagina 2
+C 0x5EE7 paleta_msx2: MSX2: los 16 colores de p01:728E
+C 0x5EED borra_16k: BIGFIL de 0x4000 bytes desde HL
+C 0x5EFA borra_16k: BIGFIL de 0x4000 bytes desde HL
+C 0x5F00 borra_16k: BIGFIL de 0x4000 bytes desde HL
+C 0x5F03 apunta a el codigo de p00:4A9A en RAM
+C 0x5F1A hay_disco: Z si no hay disco: mira si H.PHYD (0xFFA7) es un `ret`
+C 0x5F25 guarda tipo y opcion del menu de disco
+C 0x5F28 modify_mode: el MODIFY MODE MENU: limpia y pinta (gemela de p02:8BFC)
+C 0x5F2B elige_fichero: lista los ficheros del disco y deja elegir uno
+C 0x5F34 ventana: abre una ventana de texto con el marco de DE
+C 0x5F3A borra_vram: borra la VRAM: 16 KB en MSX1, 64 KB en MSX2 (BIGFIL)
+C 0x5F3D disco_carga_vram: carga del disco la VRAM
+C 0x5F44 guarda hay menu en pantalla
+C 0x5F47 pregunta_vuelve: pregunta y vuelve al menu
+C 0x5F54 ventana_menu: las esquinas de la ventana del menu (0x9235, 0x9237)
+C 0x5F57 disco_guarda_vrm: graba un fichero .VRM (la VRAM)
+C 0x5F5B guarda hay menu en pantalla
+C 0x5F5E pantalla_del_menu: borra la VRAM y pone el modo del menu (MSX1 o MSX2)
+C 0x5F61 p09_8191_desde_menu: 1-9-10 con el cartucho en la pagina 2, p09:8191 y vuelta
+C 0x5F67 pantalla_del_menu: borra la VRAM y pone el modo del menu (MSX1 o MSX2)
+C 0x5F6A p09_8191_desde_menu: 1-9-10 con el cartucho en la pagina 2, p09:8191 y vuelta
+# --- fin de las anotaciones de anota.py ---

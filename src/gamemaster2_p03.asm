@@ -28,14 +28,14 @@ L_A002:
 	ld hl,0a02bh		;a009
 L_A00C:
 	ld a,b			;a00c
-	call L_A3E6		;a00d
+	call hl_mas_a		;a00d   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ex de,hl			;a010
 	pop af			;a011
 	ld b,a			;a012
 	add a,a			;a013
 	add a,b			;a014
 	ld hl,0e050h		;a015
-	call L_A3E6		;a018
+	call hl_mas_a		;a018   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ex de,hl			;a01b
 	inc de			;a01c
 	ld bc,00002h		;a01d
@@ -56,20 +56,20 @@ DATA_resto_A023:
 
 
 L_A033:
-	call L_A122		;a033
+	call pon_valor		;a033   ; pon_valor: escribe 0xF29C en la variable del juego (0xF28A) (gemela de p01:6F70)
 	ld a,(0d31ah)		;a036
 	ld l,a			;a039
 	sub 005h		;a03a
 	jr c,L_A044		;a03c
 	inc a			;a03e
 	ld c,005h		;a03f
-	call L_A21E		;a041
+	call multiplica		;a041   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
 L_A044:
 	ld a,l			;a044
 	ld (0e052h),a		;a045
 	ret			;a048
 L_A049:
-	call L_A122		;a049
+	call pon_valor		;a049   ; pon_valor: escribe 0xF29C en la variable del juego (0xF28A) (gemela de p01:6F70)
 	ld a,(0d31ah)		;a04c
 	ld b,a			;a04f
 	dec a			;a050
@@ -79,18 +79,18 @@ L_A049:
 	ld a,008h		;a058
 L_A05A:
 	ld hl,0a080h		;a05a
-	call L_A3E6		;a05d
+	call hl_mas_a		;a05d   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;a060
 	ld (0e05dh),a		;a061
 	ld a,08ah		;a064
 	ld (0e056h),a		;a066
 	ld a,b			;a069
 	ld c,009h		;a06a
-	call L_A21E		;a06c
+	call multiplica		;a06c   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
 	ld a,l			;a06f
 	add a,a			;a070
 	ld hl,0a089h		;a071
-	call L_A3E6		;a074
+	call hl_mas_a		;a074   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld de,0e054h		;a077
 	ld bc,00002h		;a07a
 	ldir		;a07d
@@ -111,7 +111,7 @@ DATA_resto_A080:
 
 
 L_A09B:
-	jp L_A122		;a09b
+	jp pon_valor		;a09b   ; pon_valor: escribe 0xF29C en la variable del juego (0xF28A) (gemela de p01:6F70)
 L_A09E:
 	ld a,(0d31ah)		;a09e
 	dec a			;a0a1
@@ -119,20 +119,20 @@ L_A09E:
 L_A0A5:
 	ld a,(0d31ah)		;a0a5
 	ld c,003h		;a0a8
-	call L_A21E		;a0aa
+	call multiplica		;a0aa   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
 	ld a,l			;a0ad
 	jp L_A125		;a0ae
 L_A0B1:
 	ld a,(0d31ah)		;a0b1
 	ld c,00dh		;a0b4
-	call L_A21E		;a0b6
+	call multiplica		;a0b6   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
 	ld a,l			;a0b9
 	inc a			;a0ba
 	ld (0e060h),a		;a0bb
 	dec a			;a0be
 	add a,a			;a0bf
 	ld hl,0a0cfh		;a0c0
-	call L_A3E6		;a0c3
+	call hl_mas_a		;a0c3   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld de,0e05bh		;a0c6
 	ld bc,00002h		;a0c9
 	ldir		;a0cc
@@ -155,17 +155,17 @@ DATA_resto_A0CF:
 L_A0E9:
 	ld a,(0d31ah)		;a0e9
 	ld c,008h		;a0ec
-	call L_A21E		;a0ee
+	call multiplica		;a0ee   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
 	ld h,l			;a0f1
 	ld l,000h		;a0f2
 	ld (0e1b8h),hl		;a0f4
-	jp L_A122		;a0f7
+	jp pon_valor		;a0f7   ; pon_valor: escribe 0xF29C en la variable del juego (0xF28A) (gemela de p01:6F70)
 L_A0FA:
-	call L_A122		;a0fa
+	call pon_valor		;a0fa   ; pon_valor: escribe 0xF29C en la variable del juego (0xF28A) (gemela de p01:6F70)
 	ld a,(0d31ah)		;a0fd
 	push af			;a100
 	ld c,005h		;a101
-	call L_A21E		;a103
+	call multiplica		;a103   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
 	ld a,l			;a106
 	ld (0e054h),a		;a107
 	pop af			;a10a
@@ -183,7 +183,7 @@ L_A117:
 	and 003h		;a11c
 	ld (0e059h),a		;a11e
 	ret			;a121
-L_A122:
+pon_valor:		; escribe 0xF29C en la variable del juego (0xF28A) (gemela de p01:6F70)
 	ld a,(0d31bh)		;a122
 L_A125:
 	ld hl,(0d30ah)		;a125
@@ -192,7 +192,7 @@ L_A125:
 L_A12A:
 	ld a,(0d31ah)		;a12a
 	ld c,00fh		;a12d
-	call L_A21E		;a12f
+	call multiplica		;a12f   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
 	ld a,e			;a132
 	ld (0e058h),a		;a133
 	ld a,l			;a136
@@ -202,7 +202,7 @@ L_A12A:
 	ld (0e054h),a		;a13c
 	ld hl,0a15bh		;a13f
 	add a,a			;a142
-	call L_A3E6		;a143
+	call hl_mas_a		;a143   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;a146
 	ld (0e056h),a		;a147
 	inc hl			;a14a
@@ -249,7 +249,7 @@ L_A192:
 L_A196:
 	ld a,(0d31ah)		;a196
 	ld c,008h		;a199
-	call L_A21E		;a19b
+	call multiplica		;a19b   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
 	ld a,l			;a19e
 	ld (0e103h),a		;a19f
 	ld hl,000c0h		;a1a2
@@ -258,20 +258,20 @@ L_A196:
 L_A1A9:
 	ld a,(0d31ah)		;a1a9
 	ld c,006h		;a1ac
-	call L_A21E		;a1ae
+	call multiplica		;a1ae   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
 	ld a,e			;a1b1
 	ld (0e042h),a		;a1b2
 	ld a,l			;a1b5
 	ld hl,(0d30ah)		;a1b6
 	ld (hl),a			;a1b9
-	call L_A23D		;a1ba
+	call borra_pantalla_b		;a1ba   ; borra_pantalla_b: borra la tabla de nombres y esconde los sprites (gemela de p01:708B)
 	ld a,004h		;a1bd
-	ld (0e001h),a		;a1bf
+	ld (0e001h),a		;a1bf   ; guarda fila elegida de la SRAM
 	ld a,008h		;a1c2
-	ld (0e000h),a		;a1c4
+	ld (0e000h),a		;a1c4   ; guarda opcion / RC del juego
 	ret			;a1c7
 L_A1C8:
-	call L_A23D		;a1c8
+	call borra_pantalla_b		;a1c8   ; borra_pantalla_b: borra la tabla de nombres y esconde los sprites (gemela de p01:708B)
 	ld hl,(0d304h)		;a1cb
 	ld (hl),007h		;a1ce
 	ret			;a1d0
@@ -285,10 +285,10 @@ L_A1DA:
 	ld a,(0d31ah)		;a1da
 	dec a			;a1dd
 	ld (0e206h),a		;a1de
-	call L_A122		;a1e1
+	call pon_valor		;a1e1   ; pon_valor: escribe 0xF29C en la variable del juego (0xF28A) (gemela de p01:6F70)
 	ld a,(0d31ah)		;a1e4
 	ld c,003h		;a1e7
-	call L_A21E		;a1e9
+	call multiplica		;a1e9   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
 	ld a,e			;a1ec
 	and 00fh		;a1ed
 	rrca			;a1ef
@@ -300,11 +300,11 @@ L_A1DA:
 	ld a,009h		;a1f7
 	ld hl,(0d304h)		;a1f9
 	ld (hl),a			;a1fc
-	jp L_A23D		;a1fd
+	jp borra_pantalla_b		;a1fd   ; borra_pantalla_b: borra la tabla de nombres y esconde los sprites (gemela de p01:708B)
 L_A200:
 	ld a,(0d31ah)		;a200
 	ld c,008h		;a203
-	call L_A21E		;a205
+	call multiplica		;a205   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
 	ld a,l			;a208
 	ld hl,(0d30ah)		;a209
 	ld (hl),a			;a20c
@@ -317,11 +317,12 @@ L_A214:
 	ld a,(0d31bh)		;a217
 	ld (0e053h),a		;a21a
 	ret			;a21d
-L_A21E:
+multiplica:		; HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
 	dec a			;a21e
 	ld e,a			;a21f
 	ld d,000h		;a220
 	ld b,d			;a222
+divide:		; DE / BC: cociente en DE y resto en HL (gemela de p05:9430)
 	ld hl,00000h		;a223
 	exx			;a226
 	ld b,010h		;a227
@@ -341,7 +342,7 @@ L_A238:
 	djnz L_A229		;a239
 	exx			;a23b
 	ret			;a23c
-L_A23D:
+borra_pantalla_b:		; borra la tabla de nombres y esconde los sprites (gemela de p01:708B)
 	ld hl,03800h		;a23d
 	xor a			;a240
 	ld bc,00300h		;a241
@@ -350,8 +351,8 @@ L_A23D:
 	ld a,0d0h		;a24a
 	jp 0004dh		;a24c   ; BIOS WRTVRM - Writes data in VRAM
 L_A24F:
-	call L_A2DE		;a24f
-	call L_A263		;a252
+	call busca_ficha_b		;a24f   ; busca_ficha_b: copia la ficha por defecto (p00:45D0) a 0xD300 y busca la del juego
+	call lee_cabecera_juego		;a252   ; lee_cabecera_juego: lee la cabecera de 0x4028 del juego y sus opciones (gemela de p01:70AA)
 	ld a,(0d301h)		;a255
 	ld b,a			;a258
 	cp 036h		;a259
@@ -359,8 +360,8 @@ L_A24F:
 	ld a,004h		;a25d
 	ld (0d312h),a		;a25f
 	ret			;a262
-L_A263:
-	ld hl,(0d300h)		;a263
+lee_cabecera_juego:		; lee la cabecera de 0x4028 del juego y sus opciones (gemela de p01:70AA)
+	ld hl,(0d300h)		;a263   ; lee la ficha del juego (copia) y el byte siguiente (16 bits)
 	ld a,l			;a266
 	ld l,h			;a267
 	ld h,a			;a268
@@ -370,7 +371,7 @@ L_A263:
 	ld hl,04028h		;a26f
 	ld de,0d4f6h		;a272
 	ld bc,00006h		;a275
-	call 08d74h		;a278
+	call 08d74h		;a278   ; copia_del_juego: copia BC bytes de HL del cartucho del juego (RDSLT) a DE (gemela de p01:6371)
 	ld hl,0d4f6h		;a27b
 	ld a,(hl)			;a27e
 	res 7,(hl)		;a27f
@@ -404,7 +405,7 @@ L_A2A5:
 	ld de,0d4f6h		;a2a5
 	ld bc,00006h		;a2a8
 	ldir		;a2ab
-	call L_A370		;a2ad
+	call rc_751_o_752_b		;a2ad   ; rc_751_o_752_b: compara el RC del juego (0xD351, al reves) con 0x751 y 0x752
 	ret			;a2b0
 
 ; ----------------------------------------------------------------------
@@ -434,24 +435,25 @@ L_A2D8:
 	ld a,001h		;a2d8
 	ld (0d339h),a		;a2da
 	ret			;a2dd
-L_A2DE:
+busca_ficha_b:		; copia la ficha por defecto (p00:45D0) a 0xD300 y busca la del juego
 	xor a			;a2de
 	ld (0d4d4h),a		;a2df
+busca_ficha:		; copia la ficha por defecto (p00:45D0) y busca la del juego por su suma (gemela de p01:7136)
 	ld hl,045d0h		;a2e2
-	ld de,0d300h		;a2e5
+	ld de,0d300h		;a2e5   ; apunta a la ficha del juego (copia)
 	ld bc,00016h		;a2e8
 	ldir		;a2eb
 	ld a,0ffh		;a2ed
 	ld (0d313h),a		;a2ef
 	ld hl,04010h		;a2f2
-	call 08398h		;a2f5
+	call 08398h		;a2f5   ; lee_palabra_del_juego: DE = la palabra HL del cartucho del juego (RDSLT en 0xF104) (gemela de p00:576B)
 	ld hl,04241h		;a2f8
 	rst 20h			;a2fb
 	jr nz,L_A30A		;a2fc
 	ld hl,04012h		;a2fe
-	ld de,0d300h		;a301
+	ld de,0d300h		;a301   ; apunta a la ficha del juego (copia)
 	ld bc,00013h		;a304
-	jp 08d74h		;a307
+	jp 08d74h		;a307   ; copia_del_juego: copia BC bytes de HL del cartucho del juego (RDSLT) a DE (gemela de p01:6371)
 L_A30A:
 	ld hl,04645h		;a30a
 	rst 20h			;a30d
@@ -463,10 +465,10 @@ L_A317:
 	ld hl,04012h		;a317
 	ld de,0d351h		;a31a
 	ld bc,0002dh		;a31d
-	call 08d74h		;a320
-	call L_A370		;a323
+	call 08d74h		;a320   ; copia_del_juego: copia BC bytes de HL del cartucho del juego (RDSLT) a DE (gemela de p01:6371)
+	call rc_751_o_752_b		;a323   ; rc_751_o_752_b: compara el RC del juego (0xD351, al reves) con 0x751 y 0x752
 	ld hl,0d351h		;a326
-	ld de,0d300h		;a329
+	ld de,0d300h		;a329   ; apunta a la ficha del juego (copia)
 	ldi		;a32c
 	ldi		;a32e
 	ld a,0ffh		;a330
@@ -506,7 +508,7 @@ L_A368:
 	inc ix		;a36b
 	djnz L_A359		;a36d
 	ret			;a36f
-L_A370:
+rc_751_o_752_b:		; compara el RC del juego (0xD351, al reves) con 0x751 y 0x752
 	ld hl,(0d351h)		;a370
 	ld a,h			;a373
 	ld h,l			;a374
@@ -579,25 +581,25 @@ L_A3D4:
 	push de			;a3d4
 	ld l,(ix+002h)		;a3d5
 	ld h,(ix+003h)		;a3d8
-	ld de,0d300h		;a3db
+	ld de,0d300h		;a3db   ; apunta a la ficha del juego (copia)
 	ld bc,00013h		;a3de
 	ldir		;a3e1
 	pop de			;a3e3
 	scf			;a3e4
 	ret			;a3e5
-L_A3E6:
+hl_mas_a:		; HL = HL + A (gemela de p01:7251)
 	add a,l			;a3e6
 	ld l,a			;a3e7
 	ret nc			;a3e8
 	inc h			;a3e9
 	ret			;a3ea
-L_A3EB:
+de_mas_a:		; DE = DE + A (gemela de p01:7256)
 	add a,e			;a3eb
 	ld e,a			;a3ec
 	ret nc			;a3ed
 	inc d			;a3ee
 	ret			;a3ef
-L_A3F0:
+pon_color:		; MSX2: el color B de la paleta con D y E (R
 	push bc			;a3f0
 	push hl			;a3f1
 	ld b,a			;a3f2
@@ -617,11 +619,13 @@ L_A3F0:
 	pop bc			;a407
 	ei			;a408
 	ret			;a409
-L_A40A:
+paleta_msx2:		; MSX2: los 16 colores de p01:728E (gemela de p01:7275)
 	ld a,(0002dh)		;a40a
 	and a			;a40d
 	ret z			;a40e
+paleta_bio:		; MSX2: los 16 colores de p05:82D7 (gemela de p05:82C3)
 	ld hl,0a423h		;a40f
+paleta_desde:		; MSX2: los 16 colores de HL (gemela de p05:82C6)
 	ld b,010h		;a412
 	ld a,000h		;a414
 L_A416:
@@ -630,7 +634,7 @@ L_A416:
 	ld e,(hl)			;a418
 	inc hl			;a419
 	push af			;a41a
-	call L_A3F0		;a41b
+	call pon_color		;a41b   ; pon_color: MSX2: el color B de la paleta con D y E (R
 	pop af			;a41e
 	inc a			;a41f
 	djnz L_A416		;a420
@@ -650,7 +654,7 @@ DATA_resto_A423:
 ; ======================================================================
 
 
-L_A443:
+paleta_lista:		; MSX2: colores de una lista [color, d, e] que acaba en 0xFF (gemela de p01:72AE)
 	ld a,(hl)			;a443
 	inc hl			;a444
 	inc a			;a445
@@ -660,9 +664,9 @@ L_A443:
 	inc hl			;a449
 	ld e,(hl)			;a44a
 	inc hl			;a44b
-	call L_A3F0		;a44c
-	jr L_A443		;a44f
-L_A451:
+	call pon_color		;a44c   ; pon_color: MSX2: el color B de la paleta con D y E (R
+	jr paleta_lista		;a44f
+registros_vdp:		; los 8 registros del VDP de p01:72E2 y, en MSX2, R
 	ld hl,0a477h		;a451
 	ld bc,00800h		;a454
 L_A457:
@@ -697,7 +701,7 @@ DATA_resto_A477:
 ; ======================================================================
 
 
-L_A47F:
+borra_nombres:		; borra la tabla de nombres y esconde los sprites (0xD0 en 0x3B00) (gemela de p01:72EA)
 	ld hl,03800h		;a47f
 	ld bc,00300h		;a482
 	xor a			;a485
@@ -705,7 +709,7 @@ L_A47F:
 	ld hl,03b00h		;a489
 	ld a,0d0h		;a48c
 	jp 0004dh		;a48e   ; BIOS WRTVRM - Writes data in VRAM
-L_A491:
+rellena_tercios:		; FILVRM en los tres tercios de la pantalla (gemela de p01:72FC)
 	ld d,003h		;a491
 L_A493:
 	push bc			;a493
@@ -718,7 +722,7 @@ L_A493:
 	dec d			;a49e
 	jr nz,L_A493		;a49f
 	ret			;a4a1
-L_A4A2:
+copia_tercios:		; LDIRVM en los tres tercios de la pantalla (gemela de p01:730D)
 	ld a,003h		;a4a2
 L_A4A4:
 	push af			;a4a4
@@ -736,13 +740,13 @@ L_A4A4:
 	dec a			;a4b4
 	jr nz,L_A4A4		;a4b5
 	ret			;a4b7
-L_A4B8:
+descomprime_tercios:		; descomprime HL en los tres tercios de la pantalla (gemela de p01:7323)
 	ld b,003h		;a4b8
 L_A4BA:
 	push bc			;a4ba
 	push hl			;a4bb
 	push de			;a4bc
-	call L_A4CF		;a4bd
+	call descomprime		;a4bd   ; descomprime: descomprime HL a la VRAM DE: n & 0x7F repeticiones o copias (gemela de p01:733A)
 	pop de			;a4c0
 	ld hl,00800h		;a4c1
 	add hl,de			;a4c4
@@ -751,14 +755,14 @@ L_A4BA:
 	pop bc			;a4c7
 	djnz L_A4BA		;a4c8
 	ret			;a4ca
-L_A4CB:
+descomprime_con_direccion:		; descomprime a la VRAM de la palabra de HL (gemela de p01:7336)
 	ld e,(hl)			;a4cb
 	inc hl			;a4cc
 	ld d,(hl)			;a4cd
 	inc hl			;a4ce
-L_A4CF:
+descomprime:		; descomprime HL a la VRAM DE: n & 0x7F repeticiones o copias (gemela de p01:733A)
 	ex de,hl			;a4cf
-	call L_A4FF		;a4d0
+	call vram_escribe_en		;a4d0   ; vram_escribe_en: SETWRT (o NSTWRT en MSX2) en HL (gemela de p01:736A)
 	ex de,hl			;a4d3
 	ld a,(00007h)		;a4d4
 	ld c,a			;a4d7
@@ -770,7 +774,7 @@ L_A4D8:
 	inc hl			;a4dd
 	jr nz,L_A4E4		;a4de
 	cp b			;a4e0
-	jr nz,L_A4CB		;a4e1
+	jr nz,descomprime_con_direccion		;a4e1
 	ret			;a4e3
 L_A4E4:
 	cp b			;a4e4
@@ -794,7 +798,7 @@ L_A4F4:
 	pop ix		;a4f9
 	djnz L_A4F4		;a4fb
 	jr L_A4D8		;a4fd
-L_A4FF:
+vram_escribe_en:		; SETWRT (o NSTWRT en MSX2) en HL (gemela de p01:736A)
 	push af			;a4ff
 	ld a,(0002dh)		;a500
 	and a			;a503
@@ -806,7 +810,7 @@ L_A50B:
 	call 00171h		;a50b   ; BIOS NSTWRT - Same function as SETWRT (with 16-bit VRAM-address)
 	pop af			;a50e
 	ret			;a50f
-L_A510:
+despacha:		; salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
 	pop hl			;a510
 	add a,a			;a511
 	add a,l			;a512
@@ -825,7 +829,7 @@ L_A51C:
 L_A520:
 	ld c,0ffh		;a520
 	jr L_A52A		;a522
-L_A524:
+pinta_texto_b:		; pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
 	ld c,0ffh		;a524
 L_A526:
 	ld e,(hl)			;a526
@@ -857,7 +861,7 @@ L_A53B:
 	pop bc			;a547
 	djnz L_A53B		;a548
 	ret			;a54a
-L_A54B:
+binario_a_bcd:		; HL a BCD en DE (gemela de p01:746C)
 	ld b,010h		;a54b
 	ld de,00000h		;a54d
 L_A550:
@@ -872,7 +876,7 @@ L_A550:
 	ld d,a			;a558
 	djnz L_A550		;a559
 	ret			;a55b
-L_A55C:
+bcd_a_binario:		; A en BCD a binario (gemela de p01:747D)
 	ld c,a			;a55c
 	and 0f0h		;a55d
 	rrca			;a55f
@@ -889,7 +893,7 @@ L_A55C:
 	and 00fh		;a56a
 	add a,b			;a56c
 	ret			;a56d
-L_A56E:
+borra_ventana:		; borra la ventana de 0x9237 (gemela de p01:748F)
 	ld bc,00613h		;a56e
 	ld hl,(0d16eh)		;a571
 	xor a			;a574
@@ -904,11 +908,11 @@ L_A578:
 	ld de,0d8b1h		;a580
 	ld hl,01000h		;a583
 	ld bc,00080h		;a586
-	call L_A5DC		;a589
+	call lee_vram_tercios		;a589   ; lee_vram_tercios: LDIRMV de los tres tercios (0x2000 de paso) (gemela de p01:7834)
 	ld de,0d500h		;a58c
 	ld hl,01180h		;a58f
 	ld bc,00158h		;a592
-	call L_A5DC		;a595
+	call lee_vram_tercios		;a595   ; lee_vram_tercios: LDIRMV de los tres tercios (0x2000 de paso) (gemela de p01:7834)
 	ld hl,03a00h		;a598
 	ld de,0d7b0h		;a59b
 	ld bc,00100h		;a59e
@@ -921,7 +925,7 @@ L_A578:
 	ld bc,00008h		;a5b3
 	ld a,055h		;a5b6
 	call 00056h		;a5b8   ; BIOS FILVRM - Fills VRAM with value
-	call L_A655		;a5bb
+	call borra_zona_3a00		;a5bb   ; borra_zona_3a00: borra 0x3A00 (0x100 bytes)
 	ld ix,0409dh		;a5be
 	ld iy,(0d12dh)		;a5c2
 	call 0001ch		;a5c6   ; BIOS CALSLT - Executes inter-slot call
@@ -932,7 +936,7 @@ L_A578:
 	ld hl,03b00h		;a5d4
 	ld a,0d0h		;a5d7
 	jp 0004dh		;a5d9   ; BIOS WRTVRM - Writes data in VRAM
-L_A5DC:
+lee_vram_tercios:		; LDIRMV de los tres tercios (0x2000 de paso) (gemela de p01:7834)
 	push bc			;a5dc
 	push de			;a5dd
 	push hl			;a5de
@@ -953,15 +957,15 @@ L_A5EF:
 	ret z			;a5f4
 	xor a			;a5f5
 	ld (hl),a			;a5f6
-	call L_A655		;a5f7
+	call borra_zona_3a00		;a5f7   ; borra_zona_3a00: borra 0x3A00 (0x100 bytes)
 	ld hl,0d8b1h		;a5fa
 	ld de,01000h		;a5fd
 	ld bc,00080h		;a600
-	call L_A62A		;a603
+	call copia_vram_tercios		;a603   ; copia_vram_tercios: LDIRVM de los tres tercios (0x2000 de paso) (gemela de p01:788E)
 	ld hl,0d500h		;a606
 	ld de,01180h		;a609
 	ld bc,00158h		;a60c
-	call L_A62A		;a60f
+	call copia_vram_tercios		;a60f   ; copia_vram_tercios: LDIRVM de los tres tercios (0x2000 de paso) (gemela de p01:788E)
 	ld hl,0d7b0h		;a612
 	ld de,03a00h		;a615
 	ld bc,00100h		;a618
@@ -970,7 +974,7 @@ L_A5EF:
 	ld de,03b00h		;a621
 	ld bc,00001h		;a624
 	jp 0005ch		;a627   ; BIOS LDIRVM - Block transfers to VRAM from memory
-L_A62A:
+copia_vram_tercios:		; LDIRVM de los tres tercios (0x2000 de paso) (gemela de p01:788E)
 	push bc			;a62a
 	push hl			;a62b
 	push de			;a62c
@@ -998,13 +1002,13 @@ L_A64B:
 	cp 03ah		;a64e
 	ld hl,03900h		;a650
 	jr c,L_A658		;a653
-L_A655:
+borra_zona_3a00:		; borra 0x3A00 (0x100 bytes)
 	ld hl,03a00h		;a655
 L_A658:
 	ld bc,00100h		;a658
 	xor a			;a65b
 	jp 00056h		;a65c   ; BIOS FILVRM - Fills VRAM with value
-L_A65F:
+menu:		; menu de B opciones con el cursor A: devuelve la elegida (gemela de p01:750E)
 	ld (0d167h),a		;a65f
 	or a			;a662
 	ld a,b			;a663
@@ -1014,8 +1018,8 @@ L_A668:
 	ld (0d164h),a		;a668
 	ld (0d168h),hl		;a66b
 	ld (0d16ah),hl		;a66e
-	call L_A778		;a671
-	call L_A731		;a674
+	call cursor_pinta_b		;a671   ; cursor_pinta_b: pinta el cursor (':' o el de MSX2)
+	call borra_teclado		;a674   ; borra_teclado: borra el bufer de teclas del menu (0x920B) (gemela de p01:75E2)
 L_A677:
 	call 0009fh		;a677   ; BIOS CHGET - One character input (waiting)
 	cp 00dh		;a67a
@@ -1031,10 +1035,10 @@ L_A687:
 	cp 008h		;a68b
 	jr nz,L_A6B4		;a68d
 L_A68F:
-	call L_A78F		;a68f
+	call opcion_cero		;a68f   ; opcion_cero: si no hay opcion elegida, vuelve al menu (gemela de p01:766D)
 	ld a,(0d165h)		;a692
 	ld hl,0d141h		;a695
-	call L_A3E6		;a698
+	call hl_mas_a		;a698   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;a69b
 	sub 03ch		;a69c
 	jr nz,L_A6A3		;a69e
@@ -1042,10 +1046,10 @@ L_A68F:
 L_A6A3:
 	ld hl,0d165h		;a6a3
 	dec (hl)			;a6a6
-	call L_A788		;a6a7
+	call cursor_borra_b		;a6a7   ; cursor_borra_b: borra el cursor
 	dec hl			;a6aa
 	ld (0d168h),hl		;a6ab
-	call L_A778		;a6ae
+	call cursor_pinta_b		;a6ae   ; cursor_pinta_b: pinta el cursor (':' o el de MSX2)
 	jp L_A677		;a6b1
 L_A6B4:
 	cp 02eh		;a6b4
@@ -1053,7 +1057,7 @@ L_A6B4:
 	ld a,(0d167h)		;a6b8
 	cp 0feh		;a6bb
 	jp nz,L_A677		;a6bd
-	call L_A78F		;a6c0
+	call opcion_cero		;a6c0   ; opcion_cero: si no hay opcion elegida, vuelve al menu (gemela de p01:766D)
 	ld a,03ch		;a6c3
 	ld hl,0d166h		;a6c5
 	cp (hl)			;a6c8
@@ -1110,26 +1114,26 @@ L_A716:
 	call 0004dh		;a71a   ; BIOS WRTVRM - Writes data in VRAM
 	inc hl			;a71d
 	ld (0d168h),hl		;a71e
-	call L_A778		;a721
+	call cursor_pinta_b		;a721   ; cursor_pinta_b: pinta el cursor (':' o el de MSX2)
 	ld a,(0d165h)		;a724
 	ld hl,0d141h		;a727
-	call L_A3E6		;a72a
+	call hl_mas_a		;a72a   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld (hl),b			;a72d
 	jp L_A677		;a72e
-L_A731:
+borra_teclado:		; borra el bufer de teclas del menu (0x920B) (gemela de p01:75E2)
 	ld hl,0d142h		;a731
 	ld de,0d143h		;a734
 	ld (hl),000h		;a737
 	ld bc,0001fh		;a739
 	ldir		;a73c
-	call L_A74F		;a73e
+	call cursor_apaga_b		;a73e   ; cursor_apaga_b: quita el cursor
 	call 00156h		;a741   ; BIOS KILBUF - Clears keyboard buffer
 	xor a			;a744
 	ld (0d163h),a		;a745
 	ld (0d165h),a		;a748
 	ld (0d166h),a		;a74b
 	ret			;a74e
-L_A74F:
+cursor_apaga_b:		; quita el cursor
 	ld hl,0a770h		;a74f
 	ld bc,00008h		;a752
 	ld a,(0d13dh)		;a755
@@ -1141,7 +1145,7 @@ L_A74F:
 	jr z,L_A767		;a762
 	ld de,02080h		;a764
 L_A767:
-	jp L_A4A2		;a767
+	jp copia_tercios		;a767   ; copia_tercios: LDIRVM en los tres tercios de la pantalla (gemela de p01:730D)
 L_A76A:
 	ld de,031d0h		;a76a
 	jp 0005ch		;a76d   ; BIOS LDIRVM - Block transfers to VRAM from memory
@@ -1159,7 +1163,7 @@ DATA_resto_A770:
 ; ======================================================================
 
 
-L_A778:
+cursor_pinta_b:		; pinta el cursor (':' o el de MSX2)
 	ld hl,(0d168h)		;a778
 	ld a,(0d4d3h)		;a77b
 	and a			;a77e
@@ -1168,19 +1172,19 @@ L_A778:
 	ld a,010h		;a783
 L_A785:
 	jp 0004dh		;a785   ; BIOS WRTVRM - Writes data in VRAM
-L_A788:
+cursor_borra_b:		; borra el cursor
 	ld hl,(0d168h)		;a788
 	xor a			;a78b
 	jp 0004dh		;a78c   ; BIOS WRTVRM - Writes data in VRAM
-L_A78F:
+opcion_cero:		; si no hay opcion elegida, vuelve al menu (gemela de p01:766D)
 	ld a,(0d165h)		;a78f
 	or a			;a792
 	ret nz			;a793
 	pop hl			;a794
 	jp L_A677		;a795
-L_A798:
-	call L_A7D1		;a798
-	call L_A818		;a79b
+menu_con_esc:		; menu: espacio elige, ESC sale (gemela de p01:7676)
+	call menu_prepara		;a798   ; menu_prepara: prepara el menu: opciones, posicion y cursor (gemela de p01:76AF)
+	call menu_limpia_b		;a79b   ; menu_limpia_b: quita el cursor y borra el teclado
 L_A79E:
 	call 0009fh		;a79e   ; BIOS CHGET - One character input (waiting)
 	cp 020h		;a7a1
@@ -1188,29 +1192,29 @@ L_A79E:
 	cp 01bh		;a7a5
 	jr z,L_A7AF		;a7a7
 	ld b,a			;a7a9
-	call L_A7E3		;a7aa
+	call menu_cursor		;a7aa   ; menu_cursor: mueve el cursor con las flechas (0x1E arriba, 0x1F abajo) (gemela de p01:76C1)
 	jr L_A79E		;a7ad
 L_A7AF:
 	or 0ffh		;a7af
 	ret			;a7b1
-L_A7B2:
-	call L_A7D1		;a7b2
-	call L_A818		;a7b5
+menu_vertical:		; menu de B opciones: cursores arriba y abajo, espacio elige (gemela de p01:7690)
+	call menu_prepara		;a7b2   ; menu_prepara: prepara el menu: opciones, posicion y cursor (gemela de p01:76AF)
+	call menu_limpia_b		;a7b5   ; menu_limpia_b: quita el cursor y borra el teclado
 L_A7B8:
 	call 0009fh		;a7b8   ; BIOS CHGET - One character input (waiting)
 	cp 020h		;a7bb
 	ld b,a			;a7bd
 	jr nz,L_A7CB		;a7be
 L_A7C0:
-	call L_A788		;a7c0
+	call cursor_borra_b		;a7c0   ; cursor_borra_b: borra el cursor
 	ld a,(0d165h)		;a7c3
 	ld (0d163h),a		;a7c6
 	or a			;a7c9
 	ret			;a7ca
 L_A7CB:
-	call L_A7E3		;a7cb
+	call menu_cursor		;a7cb   ; menu_cursor: mueve el cursor con las flechas (0x1E arriba, 0x1F abajo) (gemela de p01:76C1)
 	jp L_A7B8		;a7ce
-L_A7D1:
+menu_prepara:		; prepara el menu: opciones, posicion y cursor (gemela de p01:76AF)
 	ld a,b			;a7d1
 	dec a			;a7d2
 	ld (0d164h),a		;a7d3
@@ -1220,8 +1224,8 @@ L_A7D1:
 	ld h,(hl)			;a7db
 	ld l,a			;a7dc
 	ld (0d168h),hl		;a7dd
-	jp L_A778		;a7e0
-L_A7E3:
+	jp cursor_pinta_b		;a7e0   ; cursor_pinta_b: pinta el cursor (':' o el de MSX2)
+menu_cursor:		; mueve el cursor con las flechas (0x1E arriba, 0x1F abajo) (gemela de p01:76C1)
 	ld c,0ffh		;a7e3
 	cp 01eh		;a7e5
 	jr z,L_A7EE		;a7e7
@@ -1245,25 +1249,25 @@ L_A800:
 	ld b,a			;a801
 	ld hl,(0d16ah)		;a802
 	add a,a			;a805
-	call L_A3E6		;a806
+	call hl_mas_a		;a806   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;a809
 	inc hl			;a80a
 	ld h,(hl)			;a80b
 	ld l,a			;a80c
 	push hl			;a80d
-	call L_A788		;a80e
+	call cursor_borra_b		;a80e   ; cursor_borra_b: borra el cursor
 	pop hl			;a811
 	ld (0d168h),hl		;a812
-	jp L_A778		;a815
-L_A818:
-	call L_A74F		;a818
+	jp cursor_pinta_b		;a815   ; cursor_pinta_b: pinta el cursor (':' o el de MSX2)
+menu_limpia_b:		; quita el cursor y borra el teclado
+	call cursor_apaga_b		;a818   ; cursor_apaga_b: quita el cursor
 	call 00156h		;a81b   ; BIOS KILBUF - Clears keyboard buffer
 	xor a			;a81e
 	ld (0d163h),a		;a81f
 	ld (0d165h),a		;a822
 	ld (0d166h),a		;a825
 	ret			;a828
-L_A829:
+comprime:		; comprime 0x8802 en 0x8002 (lo contrario de p01:733A) (gemela de p01:7707)
 	ld hl,0c442h		;a829
 	ld de,0c002h		;a82c
 L_A82F:
@@ -1276,7 +1280,7 @@ L_A82F:
 	ld (de),a			;a83b
 	inc hl			;a83c
 	inc de			;a83d
-	call L_A8B2		;a83e
+	call fin_de_8882		;a83e   ; fin_de_8882: compara HL con 0x8882 (gemela de p01:7790)
 	jp z,L_A8D1		;a841
 	ld a,c			;a844
 	cp (hl)			;a845
@@ -1289,12 +1293,12 @@ L_A84D:
 	ld a,c			;a84f
 	ld (de),a			;a850
 	inc de			;a851
-	call L_A8B2		;a852
+	call fin_de_8882		;a852   ; fin_de_8882: compara HL con 0x8882 (gemela de p01:7790)
 	jp z,L_A8C8		;a855
 	cp (hl)			;a858
 	jr nz,L_A878		;a859
 	inc hl			;a85b
-	call L_A8B2		;a85c
+	call fin_de_8882		;a85c   ; fin_de_8882: compara HL con 0x8882 (gemela de p01:7790)
 	jr z,L_A8BD		;a85f
 	cp (hl)			;a861
 	dec hl			;a862
@@ -1322,7 +1326,7 @@ L_A885:
 	ld (0d13eh),a		;a887
 L_A88A:
 	inc hl			;a88a
-	call L_A8B2		;a88b
+	call fin_de_8882		;a88b   ; fin_de_8882: compara HL con 0x8882 (gemela de p01:7790)
 	jr z,L_A8D1		;a88e
 	ld a,c			;a890
 	cp (hl)			;a891
@@ -1342,7 +1346,7 @@ L_A8A5:
 	inc a			;a8ac
 	ld (0d13eh),a		;a8ad
 	jr L_A88A		;a8b0
-L_A8B2:
+fin_de_8882:		; compara HL con 0x8882 (gemela de p01:7790)
 	push hl			;a8b2
 	push de			;a8b3
 	ld de,0c4c2h		;a8b4
@@ -1374,9 +1378,9 @@ L_A8D1:
 	ld de,0c001h		;a8db
 	and a			;a8de
 	sbc hl,de		;a8df
-	ld (0c000h),hl		;a8e1
+	ld (0c000h),hl		;a8e1   ; guarda el codigo de p00:4A9A en RAM y el byte siguiente (16 bits)
 	ret			;a8e4
-L_A8E5:
+menu_principal:		; el menu del Game Master: engancha H.TIMI y pinta (gemela de p01:7973)
 	di			;a8e5
 	ld hl,0a965h		;a8e6
 	ld de,0fd9fh		;a8e9
@@ -1386,34 +1390,34 @@ L_A8E5:
 	add hl,sp			;a8f4
 	ld (0f000h),hl		;a8f5
 	ei			;a8f8
-	call 0448dh		;a8f9
-	ld hl,0e000h		;a8fc
-	ld de,0e001h		;a8ff
+	call 0448dh		;a8f9   ; borra_pantalla: borra la tabla de nombres (0x3800, 0x300 bytes)
+	ld hl,0e000h		;a8fc   ; apunta a opcion / RC del juego
+	ld de,0e001h		;a8ff   ; apunta a fila elegida de la SRAM
 	ld bc,00fffh		;a902
 	ld (hl),000h		;a905
 	ldir		;a907
 	ld hl,(00004h)		;a909
 	ld de,02000h		;a90c
 	ld bc,007f0h		;a90f
-	call L_A4A2		;a912
+	call copia_tercios		;a912   ; copia_tercios: LDIRVM en los tres tercios de la pantalla (gemela de p01:730D)
 	ld hl,00000h		;a915
 	ld bc,007f0h		;a918
 	ld a,0f0h		;a91b
-	call L_A491		;a91d
-	ld a,(0d12eh)		;a920
-	ld (0e000h),a		;a923
+	call rellena_tercios		;a91d   ; rellena_tercios: FILVRM en los tres tercios de la pantalla (gemela de p01:72FC)
+	ld a,(0d12eh)		;a920   ; lee el slot del juego (copia)
+	ld (0e000h),a		;a923   ; guarda opcion / RC del juego
 	ld a,001h		;a926
 	ld (0d4d3h),a		;a928
 L_A92B:
 	ld hl,04123h		;a92b
-	call L_A524		;a92e
+	call pinta_texto_b		;a92e   ; pinta_texto_b: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
 	ld b,004h		;a931
 	ld hl,04175h		;a933
-	call L_A7B2		;a936
+	call menu_vertical		;a936   ; menu_vertical: menu de B opciones: cursores arriba y abajo, espacio elige (gemela de p01:7690)
 	push af			;a939
-	call 044adh		;a93a
+	call 044adh		;a93a   ; borra_zona_3ac0: borra 0x3AC0 (0x20 bytes) letra a letra
 	pop af			;a93d
-	call L_A510		;a93e
+	call despacha		;a93e   ; despacha: salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
 
 ; ----------------------------------------------------------------------
 ; DATOS saltos_A941: tabla de 4 palabras del despachador (call 0x408D en
@@ -1437,13 +1441,13 @@ L_A949:
 	ld (0d4d3h),a		;a94f
 	ret			;a952
 L_A953:
-	call 0417dh		;a953
+	call 0417dh		;a953   ; menu_sram: el menu de la SRAM: limpia 0xE010, pinta y lee teclas
 	jp L_A92B		;a956
 L_A959:
-	call 04209h		;a959
+	call 04209h		;a959   ; menu_borrar: pide el nombre de 5 letras a borrar (0xE250) y lo busca
 	jp L_A92B		;a95c
 L_A95F:
-	call 04333h		;a95f
+	call 04333h		;a95f   ; pregunta_formatear: pregunta si se formatea (Y/N) y llama a la SRAM
 	jp L_A92B		;a962
 L_A965:
 	jp L_A968		;a965

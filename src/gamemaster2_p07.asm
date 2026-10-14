@@ -20,33 +20,33 @@ L_8000:
 L_8004:
 	call 0013eh		;8004   ; BIOS RDVDP - Reads VDP status register
 	di			;8007
-	call L_9CA5		;8008
+	call sonido_cuadro		;8008   ; sonido_cuadro: el motor de sonido: un cuadro de los cinco canales
 	ld hl,0e404h		;800b
 	bit 0,(hl)		;800e
 	jr nz,L_801F		;8010
 	inc (hl)			;8012
 	ei			;8013
-	call L_86E2		;8014
-	call L_806E		;8017
+	call th_lee_mandos		;8014   ; th_lee_mandos: lee los dos mandos y el teclado (0xE405-0xE408)
+	call th_sale_con_teclas		;8017   ; th_sale_con_teclas: si se pulsan a la vez las teclas de salida (SNSMAT 6 y 3), acaba el juego
 	ld a,000h		;801a
 	ld (0e404h),a		;801c
 L_801F:
 	call 0013eh		;801f   ; BIOS RDVDP - Reads VDP status register
 	ei			;8022
 	ret			;8023
-L_8024:
+hl_mas_a:		; HL = HL + A (gemela de p01:7251)
 	add a,l			;8024
 	ld l,a			;8025
 	ret nc			;8026
 	inc h			;8027
 	ret			;8028
-L_8029:
+de_mas_a:		; DE = DE + A (gemela de p01:7256)
 	add a,e			;8029
 	ld e,a			;802a
 	ret nc			;802b
 	inc d			;802c
 	ret			;802d
-L_802E:
+despacha:		; salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
 	pop hl			;802e
 	add a,a			;802f
 	add a,l			;8030
@@ -71,7 +71,7 @@ L_803A:
 	ldir		;8050
 	ld a,001h		;8052
 	ld (0e404h),a		;8054
-	call L_86B0		;8057
+	call th_inicia		;8057   ; th_inicia: silencio, sonido 1, borra la VRAM y pone los 8 registros del VDP
 	xor a			;805a
 	ld (0e404h),a		;805b
 	call 0013eh		;805e   ; BIOS RDVDP - Reads VDP status register
@@ -83,7 +83,7 @@ L_8062:
 	ld a,0c9h		;8068
 	ld (0fd9ah),a		;806a
 	ret			;806d
-L_806E:
+th_sale_con_teclas:		; si se pulsan a la vez las teclas de salida (SNSMAT 6 y 3), acaba el juego
 	ld a,006h		;806e
 	call 00141h		;8070   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
 	bit 1,a		;8073
@@ -100,7 +100,7 @@ L_8088:
 	inc (hl)			;808b
 	ld bc,(0e400h)		;808c
 	ld a,c			;8090
-	call L_802E		;8091
+	call despacha		;8091   ; despacha: salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
 
 ; ----------------------------------------------------------------------
 ; DATOS saltos_8094: tabla de 8 palabras del despachador (call 0x408D en
@@ -127,16 +127,16 @@ L_80A4:
 	dec b			;80a7
 	jr z,L_80E3		;80a8
 	ld a,00dh		;80aa
-	call L_9B3C		;80ac
-	call L_85D5		;80af
-	call L_8823		;80b2
-	call L_9082		;80b5
-	call L_908B		;80b8
-	call L_9094		;80bb
-	call L_909A		;80be
+	call pide_sonido		;80ac   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
+	call th_borra_pantalla		;80af   ; th_borra_pantalla: borra los sprites y la tabla de nombres
+	call th_fuente		;80b2   ; th_fuente: la fuente del minijuego (p07:885B en 0x2080) y su color
+	call th_campo_tenis		;80b5   ; th_campo_tenis: descomprime p07:9386 en 0x2300
+	call th_campo_hockey		;80b8   ; th_campo_hockey: descomprime p07:951D en 0x0300
+	call th_campo_colores		;80bb   ; th_campo_colores: descomprime p07:9535
+	call th_menu_juego		;80be   ; th_menu_juego: GAME SELECT: TENNIS / HOCKEY / END
 	jr L_80EC		;80c1
 L_80C3:
-	call L_90A6		;80c3
+	call th_elige_juego		;80c3   ; th_elige_juego: mueve la eleccion de juego (0xE412) con el mando
 	ld a,(0e405h)		;80c6
 	and 010h		;80c9
 	ret z			;80cb
@@ -144,11 +144,11 @@ L_80C3:
 	cp 003h		;80cf
 	jr z,L_80DB		;80d1
 	ld a,004h		;80d3
-	call L_9B3C		;80d5
+	call pide_sonido		;80d5   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 	jp L_81BD		;80d8
 L_80DB:
 	ld a,001h		;80db
-	call L_9B3C		;80dd
+	call pide_sonido		;80dd   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 	jp L_80EC		;80e0
 L_80E3:
 	ld a,001h		;80e3
@@ -165,19 +165,19 @@ L_80F1:
 	jr z,L_8103		;80f2
 	dec b			;80f4
 	jr z,L_811E		;80f5
-	call L_85D5		;80f7
+	call th_borra_pantalla		;80f7   ; th_borra_pantalla: borra los sprites y la tabla de nombres
 	xor a			;80fa
 	ld (0e460h),a		;80fb
-	call L_9100		;80fe
+	call th_menu_modify		;80fe   ; th_menu_modify: GAME MODIFY: LENGTH / SPEED / TYPE / BAR
 	jr L_80EC		;8101
 L_8103:
-	call L_9136		;8103
+	call th_cambia_opcion		;8103   ; th_cambia_opcion: cambia la opcion elegida del GAME MODIFY (0xE460)
 	ld a,(0e405h)		;8106
 	and 010h		;8109
 	ret z			;810b
 	ld a,004h		;810c
-	call L_9B3C		;810e
-	call L_9230		;8111
+	call pide_sonido		;810e   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
+	call th_aplica_opciones		;8111   ; th_aplica_opciones: copia LENGTH, SPEED, TYPE y BAR (0xE461...) a 0xE413...
 	xor a			;8114
 	ld (0e40ch),a		;8115
 	ld (0e41fh),a		;8118
@@ -192,11 +192,11 @@ L_811E:
 	jr z,L_812D		;8129
 	ld a,00ch		;812b
 L_812D:
-	call L_9B3C		;812d
+	call pide_sonido		;812d   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 	jp L_81BD		;8130
 L_8133:
 	ld a,(0e401h)		;8133
-	call L_802E		;8136
+	call despacha		;8136   ; despacha: salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
 
 ; ----------------------------------------------------------------------
 ; DATOS saltos_8139: tabla de 4 palabras del despachador (call 0x408D en
@@ -214,25 +214,25 @@ DATA_saltos_8139:
 
 
 L_8141:
-	call L_85D5		;8141
-	call L_8154		;8144
+	call th_borra_pantalla		;8141   ; th_borra_pantalla: borra los sprites y la tabla de nombres
+	call th_marcador_set		;8144   ; th_marcador_set: pinta el SET y el 1ST/2ND/3RD (tenis: 0xE412 = 1)
 	ld a,090h		;8147
 	ld (0e419h),a		;8149
 	ld a,05ah		;814c
 	ld (0e403h),a		;814e
 	jp L_80EC		;8151
-L_8154:
+th_marcador_set:		; pinta el SET y el 1ST/2ND/3RD (tenis: 0xE412 = 1)
 	ld a,(0e412h)		;8154
 	dec a			;8157
 	jr nz,$+39		;8158
 	ld de,08186h		;815a
-	call L_8626		;815d
+	call th_pinta_texto		;815d   ; th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
 	ld hl,0e40ch		;8160
 	ld a,(hl)			;8163
 	add a,a			;8164
 	add a,(hl)			;8165
 	ld hl,08176h		;8166
-	call L_8024		;8169
+	call hl_mas_a		;8169   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld de,03909h		;816c
 	ld bc,00003h		;816f
 	call 0005ch		;8172   ; BIOS LDIRVM - Block transfers to VRAM from memory
@@ -253,7 +253,7 @@ DATA_resto_8176:
 
 L_817F:
 	ld de,08192h		;817f
-	call L_8626		;8182
+	call th_pinta_texto		;8182   ; th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
 	ret			;8185
 
 ; ----------------------------------------------------------------------
@@ -276,14 +276,14 @@ L_819A:
 	ret nz			;819e
 	jp L_80EC		;819f
 L_81A2:
-	call L_84A5		;81a2
-	call L_898C		;81a5
+	call th_pinta_marcadores		;81a2   ; th_pinta_marcadores: pinta el marcador entero
+	call th_partido		;81a5   ; th_partido: prepara el partido: tenis (p07:95BC) o hockey (p07:987C)
 	ld hl,0e40ah		;81a8
 	ld (hl),001h		;81ab
 	ld a,030h		;81ad
 	jp L_80E9		;81af
 L_81B2:
-	call L_866C		;81b2
+	call th_vuelca_sprites		;81b2   ; th_vuelca_sprites: vuelca a la tabla de sprites la copia de 0xE500
 	ld hl,0e403h		;81b5
 	dec (hl)			;81b8
 	ret nz			;81b9
@@ -295,7 +295,7 @@ L_81BD:
 	ld (0e401h),a		;81c2
 	ret			;81c5
 L_81C6:
-	call L_89D3		;81c6
+	call th_cuadro		;81c6   ; th_cuadro: un cuadro del partido: jugadores, pelota, marcador y sprites
 	ld a,(0e409h)		;81c9
 	and a			;81cc
 	jp nz,L_81BD		;81cd
@@ -305,15 +305,15 @@ L_81C6:
 	jp L_81BD		;81d5
 L_81D8:
 	ld a,001h		;81d8
-	call L_9B3C		;81da
+	call pide_sonido		;81da   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 	ld hl,00000h		;81dd
 	ld (0e400h),hl		;81e0
 	ret			;81e3
 L_81E4:
-	call L_822D		;81e4
+	call th_esconde_sprites		;81e4   ; th_esconde_sprites: pone 0xE0 en la tabla de sprites (0x3B00)
 	ld a,(0e409h)		;81e7
 	and a			;81ea
-	call nz,L_9277		;81eb
+	call nz,th_tanto		;81eb   ; th_tanto: suma el tanto al jugador que toca
 	xor a			;81ee
 	ld (0e409h),a		;81ef
 	ld a,(0e40ah)		;81f2
@@ -345,7 +345,7 @@ L_8214:
 	ld hl,00007h		;8226
 	ld (0e400h),hl		;8229
 	ret			;822c
-L_822D:
+th_esconde_sprites:		; pone 0xE0 en la tabla de sprites (0x3B00)
 	ld hl,03b00h		;822d
 	ld bc,00080h		;8230
 	ld a,0e0h		;8233
@@ -365,18 +365,18 @@ L_8239:
 	ret z			;824b
 	ld (hl),000h		;824c
 	ld a,011h		;824e
-	call L_9B3C		;8250
-	call L_85D5		;8253
+	call pide_sonido		;8250   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
+	call th_borra_pantalla		;8253   ; th_borra_pantalla: borra los sprites y la tabla de nombres
 	ld de,08294h		;8256
-	call L_8626		;8259
+	call th_pinta_texto		;8259   ; th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
 	ld de,0827eh		;825c
-	call L_8626		;825f
+	call th_pinta_texto		;825f   ; th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
 	ld hl,03971h		;8262
 	ld de,0e410h		;8265
-	call L_8586		;8268
+	call th_pinta_bcd		;8268   ; th_pinta_bcd: pinta el byte BCD de DE en dos cifras grandes
 	ld hl,0396dh		;826b
 	ld de,0e411h		;826e
-	call L_8586		;8271
+	call th_pinta_bcd		;8271   ; th_pinta_bcd: pinta el byte BCD de DE en dos cifras grandes
 	xor a			;8274
 	ld (0e41eh),a		;8275
 	ld (0e403h),a		;8278
@@ -400,18 +400,18 @@ DATA_resto_827E:
 
 
 L_82B1:
-	call L_831B		;82b1
+	call th_texto_saque		;82b1   ; th_texto_saque: pinta el texto del saque segun 0xE41D
 	ld a,(0e200h)		;82b4
 	and a			;82b7
 	ret nz			;82b8
 	ld de,082a0h		;82b9
-	call L_8626		;82bc
+	call th_pinta_texto		;82bc   ; th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
 	jp L_80EC		;82bf
 L_82C2:
 	ld a,008h		;82c2
 	call 00141h		;82c4   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
 	rra			;82c7
-	jr c,L_831B		;82c8
+	jr c,th_texto_saque		;82c8
 	jr L_8308		;82ca
 L_82CC:
 	dec b			;82cc
@@ -424,36 +424,36 @@ L_82CC:
 	ret z			;82d7
 	ld (hl),000h		;82d8
 	ld a,010h		;82da
-	call L_9B3C		;82dc
-	call L_83D2		;82df
-	call L_83A5		;82e2
+	call pide_sonido		;82dc   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
+	call th_pantalla_campo		;82df   ; th_pantalla_campo: borra y pinta el campo (p07:83F5 en 0x38E8)
+	call th_pinta_campo		;82e2   ; th_pinta_campo: pinta las piezas del campo de la tabla de p07:83C6
 	xor a			;82e5
 	ld (0e41eh),a		;82e6
 	ld (0e403h),a		;82e9
 	jp L_80EC		;82ec
 L_82EF:
-	call L_831B		;82ef
+	call th_texto_saque		;82ef   ; th_texto_saque: pinta el texto del saque segun 0xE41D
 	ld a,(0e200h)		;82f2
 	and a			;82f5
 	ret nz			;82f6
 	ld de,082a0h		;82f7
-	call L_8626		;82fa
+	call th_pinta_texto		;82fa   ; th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
 	jp L_80EC		;82fd
 L_8300:
 	ld a,008h		;8300
 	call 00141h		;8302   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
 	rra			;8305
-	jr c,L_831B		;8306
+	jr c,th_texto_saque		;8306
 L_8308:
 	ld a,001h		;8308
-	call L_9B3C		;830a
+	call pide_sonido		;830a   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 	xor a			;830d
 	ld (0e41eh),a		;830e
-	call L_85D5		;8311
+	call th_borra_pantalla		;8311   ; th_borra_pantalla: borra los sprites y la tabla de nombres
 	ld hl,00000h		;8314
 	ld (0e400h),hl		;8317
 	ret			;831a
-L_831B:
+th_texto_saque:		; pinta el texto del saque segun 0xE41D
 	ld a,(0e41dh)		;831b
 	and a			;831e
 	ld de,0881ch		;831f
@@ -466,7 +466,7 @@ L_832D:
 	ld hl,0e40dh		;832d
 	dec (hl)			;8330
 	bit 3,(hl)		;8331
-	jp z,L_8626		;8333
+	jp z,th_pinta_texto		;8333   ; th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
 	jp L_863D		;8336
 L_8339:
 	dec b			;8339
@@ -477,9 +477,9 @@ L_8339:
 	ret z			;8341
 	ld (hl),000h		;8342
 	ld a,012h		;8344
-	call L_9B3C		;8346
-	call L_83D2		;8349
-	call L_83A5		;834c
+	call pide_sonido		;8346   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
+	call th_pantalla_campo		;8349   ; th_pantalla_campo: borra y pinta el campo (p07:83F5 en 0x38E8)
+	call th_pinta_campo		;834c   ; th_pinta_campo: pinta las piezas del campo de la tabla de p07:83C6
 	xor a			;834f
 	ld (0e403h),a		;8350
 	jp L_80EC		;8353
@@ -488,7 +488,7 @@ L_8356:
 	and a			;8359
 	ret nz			;835a
 	ld a,00bh		;835b
-	call L_9B3C		;835d
+	call pide_sonido		;835d   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 	ld hl,00002h		;8360
 	ld (0e400h),hl		;8363
 	ret			;8366
@@ -501,10 +501,10 @@ L_8367:
 	ret z			;836f
 	ld (hl),000h		;8370
 	ld a,013h		;8372
-	call L_9B3C		;8374
-	call L_85D5		;8377
+	call pide_sonido		;8374   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
+	call th_borra_pantalla		;8377   ; th_borra_pantalla: borra los sprites y la tabla de nombres
 	ld de,08399h		;837a
-	call L_8626		;837d
+	call th_pinta_texto		;837d   ; th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
 	ld a,05ah		;8380
 	ld (0e403h),a		;8382
 	jp L_80EC		;8385
@@ -513,7 +513,7 @@ L_8388:
 	and a			;838b
 	ret nz			;838c
 	ld a,00ch		;838d
-	call L_9B3C		;838f
+	call pide_sonido		;838f   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 	ld hl,00002h		;8392
 	ld (0e400h),hl		;8395
 	ret			;8398
@@ -531,7 +531,7 @@ DATA_resto_8399:
 ; ======================================================================
 
 
-L_83A5:
+th_pinta_campo:		; pinta las piezas del campo de la tabla de p07:83C6
 	ld a,(0e40ch)		;83a5
 	add a,a			;83a8
 	ld b,a			;83a9
@@ -547,8 +547,8 @@ L_83AF:
 	ex de,hl			;83b5
 	ld a,c			;83b6
 	ld de,0e580h		;83b7
-	call L_8029		;83ba
-	call L_8593		;83bd
+	call de_mas_a		;83ba   ; de_mas_a: DE = DE + A (gemela de p01:7256)
+	call th_cifra_baja		;83bd   ; th_cifra_baja: pinta la cifra baja del BCD de DE
 	pop hl			;83c0
 	pop bc			;83c1
 	inc c			;83c2
@@ -568,8 +568,8 @@ DATA_resto_83C6:
 ; ======================================================================
 
 
-L_83D2:
-	call L_85D5		;83d2
+th_pantalla_campo:		; borra y pinta el campo (p07:83F5 en 0x38E8)
+	call th_borra_pantalla		;83d2   ; th_borra_pantalla: borra los sprites y la tabla de nombres
 	ld hl,083f5h		;83d5
 	ld de,038e8h		;83d8
 	ld bc,00a10h		;83db
@@ -581,11 +581,11 @@ L_83DE:
 	call 0005ch		;83e3   ; BIOS LDIRVM - Block transfers to VRAM from memory
 	pop de			;83e6
 	ld a,020h		;83e7
-	call L_8029		;83e9
+	call de_mas_a		;83e9   ; de_mas_a: DE = DE + A (gemela de p01:7256)
 	pop hl			;83ec
 	pop bc			;83ed
 	ld a,c			;83ee
-	call L_8024		;83ef
+	call hl_mas_a		;83ef   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	djnz L_83DE		;83f2
 	ret			;83f4
 
@@ -611,19 +611,19 @@ DATA_resto_83F5:
 ; ======================================================================
 
 
-L_8495:
+th_borra_sprites:		; pone 0xE0 en la copia de sprites (0xE500) y la vuelca
 	ld hl,0e500h		;8495
 	ld de,0e501h		;8498
 	ld bc,0002fh		;849b
 	ld (hl),0e0h		;849e
 	ldir		;84a0
-	jp L_866C		;84a2
-L_84A5:
-	call L_84B1		;84a5
-	call L_8551		;84a8
-	call L_8562		;84ab
+	jp th_vuelca_sprites		;84a2   ; th_vuelca_sprites: vuelca a la tabla de sprites la copia de 0xE500
+th_pinta_marcadores:		; pinta el marcador entero
+	call th_cabecera		;84a5   ; th_cabecera: la cabecera del marcador: tenis (p07:84C6) o hockey (p07:8506)
+	call th_tanteo		;84a8   ; th_tanteo: pinta los dos tanteos (0xE410 y 0xE411)
+	call th_tiempo		;84ab   ; th_tiempo: en hockey, pinta el tiempo (0xE419)
 	jp L_856F		;84ae
-L_84B1:
+th_cabecera:		; la cabecera del marcador: tenis (p07:84C6) o hockey (p07:8506)
 	ld hl,03800h		;84b1
 	ld a,(0e412h)		;84b4
 	dec a			;84b7
@@ -632,7 +632,7 @@ L_84B1:
 	ld de,08506h		;84bd
 L_84C0:
 	ld bc,00040h		;84c0
-	jp L_85EE		;84c3
+	jp th_copia_a_vram		;84c3   ; th_copia_a_vram: LDIRVM de DE a HL
 
 ; ----------------------------------------------------------------------
 ; DATOS resto_84C6: lo apuntan con el banco puesto p07:84B8 (0x84C6), p07:84BD
@@ -655,31 +655,31 @@ DATA_resto_84C6:
 ; ======================================================================
 
 
-L_8551:
+th_tanteo:		; pinta los dos tanteos (0xE410 y 0xE411)
 	ld hl,03814h		;8551
 	ld de,0e410h		;8554
-	call L_8586		;8557
+	call th_pinta_bcd		;8557   ; th_pinta_bcd: pinta el byte BCD de DE en dos cifras grandes
 	ld hl,0380dh		;855a
 	ld de,0e411h		;855d
-	jr L_8586		;8560
-L_8562:
+	jr th_pinta_bcd		;8560
+th_tiempo:		; en hockey, pinta el tiempo (0xE419)
 	ld a,(0e412h)		;8562
 	dec a			;8565
 	ret z			;8566
 	ld hl,0381ch		;8567
 	ld de,0e419h		;856a
-	jr L_8586		;856d
+	jr th_pinta_bcd		;856d
 L_856F:
 	ld a,(0e412h)		;856f
 	dec a			;8572
 	ret nz			;8573
 	ld hl,0381ch		;8574
 	ld de,0e417h		;8577
-	call L_8593		;857a
+	call th_cifra_baja		;857a   ; th_cifra_baja: pinta la cifra baja del BCD de DE
 	ld hl,03808h		;857d
 	ld de,0e41bh		;8580
-	jp L_8593		;8583
-L_8586:
+	jp th_cifra_baja		;8583   ; th_cifra_baja: pinta la cifra baja del BCD de DE
+th_pinta_bcd:		; pinta el byte BCD de DE en dos cifras grandes
 	ld a,(de)			;8586
 	rra			;8587
 	rra			;8588
@@ -687,16 +687,16 @@ L_8586:
 	rra			;858a
 	and 00fh		;858b
 	push de			;858d
-	call L_8596		;858e
+	call th_cifra		;858e   ; th_cifra: pinta la cifra A con las dos letras de p07:85AD
 	pop de			;8591
 	inc hl			;8592
-L_8593:
+th_cifra_baja:		; pinta la cifra baja del BCD de DE
 	ld a,(de)			;8593
 	and 00fh		;8594
-L_8596:
+th_cifra:		; pinta la cifra A con las dos letras de p07:85AD
 	push hl			;8596
 	ld de,085adh		;8597
-	call L_9079		;859a
+	call palabra_de_tabla		;859a   ; palabra_de_tabla: DE = la palabra A de la tabla de DE
 	pop hl			;859d
 	ld a,e			;859e
 	call 0004dh		;859f   ; BIOS WRTVRM - Writes data in VRAM
@@ -722,7 +722,7 @@ DATA_resto_85AD:
 ; ======================================================================
 
 
-L_85C1:
+th_divide:		; desplaza HL y A: la posicion entre 8
 	ld a,l			;85c1
 	rra			;85c2
 	rra			;85c3
@@ -738,13 +738,13 @@ L_85C1:
 	add a,0e6h		;85d1
 	ld h,a			;85d3
 	ret			;85d4
-L_85D5:
-	call L_8495		;85d5
+th_borra_pantalla:		; borra los sprites y la tabla de nombres
+	call th_borra_sprites		;85d5   ; th_borra_sprites: pone 0xE0 en la copia de sprites (0xE500) y la vuelca
 	ld hl,03800h		;85d8
 	ld bc,00300h		;85db
 	xor a			;85de
 	jp 00056h		;85df   ; BIOS FILVRM - Fills VRAM with value
-L_85E2:
+th_vram_escribe:		; SETWRT en HL y C = el puerto de datos del VDP
 	ex af,af'			;85e2
 	call 00053h		;85e3   ; BIOS SETWRT - Enables VDP to write
 	exx			;85e6
@@ -753,7 +753,7 @@ L_85E2:
 	exx			;85eb
 	ex af,af'			;85ec
 	ret			;85ed
-L_85EE:
+th_copia_a_vram:		; LDIRVM de DE a HL
 	ex de,hl			;85ee
 	jp 0005ch		;85ef   ; BIOS LDIRVM - Block transfers to VRAM from memory
 L_85F2:
@@ -763,7 +763,7 @@ L_85F5:
 	exx			;85f5
 	push bc			;85f6
 	push de			;85f7
-	call L_85EE		;85f8
+	call th_copia_a_vram		;85f8   ; th_copia_a_vram: LDIRVM de DE a HL
 	ld de,00800h		;85fb
 	add hl,de			;85fe
 	pop de			;85ff
@@ -771,7 +771,7 @@ L_85F5:
 	exx			;8601
 	djnz L_85F5		;8602
 	ret			;8604
-L_8605:
+th_rellena_tercios:		; FILVRM en los tres tercios
 	ld d,003h		;8605
 L_8607:
 	push bc			;8607
@@ -784,19 +784,19 @@ L_8607:
 	dec d			;8612
 	jr nz,L_8607		;8613
 	ret			;8615
-L_8616:
+th_descomprime_tercios:		; descomprime DE en los tres tercios
 	ld b,003h		;8616
 L_8618:
 	push bc			;8618
 	push de			;8619
-	call L_8647		;861a
+	call th_descomprime		;861a   ; th_descomprime: descomprime DE a la VRAM HL: n & 0x7F repeticiones o copias, 0 acaba
 	ld de,00800h		;861d
 	add hl,de			;8620
 	pop de			;8621
 	pop bc			;8622
 	djnz L_8618		;8623
 	ret			;8625
-L_8626:
+th_pinta_texto:		; pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
 	ld c,0ffh		;8626
 L_8628:
 	ex de,hl			;8628
@@ -827,8 +827,8 @@ L_8641:
 	ld d,(hl)			;8644
 	ex de,hl			;8645
 	inc de			;8646
-L_8647:
-	call L_85E2		;8647
+th_descomprime:		; descomprime DE a la VRAM HL: n & 0x7F repeticiones o copias, 0 acaba
+	call th_vram_escribe		;8647   ; th_vram_escribe: SETWRT en HL y C = el puerto de datos del VDP
 L_864A:
 	ld a,(de)			;864a
 	and a			;864b
@@ -858,7 +858,7 @@ L_8664:
 	exx			;8667
 	djnz L_8664		;8668
 	jr L_864A		;866a
-L_866C:
+th_vuelca_sprites:		; vuelca a la tabla de sprites la copia de 0xE500
 	ld hl,03b00h		;866c
 	call 00053h		;866f   ; BIOS SETWRT - Enables VDP to write
 	ld a,(00007h)		;8672
@@ -905,11 +905,11 @@ L_8684:
 	ld e,a			;86ac
 	djnz L_8684		;86ad
 	ret			;86af
-L_86B0:
+th_inicia:		; silencio, sonido 1, borra la VRAM y pone los 8 registros del VDP
 	ld a,0bfh		;86b0
 	call 0a3bdh		;86b2
 	ld a,001h		;86b5
-	call L_9B3C		;86b7
+	call pide_sonido		;86b7   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 	ld hl,00000h		;86ba
 	ld bc,04000h		;86bd
 	xor a			;86c0
@@ -939,17 +939,17 @@ DATA_resto_86D5:
 ; ======================================================================
 
 
-L_86E2:
+th_lee_mandos:		; lee los dos mandos y el teclado (0xE405-0xE408)
 	ld e,08fh		;86e2
-	call L_8702		;86e4
-	call L_8712		;86e7
+	call th_lee_puerto		;86e4   ; th_lee_puerto: lee el puerto de mandos E (R#15 del PSG y R#14)
+	call th_teclas_1		;86e7   ; th_teclas_1: las teclas del jugador 1 (SNSMAT 7 y 8)
 	ld hl,0e406h		;86ea
-	call L_86FB		;86ed
+	call th_recien_pulsado		;86ed   ; th_recien_pulsado: guarda lo pulsado y deja en A lo que se acaba de pulsar
 	ld e,0cfh		;86f0
-	call L_8702		;86f2
-	call L_873A		;86f5
+	call th_lee_puerto		;86f2   ; th_lee_puerto: lee el puerto de mandos E (R#15 del PSG y R#14)
+	call th_teclas_2		;86f5   ; th_teclas_2: las teclas del jugador 2 (SNSMAT 3...)
 	ld hl,0e408h		;86f8
-L_86FB:
+th_recien_pulsado:		; guarda lo pulsado y deja en A lo que se acaba de pulsar
 	ld c,(hl)			;86fb
 	ld (hl),a			;86fc
 	xor c			;86fd
@@ -957,7 +957,7 @@ L_86FB:
 	dec hl			;86ff
 	ld (hl),a			;8700
 	ret			;8701
-L_8702:
+th_lee_puerto:		; lee el puerto de mandos E (R#15 del PSG y R#14)
 	ld a,00fh		;8702
 	call 00093h		;8704   ; BIOS WRTPSG - Writes data to PSG-register
 	ld a,00eh		;8707
@@ -967,7 +967,7 @@ L_8702:
 	cpl			;870e
 	and 03fh		;870f
 	ret			;8711
-L_8712:
+th_teclas_1:		; las teclas del jugador 1 (SNSMAT 7 y 8)
 	push af			;8712
 	ld a,007h		;8713
 	call 00141h		;8715   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
@@ -998,7 +998,7 @@ L_8712:
 	pop bc			;8737
 	or b			;8738
 	ret			;8739
-L_873A:
+th_teclas_2:		; las teclas del jugador 2 (SNSMAT 3...)
 	push af			;873a
 	ld a,003h		;873b
 	call 00141h		;873d   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
@@ -1063,20 +1063,20 @@ DATA_resto_876E:
 ; ======================================================================
 
 
-L_8823:
-	call L_883A		;8823
+th_fuente:		; la fuente del minijuego (p07:885B en 0x2080) y su color
+	call th_patrones		;8823   ; th_patrones: los patrones del campo
 	ld de,0885bh		;8826
 	ld hl,02080h		;8829
-	call L_8616		;882c
+	call th_descomprime_tercios		;882c   ; th_descomprime_tercios: descomprime DE en los tres tercios
 	ld a,0f0h		;882f
 	ld hl,00080h		;8831
 	ld bc,00158h		;8834
-	jp L_8605		;8837
-L_883A:
+	jp th_rellena_tercios		;8837   ; th_rellena_tercios: FILVRM en los tres tercios
+th_patrones:		; los patrones del campo
 	ld hl,02000h		;883a
 	ld bc,00080h		;883d
 	xor a			;8840
-	call L_8605		;8841
+	call th_rellena_tercios		;8841   ; th_rellena_tercios: FILVRM en los tres tercios
 	ld hl,00000h		;8844
 	ld de,00008h		;8847
 	ld b,010h		;884a
@@ -1084,7 +1084,7 @@ L_884C:
 	push bc			;884c
 	ld bc,00008h		;884d
 	push hl			;8850
-	call L_8605		;8851
+	call th_rellena_tercios		;8851   ; th_rellena_tercios: FILVRM en los tres tercios
 	pop hl			;8854
 	add hl,de			;8855
 	inc a			;8856
@@ -1124,12 +1124,12 @@ DATA_resto_885B:
 ; ======================================================================
 
 
-L_898C:
-	call L_8495		;898c
+th_partido:		; prepara el partido: tenis (p07:95BC) o hockey (p07:987C)
+	call th_borra_sprites		;898c   ; th_borra_sprites: pone 0xE0 en la copia de sprites (0xE500) y la vuelca
 	ld hl,03b00h		;898f
 	ld de,0e500h		;8992
 	ld bc,00080h		;8995
-	call L_85EE		;8998
+	call th_copia_a_vram		;8998   ; th_copia_a_vram: LDIRVM de DE a HL
 	ld a,(0e412h)		;899b
 	dec a			;899e
 	ld hl,095bch		;899f
@@ -1142,30 +1142,30 @@ L_89A7:
 	ld hl,03840h		;89af
 	ld de,0e640h		;89b2
 	ld bc,002c0h		;89b5
-	call L_85EE		;89b8
-	call L_89F6		;89bb
-	call L_8A55		;89be
-	call L_8CB9		;89c1
-	call L_8C4D		;89c4
-	call L_8BD7		;89c7
-	call L_902C		;89ca
-	call L_8C86		;89cd
-	jp L_866C		;89d0
-L_89D3:
-	call L_866C		;89d3
+	call th_copia_a_vram		;89b8   ; th_copia_a_vram: LDIRVM de DE a HL
+	call th_jugador_1		;89bb   ; th_jugador_1: prepara al jugador 1 (0xE421)
+	call th_jugador_2		;89be   ; th_jugador_2: prepara al jugador 2 (0xE431)
+	call th_prepara_pelota		;89c1   ; th_prepara_pelota: la pelota al centro (0xE440)
+	call th_prepara_disco		;89c4   ; th_prepara_disco: prepara el disco del hockey (0xE450)
+	call th_sprites_jugadores		;89c7   ; th_sprites_jugadores: los sprites de los dos jugadores a la copia de 0xE500
+	call th_sprite_pelota		;89ca   ; th_sprite_pelota: el sprite de la pelota a la copia de 0xE500
+	call th_sprite_disco		;89cd   ; th_sprite_disco: el sprite del disco del hockey
+	jp th_vuelca_sprites		;89d0   ; th_vuelca_sprites: vuelca a la tabla de sprites la copia de 0xE500
+th_cuadro:		; un cuadro del partido: jugadores, pelota, marcador y sprites
+	call th_vuelca_sprites		;89d3   ; th_vuelca_sprites: vuelca a la tabla de sprites la copia de 0xE500
 	ld a,(0e412h)		;89d6
 	dec a			;89d9
-	call nz,L_931A		;89da
-	call L_8AE1		;89dd
-	call L_8B58		;89e0
-	call L_8CF2		;89e3
-	call L_8C62		;89e6
-	call L_8BD7		;89e9
-	call L_902C		;89ec
-	call L_8C86		;89ef
-	call L_935D		;89f2
+	call nz,th_reloj		;89da   ; th_reloj: en hockey, baja el tiempo (0xE419, BCD) cada 64 cuadros
+	call th_mueve_jugador_1		;89dd   ; th_mueve_jugador_1: mueve al jugador 1 segun su mando
+	call th_mueve_jugador_2		;89e0   ; th_mueve_jugador_2: mueve al jugador 2 segun su mando
+	call th_mueve_pelota		;89e3   ; th_mueve_pelota: mueve la pelota y mira los choques
+	call th_mueve_disco		;89e6   ; th_mueve_disco: mueve el disco del hockey
+	call th_sprites_jugadores		;89e9   ; th_sprites_jugadores: los sprites de los dos jugadores a la copia de 0xE500
+	call th_sprite_pelota		;89ec   ; th_sprite_pelota: el sprite de la pelota a la copia de 0xE500
+	call th_sprite_disco		;89ef   ; th_sprite_disco: el sprite del disco del hockey
+	call th_gol		;89f2   ; th_gol: mira si la pelota sale por un lado y de quien es el tanto
 	ret			;89f5
-L_89F6:
+th_jugador_1:		; prepara al jugador 1 (0xE421)
 	ld bc,00008h		;89f6
 	ld de,0e421h		;89f9
 	ld hl,08a41h		;89fc
@@ -1177,7 +1177,7 @@ L_8A08:
 	ldir		;8a08
 	ld a,(0e413h)		;8a0a
 	ld hl,08a51h		;8a0d
-	call L_8024		;8a10
+	call hl_mas_a		;8a10   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;8a13
 	ld (0e422h),a		;8a14
 	ld hl,0e427h		;8a17
@@ -1197,7 +1197,7 @@ L_8A24:
 	and 002h		;8a31
 	add a,b			;8a33
 	ld hl,08a4dh		;8a34
-	call L_8024		;8a37
+	call hl_mas_a		;8a37   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;8a3a
 	ld de,0e426h		;8a3b
 	ld (de),a			;8a3e
@@ -1218,7 +1218,7 @@ DATA_resto_8A41:
 ; ======================================================================
 
 
-L_8A55:
+th_jugador_2:		; prepara al jugador 2 (0xE431)
 	ld bc,00008h		;8a55
 	ld de,0e431h		;8a58
 	ld hl,08a9fh		;8a5b
@@ -1230,7 +1230,7 @@ L_8A67:
 	ldir		;8a67
 	ld a,(0e413h)		;8a69
 	ld hl,08a51h		;8a6c
-	call L_8024		;8a6f
+	call hl_mas_a		;8a6f   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;8a72
 	ld (0e432h),a		;8a73
 	ld hl,0e437h		;8a76
@@ -1250,7 +1250,7 @@ L_8A83:
 	and 002h		;8a8f
 	add a,b			;8a91
 	ld hl,08aabh		;8a92
-	call L_8024		;8a95
+	call hl_mas_a		;8a95   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;8a98
 	ld de,0e436h		;8a99
 	ld (de),a			;8a9c
@@ -1313,13 +1313,13 @@ DATA_resto_8AD9:
 ; ======================================================================
 
 
-L_8AE1:
-	call L_8B2C		;8ae1
+th_mueve_jugador_1:		; mueve al jugador 1 segun su mando
+	call th_direccion_1		;8ae1   ; th_direccion_1: la direccion del mando del jugador 1
 	ld a,(0e42fh)		;8ae4
 	and 003h		;8ae7
 	ret z			;8ae9
 	dec a			;8aea
-	call L_802E		;8aeb
+	call despacha		;8aeb   ; despacha: salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
 
 ; ----------------------------------------------------------------------
 ; DATOS saltos_8AEE: tabla de 3 palabras del despachador (call 0x408D en
@@ -1338,7 +1338,7 @@ DATA_saltos_8AEE:
 L_8AF4:
 	ld a,(0e413h)		;8af4
 	ld hl,08bcfh		;8af7
-	call L_8024		;8afa
+	call hl_mas_a		;8afa   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;8afd
 	ld d,a			;8afe
 	ld h,d			;8aff
@@ -1352,7 +1352,7 @@ L_8AF4:
 L_8B0E:
 	ld a,(0e413h)		;8b0e
 	ld hl,08bd3h		;8b11
-	call L_8024		;8b14
+	call hl_mas_a		;8b14   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;8b17
 	ld h,a			;8b18
 	ld l,000h		;8b19
@@ -1367,7 +1367,7 @@ L_8B28:
 	ld (0e421h),hl		;8b28
 L_8B2B:
 	ret			;8b2b
-L_8B2C:
+th_direccion_1:		; la direccion del mando del jugador 1
 	ld a,(0e406h)		;8b2c
 	and 003h		;8b2f
 	ld b,a			;8b31
@@ -1394,13 +1394,13 @@ L_8B53:
 	ld a,c			;8b53
 	ld (0e42fh),a		;8b54
 	ret			;8b57
-L_8B58:
-	call L_8BA3		;8b58
+th_mueve_jugador_2:		; mueve al jugador 2 segun su mando
+	call th_direccion_2		;8b58   ; th_direccion_2: la direccion del mando del jugador 2
 	ld a,(0e43fh)		;8b5b
 	and 003h		;8b5e
 	ret z			;8b60
 	dec a			;8b61
-	call L_802E		;8b62
+	call despacha		;8b62   ; despacha: salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
 
 ; ----------------------------------------------------------------------
 ; DATOS saltos_8B65: tabla de 3 palabras del despachador (call 0x408D en
@@ -1419,7 +1419,7 @@ DATA_saltos_8B65:
 L_8B6B:
 	ld a,(0e413h)		;8b6b
 	ld hl,08bcfh		;8b6e
-	call L_8024		;8b71
+	call hl_mas_a		;8b71   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;8b74
 	ld d,a			;8b75
 	ld h,d			;8b76
@@ -1433,7 +1433,7 @@ L_8B6B:
 L_8B85:
 	ld a,(0e413h)		;8b85
 	ld hl,08bd3h		;8b88
-	call L_8024		;8b8b
+	call hl_mas_a		;8b8b   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;8b8e
 	ld h,a			;8b8f
 	ld l,000h		;8b90
@@ -1447,7 +1447,7 @@ L_8B9B:
 L_8B9F:
 	ld (0e431h),hl		;8b9f
 	ret			;8ba2
-L_8BA3:
+th_direccion_2:		; la direccion del mando del jugador 2
 	ld a,(0e408h)		;8ba3
 	and 003h		;8ba6
 	ld b,a			;8ba8
@@ -1489,12 +1489,12 @@ DATA_resto_8BCF:
 ; ======================================================================
 
 
-L_8BD7:
+th_sprites_jugadores:		; los sprites de los dos jugadores a la copia de 0xE500
 	ld de,0e422h		;8bd7
 	ld hl,0e504h		;8bda
 	ld c,00ah		;8bdd
 	ld a,(0e423h)		;8bdf
-	call L_8C17		;8be2
+	call th_sprite_raqueta		;8be2   ; th_sprite_raqueta: escribe los sprites de una raqueta (C de alto)
 	ld a,(0e415h)		;8be5
 	or a			;8be8
 	jr z,L_8BF9		;8be9
@@ -1502,13 +1502,13 @@ L_8BD7:
 	ld hl,0e50ch		;8bee
 	ld c,00ah		;8bf1
 	ld a,(0e426h)		;8bf3
-	call L_8C17		;8bf6
+	call th_sprite_raqueta		;8bf6   ; th_sprite_raqueta: escribe los sprites de una raqueta (C de alto)
 L_8BF9:
 	ld de,0e432h		;8bf9
 	ld hl,0e514h		;8bfc
 	ld c,007h		;8bff
 	ld a,(0e433h)		;8c01
-	call L_8C17		;8c04
+	call th_sprite_raqueta		;8c04   ; th_sprite_raqueta: escribe los sprites de una raqueta (C de alto)
 	ld a,(0e415h)		;8c07
 	or a			;8c0a
 	ret z			;8c0b
@@ -1516,7 +1516,7 @@ L_8BF9:
 	ld hl,0e51ch		;8c0f
 	ld c,007h		;8c12
 	ld a,(0e436h)		;8c14
-L_8C17:
+th_sprite_raqueta:		; escribe los sprites de una raqueta (C de alto)
 	push af			;8c17
 	ld a,(de)			;8c18
 	ld b,a			;8c19
@@ -1569,7 +1569,7 @@ L_8C3C:
 	inc l			;8c4a
 	ld (hl),c			;8c4b
 	ret			;8c4c
-L_8C4D:
+th_prepara_disco:		; prepara el disco del hockey (0xE450)
 	ld a,(0e416h)		;8c4d
 	or a			;8c50
 	ret z			;8c51
@@ -1592,7 +1592,7 @@ DATA_resto_8C5E:
 ; ======================================================================
 
 
-L_8C62:
+th_mueve_disco:		; mueve el disco del hockey
 	ld a,(0e416h)		;8c62
 	or a			;8c65
 	ret z			;8c66
@@ -1615,7 +1615,7 @@ L_8C7D:
 	xor 001h		;8c80
 	ld (0e450h),a		;8c82
 	ret			;8c85
-L_8C86:
+th_sprite_disco:		; el sprite del disco del hockey
 	ld a,(0e416h)		;8c86
 	or a			;8c89
 	ret z			;8c8a
@@ -1653,7 +1653,7 @@ L_8C86:
 	inc l			;8cb5
 	ld (hl),00dh		;8cb6
 	ret			;8cb8
-L_8CB9:
+th_prepara_pelota:		; la pelota al centro (0xE440)
 	ld hl,0e448h		;8cb9
 	ld (hl),000h		;8cbc
 	ld hl,0e449h		;8cbe
@@ -1670,7 +1670,7 @@ L_8CB9:
 L_8CDA:
 	ld a,(0e412h)		;8cda
 	dec a			;8cdd
-	call L_8024		;8cde
+	call hl_mas_a		;8cde   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;8ce1
 	ld (0e443h),a		;8ce2
 	ret			;8ce5
@@ -1688,11 +1688,11 @@ DATA_resto_8CE6:
 ; ======================================================================
 
 
-L_8CF2:
+th_mueve_pelota:		; mueve la pelota y mira los choques
 	ld a,(0e448h)		;8cf2
 	dec a			;8cf5
 	jr z,L_8D4C		;8cf6
-	call L_8D63		;8cf8
+	call th_velocidad		;8cf8   ; th_velocidad: la velocidad de la pelota segun SPEED (0xE413)
 	ld a,(0e443h)		;8cfb
 	cp 078h		;8cfe
 	ld a,(0e405h)		;8d00
@@ -1709,7 +1709,7 @@ L_8D08:
 	ret nz			;8d15
 L_8D16:
 	ld a,005h		;8d16
-	call L_9B3C		;8d18
+	call pide_sonido		;8d18   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 	ld hl,0e448h		;8d1b
 	inc (hl)			;8d1e
 	ld hl,08d5fh		;8d1f
@@ -1726,8 +1726,8 @@ L_8D2C:
 L_8D34:
 	ld a,(hl)			;8d34
 	ld (0e44ah),a		;8d35
-L_8D38:
-	call L_9040		;8d38
+th_avanza_pelota:		; suma la velocidad a la posicion de la pelota (0xE440, 0xE442)
+	call th_velocidades		;8d38   ; th_velocidades: las dos velocidades de las tablas de p07:9051 y p07:9059
 	push hl			;8d3b
 	ld hl,(0e440h)		;8d3c
 	add hl,de			;8d3f
@@ -1744,8 +1744,8 @@ L_8D4C:
 L_8D51:
 	push bc			;8d51
 	ld a,(0e44ah)		;8d52
-	call L_8D38		;8d55
-	call L_8D84		;8d58
+	call th_avanza_pelota		;8d55   ; th_avanza_pelota: suma la velocidad a la posicion de la pelota (0xE440, 0xE442)
+	call th_choques		;8d58   ; th_choques: los choques de la pelota con las raquetas
 	pop bc			;8d5b
 	djnz L_8D51		;8d5c
 	ret			;8d5e
@@ -1763,7 +1763,7 @@ DATA_resto_8D5F:
 ; ======================================================================
 
 
-L_8D63:
+th_velocidad:		; la velocidad de la pelota segun SPEED (0xE413)
 	ld a,(0e443h)		;8d63
 	cp 078h		;8d66
 	ld a,(0e422h)		;8d68
@@ -1773,7 +1773,7 @@ L_8D70:
 	ld b,a			;8d70
 	ld a,(0e413h)		;8d71
 	ld hl,08d80h		;8d74
-	call L_8024		;8d77
+	call hl_mas_a		;8d77   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;8d7a
 	add a,b			;8d7b
 	ld (0e441h),a		;8d7c
@@ -1792,7 +1792,7 @@ DATA_resto_8D80:
 ; ======================================================================
 
 
-L_8D84:
+th_choques:		; los choques de la pelota con las raquetas
 	ld hl,0e44bh		;8d84
 	ld (hl),000h		;8d87
 	ex af,af'			;8d89
@@ -1801,11 +1801,11 @@ L_8D84:
 	exx			;8d8c
 	ld c,006h		;8d8d
 	exx			;8d8f
-	call L_8E44		;8d90
+	call th_choque		;8d90   ; th_choque: comprueba un choque de la pelota
 	ex af,af'			;8d93
 	ld a,001h		;8d94
 	ex af,af'			;8d96
-	call L_8E44		;8d97
+	call th_choque		;8d97   ; th_choque: comprueba un choque de la pelota
 	ld a,(0e416h)		;8d9a
 	or a			;8d9d
 	ret z			;8d9e
@@ -1815,7 +1815,7 @@ L_8D84:
 	exx			;8da3
 	ld c,00ah		;8da4
 	exx			;8da6
-	jp L_8E44		;8da7
+	jp th_choque		;8da7   ; th_choque: comprueba un choque de la pelota
 L_8DAA:
 	ld a,(0e44ah)		;8daa
 	ld b,a			;8dad
@@ -1828,7 +1828,7 @@ L_8DB8:
 	ld a,(0e44bh)		;8db8
 	or a			;8dbb
 	jr z,L_8DC3		;8dbc
-	call L_8DFE		;8dbe
+	call th_efecto		;8dbe   ; th_efecto: el efecto que da la raqueta a la pelota
 	jr nz,$+55		;8dc1
 L_8DC3:
 	ld d,000h		;8dc3
@@ -1857,7 +1857,7 @@ L_8DE3:
 	ld a,(0e44bh)		;8de3
 	or a			;8de6
 	jr z,L_8DEE		;8de7
-	call L_8DFE		;8de9
+	call th_efecto		;8de9   ; th_efecto: el efecto que da la raqueta a la pelota
 	jr nz,L_8DF8		;8dec
 L_8DEE:
 	ld a,(0e44ah)		;8dee
@@ -1868,8 +1868,8 @@ L_8DF8:
 	exx			;8df8
 	ld a,c			;8df9
 	exx			;8dfa
-	jp L_9B3C		;8dfb
-L_8DFE:
+	jp pide_sonido		;8dfb   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
+th_efecto:		; el efecto que da la raqueta a la pelota
 	ld a,(0e44ch)		;8dfe
 	or a			;8e01
 	ld a,(0e42fh)		;8e02
@@ -1886,7 +1886,7 @@ L_8E0A:
 	ld hl,08e34h		;8e16
 L_8E19:
 	ld a,(0e44ah)		;8e19
-	call L_8024		;8e1c
+	call hl_mas_a		;8e1c   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;8e1f
 	ld (0e44ah),a		;8e20
 	ret			;8e23
@@ -1905,9 +1905,9 @@ DATA_resto_8E24:
 ; ======================================================================
 
 
-L_8E44:
+th_choque:		; comprueba un choque de la pelota
 	ld a,(0e44ah)		;8e44
-	call L_802E		;8e47
+	call despacha		;8e47   ; despacha: salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
 
 ; ----------------------------------------------------------------------
 ; DATOS saltos_8E4A: tabla de 16 palabras del despachador (call 0x408D en
@@ -1943,7 +1943,7 @@ L_8E6A:
 	ld a,(0e441h)		;8e70
 	add a,008h		;8e73
 	ld l,a			;8e75
-	call L_8F72		;8e76
+	call th_choca_raqueta		;8e76   ; th_choca_raqueta: mira si la pelota toca una raqueta
 	jp z,L_8DB8		;8e79
 	ret			;8e7c
 L_8E7D:
@@ -1954,7 +1954,7 @@ L_8E7D:
 	add a,008h		;8e86
 	ld l,a			;8e88
 	push hl			;8e89
-	call L_8F72		;8e8a
+	call th_choca_raqueta		;8e8a   ; th_choca_raqueta: mira si la pelota toca una raqueta
 	pop hl			;8e8d
 	jp z,L_8DB8		;8e8e
 	ld a,l			;8e91
@@ -1964,13 +1964,13 @@ L_8E7D:
 	sub 003h		;8e96
 	ld h,a			;8e98
 	push hl			;8e99
-	call L_8F72		;8e9a
+	call th_choca_raqueta		;8e9a   ; th_choca_raqueta: mira si la pelota toca una raqueta
 	pop hl			;8e9d
 	jp z,L_8DAA		;8e9e
 	ld a,h			;8ea1
 	add a,003h		;8ea2
 	ld h,a			;8ea4
-	call L_8F72		;8ea5
+	call th_choca_raqueta		;8ea5   ; th_choca_raqueta: mira si la pelota toca una raqueta
 	jp z,L_8DE3		;8ea8
 	ret			;8eab
 L_8EAC:
@@ -1980,7 +1980,7 @@ L_8EAC:
 	ld a,(0e441h)		;8eb2
 	add a,005h		;8eb5
 	ld l,a			;8eb7
-	call L_8F72		;8eb8
+	call th_choca_raqueta		;8eb8   ; th_choca_raqueta: mira si la pelota toca una raqueta
 	jp z,L_8DAA		;8ebb
 	ret			;8ebe
 L_8EBF:
@@ -1991,7 +1991,7 @@ L_8EBF:
 	add a,005h		;8ec8
 	ld l,a			;8eca
 	push hl			;8ecb
-	call L_8F72		;8ecc
+	call th_choca_raqueta		;8ecc   ; th_choca_raqueta: mira si la pelota toca una raqueta
 	pop hl			;8ecf
 	jp z,L_8DAA		;8ed0
 	ld a,l			;8ed3
@@ -2001,13 +2001,13 @@ L_8EBF:
 	sub 003h		;8ed8
 	ld h,a			;8eda
 	push hl			;8edb
-	call L_8F72		;8edc
+	call th_choca_raqueta		;8edc   ; th_choca_raqueta: mira si la pelota toca una raqueta
 	pop hl			;8edf
 	jp z,L_8DB8		;8ee0
 	ld a,l			;8ee3
 	sub 003h		;8ee4
 	ld l,a			;8ee6
-	call L_8F72		;8ee7
+	call th_choca_raqueta		;8ee7   ; th_choca_raqueta: mira si la pelota toca una raqueta
 	jp z,L_8DE3		;8eea
 	ret			;8eed
 L_8EEE:
@@ -2017,7 +2017,7 @@ L_8EEE:
 	ld a,(0e441h)		;8ef4
 	add a,008h		;8ef7
 	ld l,a			;8ef9
-	call L_8F72		;8efa
+	call th_choca_raqueta		;8efa   ; th_choca_raqueta: mira si la pelota toca una raqueta
 	jp z,L_8DB8		;8efd
 	ret			;8f00
 L_8F01:
@@ -2028,7 +2028,7 @@ L_8F01:
 	add a,008h		;8f0a
 	ld l,a			;8f0c
 	push hl			;8f0d
-	call L_8F72		;8f0e
+	call th_choca_raqueta		;8f0e   ; th_choca_raqueta: mira si la pelota toca una raqueta
 	pop hl			;8f11
 	jp z,L_8DB8		;8f12
 	ld a,l			;8f15
@@ -2038,13 +2038,13 @@ L_8F01:
 	add a,003h		;8f1a
 	ld h,a			;8f1c
 	push hl			;8f1d
-	call L_8F72		;8f1e
+	call th_choca_raqueta		;8f1e   ; th_choca_raqueta: mira si la pelota toca una raqueta
 	pop hl			;8f21
 	jp z,L_8DAA		;8f22
 	ld a,h			;8f25
 	sub 003h		;8f26
 	ld h,a			;8f28
-	call L_8F72		;8f29
+	call th_choca_raqueta		;8f29   ; th_choca_raqueta: mira si la pelota toca una raqueta
 	jp z,L_8DE3		;8f2c
 	ret			;8f2f
 L_8F30:
@@ -2054,7 +2054,7 @@ L_8F30:
 	ld a,(0e441h)		;8f36
 	add a,00bh		;8f39
 	ld l,a			;8f3b
-	call L_8F72		;8f3c
+	call th_choca_raqueta		;8f3c   ; th_choca_raqueta: mira si la pelota toca una raqueta
 	jp z,L_8DAA		;8f3f
 	ret			;8f42
 L_8F43:
@@ -2065,7 +2065,7 @@ L_8F43:
 	add a,00bh		;8f4c
 	ld l,a			;8f4e
 	push hl			;8f4f
-	call L_8F72		;8f50
+	call th_choca_raqueta		;8f50   ; th_choca_raqueta: mira si la pelota toca una raqueta
 	pop hl			;8f53
 	jp z,L_8DAA		;8f54
 	ld a,l			;8f57
@@ -2075,16 +2075,16 @@ L_8F43:
 	add a,003h		;8f5c
 	ld h,a			;8f5e
 	push hl			;8f5f
-	call L_8F72		;8f60
+	call th_choca_raqueta		;8f60   ; th_choca_raqueta: mira si la pelota toca una raqueta
 	pop hl			;8f63
 	jp z,L_8DB8		;8f64
 	ld a,l			;8f67
 	add a,003h		;8f68
 	ld l,a			;8f6a
-	call L_8F72		;8f6b
+	call th_choca_raqueta		;8f6b   ; th_choca_raqueta: mira si la pelota toca una raqueta
 	jp z,L_8DE3		;8f6e
 	ret			;8f71
-L_8F72:
+th_choca_raqueta:		; mira si la pelota toca una raqueta
 	ex af,af'			;8f72
 	ld b,a			;8f73
 	ex af,af'			;8f74
@@ -2096,7 +2096,7 @@ L_8F72:
 	push hl			;8f7e
 	ex de,hl			;8f7f
 	ld hl,(0e422h)		;8f80
-	call L_8FCA		;8f83
+	call th_choca_borde		;8f83   ; th_choca_borde: mira si la pelota toca el borde de la raqueta
 	pop de			;8f86
 	dec b			;8f87
 	ret z			;8f88
@@ -2105,7 +2105,7 @@ L_8F72:
 	ld (0e44ch),a		;8f8d
 	push de			;8f90
 	ld hl,(0e432h)		;8f91
-	call L_8FCA		;8f94
+	call th_choca_borde		;8f94   ; th_choca_borde: mira si la pelota toca el borde de la raqueta
 	pop de			;8f97
 	dec b			;8f98
 	ret z			;8f99
@@ -2123,7 +2123,7 @@ L_8FA2:
 	ld l,a			;8fab
 	ld a,(0e426h)		;8fac
 	ld h,a			;8faf
-	call L_8FCA		;8fb0
+	call th_choca_borde		;8fb0   ; th_choca_borde: mira si la pelota toca el borde de la raqueta
 	pop de			;8fb3
 	dec b			;8fb4
 	ret z			;8fb5
@@ -2134,15 +2134,15 @@ L_8FA2:
 	ld l,a			;8fc0
 	ld a,(0e436h)		;8fc1
 	ld h,a			;8fc4
-	call L_8FCA		;8fc5
+	call th_choca_borde		;8fc5   ; th_choca_borde: mira si la pelota toca el borde de la raqueta
 	dec b			;8fc8
 	ret			;8fc9
-L_8FCA:
+th_choca_borde:		; mira si la pelota toca el borde de la raqueta
 	exx			;8fca
 	ld hl,09024h		;8fcb
 	ld a,(0e413h)		;8fce
 	add a,a			;8fd1
-	call L_8024		;8fd2
+	call hl_mas_a		;8fd2   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;8fd5
 	exx			;8fd6
 	add a,l			;8fd7
@@ -2178,10 +2178,10 @@ L_8FFB:
 L_8FFE:
 	djnz L_901B		;8ffe
 	ld b,000h		;9000
-	call L_9007		;9002
+	call th_dentro_porteria		;9002   ; th_dentro_porteria: mira si la pelota entra en la porteria
 	dec b			;9005
 	ret			;9006
-L_9007:
+th_dentro_porteria:		; mira si la pelota entra en la porteria
 	ld a,(0e452h)		;9007
 	dec a			;900a
 	cp l			;900b
@@ -2198,7 +2198,7 @@ L_9007:
 	inc b			;9019
 	ret			;901a
 L_901B:
-	call L_85C1		;901b
+	call th_divide		;901b   ; th_divide: desplaza HL y A: la posicion entre 8
 	ld a,(hl)			;901e
 	sub 060h		;901f
 	ret z			;9021
@@ -2218,7 +2218,7 @@ DATA_resto_9024:
 ; ======================================================================
 
 
-L_902C:
+th_sprite_pelota:		; el sprite de la pelota a la copia de 0xE500
 	ld hl,0e500h		;902c
 	ld de,0e441h		;902f
 	ld a,(de)			;9032
@@ -2233,14 +2233,14 @@ L_902C:
 	inc l			;903c
 	ld (hl),00fh		;903d
 	ret			;903f
-L_9040:
+th_velocidades:		; las dos velocidades de las tablas de p07:9051 y p07:9059
 	push af			;9040
 	ld de,09051h		;9041
-	call L_9079		;9044
+	call palabra_de_tabla		;9044   ; palabra_de_tabla: DE = la palabra A de la tabla de DE
 	pop af			;9047
 	push de			;9048
 	ld de,09059h		;9049
-	call L_9079		;904c
+	call palabra_de_tabla		;904c   ; palabra_de_tabla: DE = la palabra A de la tabla de DE
 	pop hl			;904f
 	ret			;9050
 
@@ -2259,7 +2259,7 @@ DATA_resto_9051:
 ; ======================================================================
 
 
-L_9079:
+palabra_de_tabla:		; DE = la palabra A de la tabla de DE
 	ld l,a			;9079
 	ld h,000h		;907a
 	add hl,hl			;907c
@@ -2268,24 +2268,24 @@ L_9079:
 	inc hl			;907f
 	ld d,(hl)			;9080
 	ret			;9081
-L_9082:
+th_campo_tenis:		; descomprime p07:9386 en 0x2300
 	ld hl,02300h		;9082
 	ld de,09386h		;9085
-	jp L_8616		;9088
-L_908B:
+	jp th_descomprime_tercios		;9088   ; th_descomprime_tercios: descomprime DE en los tres tercios
+th_campo_hockey:		; descomprime p07:951D en 0x0300
 	ld hl,00300h		;908b
 	ld de,0951dh		;908e
-	jp L_8616		;9091
-L_9094:
+	jp th_descomprime_tercios		;9091   ; th_descomprime_tercios: descomprime DE en los tres tercios
+th_campo_colores:		; descomprime p07:9535
 	ld de,09535h		;9094
 	jp L_8641		;9097
-L_909A:
+th_menu_juego:		; GAME SELECT: TENNIS / HOCKEY / END
 	ld de,0876eh		;909a
-	call L_8626		;909d
+	call th_pinta_texto		;909d   ; th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
 	ld a,001h		;90a0
 	ld (0e412h),a		;90a2
 	ret			;90a5
-L_90A6:
+th_elige_juego:		; mueve la eleccion de juego (0xE412) con el mando
 	ld a,(0e405h)		;90a6
 	and 003h		;90a9
 	jr z,L_90D0		;90ab
@@ -2297,7 +2297,7 @@ L_90A6:
 	jp z,L_90D0		;90b5
 	dec (hl)			;90b8
 	ld a,002h		;90b9
-	call L_9B3C		;90bb
+	call pide_sonido		;90bb   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 	jp L_90D0		;90be
 L_90C1:
 	ld a,(hl)			;90c1
@@ -2305,7 +2305,7 @@ L_90C1:
 	jp z,L_90D0		;90c4
 	inc (hl)			;90c7
 	ld a,002h		;90c8
-	call L_9B3C		;90ca
+	call pide_sonido		;90ca   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 	jp L_90D0		;90cd
 L_90D0:
 	xor a			;90d0
@@ -2321,7 +2321,7 @@ L_90D0:
 	dec a			;90e8
 	ld hl,090fah		;90e9
 	add a,a			;90ec
-	call L_8024		;90ed
+	call hl_mas_a		;90ed   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld e,(hl)			;90f0
 	inc hl			;90f1
 	ld d,(hl)			;90f2
@@ -2343,9 +2343,9 @@ DATA_resto_90FA:
 ; ======================================================================
 
 
-L_9100:
+th_menu_modify:		; GAME MODIFY: LENGTH / SPEED / TYPE / BAR
 	ld de,087a5h		;9100
-	call L_8626		;9103
+	call th_pinta_texto		;9103   ; th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
 	ld hl,09126h		;9106
 	ld de,0e500h		;9109
 	ld bc,00010h		;910c
@@ -2373,7 +2373,7 @@ DATA_resto_9126:
 ; ======================================================================
 
 
-L_9136:
+th_cambia_opcion:		; cambia la opcion elegida del GAME MODIFY (0xE460)
 	ld a,(0e405h)		;9136
 	ld c,a			;9139
 	and 00ch		;913a
@@ -2389,7 +2389,7 @@ L_9136:
 	jp z,L_9199		;914c
 	dec (hl)			;914f
 	ld a,002h		;9150
-	call L_9B3C		;9152
+	call pide_sonido		;9152   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 	jp L_9199		;9155
 L_9158:
 	ld a,(hl)			;9158
@@ -2397,14 +2397,14 @@ L_9158:
 	jp z,L_9199		;915b
 	inc (hl)			;915e
 	ld a,002h		;915f
-	call L_9B3C		;9161
+	call pide_sonido		;9161   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 	jp L_9199		;9164
 L_9167:
 	ld c,a			;9167
 	ld a,(0e460h)		;9168
 	ld hl,09204h		;916b
 	add a,a			;916e
-	call L_8024		;916f
+	call hl_mas_a		;916f   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld e,(hl)			;9172
 	inc hl			;9173
 	ld d,(hl)			;9174
@@ -2416,7 +2416,7 @@ L_9167:
 	jp z,L_9199		;917c
 	dec (hl)			;917f
 	ld a,003h		;9180
-	call L_9B3C		;9182
+	call pide_sonido		;9182   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 	jp L_9199		;9185
 L_9188:
 	inc hl			;9188
@@ -2427,7 +2427,7 @@ L_9188:
 	jp z,L_9199		;918d
 	inc (hl)			;9190
 	ld a,003h		;9191
-	call L_9B3C		;9193
+	call pide_sonido		;9193   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 	jp L_9199		;9196
 L_9199:
 	xor a			;9199
@@ -2445,7 +2445,7 @@ L_9199:
 	ld a,(0e460h)		;91b5
 	ld hl,0920ch		;91b8
 	add a,a			;91bb
-	call L_8024		;91bc
+	call hl_mas_a		;91bc   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld e,(hl)			;91bf
 	inc hl			;91c0
 	ld d,(hl)			;91c1
@@ -2455,22 +2455,22 @@ L_9199:
 	ld a,(0e461h)		;91c8
 	ld bc,0e500h		;91cb
 	ld hl,09214h		;91ce
-	call L_91F5		;91d1
+	call th_pon_palabra		;91d1   ; th_pon_palabra: escribe en HL la palabra A de la tabla y vuelca los sprites
 	ld a,(0e463h)		;91d4
 	ld bc,0e504h		;91d7
 	ld hl,0921ch		;91da
-	call L_91F5		;91dd
+	call th_pon_palabra		;91dd   ; th_pon_palabra: escribe en HL la palabra A de la tabla y vuelca los sprites
 	ld a,(0e465h)		;91e0
 	ld bc,0e508h		;91e3
 	ld hl,09226h		;91e6
-	call L_91F5		;91e9
+	call th_pon_palabra		;91e9   ; th_pon_palabra: escribe en HL la palabra A de la tabla y vuelca los sprites
 	ld a,(0e467h)		;91ec
 	ld bc,0e50ch		;91ef
 	ld hl,0922ch		;91f2
-L_91F5:
+th_pon_palabra:		; escribe en HL la palabra A de la tabla y vuelca los sprites
 	push bc			;91f5
 	add a,a			;91f6
-	call L_8024		;91f7
+	call hl_mas_a		;91f7   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld e,(hl)			;91fa
 	inc hl			;91fb
 	ld d,(hl)			;91fc
@@ -2478,7 +2478,7 @@ L_91F5:
 	ld (hl),e			;91fe
 	inc hl			;91ff
 	ld (hl),d			;9200
-	jp L_866C		;9201
+	jp th_vuelca_sprites		;9201   ; th_vuelca_sprites: vuelca a la tabla de sprites la copia de 0xE500
 
 ; ----------------------------------------------------------------------
 ; DATOS resto_9204: lo apuntan con el banco puesto p07:916B (0x9204), p07:91B8
@@ -2497,7 +2497,7 @@ DATA_resto_9204:
 ; ======================================================================
 
 
-L_9230:
+th_aplica_opciones:		; copia LENGTH, SPEED, TYPE y BAR (0xE461...) a 0xE413...
 	ld hl,0e461h		;9230
 	ld a,(hl)			;9233
 	ld (0e413h),a		;9234
@@ -2532,8 +2532,8 @@ L_9230:
 	ld c,00fh		;9271
 L_9273:
 	ld a,c			;9273
-	jp L_9B3C		;9274
-L_9277:
+	jp pide_sonido		;9274   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
+th_tanto:		; suma el tanto al jugador que toca
 	ld a,(0e412h)		;9277
 	dec a			;927a
 	jp nz,L_92F7		;927b
@@ -2578,7 +2578,7 @@ L_92A6:
 	ld de,0e580h		;92c1
 	ld a,(0e40ch)		;92c4
 	add a,a			;92c7
-	call L_8029		;92c8
+	call de_mas_a		;92c8   ; de_mas_a: DE = DE + A (gemela de p01:7256)
 	ldi		;92cb
 	ld hl,0e41bh		;92cd
 	ldi		;92d0
@@ -2622,7 +2622,7 @@ L_9309:
 	xor 001h		;9314
 	ld (0e41ah),a		;9316
 	ret			;9319
-L_931A:
+th_reloj:		; en hockey, baja el tiempo (0xE419, BCD) cada 64 cuadros
 	ld a,(0e402h)		;931a
 	and 03fh		;931d
 	ret nz			;931f
@@ -2633,7 +2633,7 @@ L_931A:
 	push af			;9329
 	cp 010h		;932a
 	ld a,014h		;932c
-	call z,L_9B3C		;932e
+	call z,pide_sonido		;932e   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 	pop af			;9331
 	push af			;9332
 	and a			;9333
@@ -2644,7 +2644,7 @@ L_931A:
 L_933C:
 	pop af			;933c
 	push af			;933d
-	call L_8562		;933e
+	call th_tiempo		;933e   ; th_tiempo: en hockey, pinta el tiempo (0xE419)
 	pop af			;9341
 	and a			;9342
 	ret nz			;9343
@@ -2662,7 +2662,7 @@ L_9354:
 	xor a			;9358
 	ld (0e40ah),a		;9359
 	ret			;935c
-L_935D:
+th_gol:		; mira si la pelota sale por un lado y de quien es el tanto
 	ld a,(0e412h)		;935d
 	dec a			;9360
 	jp nz,L_937B		;9361
@@ -2678,7 +2678,7 @@ L_9371:
 	ld a,c			;9371
 	ld (0e409h),a		;9372
 	ld a,009h		;9375
-	call L_9B3C		;9377
+	call pide_sonido		;9377   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 	ret			;937a
 L_937B:
 	ld a,(0e441h)		;937b
@@ -2825,7 +2825,7 @@ DATA_resto_9386:
 ; ======================================================================
 
 
-L_9B3C:
+pide_sonido:		; pide el sonido A al motor (con las interrupciones cerradas)
 	di			;9b3c
 	push ix		;9b3d
 	push iy		;9b3f
@@ -2833,7 +2833,7 @@ L_9B3C:
 	push de			;9b42
 	push bc			;9b43
 	push af			;9b44
-	call L_9B52		;9b45
+	call pide_sonido_b		;9b45   ; pide_sonido_b: pone en sus canales las pistas del sonido A (tabla de p07:9BF5)
 	pop af			;9b48
 	pop bc			;9b49
 	pop de			;9b4a
@@ -2842,7 +2842,7 @@ L_9B3C:
 	pop ix		;9b4e
 	ei			;9b50
 	ret			;9b51
-L_9B52:
+pide_sonido_b:		; pone en sus canales las pistas del sonido A (tabla de p07:9BF5)
 	ld c,a			;9b52
 	ld hl,0e2ddh		;9b53
 	ld (hl),c			;9b56
@@ -2866,7 +2866,7 @@ L_9B52:
 	inc hl			;9b78
 	ld a,(hl)			;9b79
 	ld hl,0e201h		;9b7a
-	call L_9BCB		;9b7d
+	call canal_libre		;9b7d   ; canal_libre: pone la pista en el canal si su prioridad no es menor
 	inc ix		;9b80
 	inc ix		;9b82
 L_9B84:
@@ -2876,7 +2876,7 @@ L_9B84:
 	inc hl			;9b8c
 	ld a,(hl)			;9b8d
 	ld hl,0e22dh		;9b8e
-	call L_9BCB		;9b91
+	call canal_libre		;9b91   ; canal_libre: pone la pista en el canal si su prioridad no es menor
 	inc ix		;9b94
 	inc ix		;9b96
 L_9B98:
@@ -2886,7 +2886,7 @@ L_9B98:
 	inc hl			;9ba0
 	ld a,(hl)			;9ba1
 	ld hl,0e259h		;9ba2
-	call L_9BCB		;9ba5
+	call canal_libre		;9ba5   ; canal_libre: pone la pista en el canal si su prioridad no es menor
 	inc ix		;9ba8
 	inc ix		;9baa
 L_9BAC:
@@ -2896,7 +2896,7 @@ L_9BAC:
 	inc hl			;9bb4
 	ld a,(hl)			;9bb5
 	ld hl,0e285h		;9bb6
-	call L_9BCB		;9bb9
+	call canal_libre		;9bb9   ; canal_libre: pone la pista en el canal si su prioridad no es menor
 	inc ix		;9bbc
 	inc ix		;9bbe
 L_9BC0:
@@ -2906,7 +2906,7 @@ L_9BC0:
 	inc hl			;9bc6
 	ld a,(hl)			;9bc7
 	ld hl,0e2b1h		;9bc8
-L_9BCB:
+canal_libre:		; pone la pista en el canal si su prioridad no es menor
 	ld b,(hl)			;9bcb
 	cp b			;9bcc
 	ret c			;9bcd
@@ -2953,38 +2953,38 @@ DATA_resto_9BEB:
 ; ======================================================================
 
 
-L_9CA5:
+sonido_cuadro:		; el motor de sonido: un cuadro de los cinco canales
 	ld a,(0e2eeh)		;9ca5
 	call 0a3bdh		;9ca8
 	ld a,001h		;9cab
 	ld (0e2efh),a		;9cad
 	ld ix,0e200h		;9cb0
-	call L_9CDF		;9cb4
+	call canal_cuadro		;9cb4   ; canal_cuadro: un cuadro del canal IX si esta activo
 	ld a,002h		;9cb7
 	ld (0e2efh),a		;9cb9
 	ld ix,0e22ch		;9cbc
-	call L_9CDF		;9cc0
+	call canal_cuadro		;9cc0   ; canal_cuadro: un cuadro del canal IX si esta activo
 	ld a,004h		;9cc3
 	ld (0e2efh),a		;9cc5
 	ld ix,0e258h		;9cc8
-	call L_9CDF		;9ccc
+	call canal_cuadro		;9ccc   ; canal_cuadro: un cuadro del canal IX si esta activo
 	ld a,008h		;9ccf
 	ld (0e2efh),a		;9cd1
 	ld ix,0e284h		;9cd4
-	call L_9CDF		;9cd8
+	call canal_cuadro		;9cd8   ; canal_cuadro: un cuadro del canal IX si esta activo
 	call 0a291h		;9cdb
 	ret			;9cde
-L_9CDF:
+canal_cuadro:		; un cuadro del canal IX si esta activo
 	ld a,(ix+000h)		;9cdf
 	or a			;9ce2
-	call nz,L_9CE7		;9ce3
+	call nz,canal_nota		;9ce3   ; canal_nota: baja la duracion; si acaba, lee la orden siguiente de la pista
 	ret			;9ce6
-L_9CE7:
+canal_nota:		; baja la duracion; si acaba, lee la orden siguiente de la pista
 	dec (ix+004h)		;9ce7
 	jp nz,L_9E6D		;9cea
 	ld l,(ix+002h)		;9ced
 	ld h,(ix+003h)		;9cf0
-L_9CF3:
+canal_ordenes:		; lee las ordenes de la pista (0xD0-0xFE) hasta una nota; 0xFF acaba
 	ld a,(hl)			;9cf3
 	cp 0ffh		;9cf4
 	jp z,L_9FC1		;9cf6
@@ -2992,17 +2992,17 @@ L_9CF3:
 	jp c,L_9D05		;9cfb
 	call 0a029h		;9cfe
 	inc hl			;9d01
-	jp L_9CF3		;9d02
+	jp canal_ordenes		;9d02   ; canal_ordenes: lee las ordenes de la pista (0xD0-0xFE) hasta una nota; 0xFF acaba
 L_9D05:
 	bit 0,(ix+009h)		;9d05
-	jp nz,L_9D1C		;9d09
+	jp nz,canal_duracion		;9d09   ; canal_duracion: la duracion de la nota: la parte baja por el tempo (ix+0x14)
 	bit 1,(ix+009h)		;9d0c
 	jp nz,L_9D7B		;9d10
 	ld a,(ix+009h)		;9d13
 	and 03ch		;9d16
 	jp nz,L_9DED		;9d18
 	ret			;9d1b
-L_9D1C:
+canal_duracion:		; la duracion de la nota: la parte baja por el tempo (ix+0x14)
 	ld a,(hl)			;9d1c
 	and 00fh		;9d1d
 	ld b,a			;9d1f
@@ -3020,7 +3020,7 @@ L_9D2A:
 	rrca			;9d31
 	rrca			;9d32
 	rrca			;9d33
-	call L_9FB9		;9d34
+	call canal_avanza		;9d34   ; canal_avanza: avanza el puntero de la pista (ix+0x02)
 	bit 7,(ix+009h)		;9d37
 	ret nz			;9d3b
 	cp 00ch		;9d3c
@@ -3044,7 +3044,7 @@ L_9D56:
 	ld e,(ix+015h)		;9d5c
 	ld (ix+012h),e		;9d5f
 	ld (ix+00dh),002h		;9d62
-	call L_9E22		;9d66
+	call canal_empieza_nota		;9d66   ; canal_empieza_nota: empieza la nota: frecuencia y envolvente a cero
 	ret			;9d69
 L_9D6A:
 	ld (ix+00dh),000h		;9d6a
@@ -3118,17 +3118,17 @@ L_9DD0:
 L_9DD5:
 	ld e,(ix+012h)		;9dd5
 	ld (ix+012h),e		;9dd8
-	call L_9E22		;9ddb
+	call canal_empieza_nota		;9ddb   ; canal_empieza_nota: empieza la nota: frecuencia y envolvente a cero
 L_9DDE:
 	bit 7,(ix+009h)		;9dde
 	ret nz			;9de2
-	call L_9FB9		;9de3
+	call canal_avanza		;9de3   ; canal_avanza: avanza el puntero de la pista (ix+0x02)
 	ld a,(ix+013h)		;9de6
 	ld (ix+004h),a		;9de9
 	ret			;9dec
 L_9DED:
 	set 7,(ix+009h)		;9ded
-	call L_9D1C		;9df1
+	call canal_duracion		;9df1   ; canal_duracion: la duracion de la nota: la parte baja por el tempo (ix+0x14)
 	ld hl,0a3dah		;9df4
 	add a,a			;9df7
 	ld e,a			;9df8
@@ -3139,9 +3139,9 @@ L_9DED:
 	ld d,(hl)			;9dfe
 	ex de,hl			;9dff
 	ld a,(hl)			;9e00
-L_9E01:
+canal_bucle:		; repeticion: guarda donde vuelve (ix+0x17)
 	set 1,(ix+009h)		;9e01
-	call L_9CF3		;9e05
+	call canal_ordenes		;9e05   ; canal_ordenes: lee las ordenes de la pista (0xD0-0xFE) hasta una nota; 0xFF acaba
 	res 1,(ix+009h)		;9e08
 	res 7,(ix+009h)		;9e0c
 	ld a,(ix+013h)		;9e10
@@ -3151,8 +3151,8 @@ L_9E01:
 	ld (ix+018h),h		;9e1a
 	set 0,(ix+00eh)		;9e1d
 	ret			;9e21
-L_9E22:
-	call L_9EB1		;9e22
+canal_empieza_nota:		; empieza la nota: frecuencia y envolvente a cero
+	call canal_frecuencia		;9e22   ; canal_frecuencia: la frecuencia de la nota (ix+0x10) con el desplazamiento (ix+0x26) a (ix+0x0A)
 	res 4,(ix+00eh)		;9e25
 	ld a,(ix+00fh)		;9e29
 	and 0d7h		;9e2c
@@ -3168,7 +3168,7 @@ L_9E22:
 	jp z,L_9E53		;9e49
 	ld e,(ix+015h)		;9e4c
 	sub e			;9e4f
-	call m,L_9E6B		;9e50
+	call m,a_cero		;9e50   ; a_cero: A = 0 y Z
 L_9E53:
 	ld (ix+00ch),a		;9e53
 	bit 2,(ix+00dh)		;9e56
@@ -3179,16 +3179,16 @@ L_9E53:
 	ld (ix+00ch),a		;9e63
 	res 2,(ix+00fh)		;9e66
 	ret			;9e6a
-L_9E6B:
+a_cero:		; A = 0 y Z
 	xor a			;9e6b
 	ret			;9e6c
 L_9E6D:
 	bit 0,(ix+00eh)		;9e6d
 	jp nz,L_9E8D		;9e71
 	bit 2,(ix+00eh)		;9e74
-	call nz,L_9ECE		;9e78
+	call nz,canal_vibrato		;9e78   ; canal_vibrato: el contador del vibrato (ix+0x1E) segun los bits de (ix+0x0E)
 	bit 0,(ix+00fh)		;9e7b
-	call nz,L_9F23		;9e7f
+	call nz,canal_volumen_si		;9e7f   ; canal_volumen_si: el volumen del canal salvo si (ix+0x0D) lleva el bit 2
 	ld a,(0e2efh)		;9e82
 	cp 004h		;9e85
 	ret nz			;9e87
@@ -3204,7 +3204,7 @@ L_9E8D:
 	cp 0ffh		;9e98
 	jp z,L_9EA5		;9e9a
 	set 7,(ix+009h)		;9e9d
-	call L_9E01		;9ea1
+	call canal_bucle		;9ea1   ; canal_bucle: repeticion: guarda donde vuelve (ix+0x17)
 	ret			;9ea4
 L_9EA5:
 	res 0,(ix+00eh)		;9ea5
@@ -3212,7 +3212,7 @@ L_9EA5:
 	ld (ix+00ch),a		;9eaa
 	ld (ix+00dh),a		;9ead
 	ret			;9eb0
-L_9EB1:
+canal_frecuencia:		; la frecuencia de la nota (ix+0x10) con el desplazamiento (ix+0x26) a (ix+0x0A)
 	ld e,(ix+010h)		;9eb1
 	ld d,(ix+011h)		;9eb4
 	bit 1,(ix+00eh)		;9eb7
@@ -3226,7 +3226,7 @@ L_9EC7:
 	ld (ix+00ah),e		;9ec7
 	ld (ix+00bh),d		;9eca
 	ret			;9ecd
-L_9ECE:
+canal_vibrato:		; el contador del vibrato (ix+0x1E) segun los bits de (ix+0x0E)
 	inc (ix+01eh)		;9ece
 	ld a,(ix+01eh)		;9ed1
 	ld b,(ix+00eh)		;9ed4
@@ -3267,13 +3267,13 @@ L_9F18:
 	ld (ix+00bh),d		;9f1b
 	ld (ix+01eh),000h		;9f1e
 	ret			;9f22
-L_9F23:
+canal_volumen_si:		; el volumen del canal salvo si (ix+0x0D) lleva el bit 2
 	bit 2,(ix+00dh)		;9f23
 	ret nz			;9f27
-	call L_9F2F		;9f28
+	call canal_volumen		;9f28   ; canal_volumen: el volumen del canal segun la envolvente de (ix+0x0F)
 	ld (ix+00ch),e		;9f2b
 	ret			;9f2e
-L_9F2F:
+canal_volumen:		; el volumen del canal segun la envolvente de (ix+0x0F)
 	ld e,(ix+00ch)		;9f2f
 	inc (ix+01fh)		;9f32
 	ld b,(ix+01fh)		;9f35
@@ -3344,7 +3344,7 @@ L_9FAD:
 	ret m			;9fb6
 	ld e,a			;9fb7
 	ret			;9fb8
-L_9FB9:
+canal_avanza:		; avanza el puntero de la pista (ix+0x02)
 	inc hl			;9fb9
 	ld (ix+002h),l		;9fba
 	ld (ix+003h),h		;9fbd
@@ -3361,7 +3361,7 @@ L_9FC1:
 	ld (ix+00dh),a		;9fd7
 	ld (ix+00eh),a		;9fda
 	ld (ix+00fh),a		;9fdd
-	call L_9FFB		;9fe0
+	call th_9ffb		;9fe0   ; th_9ffb: HL = 0xE2F6 y sigue en p08
 	ld hl,0e2f2h		;9fe3
 	ld a,(0e2efh)		;9fe6
 	cp 008h		;9fe9
@@ -3375,7 +3375,7 @@ L_9FC1:
 L_9FF8:
 	res 3,(hl)		;9ff8
 	ret			;9ffa
-L_9FFB:
+th_9ffb:		; HL = 0xE2F6 y sigue en p08
 	ld hl,0e2f6h		;9ffb
 
 ; ----------------------------------------------------------------------

@@ -4,6 +4,278 @@ C 0x802E la direccion de la tabla, que va pegada al `call`
 C 0x802F A x 2: cada destino es una palabra
 # --- fin de los comentarios copiados ---
 
+# --- A MANO: comentarios escritos leyendo el codigo ---
+C 0x8217 el tenis no tiene esto
+C 0x821B 0xE41E: ya esta hecho
+C 0x8222 lo apunta
+C 0x8226 y una espera de 7 cuadros (0xE400)
+C 0x831B quien saca (0xE41D): 0...
+C 0x831F ...el texto de p07:881C
+C 0x8324 1: el de p07:8808
+C 0x832A 2: el de p07:8812
+C 0x85C1 la posicion en pixeles: L / 8...
+C 0x85C6 ...pasando los bits bajos de H...
+C 0x85CE ...L = la columna
+C 0x85CF la fila...
+C 0x85D1 ...en la tabla de nombres (0x3800 = 0xE6 + 0x52...)
+C 0x85F5 B tercios: copia a la VRAM
+C 0x85FB el tercio siguiente esta 0x800 mas alla
+C 0x8602 los B tercios
+C 0x8628 HL = la direccion de VRAM que viene en el texto
+C 0x862E una letra
+C 0x8630 0xFF acaba
+C 0x8633 0xFE: otra direccion
+C 0x8636 con la mascara C
+C 0x8637 a la VRAM
+C 0x863A la columna siguiente
+C 0x8641 HL = la direccion de VRAM que viene en el bloque
+C 0x864A el byte de cuenta
+C 0x864C 0 acaba
+C 0x864F n & 0x7F...
+C 0x8651 ...si es el mismo, bit 7 a 0: repetir
+C 0x8654 0x80: otra direccion de VRAM
+C 0x8657 bit 7 a 1: copiar n bytes
+C 0x8658 un byte...
+C 0x865B ...a la VRAM
+C 0x865E los n bytes
+C 0x8684 un sprite de la copia: Y - 1 (el VDP pinta una linea mas abajo)
+C 0x868A X
+C 0x868E el patron
+C 0x8692 el color
+C 0x8696 el segundo sprite: Y - 1
+C 0x869B X
+C 0x869F el patron
+C 0x86A3 el color
+C 0x86A7 la pareja siguiente, 0x48 bytes mas alla (dando la vuelta a 0x78)
+C 0x86AD las B parejas
+C 0x86FB lo que habia
+C 0x86FC lo que hay ahora
+C 0x86FD lo que cambio...
+C 0x86FE ...y esta pulsado: lo recien pulsado
+C 0x8700 en el byte anterior
+C 0x8713 la fila 7 del teclado...
+C 0x8718 ...a nivel alto
+C 0x8719 ESC al bit 5? (bit 2 de la fila 7, rotado)
+C 0x871D la fila 8 (espacio y flechas)
+C 0x8726 el espacio, al bit 2
+C 0x872E las flechas arriba/abajo, a los bits 3 y 4
+C 0x8734 izquierda/derecha, a los bits 0 y 1
+C 0x8738 junto con lo del mando
+C 0x873B la fila 3 del teclado
+C 0x8742 una tecla al bit 3
+C 0x8746 otra al bit 0
+C 0x874D otra al bit 1
+C 0x8752 la fila 5
+C 0x8758 una tecla al bit 2
+C 0x875E la fila 6
+C 0x8764 dos teclas a los bits 4 y 5
+C 0x876C junto con lo del mando
+C 0x8AAF LENGTH...
+C 0x8AB2 ...elige dos bytes de la tabla de p07:8AD9...
+C 0x8ABB ...para el jugador 1 (0xE428)
+C 0x8AC4 LENGTH...
+C 0x8AC7 ...elige dos bytes de la tabla de p07:8AD9...
+C 0x8AD0 ...para el jugador 2 (0xE438)
+C 0x8B2C lo recien pulsado del jugador 1 (arriba y abajo)
+C 0x8B32 C = 0: quieto
+C 0x8B36 lo que mantiene pulsado
+C 0x8B3B los dos a la vez: nada
+C 0x8B3E arriba: C = 1
+C 0x8B43 abajo: C = 2
+C 0x8B48 lo recien pulsado
+C 0x8BA3 lo recien pulsado del jugador 2 (arriba y abajo)
+C 0x8BA9 C = 0: quieto
+C 0x8BAD lo que mantiene pulsado
+C 0x8BB2 los dos a la vez: nada
+C 0x8BB5 arriba: C = 1
+C 0x8BBA abajo: C = 2
+C 0x8BBF lo recien pulsado
+C 0x8C18 Y del primer sprite
+C 0x8C1D X
+C 0x8C21 el patron, 6 bytes mas alla en la ficha
+C 0x8C2B el color (C)
+C 0x8C2D la raqueta corta (LENGTH = 1)...
+C 0x8C32 ...esconde el segundo sprite (Y = 0xE0)
+C 0x8C3C el segundo sprite, 16 lineas mas abajo
+C 0x8C41 la misma X
+C 0x8C48 su patron
+C 0x8C4B el color
+C 0x8C62 sin barra, nada
+C 0x8C67 la direccion de la barra
+C 0x8C6B su altura (0xE452)
+C 0x8C71 bajando, hasta 0x88...
+C 0x8C75 ...una linea por cuadro
+C 0x8C86 sin barra, nada
+C 0x8C8B los sprites 9-11 de la copia (0xE524)
+C 0x8C8E la altura y la columna de la barra
+C 0x8C9A patron 0x18
+C 0x8C9D color 0x0D
+C 0x8CA0 el segundo, 16 lineas mas abajo
+C 0x8CA7 patron 0x1C
+C 0x8CAD el tercero, 16 mas
+C 0x8CB3 patron 0x20
+C 0x8CB9 0xE448 = 0
+C 0x8CBE 0xE449 = 0x50
+C 0x8CC3 la posicion de partida de p07:8CE6 (8 bytes)
+C 0x8CCE la velocidad de saque: hacia un lado...
+C 0x8CD1 ...segun quien saca (0xE41A)...
+C 0x8CD7 ...o hacia el otro
+C 0x8DAA el angulo de la pelota (0-15)
+C 0x8DAE rebota en horizontal: 16 - angulo
+C 0x8DC3 el angulo
+C 0x8DC9 rebota en vertical: la tabla de p07:8DD3
+C 0x8E0A el mando: arriba o abajo
+C 0x8E0D los dos a la vez: nada
+C 0x8E10 arriba: la tabla de p07:8E24
+C 0x8E16 abajo: la de p07:8E34
+C 0x8FA2 la raqueta del jugador 1
+C 0x8FA8 su altura
+C 0x8FAC y su columna
+C 0x8FB0 ¿la toca?
+C 0x8FB5 si: sale
+C 0x8FB8 la raqueta del jugador 2
+C 0x8FC5 ¿la toca?
+C 0x8FCA el largo de la raqueta...
+C 0x8FCB ...segun LENGTH (tabla p07:9024)
+C 0x8FD7 la parte de arriba de la raqueta...
+C 0x8FD8 ...por debajo de la pelota: no
+C 0x8FDF la de abajo...
+C 0x8FE0 ...por encima: no
+C 0x8FE2 la columna de la raqueta, mas 5...
+C 0x8FE7 ...y 4 de ancho
+C 0x8FEB toca: 0xE44B = 1
+C 0x8FF1 el lado (0xE44C)...
+C 0x8FF4 ...decide el sonido: 8 o 7
+C 0x9007 la parte de arriba de la barra
+C 0x900B por debajo de la pelota: no
+C 0x900D la de abajo (0x30 de alto)
+C 0x9011 la columna de la barra (0x7C)...
+C 0x9015 ...y 6 de ancho
+C 0x9019 toca: B + 1
+C 0x9079 HL = A x 2...
+C 0x907D ...en la tabla de DE
+C 0x907E DE = la palabra
+C 0x9290 el tanteo del juego (0x40 en el tenis: juego)
+C 0x9295 0: 15
+C 0x929A 0x15: 30
+C 0x92A0 si no, 10 mas (0x30 -> 0x40)
+C 0x92A6 cambia el que saca
+C 0x92AE los dos tantos a cero
+C 0x92B5 un juego mas al ganador (BCD)
+C 0x92BA hasta 6 juegos...
+C 0x92BD ...el set: guarda los juegos de cada uno en 0xE580
+C 0x92C4 el set que se juega (0xE40C) x 2
+C 0x92CB los juegos del jugador 1
+C 0x92D0 y los del 2
+C 0x92D2 vuelven a cero
+C 0x92D9 0xE41F = 1
+C 0x92DD el set siguiente
+C 0x92E2 los sets ganados
+C 0x92E4 con uno, el partido
+C 0x92E9 un set mas
+C 0x9309 el tanto en BCD, con tope 99
+C 0x930D uno mas
+C 0x9311 y cambia el que saca
+C 0x9B3C sin interrupciones, guardando todos los registros
+C 0x9B45 pide el sonido
+C 0x9B50 y las vuelve a abrir
+C 0x9B52 C = el sonido
+C 0x9B57 su ficha, en la tabla de p07:9BF5
+C 0x9B64 copia sus 12 bytes a 0xE2DE: los canales que usa y sus pistas
+C 0x9B6C IX = las pistas
+C 0x9B70 bit 7: usa el canal 1
+C 0x9B79 la prioridad
+C 0x9B7A el canal 1 (0xE201)
+C 0x9B7D se pone si puede
+C 0x9B80 la pista siguiente
+C 0x9BC0 bit 3: usa el canal 5
+C 0x9BC6 la prioridad
+C 0x9BC8 el canal 5 (0xE2B1)
+C 0x9BCB la prioridad del canal
+C 0x9BCC si la del sonido es menor, no entra
+C 0x9BCF la nueva prioridad
+C 0x9BD4 el sonido
+C 0x9BD8 la direccion de la pista...
+C 0x9BDD ...que trae IX
+C 0x9BE2 y el resto del canal desde p07:9BEB (12 bytes)
+C 0x9D1C la duracion: la parte baja de la nota...
+C 0x9D20 ...por el tempo (ix+0x14)
+C 0x9D2A la duracion del canal (ix+0x04)
+C 0x9D2D la nota: la parte alta
+C 0x9D34 la pista avanza
+C 0x9D37 bit 7: silencio
+C 0x9D3C 0x0C y mas: no es una nota
+C 0x9D41 la frecuencia de la nota en la tabla de p07:9D6F
+C 0x9D4B la octava (ix+0x16)...
+C 0x9D52 ...divide la frecuencia
+C 0x9D7B el modo del canal (ix+0x0D)
+C 0x9D80 0: tono
+C 0x9D83 1: ...
+C 0x9D88 el byte de la orden
+C 0x9D89 bit 6...
+C 0x9D90 ...o bit 5 del estado
+C 0x9D97 la parte alta: la octava
+C 0x9D99 la baja con lo que quede: la parte alta de la frecuencia
+C 0x9D9C el byte siguiente...
+C 0x9D9E ...la parte baja de la frecuencia
+C 0x9DA4 la octava
+C 0x9DB3 la parte alta del byte...
+C 0x9DB9 ...la octava
+C 0x9DBA la baja...
+C 0x9DBD ...la parte alta de la frecuencia
+C 0x9DED silencio
+C 0x9DF1 su duracion
+C 0x9DF4 el sonido de ruido de la tabla de p08:A3DA
+C 0x9E01 apunta que se lee la repeticion
+C 0x9E05 las ordenes que la abren
+C 0x9E08 y vuelve al modo normal
+C 0x9E10 el contador de la repeticion
+C 0x9E16 donde empieza...
+C 0x9E17 ...a (ix+0x17)
+C 0x9E1D y la enciende
+C 0x9E53 el volumen del canal (ix+0x0C)
+C 0x9E56 bit 2 del modo: sin envolvente
+C 0x9E5B bit 1 de (ix+0x0F): el volumen fijo
+C 0x9E60 de (ix+0x25)
+C 0x9EB1 la frecuencia de la nota
+C 0x9EB7 si hay desplazamiento (bit 1)...
+C 0x9EBE ...se suma (ix+0x26)
+C 0x9ECE el contador del vibrato
+C 0x9ED7 bit 4: ya esta vibrando
+C 0x9EDC bit 3: hay vibrato
+C 0x9EE1 hasta que llega su retraso (ix+0x1A)
+C 0x9EE5 entonces empieza
+C 0x9EF4 la frecuencia que suena
+C 0x9EFA la amplitud del vibrato
+C 0x9EFD el sentido (ix+0x1D)...
+C 0x9F00 ...cambia en cada cuadro
+C 0x9F09 arriba: suma la amplitud
+C 0x9F2F el volumen
+C 0x9F32 el contador de la envolvente
+C 0x9F38 bit 5: fase de caida final
+C 0x9F3F bit 3: fase de caida
+C 0x9F46 bit 2: fase sostenida
+C 0x9F4D subida: uno mas...
+C 0x9F50 ...hasta el volumen maximo (ix+0x12)
+C 0x9F54 entonces pasa a sostenido
+C 0x9F66 sostenido durante (ix+0x21) cuadros
+C 0x9F6B y pasa a caida
+C 0x9F74 bit 4: caida rapida
+C 0x9F7B cada (ix+0x22) cuadros...
+C 0x9F80 ...baja uno
+C 0x9F84 las veces que baja
+C 0x9F8A hasta (ix+0x23)
+C 0x9F92 entonces la caida final
+C 0x9F97 caida rapida: resta (ix+0x22)
+C 0x9F9D sin bajar de 0
+C 0x9FAD caida final: cuando quedan (ix+0x24) cuadros de la nota...
+C 0x9FB4 ...baja uno
+C 0x9FC1 la pista acabo: apaga el canal
+C 0x9FE3 lo que hay que mandar al PSG
+C 0x9FE6 si era el canal del ruido (8)...
+C 0x9FEE ...ya no hay ruido que mandar
+# --- fin de lo escrito a mano ---
+
 # --- BLOQUES QUE LEE EL CODIGO (seccion que reescribe tools/bloques.py; no editar a mano) ---
 D 0x8094 0x80A4 saltos_8094  tabla de 8 palabras del despachador (call 0x408D en 0x8091); lo leen el despachador (16 bytes)
 F 0x8094 2
@@ -122,19 +394,19 @@ L 0x8B58 th_mueve_jugador_2 mueve al jugador 2 segun su mando
 L 0x8BA3 th_direccion_2 la direccion del mando del jugador 2
 L 0x8BD7 th_sprites_jugadores los sprites de los dos jugadores a la copia de 0xE500
 L 0x8C17 th_sprite_raqueta escribe los sprites de una raqueta (C de alto)
-L 0x8C4D th_prepara_disco prepara el disco del hockey (0xE450)
-L 0x8C62 th_mueve_disco mueve el disco del hockey
-L 0x8C86 th_sprite_disco el sprite del disco del hockey
+L 0x8C4D th_prepara_barra con BAR (0xE416), prepara la barra del centro (0xE450)
+L 0x8C62 th_mueve_barra con BAR, sube y baja la barra del centro
+L 0x8C86 th_sprite_barra con BAR, los tres sprites de la barra del centro
 L 0x8CB9 th_prepara_pelota la pelota al centro (0xE440)
 L 0x8CF2 th_mueve_pelota mueve la pelota y mira los choques
 L 0x8D38 th_avanza_pelota suma la velocidad a la posicion de la pelota (0xE440, 0xE442)
-L 0x8D63 th_velocidad la velocidad de la pelota segun SPEED (0xE413)
+L 0x8D63 th_pelota_en_raqueta pone la pelota (0xE441) a la altura de la raqueta del lado que saca, centrada segun LENGTH (tabla p07:8D80)
 L 0x8D84 th_choques los choques de la pelota con las raquetas
 L 0x8DFE th_efecto el efecto que da la raqueta a la pelota
 L 0x8E44 th_choque comprueba un choque de la pelota
 L 0x8F72 th_choca_raqueta mira si la pelota toca una raqueta
 L 0x8FCA th_choca_borde mira si la pelota toca el borde de la raqueta
-L 0x9007 th_dentro_porteria mira si la pelota entra en la porteria
+L 0x9007 th_choca_barra mira si la pelota toca la barra del centro: B + 1
 L 0x902C th_sprite_pelota el sprite de la pelota a la copia de 0xE500
 L 0x9040 th_velocidades las dos velocidades de las tablas de p07:9051 y p07:9059
 L 0x9079 palabra_de_tabla DE = la palabra A de la tabla de DE
@@ -296,10 +568,10 @@ C 0x89B8 th_copia_a_vram: LDIRVM de DE a HL
 C 0x89BB th_jugador_1: prepara al jugador 1 (0xE421)
 C 0x89BE th_jugador_2: prepara al jugador 2 (0xE431)
 C 0x89C1 th_prepara_pelota: la pelota al centro (0xE440)
-C 0x89C4 th_prepara_disco: prepara el disco del hockey (0xE450)
+C 0x89C4 th_prepara_barra: con BAR (0xE416), prepara la barra del centro (0xE450)
 C 0x89C7 th_sprites_jugadores: los sprites de los dos jugadores a la copia de 0xE500
 C 0x89CA th_sprite_pelota: el sprite de la pelota a la copia de 0xE500
-C 0x89CD th_sprite_disco: el sprite del disco del hockey
+C 0x89CD th_sprite_barra: con BAR, los tres sprites de la barra del centro
 C 0x89D0 th_vuelca_sprites: vuelca a la tabla de sprites la copia de 0xE500
 C 0x89D3 th_vuelca_sprites: vuelca a la tabla de sprites la copia de 0xE500
 C 0x89D6 lee el juego: 1 tenis, 2 hockey
@@ -307,107 +579,124 @@ C 0x89DA th_reloj: en hockey, baja el tiempo (0xE419, BCD) cada 64 cuadros
 C 0x89DD th_mueve_jugador_1: mueve al jugador 1 segun su mando
 C 0x89E0 th_mueve_jugador_2: mueve al jugador 2 segun su mando
 C 0x89E3 th_mueve_pelota: mueve la pelota y mira los choques
-C 0x89E6 th_mueve_disco: mueve el disco del hockey
+C 0x89E6 th_mueve_barra: con BAR, sube y baja la barra del centro
 C 0x89E9 th_sprites_jugadores: los sprites de los dos jugadores a la copia de 0xE500
 C 0x89EC th_sprite_pelota: el sprite de la pelota a la copia de 0xE500
-C 0x89EF th_sprite_disco: el sprite del disco del hockey
+C 0x89EF th_sprite_barra: con BAR, los tres sprites de la barra del centro
 C 0x89F2 th_gol: mira si la pelota sale por un lado y de quien es el tanto
 C 0x89F9 apunta a el jugador 1
 C 0x89FF lee el juego: 1 tenis, 2 hockey
-C 0x8A0A lee SPEED
+C 0x8A0A lee LENGTH, el largo de la raqueta
 C 0x8A10 hl_mas_a: HL = HL + A (gemela de p01:7251)
-C 0x8A1A lee SPEED
-C 0x8A25 lee BAR
+C 0x8A1A lee LENGTH, el largo de la raqueta
+C 0x8A25 lee TYPE
 C 0x8A2E lee el juego: 1 tenis, 2 hockey
 C 0x8A37 hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x8A58 apunta a el jugador 2
 C 0x8A5E lee el juego: 1 tenis, 2 hockey
-C 0x8A69 lee SPEED
+C 0x8A69 lee LENGTH, el largo de la raqueta
 C 0x8A6F hl_mas_a: HL = HL + A (gemela de p01:7251)
-C 0x8A79 lee SPEED
-C 0x8A84 lee BAR
+C 0x8A79 lee LENGTH, el largo de la raqueta
+C 0x8A84 lee TYPE
 C 0x8A8C lee el juego: 1 tenis, 2 hockey
 C 0x8A95 hl_mas_a: HL = HL + A (gemela de p01:7251)
-C 0x8AAF lee SPEED
-C 0x8AC4 lee SPEED
 C 0x8AE1 th_direccion_1: la direccion del mando del jugador 1
 C 0x8AEB despacha: salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
-C 0x8AF4 lee SPEED
+C 0x8AF4 lee LENGTH, el largo de la raqueta
 C 0x8AFA hl_mas_a: HL = HL + A (gemela de p01:7251)
-C 0x8B0E lee SPEED
+C 0x8B0E lee LENGTH, el largo de la raqueta
 C 0x8B14 hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x8B24 lee el jugador 1 y el byte siguiente (16 bits)
 C 0x8B28 guarda el jugador 1 y el byte siguiente (16 bits)
-C 0x8B36 lee el mando del jugador 1
 C 0x8B58 th_direccion_2: la direccion del mando del jugador 2
 C 0x8B62 despacha: salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
-C 0x8B6B lee SPEED
+C 0x8B6B lee LENGTH, el largo de la raqueta
 C 0x8B71 hl_mas_a: HL = HL + A (gemela de p01:7251)
-C 0x8B85 lee SPEED
+C 0x8B85 lee LENGTH, el largo de la raqueta
 C 0x8B8B hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x8B9B lee el jugador 2 y el byte siguiente (16 bits)
 C 0x8B9F guarda el jugador 2 y el byte siguiente (16 bits)
-C 0x8BAD lee el mando del jugador 2
 C 0x8BE2 th_sprite_raqueta: escribe los sprites de una raqueta (C de alto)
-C 0x8BE5 lee BAR
+C 0x8BE5 lee TYPE
 C 0x8BF6 th_sprite_raqueta: escribe los sprites de una raqueta (C de alto)
 C 0x8C04 th_sprite_raqueta: escribe los sprites de una raqueta (C de alto)
-C 0x8C07 lee BAR
-C 0x8C55 apunta a el disco del hockey
-C 0x8C67 lee el disco del hockey
-C 0x8C7D lee el disco del hockey
-C 0x8C82 guarda el disco del hockey
-C 0x8CC3 apunta a la posicion de la pelota
+C 0x8C07 lee TYPE
+C 0x8C4D lee hay barra en el centro
+C 0x8C55 apunta a la barra del centro (BAR)
+C 0x8C7D lee la barra del centro (BAR)
+C 0x8C82 guarda la barra del centro (BAR)
 C 0x8CDA lee el juego: 1 tenis, 2 hockey
 C 0x8CDE hl_mas_a: HL = HL + A (gemela de p01:7251)
-C 0x8CF8 th_velocidad: la velocidad de la pelota segun SPEED (0xE413)
+C 0x8CE2 guarda la columna de la pelota (0x78 es el centro)
+C 0x8CF8 th_pelota_en_raqueta: pone la pelota (0xE441) a la altura de la raqueta del lado que saca, centrada segun LENGTH (tabla p07:8D80)
+C 0x8CFB lee la columna de la pelota (0x78 es el centro)
 C 0x8D00 lee el mando del jugador 1
 C 0x8D05 lee el mando del jugador 2
 C 0x8D0C lee el juego: 1 tenis, 2 hockey
 C 0x8D18 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
+C 0x8D22 lee la columna de la pelota (0x78 es el centro)
 C 0x8D38 th_velocidades: las dos velocidades de las tablas de p07:9051 y p07:9059
-C 0x8D3C lee la posicion de la pelota y el byte siguiente (16 bits)
-C 0x8D40 guarda la posicion de la pelota y el byte siguiente (16 bits)
-C 0x8D44 lee la velocidad de la pelota y el byte siguiente (16 bits)
-C 0x8D48 guarda la velocidad de la pelota y el byte siguiente (16 bits)
+C 0x8D3C lee la altura de la pelota (16 bits; la parte entera en 0xE441) y el byte siguiente (16 bits)
+C 0x8D40 guarda la altura de la pelota (16 bits; la parte entera en 0xE441) y el byte siguiente (16 bits)
+C 0x8D44 lee la posicion horizontal de la pelota (16 bits; la parte entera en 0xE443) y el byte siguiente (16 bits)
+C 0x8D48 guarda la posicion horizontal de la pelota (16 bits; la parte entera en 0xE443) y el byte siguiente (16 bits)
+C 0x8D4C lee SPEED
 C 0x8D55 th_avanza_pelota: suma la velocidad a la posicion de la pelota (0xE440, 0xE442)
 C 0x8D58 th_choques: los choques de la pelota con las raquetas
-C 0x8D71 lee SPEED
+C 0x8D63 lee la columna de la pelota (0x78 es el centro)
+C 0x8D71 lee LENGTH, el largo de la raqueta
 C 0x8D77 hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0x8D7C guarda la altura de la pelota
 C 0x8D90 th_choque: comprueba un choque de la pelota
 C 0x8D97 th_choque: comprueba un choque de la pelota
+C 0x8D9A lee hay barra en el centro
 C 0x8DA7 th_choque: comprueba un choque de la pelota
 C 0x8DBE th_efecto: el efecto que da la raqueta a la pelota
 C 0x8DE9 th_efecto: el efecto que da la raqueta a la pelota
 C 0x8DFB pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x8E1C hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x8E47 despacha: salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
+C 0x8E6A lee la columna de la pelota (0x78 es el centro)
+C 0x8E70 lee la altura de la pelota
 C 0x8E76 th_choca_raqueta: mira si la pelota toca una raqueta
+C 0x8E7D lee la columna de la pelota (0x78 es el centro)
+C 0x8E83 lee la altura de la pelota
 C 0x8E8A th_choca_raqueta: mira si la pelota toca una raqueta
 C 0x8E9A th_choca_raqueta: mira si la pelota toca una raqueta
 C 0x8EA5 th_choca_raqueta: mira si la pelota toca una raqueta
+C 0x8EAC lee la columna de la pelota (0x78 es el centro)
+C 0x8EB2 lee la altura de la pelota
 C 0x8EB8 th_choca_raqueta: mira si la pelota toca una raqueta
+C 0x8EBF lee la columna de la pelota (0x78 es el centro)
+C 0x8EC5 lee la altura de la pelota
 C 0x8ECC th_choca_raqueta: mira si la pelota toca una raqueta
 C 0x8EDC th_choca_raqueta: mira si la pelota toca una raqueta
 C 0x8EE7 th_choca_raqueta: mira si la pelota toca una raqueta
+C 0x8EEE lee la columna de la pelota (0x78 es el centro)
+C 0x8EF4 lee la altura de la pelota
 C 0x8EFA th_choca_raqueta: mira si la pelota toca una raqueta
+C 0x8F01 lee la columna de la pelota (0x78 es el centro)
+C 0x8F07 lee la altura de la pelota
 C 0x8F0E th_choca_raqueta: mira si la pelota toca una raqueta
 C 0x8F1E th_choca_raqueta: mira si la pelota toca una raqueta
 C 0x8F29 th_choca_raqueta: mira si la pelota toca una raqueta
+C 0x8F30 lee la columna de la pelota (0x78 es el centro)
+C 0x8F36 lee la altura de la pelota
 C 0x8F3C th_choca_raqueta: mira si la pelota toca una raqueta
+C 0x8F43 lee la columna de la pelota (0x78 es el centro)
+C 0x8F49 lee la altura de la pelota
 C 0x8F50 th_choca_raqueta: mira si la pelota toca una raqueta
 C 0x8F60 th_choca_raqueta: mira si la pelota toca una raqueta
 C 0x8F6B th_choca_raqueta: mira si la pelota toca una raqueta
 C 0x8F83 th_choca_borde: mira si la pelota toca el borde de la raqueta
 C 0x8F94 th_choca_borde: mira si la pelota toca el borde de la raqueta
-C 0x8F9A lee BAR
-C 0x8FB0 th_choca_borde: mira si la pelota toca el borde de la raqueta
-C 0x8FC5 th_choca_borde: mira si la pelota toca el borde de la raqueta
-C 0x8FCE lee SPEED
+C 0x8F9A lee TYPE
+C 0x8FCE lee LENGTH, el largo de la raqueta
 C 0x8FD2 hl_mas_a: HL = HL + A (gemela de p01:7251)
-C 0x9002 th_dentro_porteria: mira si la pelota entra en la porteria
+C 0x9002 th_choca_barra: mira si la pelota toca la barra del centro: B + 1
 C 0x901B th_divide: desplaza HL y A: la posicion entre 8
 C 0x902C apunta a la copia de la tabla de sprites
+C 0x902F apunta a la altura de la pelota
 C 0x9044 palabra_de_tabla: DE = la palabra A de la tabla de DE
 C 0x904C palabra_de_tabla: DE = la palabra A de la tabla de DE
 C 0x9088 th_descomprime_tercios: descomprime DE en los tres tercios
@@ -432,16 +721,18 @@ C 0x9182 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas
 C 0x9193 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x91B5 lee la opcion elegida del GAME MODIFY
 C 0x91BC hl_mas_a: HL = HL + A (gemela de p01:7251)
-C 0x91C8 lee LENGTH, SPEED, TYPE y BAR
+C 0x91C8 lee LENGTH, SPEED, TYPE y BAR (de dos en dos bytes: valor y tope)
 C 0x91CB apunta a la copia de la tabla de sprites
 C 0x91D1 th_pon_palabra: escribe en HL la palabra A de la tabla y vuelca los sprites
 C 0x91DD th_pon_palabra: escribe en HL la palabra A de la tabla y vuelca los sprites
 C 0x91E9 th_pon_palabra: escribe en HL la palabra A de la tabla y vuelca los sprites
 C 0x91F7 hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x9201 th_vuelca_sprites: vuelca a la tabla de sprites la copia de 0xE500
-C 0x9230 apunta a LENGTH, SPEED, TYPE y BAR
-C 0x9234 guarda SPEED
-C 0x9240 guarda BAR
+C 0x9230 apunta a LENGTH, SPEED, TYPE y BAR (de dos en dos bytes: valor y tope)
+C 0x9234 guarda LENGTH, el largo de la raqueta
+C 0x923A guarda SPEED
+C 0x9240 guarda TYPE
+C 0x9246 guarda hay barra en el centro
 C 0x924A guarda los tantos del jugador 1
 C 0x924D guarda los tantos del jugador 2
 C 0x925C guarda el tiempo del hockey (BCD)
@@ -462,10 +753,10 @@ C 0x933E th_tiempo: en hockey, pinta el tiempo (0xE419)
 C 0x9346 lee los tantos del jugador 1
 C 0x9349 apunta a los tantos del jugador 2
 C 0x935D lee el juego: 1 tenis, 2 hockey
+C 0x9364 lee la columna de la pelota (0x78 es el centro)
 C 0x9377 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
-C 0x9B45 pide_sonido_b: pone en sus canales las pistas del sonido A (tabla de p07:9BF5)
+C 0x937B lee la altura de la pelota
 C 0x9B53 apunta a el sonido pedido
-C 0x9B7D canal_libre: pone la pista en el canal si su prioridad no es menor
 C 0x9B91 canal_libre: pone la pista en el canal si su prioridad no es menor
 C 0x9BA5 canal_libre: pone la pista en el canal si su prioridad no es menor
 C 0x9BB9 canal_libre: pone la pista en el canal si su prioridad no es menor
@@ -482,12 +773,9 @@ C 0x9CD8 canal_cuadro: un cuadro del canal IX si esta activo
 C 0x9CE3 canal_nota: baja la duracion; si acaba, lee la orden siguiente de la pista
 C 0x9D02 canal_ordenes: lee las ordenes de la pista (0xD0-0xFE) hasta una nota; 0xFF acaba
 C 0x9D09 canal_duracion: la duracion de la nota: la parte baja por el tempo (ix+0x14)
-C 0x9D34 canal_avanza: avanza el puntero de la pista (ix+0x02)
 C 0x9D66 canal_empieza_nota: empieza la nota: frecuencia y envolvente a cero
 C 0x9DDB canal_empieza_nota: empieza la nota: frecuencia y envolvente a cero
 C 0x9DE3 canal_avanza: avanza el puntero de la pista (ix+0x02)
-C 0x9DF1 canal_duracion: la duracion de la nota: la parte baja por el tempo (ix+0x14)
-C 0x9E05 canal_ordenes: lee las ordenes de la pista (0xD0-0xFE) hasta una nota; 0xFF acaba
 C 0x9E22 canal_frecuencia: la frecuencia de la nota (ix+0x10) con el desplazamiento (ix+0x26) a (ix+0x0A)
 C 0x9E50 a_cero: A = 0 y Z
 C 0x9E78 canal_vibrato: el contador del vibrato (ix+0x1E) segun los bits de (ix+0x0E)
@@ -496,5 +784,4 @@ C 0x9E82 lee el canal que se esta tocando
 C 0x9EA1 canal_bucle: repeticion: guarda donde vuelve (ix+0x17)
 C 0x9F28 canal_volumen: el volumen del canal segun la envolvente de (ix+0x0F)
 C 0x9FE0 th_9ffb: HL = 0xE2F6 y sigue en p08
-C 0x9FE6 lee el canal que se esta tocando
 # --- fin de las anotaciones de anota.py ---

@@ -294,20 +294,20 @@ titulo_anima:		; la animacion de la presentacion (0xE001)
 	ld a,0ebh		;825e
 	inc b			;8260
 L_8261:
-	add a,015h		;8261
+	add a,015h		;8261   ; la fila por 21 (0x15)
 	djnz L_8261		;8263
-	ld l,a			;8265
+	ld l,a			;8265   ; x 8: la posicion en la tabla de patrones...
 	ld h,000h		;8266
 	add hl,hl			;8268
 	add hl,hl			;8269
 	add hl,hl			;826a
-	ld de,00b00h		;826b
+	ld de,00b00h		;826b   ; ...desde 0x0B00
 	add hl,de			;826e
-	ld a,c			;826f
+	ld a,c			;826f   ; mas la columna C
 	call 07251h		;8270   ; hl_mas_a: HL = HL + A
-	ld b,015h		;8273
+	ld b,015h		;8273   ; 21 casillas
 	ld de,00008h		;8275
-	ld a,0f0h		;8278
+	ld a,0f0h		;8278   ; color 0xF0
 L_827A:
 	call 0004dh		;827a   ; BIOS WRTVRM - Writes data in VRAM
 	add hl,de			;827d
@@ -330,33 +330,33 @@ L_828F:
 	xor a			;8295
 	ret			;8296
 L_8297:
-	ld a,031h		;8297
+	ld a,031h		;8297   ; el ancho: 0x31 menos lo que ya se ve
 	sub (hl)			;8299
 	ld c,a			;829a
-	ld b,0a8h		;829b
-	ld hl,02840h		;829d
+	ld b,0a8h		;829b   ; 0xA8 de alto
+	ld hl,02840h		;829d   ; desde y hacia (0x40, 0x28)...
 	ld e,l			;82a0
 	ld d,h			;82a1
-	ld a,001h		;82a2
+	ld a,001h		;82a2   ; ...en la pagina 1
 	call vdp_hmmm		;82a4   ; vdp_hmmm: copia rapida de VRAM a VRAM (HMMM): origen HL, destino DE, tamano BC, paginas en A
-	or 0ffh		;82a7
+	or 0ffh		;82a7   ; NZ: sigue
 	ret			;82a9
 pinta_lista_de_letras:		; pinta una lista de letras [n, letras]; 0xFF acaba, 0xFE salta
 	push de			;82aa
 L_82AB:
-	ld a,(hl)			;82ab
+	ld a,(hl)			;82ab   ; el byte de la lista
 	inc hl			;82ac
-	ld c,a			;82ad
-	inc a			;82ae
+	ld c,a			;82ad   ; C = cuantas letras
+	inc a			;82ae   ; 0xFF acaba
 	jr z,L_82C8		;82af
-	inc a			;82b1
+	inc a			;82b1   ; 0xFE: salta...
 	jr nz,L_82BF		;82b2
 	pop de			;82b4
-	ld a,(hl)			;82b5
+	ld a,(hl)			;82b5   ; ...las columnas que dice el byte siguiente...
 	inc hl			;82b6
 	add a,d			;82b7
 	ld d,a			;82b8
-	ld a,008h		;82b9
+	ld a,008h		;82b9   ; ...y una fila (8 pixeles) mas abajo
 	add a,e			;82bb
 	ld e,a			;82bc
 	jr pinta_lista_de_letras		;82bd
@@ -432,21 +432,21 @@ DATA_resto_831B:
 
 
 copia_filas_a_vram:		; copia B filas de C bytes a la VRAM, una fila de 32 de paso
-	push bc			;8457
+	push bc			;8457   ; una fila de C bytes
 	push hl			;8458
 	ld b,000h		;8459
 	push bc			;845b
 	push de			;845c
-	call 0005ch		;845d   ; BIOS LDIRVM - Block transfers to VRAM from memory
+	call 0005ch		;845d   ; BIOS LDIRVM - Block transfers to VRAM from memory | a la VRAM
 	pop hl			;8460
-	ld bc,00020h		;8461
+	ld bc,00020h		;8461   ; la fila siguiente de la pantalla (32 bytes mas alla)
 	add hl,bc			;8464
 	ex de,hl			;8465
 	pop bc			;8466
 	pop hl			;8467
-	add hl,bc			;8468
+	add hl,bc			;8468   ; el origen avanza C bytes
 	pop bc			;8469
-	djnz copia_filas_a_vram		;846a
+	djnz copia_filas_a_vram		;846a   ; las B filas
 	ret			;846c
 L_846D:
 	call 00156h		;846d   ; BIOS KILBUF - Clears keyboard buffer
@@ -463,10 +463,10 @@ L_8477:
 	call titulo_paso		;8487   ; titulo_paso: un paso de la animacion de la presentacion (0xE020)
 	jr L_8477		;848a
 L_848C:
-	ld a,(0e010h)		;848c
+	ld a,(0e010h)		;848c   ; la opcion elegida es la 2...
 	cp 002h		;848f
 	jr z,L_8499		;8491
-	ld a,(0e000h)		;8493
+	ld a,(0e000h)		;8493   ; ...o hay tecla pulsada (0xE000)
 	inc a			;8496
 	jr nz,L_8477		;8497
 L_8499:
@@ -572,15 +572,15 @@ L_850D:
 	ld c,a			;853e
 	ld b,003h		;853f
 L_8541:
-	ld a,(de)			;8541
+	ld a,(de)			;8541   ; un color: rojo y azul...
 	out (c),a		;8542
 	inc de			;8544
-	ld a,(de)			;8545
+	ld a,(de)			;8545   ; ...y verde
 	out (c),a		;8546
 	inc de			;8548
-	out (c),l		;8549
+	out (c),l		;8549   ; los mismos para otro color
 	out (c),a		;854b
-	djnz L_8541		;854d
+	djnz L_8541		;854d   ; los B colores
 	ret			;854f
 L_8550:
 	xor a			;8550
@@ -617,18 +617,18 @@ flecha:		; 0x1E arriba, 0x1F abajo
 	jr z,L_85D4		;85d1
 	ret			;85d3
 L_85D4:
-	ld hl,0e010h		;85d4
+	ld hl,0e010h		;85d4   ; la opcion siguiente...
 	inc (hl)			;85d7
 	ld a,(hl)			;85d8
-	cp 003h		;85d9
+	cp 003h		;85d9   ; ...de tres (0-2)...
 	ret c			;85db
-	ld (hl),000h		;85dc
+	ld (hl),000h		;85dc   ; ...vuelve a la primera
 	ret			;85de
 L_85DF:
-	ld hl,0e010h		;85df
+	ld hl,0e010h		;85df   ; la opcion anterior...
 	dec (hl)			;85e2
 	ld a,(hl)			;85e3
-	cp 003h		;85e4
+	cp 003h		;85e4   ; ...de la primera pasa a la ultima (2)
 	ret c			;85e6
 	ld (hl),002h		;85e7
 	ret			;85e9
@@ -727,19 +727,19 @@ pinta_letras_8x8:		; pinta B letras de 8x8 desde HL (p09:8F7D)
 	push bc			;86e1
 	push de			;86e2
 L_86E3:
-	ld a,(hl)			;86e3
+	ld a,(hl)			;86e3   ; una letra
 	inc hl			;86e4
-	call letra_8x8_a_pagina_0		;86e5   ; letra_8x8_a_pagina_0: copia la letra A de 8x8 de la pagina 1 a la 0 (HMMM)
-	ld a,008h		;86e8
+	call letra_8x8_a_pagina_0		;86e5   ; a la pantalla
+	ld a,008h		;86e8   ; 8 pixeles a la derecha
 	add a,d			;86ea
 	ld d,a			;86eb
-	djnz L_86E3		;86ec
+	djnz L_86E3		;86ec   ; las B letras de la fila
 	pop de			;86ee
-	ld a,008h		;86ef
+	ld a,008h		;86ef   ; la fila siguiente, 8 pixeles mas abajo
 	add a,e			;86f1
 	ld e,a			;86f2
 	pop bc			;86f3
-	dec c			;86f4
+	dec c			;86f4   ; las C filas
 	jr nz,pinta_letras_8x8		;86f5
 	ret			;86f7
 titulo_paleta:		; el color 7 del fondo (R#7) y la paleta de p09:8706
@@ -781,11 +781,11 @@ descomprime_128k:		; descomprime HL a la VRAM DE de 128 KB: n & 0x7F repeticione
 	exx			;874c
 	ld c,000h		;874d
 L_874F:
-	ld a,(de)			;874f
+	ld a,(de)			;874f   ; el byte de cuenta: n & 0x7F
 	and 07fh		;8750
-	ret z			;8752
+	ret z			;8752   ; 0 acaba
 	ld b,a			;8753
-	ld a,(de)			;8754
+	ld a,(de)			;8754   ; bit 7: copiar o repetir
 	add a,a			;8755
 	inc de			;8756
 	jr nc,L_8766		;8757
@@ -824,13 +824,13 @@ siguiente_fila_128k:		; pasa a la fila siguiente cada 32 bytes
 	inc h			;8785
 	jp 00171h		;8786   ; BIOS NSTWRT - Same function as SETWRT (with 16-bit VRAM-address)
 L_8789:
-	push de			;8789
-	ld de,0fc84h		;878a
+	push de			;8789   ; la posicion en la pantalla...
+	ld de,0fc84h		;878a   ; ...sube 0x37C bytes...
 	add hl,de			;878d
 	ld a,l			;878e
-	cp 080h		;878f
+	cp 080h		;878f   ; ...y al llegar a una nueva linea...
 	jr nz,L_8797		;8791
-	ld de,00380h		;8793
+	ld de,00380h		;8793   ; ...salta 0x380
 	add hl,de			;8796
 L_8797:
 	pop de			;8797
@@ -1121,21 +1121,21 @@ DATA_resto_8D74:
 
 
 copia_filas_a_vram_b:		; copia B filas de C bytes a la VRAM, una fila de 32 de paso
-	push bc			;8d83
+	push bc			;8d83   ; una fila de C bytes
 	push hl			;8d84
 	ld b,000h		;8d85
 	push bc			;8d87
 	push de			;8d88
-	call 0005ch		;8d89   ; BIOS LDIRVM - Block transfers to VRAM from memory
+	call 0005ch		;8d89   ; BIOS LDIRVM - Block transfers to VRAM from memory | a la VRAM
 	pop hl			;8d8c
-	ld bc,00020h		;8d8d
+	ld bc,00020h		;8d8d   ; la fila siguiente de la pantalla (32 bytes mas alla)
 	add hl,bc			;8d90
 	ex de,hl			;8d91
 	pop bc			;8d92
 	pop hl			;8d93
-	add hl,bc			;8d94
+	add hl,bc			;8d94   ; el origen avanza C bytes
 	pop bc			;8d95
-	djnz copia_filas_a_vram_b		;8d96
+	djnz copia_filas_a_vram_b		;8d96   ; las B filas
 	ret			;8d98
 
 ; ----------------------------------------------------------------------
@@ -1158,12 +1158,12 @@ DATA_resto_8D99:
 
 cuenta_otir:		; A y B para un OTIR de BC bytes
 	ex de,hl			;8dee
-	ld a,c			;8def
+	ld a,c			;8def   ; BC bytes: B vueltas de 256...
 	or a			;8df0
 	ld a,b			;8df1
 	ld b,c			;8df2
-	ret z			;8df3
-	inc a			;8df4
+	ret z			;8df3   ; ...si C es 0, justas
+	inc a			;8df4   ; si no, una mas
 	ret			;8df5
 escribe_vram_otir:		; escribe BC bytes de HL en la VRAM DE con OTIR
 	ex de,hl			;8df6
@@ -1180,20 +1180,20 @@ L_8E03:
 	ret			;8e08
 vram_situa_128k:		; pone la direccion de 17 bits de la VRAM (R#14 y la direccion)
 	push bc			;8e09
-	ld a,(00007h)		;8e0a   ; el puerto de escritura del VDP (VDP.DW)
+	ld a,(00007h)		;8e0a   ; el puerto de los registros (VDP.DW + 1)
 	inc a			;8e0d
 	ld c,a			;8e0e
-	ld a,h			;8e0f
+	ld a,h			;8e0f   ; los dos bits altos de la direccion...
 	rlca			;8e10
 	rlca			;8e11
 	and 003h		;8e12
 	di			;8e14
-	out (c),a		;8e15
+	out (c),a		;8e15   ; ...a R#14
 	ld a,08eh		;8e17
 	out (c),a		;8e19
-	ld a,l			;8e1b
+	ld a,l			;8e1b   ; la parte baja
 	out (c),a		;8e1c
-	ld a,h			;8e1e
+	ld a,h			;8e1e   ; y la alta con el bit de escritura (0x40)
 	and 03fh		;8e1f
 	or 040h		;8e21
 	out (c),a		;8e23
@@ -1209,18 +1209,18 @@ espera_vdp:		; espera a que el VDP acabe el comando (bit 0 de S#2)
 lee_estado_vdp:		; lee el registro de estado A del VDP (R#15) y vuelve a S#0
 	push bc			;8e32
 	push hl			;8e33
-	ld hl,(00006h)		;8e34   ; el puerto de lectura del VDP (VDP.DR)
-	inc h			;8e37
+	ld hl,(00006h)		;8e34   ; los puertos del VDP
+	inc h			;8e37   ; C = el de los registros
 	inc l			;8e38
 	ld c,h			;8e39
 	di			;8e3a
-	out (c),a		;8e3b
-	ld a,08fh		;8e3d
+	out (c),a		;8e3b   ; el numero de registro de estado...
+	ld a,08fh		;8e3d   ; ...a R#15
 	out (c),a		;8e3f
 	ld c,l			;8e41
-	in a,(c)		;8e42
+	in a,(c)		;8e42   ; lo lee
 	push af			;8e44
-	xor a			;8e45
+	xor a			;8e45   ; y deja R#15 en 0
 	ld c,h			;8e46
 	out (c),a		;8e47
 	ld a,08fh		;8e49
@@ -1231,45 +1231,45 @@ lee_estado_vdp:		; lee el registro de estado A del VDP (R#15) y vuelve a S#0
 	ei			;8e50
 	ret			;8e51
 vdp_hmmm:		; copia rapida de VRAM a VRAM (HMMM): origen HL, destino DE, tamano BC, paginas en A
-	ex af,af'			;8e52
-	call espera_vdp		;8e53   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
+	ex af,af'			;8e52   ; guarda las paginas
+	call espera_vdp		;8e53   ; espera al VDP
 	push bc			;8e56
-	ld a,(00007h)		;8e57   ; el puerto de escritura del VDP (VDP.DW)
+	ld a,(00007h)		;8e57   ; el puerto de los registros (VDP.DW + 1)
 	inc a			;8e5a
 	ld c,a			;8e5b
-	ld a,020h		;8e5c
+	ld a,020h		;8e5c   ; R#17 = 32 (SX) con incremento: los 15 registros del comando seguidos
 	di			;8e5e
 	out (c),a		;8e5f
 	ld a,091h		;8e61
 	out (c),a		;8e63
-	inc c			;8e65
+	inc c			;8e65   ; C = el puerto de registros indirectos (VDP.DW + 3)
 	inc c			;8e66
-	out (c),h		;8e67
+	out (c),h		;8e67   ; SX = H
 	xor a			;8e69
 	out (c),a		;8e6a
-	out (c),l		;8e6c
+	out (c),l		;8e6c   ; SY = L...
 	ex af,af'			;8e6e
 	ld l,a			;8e6f
-	and 003h		;8e70
+	and 003h		;8e70   ; ...con la pagina de origen (A & 3)
 	out (c),a		;8e72
-	out (c),d		;8e74
+	out (c),d		;8e74   ; DX = D
 	xor a			;8e76
 	out (c),a		;8e77
-	out (c),e		;8e79
-	ld a,l			;8e7b
+	out (c),e		;8e79   ; DY = E...
+	ld a,l			;8e7b   ; ...con la pagina de destino ((A >> 2) & 3)
 	rra			;8e7c
 	rra			;8e7d
 	and 003h		;8e7e
 	out (c),a		;8e80
-	pop hl			;8e82
+	pop hl			;8e82   ; NX = B (de la pila)
 	out (c),h		;8e83
 	xor a			;8e85
 	out (c),a		;8e86
-	out (c),l		;8e88
-	out (c),a		;8e8a
+	out (c),l		;8e88   ; NY = C
+	out (c),a		;8e8a   ; CLR y ARG a 0
 	out (c),a		;8e8c
 	out (c),a		;8e8e
-	ld a,0d0h		;8e90
+	ld a,0d0h		;8e90   ; CMD = 0xD0: HMMM
 	out (c),a		;8e92
 	ei			;8e94
 	ret			;8e95
@@ -1286,13 +1286,13 @@ letra_8x8_en_pagina_1:		; copia la letra A de 8x8 dentro de la pagina 1 (HMMM)
 	pop bc			;8ea6
 	ret			;8ea7
 letra_a_coordenadas:		; H, L = la columna y la fila de la letra A en la hoja de letras
-	ld b,a			;8ea8
-	and 01fh		;8ea9
+	ld b,a			;8ea8   ; la letra
+	and 01fh		;8ea9   ; la columna (0-31) x 8: X
 	add a,a			;8eab
 	add a,a			;8eac
 	add a,a			;8ead
 	ld h,a			;8eae
-	ld a,b			;8eaf
+	ld a,b			;8eaf   ; la fila (de 32 en 32) / 4: Y
 	and 0e0h		;8eb0
 	rrca			;8eb2
 	rrca			;8eb3
@@ -1345,17 +1345,17 @@ letra_1bit_a_4bit:		; pasa una letra de 1 bit a 4 bits (0xE100) y la escribe
 	ld hl,0e100h		;8efe   ; apunta a la letra expandida a 4 bits
 	ld b,008h		;8f01
 L_8F03:
-	push bc			;8f03
+	push bc			;8f03   ; una linea de la letra: 4 bytes (8 pixeles de 4 bits)
 	ld bc,00004h		;8f04
 	call escribe_vram_otir		;8f07   ; escribe_vram_otir: escribe BC bytes de HL en la VRAM DE con OTIR
 	ex de,hl			;8f0a
-	ld bc,00080h		;8f0b
+	ld bc,00080h		;8f0b   ; la linea siguiente esta 128 bytes mas abajo
 	add hl,bc			;8f0e
 	ex de,hl			;8f0f
 	pop bc			;8f10
-	djnz L_8F03		;8f11
+	djnz L_8F03		;8f11   ; las 8 lineas
 	pop hl			;8f13
-	ld bc,00008h		;8f14
+	ld bc,00008h		;8f14   ; la letra siguiente, 8 bytes mas alla
 	add hl,bc			;8f17
 	pop de			;8f18
 	pop bc			;8f19
@@ -1364,12 +1364,12 @@ letra_expande:		; expande los 8 bytes de la letra a 32 con el color C
 	ld b,008h		;8f1b
 	ld de,0e100h		;8f1d   ; apunta a la letra expandida a 4 bits
 L_8F20:
-	push bc			;8f20
+	push bc			;8f20   ; un byte de la letra
 	push hl			;8f21
 	ex de,hl			;8f22
 	ld a,(de)			;8f23
 	ld d,a			;8f24
-	ld b,004h		;8f25
+	ld b,004h		;8f25   ; 4 pares de pixeles
 L_8F27:
 	ld a,c			;8f27
 	rl d		;8f28
@@ -1382,53 +1382,53 @@ L_8F2D:
 	jr c,L_8F35		;8f32
 	xor a			;8f34
 L_8F35:
-	rld		;8f35
+	rld		;8f35   ; dos pixeles al byte de destino
 	inc hl			;8f37
-	djnz L_8F27		;8f38
+	djnz L_8F27		;8f38   ; los 4 pares
 	ex de,hl			;8f3a
 	pop hl			;8f3b
-	inc hl			;8f3c
+	inc hl			;8f3c   ; el byte siguiente
 	pop bc			;8f3d
-	djnz L_8F20		;8f3e
+	djnz L_8F20		;8f3e   ; los 8 bytes
 	ret			;8f40
 vdp_hmmv:		; rellena un rectangulo de VRAM (HMMV, comando 0xC0)
-	ex af,af'			;8f41
-	call espera_vdp		;8f42   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
+	ex af,af'			;8f41   ; guarda el color
+	call espera_vdp		;8f42   ; espera al VDP
 	push bc			;8f45
 	ld a,(00007h)		;8f46   ; el puerto de escritura del VDP (VDP.DW)
 	inc a			;8f49
 	ld c,a			;8f4a
-	ld a,024h		;8f4b
+	ld a,024h		;8f4b   ; R#17 = 36 (DX) con incremento
 	di			;8f4d
 	out (c),a		;8f4e
 	ld a,091h		;8f50
 	out (c),a		;8f52
 	inc c			;8f54
 	inc c			;8f55
-	out (c),h		;8f56
+	out (c),h		;8f56   ; DX = H
 	xor a			;8f58
 	out (c),a		;8f59
-	out (c),l		;8f5b
+	out (c),l		;8f5b   ; DY = L, en la pagina D
 	out (c),d		;8f5d
 	pop hl			;8f5f
-	out (c),h		;8f60
+	out (c),h		;8f60   ; NX = B; 0 vale 256...
 	cp h			;8f62
 	jr nz,L_8F66		;8f63
 	inc a			;8f65
 L_8F66:
-	out (c),a		;8f66
+	out (c),a		;8f66   ; ...y su parte alta
 	xor a			;8f68
-	out (c),l		;8f69
+	out (c),l		;8f69   ; NY = C; 0 vale 256
 	cp l			;8f6b
 	jr nz,L_8F6F		;8f6c
 	inc a			;8f6e
 L_8F6F:
-	out (c),a		;8f6f
+	out (c),a		;8f6f   ; y su parte alta
 	ex af,af'			;8f71
-	out (c),a		;8f72
+	out (c),a		;8f72   ; CLR = el color
 	xor a			;8f74
-	out (c),a		;8f75
-	ld a,0c0h		;8f77
+	out (c),a		;8f75   ; ARG a 0
+	ld a,0c0h		;8f77   ; CMD = 0xC0: HMMV
 	out (c),a		;8f79
 	ei			;8f7b
 	ret			;8f7c
@@ -1457,114 +1457,114 @@ pinta_letra_8x8:		; copia la letra A de 8x8 de la hoja de letras a DE (LMMM) (ge
 	pop bc			;8f9f
 	ret			;8fa0
 vdp_lmmm:		; copia de VRAM a VRAM con operacion logica (LMMM, 0x90 | op)
-	ex af,af'			;8fa1
-	call espera_vdp		;8fa2   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
+	ex af,af'			;8fa1   ; guarda la operacion y las paginas
+	call espera_vdp		;8fa2   ; espera al VDP
 	push bc			;8fa5
 	ld a,(00007h)		;8fa6   ; el puerto de escritura del VDP (VDP.DW)
 	inc a			;8fa9
 	ld c,a			;8faa
-	ld a,020h		;8fab
+	ld a,020h		;8fab   ; R#17 = 32 (SX) con incremento
 	di			;8fad
 	out (c),a		;8fae
 	ld a,091h		;8fb0
 	out (c),a		;8fb2
 	inc c			;8fb4
 	inc c			;8fb5
-	out (c),h		;8fb6
+	out (c),h		;8fb6   ; SX = H
 	xor a			;8fb8
 	out (c),a		;8fb9
-	out (c),l		;8fbb
+	out (c),l		;8fbb   ; SY = L...
 	ex af,af'			;8fbd
-	rlca			;8fbe
+	rlca			;8fbe   ; ...con la pagina de origen (bits 6-7 de A)
 	rlca			;8fbf
 	ld l,a			;8fc0
 	and 003h		;8fc1
 	out (c),a		;8fc3
-	out (c),d		;8fc5
+	out (c),d		;8fc5   ; DX = D
 	xor a			;8fc7
 	out (c),a		;8fc8
-	out (c),e		;8fca
-	ld a,l			;8fcc
+	out (c),e		;8fca   ; DY = E...
+	ld a,l			;8fcc   ; ...con la pagina de destino (bits 4-5)
 	ld e,a			;8fcd
 	rlca			;8fce
 	rlca			;8fcf
 	and 003h		;8fd0
 	out (c),a		;8fd2
 	pop hl			;8fd4
-	out (c),h		;8fd5
+	out (c),h		;8fd5   ; NX = B (de la pila)
 	xor a			;8fd7
 	out (c),a		;8fd8
-	out (c),l		;8fda
-	out (c),a		;8fdc
+	out (c),l		;8fda   ; NY = C
+	out (c),a		;8fdc   ; CLR y ARG a 0
 	out (c),a		;8fde
 	out (c),a		;8fe0
-	ld a,e			;8fe2
+	ld a,e			;8fe2   ; la operacion logica (bits 0-3 de A)...
 	rra			;8fe3
 	rra			;8fe4
 	and 00fh		;8fe5
-	or 090h		;8fe7
+	or 090h		;8fe7   ; ...con CMD = 0x90: LMMM
 	out (c),a		;8fe9
 	ei			;8feb
 	ret			;8fec
 L_8FED:
-	ex af,af'			;8fed
-	call espera_vdp		;8fee   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
+	ex af,af'			;8fed   ; guarda la pagina
+	call espera_vdp		;8fee   ; espera al VDP
 	push bc			;8ff1
 	ld a,(00007h)		;8ff2   ; el puerto de escritura del VDP (VDP.DW)
 	inc a			;8ff5
 	ld c,a			;8ff6
-	ld a,024h		;8ff7
+	ld a,024h		;8ff7   ; R#17 = 36 (DX) con incremento
 	di			;8ff9
 	out (c),a		;8ffa
 	ld a,091h		;8ffc
 	out (c),a		;8ffe
 	inc c			;9000
 	inc c			;9001
-	out (c),d		;9002
+	out (c),d		;9002   ; DX = D
 	xor a			;9004
 	out (c),a		;9005
-	out (c),e		;9007
+	out (c),e		;9007   ; DY = E, en la pagina A
 	ex af,af'			;9009
 	out (c),a		;900a
 	pop de			;900c
-	out (c),d		;900d
+	out (c),d		;900d   ; NX = B (de la pila)
 	xor a			;900f
 	out (c),a		;9010
-	out (c),e		;9012
+	out (c),e		;9012   ; NY = C
 	out (c),a		;9014
-	ld a,(hl)			;9016
+	ld a,(hl)			;9016   ; CLR = el primer byte de HL
 	inc hl			;9017
 	out (c),a		;9018
 	xor a			;901a
 	out (c),a		;901b
-	ld a,0f0h		;901d
+	ld a,0f0h		;901d   ; CMD = 0xF0: HMMC (de la CPU a la VRAM)
 	out (c),a		;901f
-	dec c			;9021
+	dec c			;9021   ; R#17 = 44 (CLR) sin incremento...
 	dec c			;9022
 	ld a,0ach		;9023
 	out (c),a		;9025
 	ld a,091h		;9027
 	out (c),a		;9029
-	inc c			;902b
+	inc c			;902b   ; ...para mandar los bytes que siguen
 	inc c			;902c
 L_902D:
-	ld a,002h		;902d
+	ld a,002h		;902d   ; el estado S#2
 	call lee_estado_vdp		;902f   ; lee_estado_vdp: lee el registro de estado A del VDP (R#15) y vuelve a S#0
-	rra			;9032
+	rra			;9032   ; bit 0 (CE): el comando acabo
 	ret nc			;9033
-	add a,a			;9034
+	add a,a			;9034   ; bit 7 (TR): el VDP pide otro byte
 	add a,a			;9035
 	jr nc,L_902D		;9036
-	ld a,(hl)			;9038
+	ld a,(hl)			;9038   ; el byte siguiente...
 	inc hl			;9039
-	out (c),a		;903a
+	out (c),a		;903a   ; ...a CLR
 	jr L_902D		;903c
 siguiente_letra:		; D += 8; al pasar de fila, E += 8
-	ld a,d			;903e
+	ld a,d			;903e   ; 8 pixeles a la derecha
 	add a,008h		;903f
 	ld d,a			;9041
-	ret nz			;9042
-	ld a,e			;9043
+	ret nz			;9042   ; si no da la vuelta, ya esta
+	ld a,e			;9043   ; si la da, 8 pixeles mas abajo
 	add a,008h		;9044
 	ld e,a			;9046
 	ret			;9047

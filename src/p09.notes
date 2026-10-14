@@ -1,5 +1,146 @@
 # Notas del banco 09
 
+# --- A MANO: comentarios escritos leyendo el codigo ---
+C 0x8261 la fila por 21 (0x15)
+C 0x8265 x 8: la posicion en la tabla de patrones...
+C 0x826B ...desde 0x0B00
+C 0x826F mas la columna C
+C 0x8273 21 casillas
+C 0x8278 color 0xF0
+C 0x8297 el ancho: 0x31 menos lo que ya se ve
+C 0x829B 0xA8 de alto
+C 0x829D desde y hacia (0x40, 0x28)...
+C 0x82A2 ...en la pagina 1
+C 0x82A7 NZ: sigue
+C 0x82AB el byte de la lista
+C 0x82AD C = cuantas letras
+C 0x82AE 0xFF acaba
+C 0x82B1 0xFE: salta...
+C 0x82B5 ...las columnas que dice el byte siguiente...
+C 0x82B9 ...y una fila (8 pixeles) mas abajo
+C 0x8457 una fila de C bytes
+C 0x845D a la VRAM
+C 0x8461 la fila siguiente de la pantalla (32 bytes mas alla)
+C 0x8468 el origen avanza C bytes
+C 0x846A las B filas
+C 0x848C la opcion elegida es la 2...
+C 0x8493 ...o hay tecla pulsada (0xE000)
+C 0x8541 un color: rojo y azul...
+C 0x8545 ...y verde
+C 0x8549 los mismos para otro color
+C 0x854D los B colores
+C 0x85D4 la opcion siguiente...
+C 0x85D9 ...de tres (0-2)...
+C 0x85DC ...vuelve a la primera
+C 0x85DF la opcion anterior...
+C 0x85E4 ...de la primera pasa a la ultima (2)
+C 0x86E3 una letra
+C 0x86E5 a la pantalla
+C 0x86E8 8 pixeles a la derecha
+C 0x86EC las B letras de la fila
+C 0x86EF la fila siguiente, 8 pixeles mas abajo
+C 0x86F4 las C filas
+C 0x874F el byte de cuenta: n & 0x7F
+C 0x8752 0 acaba
+C 0x8754 bit 7: copiar o repetir
+C 0x8789 la posicion en la pantalla...
+C 0x878A ...sube 0x37C bytes...
+C 0x878F ...y al llegar a una nueva linea...
+C 0x8793 ...salta 0x380
+C 0x8D83 una fila de C bytes
+C 0x8D89 a la VRAM
+C 0x8D8D la fila siguiente de la pantalla (32 bytes mas alla)
+C 0x8D94 el origen avanza C bytes
+C 0x8D96 las B filas
+C 0x8DEF BC bytes: B vueltas de 256...
+C 0x8DF3 ...si C es 0, justas
+C 0x8DF4 si no, una mas
+C 0x8E0A el puerto de los registros (VDP.DW + 1)
+C 0x8E0F los dos bits altos de la direccion...
+C 0x8E15 ...a R#14
+C 0x8E1B la parte baja
+C 0x8E1E y la alta con el bit de escritura (0x40)
+C 0x8E34 los puertos del VDP
+C 0x8E37 C = el de los registros
+C 0x8E3B el numero de registro de estado...
+C 0x8E3D ...a R#15
+C 0x8E42 lo lee
+C 0x8E45 y deja R#15 en 0
+C 0x8E52 guarda las paginas
+C 0x8E53 espera al VDP
+C 0x8E57 el puerto de los registros (VDP.DW + 1)
+C 0x8E5C R#17 = 32 (SX) con incremento: los 15 registros del comando seguidos
+C 0x8E65 C = el puerto de registros indirectos (VDP.DW + 3)
+C 0x8E67 SX = H
+C 0x8E6C SY = L...
+C 0x8E70 ...con la pagina de origen (A & 3)
+C 0x8E74 DX = D
+C 0x8E79 DY = E...
+C 0x8E7B ...con la pagina de destino ((A >> 2) & 3)
+C 0x8E82 NX = B (de la pila)
+C 0x8E88 NY = C
+C 0x8E8A CLR y ARG a 0
+C 0x8E90 CMD = 0xD0: HMMM
+C 0x8EA8 la letra
+C 0x8EA9 la columna (0-31) x 8: X
+C 0x8EAF la fila (de 32 en 32) / 4: Y
+C 0x8F03 una linea de la letra: 4 bytes (8 pixeles de 4 bits)
+C 0x8F0B la linea siguiente esta 128 bytes mas abajo
+C 0x8F11 las 8 lineas
+C 0x8F14 la letra siguiente, 8 bytes mas alla
+C 0x8F20 un byte de la letra
+C 0x8F25 4 pares de pixeles
+C 0x8F35 dos pixeles al byte de destino
+C 0x8F38 los 4 pares
+C 0x8F3C el byte siguiente
+C 0x8F3E los 8 bytes
+C 0x8F41 guarda el color
+C 0x8F42 espera al VDP
+C 0x8F4B R#17 = 36 (DX) con incremento
+C 0x8F56 DX = H
+C 0x8F5B DY = L, en la pagina D
+C 0x8F60 NX = B; 0 vale 256...
+C 0x8F66 ...y su parte alta
+C 0x8F69 NY = C; 0 vale 256
+C 0x8F6F y su parte alta
+C 0x8F72 CLR = el color
+C 0x8F75 ARG a 0
+C 0x8F77 CMD = 0xC0: HMMV
+C 0x8FA1 guarda la operacion y las paginas
+C 0x8FA2 espera al VDP
+C 0x8FAB R#17 = 32 (SX) con incremento
+C 0x8FB6 SX = H
+C 0x8FBB SY = L...
+C 0x8FBE ...con la pagina de origen (bits 6-7 de A)
+C 0x8FC5 DX = D
+C 0x8FCA DY = E...
+C 0x8FCC ...con la pagina de destino (bits 4-5)
+C 0x8FD5 NX = B (de la pila)
+C 0x8FDA NY = C
+C 0x8FDC CLR y ARG a 0
+C 0x8FE2 la operacion logica (bits 0-3 de A)...
+C 0x8FE7 ...con CMD = 0x90: LMMM
+C 0x8FED guarda la pagina
+C 0x8FEE espera al VDP
+C 0x8FF7 R#17 = 36 (DX) con incremento
+C 0x9002 DX = D
+C 0x9007 DY = E, en la pagina A
+C 0x900D NX = B (de la pila)
+C 0x9012 NY = C
+C 0x9016 CLR = el primer byte de HL
+C 0x901D CMD = 0xF0: HMMC (de la CPU a la VRAM)
+C 0x9021 R#17 = 44 (CLR) sin incremento...
+C 0x902B ...para mandar los bytes que siguen
+C 0x902D el estado S#2
+C 0x9032 bit 0 (CE): el comando acabo
+C 0x9034 bit 7 (TR): el VDP pide otro byte
+C 0x9038 el byte siguiente...
+C 0x903A ...a CLR
+C 0x903E 8 pixeles a la derecha
+C 0x9042 si no da la vuelta, ya esta
+C 0x9043 si la da, 8 pixeles mas abajo
+# --- fin de lo escrito a mano ---
+
 # --- BLOQUES QUE LEE EL CODIGO (seccion que reescribe tools/bloques.py; no editar a mano) ---
 D 0x80CA 0x80D2 resto_80CA  lo apuntan con el banco puesto p09:8098 (0x80CA); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p09:8098 (8 bytes)
 F 0x80CA 16
@@ -190,7 +331,6 @@ C 0x86A4 pantalla_encendida: R#1 con el bit 6 (pantalla encendida) y R#8 sin el 
 C 0x86B9 descomprime: descomprime HL a la VRAM DE: n & 0x7F repeticiones o copias
 C 0x86D1 pinta_letras_8x8: pinta B letras de 8x8 desde HL (p09:8F7D)
 C 0x86DD pinta_letras_8x8: pinta B letras de 8x8 desde HL (p09:8F7D)
-C 0x86E5 letra_8x8_a_pagina_0: copia la letra A de 8x8 de la pagina 1 a la 0 (HMMM)
 C 0x8702 paleta_lista: MSX2: colores de una lista [color, d, e] que acaba en 0xFF
 C 0x8737 descomprime_128k: descomprime HL a la VRAM DE de 128 KB: n & 0x7F repeticiones
 C 0x8740 descomprime_128k: descomprime HL a la VRAM DE de 128 KB: n & 0x7F repeticiones
@@ -240,12 +380,8 @@ C 0x8D70 pinta_texto: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE o
 C 0x8DF7 vram_situa_128k: pone la direccion de 17 bits de la VRAM (R#14 y la direccion)
 C 0x8DFA cuenta_otir: A y B para un OTIR de BC bytes
 C 0x8DFE el puerto de escritura del VDP (VDP.DW)
-C 0x8E0A el puerto de escritura del VDP (VDP.DW)
 C 0x8E2A lee_estado_vdp: lee el registro de estado A del VDP (R#15) y vuelve a S#0
 C 0x8E2E espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
-C 0x8E34 el puerto de lectura del VDP (VDP.DR)
-C 0x8E53 espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
-C 0x8E57 el puerto de escritura del VDP (VDP.DW)
 C 0x8E99 letra_a_coordenadas: H, L = la columna y la fila de la letra A en la hoja de letras
 C 0x8EA1 vdp_hmmm: copia rapida de VRAM a VRAM (HMMM): origen HL, destino DE, tamano BC, paginas en A
 C 0x8EB6 lee el registro 1 del VDP (copia de la BIOS)
@@ -258,15 +394,12 @@ C 0x8EEF letra_expande: expande los 8 bytes de la letra a 32 con el color C
 C 0x8EFE apunta a la letra expandida a 4 bits
 C 0x8F07 escribe_vram_otir: escribe BC bytes de HL en la VRAM DE con OTIR
 C 0x8F1D apunta a la letra expandida a 4 bits
-C 0x8F42 espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 C 0x8F46 el puerto de escritura del VDP (VDP.DW)
 C 0x8F80 letra_a_coordenadas: H, L = la columna y la fila de la letra A en la hoja de letras
 C 0x8F88 vdp_hmmm: copia rapida de VRAM a VRAM (HMMM): origen HL, destino DE, tamano BC, paginas en A
 C 0x8F92 letra_a_coordenadas: H, L = la columna y la fila de la letra A en la hoja de letras
 C 0x8F9A vdp_lmmm: copia de VRAM a VRAM con operacion logica (LMMM, 0x90 | op)
-C 0x8FA2 espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 C 0x8FA6 el puerto de escritura del VDP (VDP.DW)
-C 0x8FEE espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 C 0x8FF2 el puerto de escritura del VDP (VDP.DW)
 C 0x902F lee_estado_vdp: lee el registro de estado A del VDP (R#15) y vuelve a S#0
 # --- fin de las anotaciones de anota.py ---

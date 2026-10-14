@@ -62,8 +62,8 @@ C 0xA00C bio_rejilla: dibuja la rejilla de la grafica
 C 0xA01A vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 C 0xA03E vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 C 0xA04C bio_texto_a19d: pinta el texto de p06:A19D
-C 0xA057 vdp_linea: traza una linea con el comando del VDP (desde R#36)
-C 0xA062 vdp_punto: pinta un punto con el comando del VDP (desde R#36)
+C 0xA057 vdp_linea: traza una linea con el comando del VDP (LINE, 0x70) de HL con el largo de la pila; el lado largo en horizontal
+C 0xA062 vdp_linea_vertical: traza una linea con el comando del VDP (LINE, 0x70) con el lado largo en vertical (ARG = 1)
 C 0xA070 vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 C 0xA07D vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 C 0xA09C vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)

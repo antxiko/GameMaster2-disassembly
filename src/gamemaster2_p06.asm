@@ -60,13 +60,13 @@ bio_eje:		; dibuja el eje de la grafica
 	ld hl,01888h		;a050
 	ld b,0d0h		;a053
 	ld c,00fh		;a055
-	call 0832fh		;a057   ; vdp_linea: traza una linea con el comando del VDP (desde R#36)
+	call 0832fh		;a057   ; vdp_linea: traza una linea con el comando del VDP (LINE, 0x70) de HL con el largo de la pila; el lado largo en horizontal
 	ret			;a05a
 bio_rejilla:		; dibuja la rejilla de la grafica
 	ld hl,05c58h		;a05b
 	ld b,060h		;a05e
 	ld c,00fh		;a060
-	call 08365h		;a062   ; vdp_punto: pinta un punto con el comando del VDP (desde R#36)
+	call 08365h		;a062   ; vdp_linea_vertical: traza una linea con el comando del VDP (LINE, 0x70) con el lado largo en vertical (ARG = 1)
 	ret			;a065
 L_A066:
 	ld hl,01e16h		;a066

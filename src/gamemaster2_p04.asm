@@ -161,13 +161,13 @@ sram_entrada_libre:		; busca en el directorio (0xB000) una entrada libre (0x10)
 	ld b,03bh		;80cd
 	ld c,000h		;80cf
 L_80D1:
-	ld a,(hl)			;80d1
-	cp 010h		;80d2
+	ld a,(hl)			;80d1   ; la entrada del directorio
+	cp 010h		;80d2   ; 0x10: libre
 	jr z,L_80DD		;80d4
-	add hl,de			;80d6
-	inc c			;80d7
-	djnz L_80D1		;80d8
-	or 0ffh		;80da
+	add hl,de			;80d6   ; la siguiente (8 bytes)
+	inc c			;80d7   ; C = su numero
+	djnz L_80D1		;80d8   ; las 0x3B entradas
+	or 0ffh		;80da   ; ninguna libre: NZ
 	ret			;80dc
 L_80DD:
 	ld (ix+007h),c		;80dd
@@ -178,13 +178,13 @@ sram_bloque_libre:		; busca en la tabla de 0xB206 un bloque libre
 	ld b,03bh		;80e5
 	ld c,006h		;80e7
 L_80E9:
-	ld a,(hl)			;80e9
-	and a			;80ea
+	ld a,(hl)			;80e9   ; un byte de la tabla de bloques
+	and a			;80ea   ; 0: libre
 	jr z,L_80F4		;80eb
-	inc c			;80ed
+	inc c			;80ed   ; C = su numero
 	inc hl			;80ee
-	djnz L_80E9		;80ef
-	or 0ffh		;80f1
+	djnz L_80E9		;80ef   ; los 0x3B bloques
+	or 0ffh		;80f1   ; ninguno libre: NZ
 	ret			;80f3
 L_80F4:
 	ld (ix+008h),c		;80f4
@@ -204,32 +204,32 @@ L_810F:
 	xor a			;8113
 	ret			;8114
 sram_tamano:		; el tamano del fichero de IX
-	ld e,(ix+00bh)		;8115
+	ld e,(ix+00bh)		;8115   ; el tamano del fichero (ix+0x0B)
 	ld d,(ix+00ch)		;8118
-	ld hl,0ffffh		;811b
+	ld hl,0ffffh		;811b   ; 0xFFFF: sin tamano, nada
 	rst 20h			;811e   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	ret z			;811f
-	ld l,(ix+007h)		;8120
+	ld l,(ix+007h)		;8120   ; la entrada (ix+0x07)...
 	ld h,000h		;8123
-	add hl,hl			;8125
+	add hl,hl			;8125   ; ...x 8...
 	add hl,hl			;8126
 	add hl,hl			;8127
-	ld bc,0b006h		;8128
+	ld bc,0b006h		;8128   ; ...en 0xB006: su tamano
 	add hl,bc			;812b
-	ld (hl),e			;812c
+	ld (hl),e			;812c   ; lo guarda
 	inc hl			;812d
 	ld (hl),d			;812e
-	or 0ffh		;812f
+	or 0ffh		;812f   ; NZ: hecho
 	ret			;8131
 sram_bloques:		; los bloques del fichero
-	ld l,(ix+00bh)		;8132
+	ld l,(ix+00bh)		;8132   ; el tamano del fichero
 	ld h,(ix+00ch)		;8135
-	dec hl			;8138
-	add hl,hl			;8139
-	jp c,L_8073		;813a
-	ld b,h			;813d
+	dec hl			;8138   ; menos uno
+	add hl,hl			;8139   ; x 2: H = los bloques de 128 bytes
+	jp c,L_8073		;813a   ; si pasa de 0x7FFF, error
+	ld b,h			;813d   ; B = cuantos bloques
 	inc b			;813e
-	ld a,(ix+008h)		;813f
+	ld a,(ix+008h)		;813f   ; el primer bloque (ix+0x08)
 	jr L_8145		;8142
 L_8144:
 	ld a,(hl)			;8144
@@ -324,19 +324,19 @@ L_81EE:
 	inc (ix+012h)		;81ee
 	jr sram_busca_sigue		;81f1
 sram_entrada:		; HL = la entrada (ix+0x12) del directorio (0xB000, 8 bytes)
-	ld l,(ix+012h)		;81f3
+	ld l,(ix+012h)		;81f3   ; la entrada (ix+0x12)...
 	ld h,000h		;81f6
-	add hl,hl			;81f8
+	add hl,hl			;81f8   ; ...x 8...
 	add hl,hl			;81f9
 	add hl,hl			;81fa
-	ld de,0b000h		;81fb
+	ld de,0b000h		;81fb   ; ...en el directorio de 0xB000
 	add hl,de			;81fe
-	ld e,(ix+00dh)		;81ff
+	ld e,(ix+00dh)		;81ff   ; a donde la quiere la orden (ix+0x0D)
 	ld d,(ix+00eh)		;8202
-	ld bc,00008h		;8205
+	ld bc,00008h		;8205   ; sus 8 bytes
 	ldir		;8208
-	inc (ix+012h)		;820a
-	xor a			;820d
+	inc (ix+012h)		;820a   ; la siguiente para la proxima vez
+	xor a			;820d   ; A = 0: bien
 	ret			;820e
 L_820F:
 	ld a,010h		;820f
@@ -347,15 +347,15 @@ L_820F:
 	ld d,(ix+00eh)		;821c
 	ld c,000h		;821f
 L_8221:
-	push hl			;8221
-	ld a,(hl)			;8222
+	push hl			;8221   ; la entrada
+	ld a,(hl)			;8222   ; 0x10: libre, no se copia
 	cp 010h		;8223
 	jr z,L_822F		;8225
 	push bc			;8227
-	ld bc,00008h		;8228
+	ld bc,00008h		;8228   ; la ocupada se copia (8 bytes)
 	ldir		;822b
 	pop bc			;822d
-	inc c			;822e
+	inc c			;822e   ; C = cuantas
 L_822F:
 	pop hl			;822f
 	ld a,008h		;8230
@@ -380,20 +380,20 @@ L_8249:
 	xor a			;8255
 	ret			;8256
 sram_borra:		; borra el fichero: marca la entrada y libera sus bloques
-	ld l,(ix+012h)		;8257
+	ld l,(ix+012h)		;8257   ; la entrada (ix+0x12)...
 	ld h,000h		;825a
-	add hl,hl			;825c
+	add hl,hl			;825c   ; ...x 8 en el directorio
 	add hl,hl			;825d
 	add hl,hl			;825e
 	ld de,0b000h		;825f
 	add hl,de			;8262
-	ld (hl),010h		;8263
-	ld de,00005h		;8265
+	ld (hl),010h		;8263   ; queda libre (0x10)
+	ld de,00005h		;8265   ; el byte 5: el primer bloque del fichero
 	add hl,de			;8268
 	ld a,(hl)			;8269
-	call sram_libera_cadena		;826a   ; sram_libera_cadena: libera la cadena de bloques de un fichero
-	jp nz,L_807B		;826d
-	xor a			;8270
+	call sram_libera_cadena		;826a   ; libera toda su cadena
+	jp nz,L_807B		;826d   ; si falla, error
+	xor a			;8270   ; A = 0: borrado
 	ret			;8271
 L_8272:
 	ld a,010h		;8272
@@ -456,11 +456,11 @@ L_82E3:
 	pop af			;82e9
 	ret			;82ea
 sram_copia_lee:		; copia de la SRAM a la RAM, bloque a bloque
-	ld e,(ix+00dh)		;82eb
+	ld e,(ix+00dh)		;82eb   ; DE = el destino en la RAM (ix+0x0D)
 	ld d,(ix+00eh)		;82ee
-	ld l,(ix+015h)		;82f1
+	ld l,(ix+015h)		;82f1   ; HL = la posicion en la SRAM (ix+0x15)
 	ld h,(ix+016h)		;82f4
-	ld c,(ix+00fh)		;82f7
+	ld c,(ix+00fh)		;82f7   ; BC = cuantos bytes (ix+0x0F)
 	ld b,(ix+010h)		;82fa
 L_82FD:
 	ldi		;82fd
@@ -523,51 +523,51 @@ L_836A:
 	pop af			;8370
 	ret			;8371
 sram_copia_escribe:		; copia de la RAM a la SRAM, bloque a bloque
-	ld l,(ix+00dh)		;8372
+	ld l,(ix+00dh)		;8372   ; HL = el origen en la RAM (ix+0x0D)
 	ld h,(ix+00eh)		;8375
-	ld e,(ix+015h)		;8378
+	ld e,(ix+015h)		;8378   ; DE = la posicion en la SRAM (ix+0x15)
 	ld d,(ix+016h)		;837b
-	ld c,(ix+00fh)		;837e
+	ld c,(ix+00fh)		;837e   ; BC = cuantos bytes (ix+0x0F)
 	ld b,(ix+010h)		;8381
 L_8384:
-	ldi		;8384
-	jp po,L_83BC		;8386
+	ldi		;8384   ; un byte a la SRAM
+	jp po,L_83BC		;8386   ; BC a 0: se acabo
 	exx			;8389
-	ld c,(ix+009h)		;838a
+	ld c,(ix+009h)		;838a   ; el puntero del fichero (ix+0x09)...
 	ld b,(ix+00ah)		;838d
-	inc bc			;8390
-	ld (ix+009h),c		;8391
+	inc bc			;8390   ; ...sube...
+	ld (ix+009h),c		;8391   ; ...y el tamano (ix+0x0B) con el
 	ld (ix+00bh),c		;8394
 	ld (ix+00ah),b		;8397
 	ld (ix+00ch),b		;839a
 	exx			;839d
-	ld a,e			;839e
+	ld a,e			;839e   ; ¿se lleno el bloque de 128 bytes?
 	and 07fh		;839f
-	jr nz,L_8384		;83a1
+	jr nz,L_8384		;83a1   ; no: sigue
 	push hl			;83a3
 	push bc			;83a4
-	call sram_enlaza		;83a5   ; sram_enlaza: escribe el bloque siguiente de la cadena
-	call sram_siguiente_bloque		;83a8   ; sram_siguiente_bloque: pasa al bloque siguiente del fichero
+	call sram_guarda_crc		;83a5   ; lleno: guarda su CRC
+	call sram_siguiente_bloque		;83a8   ; y pasa al bloque siguiente
 	pop bc			;83ab
 	pop hl			;83ac
-	ret nz			;83ad
-	ld e,(ix+015h)		;83ae
+	ret nz			;83ad   ; si no hay sitio, error
+	ld e,(ix+015h)		;83ae   ; la posicion del bloque nuevo
 	ld d,(ix+016h)		;83b1
-	ld a,(ix+013h)		;83b4
+	ld a,(ix+013h)		;83b4   ; el bloque actual pasa a ser el anterior
 	ld (ix+014h),a		;83b7
 	jr L_8384		;83ba
 L_83BC:
-	ld c,(ix+009h)		;83bc
+	ld c,(ix+009h)		;83bc   ; el puntero del fichero (ix+0x09)...
 	ld b,(ix+00ah)		;83bf
-	inc bc			;83c2
-	ld (ix+009h),c		;83c3
+	inc bc			;83c2   ; ...sube uno...
+	ld (ix+009h),c		;83c3   ; ...y el tamano (ix+0x0B) con el
 	ld (ix+00bh),c		;83c6
 	ld (ix+00ah),b		;83c9
 	ld (ix+00ch),b		;83cc
-	call sram_enlaza		;83cf   ; sram_enlaza: escribe el bloque siguiente de la cadena
-	ld a,010h		;83d2
+	call sram_guarda_crc		;83cf   ; guarda el CRC del ultimo bloque
+	ld a,010h		;83d2   ; vuelve a la mitad 0x10 de la SRAM
 	ld (0a000h),a		;83d4   ; el mapper: pone en 0xA000 el banco de A
-	xor a			;83d7
+	xor a			;83d7   ; A = 0: bien
 	ret			;83d8
 sram_siguiente_bloque:		; pasa al bloque siguiente del fichero
 	ld a,010h		;83d9
@@ -577,47 +577,47 @@ sram_siguiente_bloque:		; pasa al bloque siguiente del fichero
 	ld a,(ix+011h)		;83e2
 	and a			;83e5
 	jr nz,L_83EE		;83e6
-	call sram_bloque_siguiente		;83e8   ; sram_bloque_siguiente: lee el bloque siguiente de la cadena
+	call sram_comprueba_crc		;83e8   ; sram_comprueba_crc: comprueba el CRC-16 del bloque con el guardado: si no da 0, error
 	jp nz,L_8067		;83eb
 L_83EE:
 	call sram_direccion_bloque		;83ee   ; sram_direccion_bloque: la direccion en la SRAM del bloque (ix+0x13): mitad 0x10 o 0x30
 	xor a			;83f1
 	ret			;83f2
 sram_direccion_bloque:		; la direccion en la SRAM del bloque (ix+0x13): mitad 0x10 o 0x30
-	ld c,010h		;83f3
-	ld a,(ix+013h)		;83f5
+	ld c,010h		;83f3   ; la mitad 0x10 de la SRAM...
+	ld a,(ix+013h)		;83f5   ; ...para los bloques 0-0x1F...
 	cp 020h		;83f8
 	jr c,L_8400		;83fa
 	sub 020h		;83fc
-	ld c,030h		;83fe
+	ld c,030h		;83fe   ; ...y la 0x30 para los 0x20-0x3F
 L_8400:
-	ld l,000h		;8400
+	ld l,000h		;8400   ; el bloque x 128...
 	ld h,a			;8402
 	srl h		;8403
 	rr l		;8405
-	ld a,(ix+009h)		;8407
+	ld a,(ix+009h)		;8407   ; ...mas la posicion dentro del bloque
 	and 07fh		;840a
 	or l			;840c
 	ld l,a			;840d
-	ld de,0b000h		;840e
+	ld de,0b000h		;840e   ; en la ventana de 0xB000
 	add hl,de			;8411
-	ld (ix+015h),l		;8412
+	ld (ix+015h),l		;8412   ; la posicion en la SRAM a (ix+0x15)
 	ld (ix+016h),h		;8415
-	ld a,c			;8418
+	ld a,c			;8418   ; y pone esa mitad en 0xA000
 	ld (0a000h),a		;8419   ; el mapper: pone en 0xA000 el banco de A
 	ret			;841c
 sram_situa:		; situa el puntero del fichero (ix+0x09)
-	ld l,(ix+009h)		;841d
+	ld l,(ix+009h)		;841d   ; el puntero del fichero (ix+0x09)
 	ld h,(ix+00ah)		;8420
-	add hl,hl			;8423
-	jp c,L_8461		;8424
-	ld a,h			;8427
+	add hl,hl			;8423   ; x 2: H = el numero de bloque dentro del fichero
+	jp c,L_8461		;8424   ; mas alla de 0x7FFF: error
+	ld a,h			;8427   ; hasta 0x3A bloques
 	cp 03ah		;8428
 	jp nc,L_8461		;842a
-	ld b,a			;842d
-	ld a,(ix+008h)		;842e
+	ld b,a			;842d   ; B = cuantos bloques hay que saltar
+	ld a,(ix+008h)		;842e   ; el primer bloque del fichero
 	ld (ix+013h),a		;8431
-	dec b			;8434
+	dec b			;8434   ; si es el primero, ya esta
 	inc b			;8435
 	jr z,L_8448		;8436
 L_8438:
@@ -638,24 +638,24 @@ L_844A:
 	ld de,0b206h		;8451
 	ld c,006h		;8454
 L_8456:
-	ld a,(de)			;8456
-	and a			;8457
+	ld a,(de)			;8456   ; busca un bloque libre en la tabla de 0xB206
+	and a			;8457   ; 0: libre
 	jr z,L_8467		;8458
 	inc de			;845a
 	inc c			;845b
-	ld a,c			;845c
+	ld a,c			;845c   ; hasta el bloque 0x40
 	cp 040h		;845d
 	jr c,L_8456		;845f
 L_8461:
 	call sram_tamano		;8461   ; sram_tamano: el tamano del fichero de IX
 	jp L_8063		;8464
 L_8467:
-	ld (hl),c			;8467
-	ld (ix+013h),c		;8468
+	ld (hl),c			;8467   ; el bloque nuevo, enlazado detras del anterior
+	ld (ix+013h),c		;8468   ; y es el actual
 	ex de,hl			;846b
-	ld (hl),0ffh		;846c
-	djnz L_844A		;846e
-	xor a			;8470
+	ld (hl),0ffh		;846c   ; el nuevo es el ultimo de la cadena (0xFF)
+	djnz L_844A		;846e   ; los B bloques
+	xor a			;8470   ; A = 0: bien
 	ret			;8471
 L_8472:
 	ld a,010h		;8472
@@ -721,9 +721,9 @@ L_84E6:
 	djnz L_84E6		;84e9
 	ret			;84eb
 sram_cabecera:		; escribe la cabecera de la SRAM en 0xB200
-	ld hl,0fffah		;84ec
+	ld hl,0fffah		;84ec   ; la marca de la SRAM formateada: 0xFFFA...
 	ld (0b200h),hl		;84ef
-	ld l,0ffh		;84f2
+	ld l,0ffh		;84f2   ; ...y 0xFF en 0xB202-0xB205
 	ld (0b202h),hl		;84f4
 	ld (0b204h),hl		;84f7
 	ret			;84fa
@@ -734,13 +734,13 @@ sram_formateada:		; compara la marca de 0xB200 con p04:8513: la SRAM esta format
 	ld de,0b200h		;8503
 	ld b,006h		;8506
 L_8508:
-	ld a,(de)			;8508
+	ld a,(de)			;8508   ; compara la marca de 0xB200 con la de p04:8513
 	cp (hl)			;8509
-	jp nz,L_8077		;850a
+	jp nz,L_8077		;850a   ; distinta: la SRAM no esta formateada
 	inc hl			;850d
 	inc de			;850e
 	djnz L_8508		;850f
-	xor a			;8511
+	xor a			;8511   ; A = 0: formateada
 	ret			;8512
 
 ; ----------------------------------------------------------------------
@@ -756,50 +756,50 @@ DATA_resto_8513:
 ; ======================================================================
 
 
-sram_enlaza:		; escribe el bloque siguiente de la cadena
-	call sram_tabla_de_bloques		;8519   ; sram_tabla_de_bloques: la tabla de bloques: la mitad (0x10 o 0x30) y la posicion
-	ex de,hl			;851c
-	ld (hl),e			;851d
+sram_guarda_crc:		; calcula el CRC-16 del bloque y lo guarda en su sitio de la tabla de 0xB280
+	call sram_crc_bloque		;8519   ; el CRC del bloque y donde se guarda
+	ex de,hl			;851c   ; lo guarda...
+	ld (hl),e			;851d   ; ...en la tabla de 0xB280
 	inc hl			;851e
 	ld (hl),d			;851f
 	ret			;8520
-sram_bloque_siguiente:		; lee el bloque siguiente de la cadena
-	call sram_tabla_de_bloques		;8521   ; sram_tabla_de_bloques: la tabla de bloques: la mitad (0x10 o 0x30) y la posicion
-	push de			;8524
+sram_comprueba_crc:		; comprueba el CRC-16 del bloque con el guardado: si no da 0, error
+	call sram_crc_bloque		;8521   ; el CRC de los 128 bytes
+	push de			;8524   ; y le pasa los dos bytes guardados
 	ld a,(de)			;8525
-	call sram_bits		;8526   ; sram_bits: los bits del bloque en la tabla de 0xA001
+	call crc16_byte		;8526   ; crc16_byte: pasa el byte A por el CRC-16 de HL (polinomio 0xA001, reflejado)
 	pop de			;8529
 	inc de			;852a
 	ld a,(de)			;852b
-	call sram_bits		;852c   ; sram_bits: los bits del bloque en la tabla de 0xA001
-	ld a,l			;852f
+	call crc16_byte		;852c   ; crc16_byte: pasa el byte A por el CRC-16 de HL (polinomio 0xA001, reflejado)
+	ld a,l			;852f   ; si el bloque esta bien, el CRC queda a 0
 	or h			;8530
-	jp nz,L_8067		;8531
+	jp nz,L_8067		;8531   ; si no, error
 	ret			;8534
-sram_tabla_de_bloques:		; la tabla de bloques: la mitad (0x10 o 0x30) y la posicion
-	ld a,(ix+013h)		;8535
-	ld c,010h		;8538
+sram_crc_bloque:		; HL = el CRC-16 de los 128 bytes del bloque (ix+0x13) y DE = donde se guarda (0xB280 + 2 x bloque)
+	ld a,(ix+013h)		;8535   ; el bloque (ix+0x13)
+	ld c,010h		;8538   ; en la mitad 0x10 de la SRAM...
 	cp 020h		;853a
 	jr c,L_8542		;853c
-	ld c,030h		;853e
+	ld c,030h		;853e   ; ...o en la 0x30
 	sub 020h		;8540
 L_8542:
-	ld h,a			;8542
-	ld a,c			;8543
+	ld h,a			;8542   ; el bloque x 128
+	ld a,c			;8543   ; pone la mitad en 0xA000
 	ld (0a000h),a		;8544   ; el mapper: pone en 0xA000 el banco de A
 	ld l,000h		;8547
 	srl h		;8549
 	rr l		;854b
-	ld de,0b000h		;854d
+	ld de,0b000h		;854d   ; en la ventana de 0xB000
 	add hl,de			;8550
 	ex de,hl			;8551
-	ld b,080h		;8552
-	ld hl,00000h		;8554
+	ld b,080h		;8552   ; 128 bytes
+	ld hl,00000h		;8554   ; el CRC empieza en 0
 L_8557:
 	push bc			;8557
 	push de			;8558
 	ld a,(de)			;8559
-	call sram_bits		;855a   ; sram_bits: los bits del bloque en la tabla de 0xA001
+	call crc16_byte		;855a   ; crc16_byte: pasa el byte A por el CRC-16 de HL (polinomio 0xA001, reflejado)
 	pop de			;855d
 	inc de			;855e
 	pop bc			;855f
@@ -811,20 +811,20 @@ L_8557:
 	ld a,010h		;856c
 	ld (0a000h),a		;856e   ; el mapper: pone en 0xA000 el banco de A
 	ret			;8571
-sram_bits:		; los bits del bloque en la tabla de 0xA001
+crc16_byte:		; pasa el byte A por el CRC-16 de HL (polinomio 0xA001, reflejado)
 	ld c,a			;8572
 	ld de,0a001h		;8573
 	ld b,008h		;8576
 L_8578:
-	ld a,c			;8578
+	ld a,c			;8578   ; un bit: el bajo del byte...
 	rr c		;8579
 	and a			;857b
-	rr h		;857c
+	rr h		;857c   ; ...entra por arriba en HL al desplazarlo
 	rr l		;857e
-	adc a,000h		;8580
-	rra			;8582
+	adc a,000h		;8580   ; el bit que sale de HL...
+	rra			;8582   ; ...decide
 	jr nc,L_858B		;8583
-	ld a,d			;8585
+	ld a,d			;8585   ; si es 1, XOR con el polinomio 0xA001 (DE)
 	xor h			;8586
 	ld h,a			;8587
 	ld a,e			;8588
@@ -845,20 +845,20 @@ sram_nombre_valido:		; comprueba el nombre de IX: 5 letras, sin '*' ni '?'
 	ld b,005h		;859a
 	ld c,000h		;859c
 L_859E:
-	ld a,(hl)			;859e
+	ld a,(hl)			;859e   ; una letra del nombre
 	inc hl			;859f
-	cp 02ah		;85a0
+	cp 02ah		;85a0   ; '*' no vale en el nombre de un fichero nuevo
 	jp z,L_8057		;85a2
-	cp 03fh		;85a5
+	cp 03fh		;85a5   ; '?' tampoco
 	jp z,L_8057		;85a7
-	sub 001h		;85aa
+	sub 001h		;85aa   ; ni los codigos de control (0x01-0x1F)
 	cp 01fh		;85ac
 	jp c,L_8057		;85ae
-	djnz L_859E		;85b1
+	djnz L_859E		;85b1   ; las 5 letras
 	push ix		;85b3
 	pop hl			;85b5
-	ld c,000h		;85b6
-	call letra_valida		;85b8   ; letra_valida: lee la letra: Z si es 0 o espacio
+	ld c,000h		;85b6   ; la primera letra...
+	call letra_valida		;85b8   ; ...no puede ser 0 ni un espacio
 	jp z,L_8057		;85bb
 	ld b,004h		;85be
 L_85C0:
@@ -968,20 +968,20 @@ L_864B:
 	ld (hl),03fh		;864e
 	inc hl			;8650
 L_8651:
-	ld c,(hl)			;8651
+	ld c,(hl)			;8651   ; desplaza el nombre una letra
 	ld (hl),a			;8652
 	ld a,c			;8653
 	inc hl			;8654
-	djnz L_8651		;8655
-	and a			;8657
+	djnz L_8651		;8655   ; las B letras
+	and a			;8657   ; la que sale: 0...
 	ret z			;8658
-	cp 020h		;8659
+	cp 020h		;8659   ; ...un espacio...
 	ret z			;865b
-	cp 03fh		;865c
+	cp 03fh		;865c   ; ...un '?'...
 	ret z			;865e
-	cp 02ah		;865f
+	cp 02ah		;865f   ; ...o un '*' estan bien
 	ret z			;8661
-	scf			;8662
+	scf			;8662   ; otra cosa: C
 	ret			;8663
 hl_mas_a:		; HL = HL + A (gemela de p01:7251)
 	add a,l			;8664
@@ -996,8 +996,8 @@ de_mas_a:		; DE = DE + A (gemela de p01:7256)
 	inc d			;866c
 	ret			;866d
 despacha:		; salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
-	pop hl			;866e
-	add a,a			;866f
+	pop hl			;866e   ; la direccion de la tabla, que va pegada al `call`
+	add a,a			;866f   ; A x 2: cada destino es una palabra
 	add a,l			;8670
 	ld l,a			;8671
 	jr nc,L_8675		;8672

@@ -1,4 +1,8 @@
 # Notas del banco 07
+# --- COMENTARIOS COPIADOS DE LAS GEMELAS (tools/gemelas.py; no editar a mano) ---
+C 0x802E la direccion de la tabla, que va pegada al `call`
+C 0x802F A x 2: cada destino es una palabra
+# --- fin de los comentarios copiados ---
 
 # --- BLOQUES QUE LEE EL CODIGO (seccion que reescribe tools/bloques.py; no editar a mano) ---
 D 0x8094 0x80A4 saltos_8094  tabla de 8 palabras del despachador (call 0x408D en 0x8091); lo leen el despachador (16 bytes)

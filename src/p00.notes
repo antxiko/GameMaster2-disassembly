@@ -1,5 +1,212 @@
 # Notas del banco 00
 
+# --- A MANO: comentarios escritos leyendo el codigo ---
+C 0x4285 la primera letra del nombre
+C 0x4286 sin nombre no hay nada que borrar
+C 0x428B un espacio tampoco vale
+C 0x4290 copia el nombre (5 letras) al bloque de la orden, 0xE210
+C 0x4298 IY para CALSLT: el slot va en el byte de 0xE000
+C 0x429C DE = el bloque de la orden
+C 0x429F la orden 6 de la SRAM (p04:8000)
+C 0x42A1 IX = la pasarela de la SRAM, p00:4020
+C 0x42A8 0: borrado (p00:42C9 pinta FILE DELETED)
+C 0x42AB 0xFE: la SRAM no esta formateada (p00:42BF, RAM DISK UNFORMATED)
+C 0x42AF 0xF7: no hay ese fichero (p00:42C4, FILE NOT FOUND)
+C 0x42B3 cualquier otro: FAILED
+C 0x4436 una letra del nombre
+C 0x443C las 5 letras
+C 0x443E salta tres columnas
+C 0x4444 DE = el tamano del fichero
+C 0x4447 menos uno
+C 0x4448 si era 0, se queda en 0
+C 0x4450 HL x 2: H = los bloques de 128 bytes
+C 0x4451 C = los bloques
+C 0x4453 redondea hacia arriba
+C 0x4454 pasa C a BCD bit a bit (8 bits)
+C 0x4457 el bit alto de C...
+C 0x4459 ...entra en A doblandolo
+C 0x445A en decimal
+C 0x445D C = los bloques en BCD
+C 0x445E la cifra de las decenas
+C 0x4464 en ASCII
+C 0x4466 a la pantalla
+C 0x446A la cifra de las unidades
+C 0x446D en ASCII
+C 0x446F a la pantalla
+C 0x4474 solo hay 4 filas por pagina (0-3)
+C 0x4478 HL = la fila x 64...
+C 0x4482 ...dentro de la lista de 0xE010
+C 0x4483 la primera letra del nombre de la fila
+C 0x4484 0: la fila esta vacia
+C 0x4487 ocupada: Z y A = 0
+C 0x4AA2 el byte de EXPTBL de ese slot
+C 0x4AA3 bit 7: el slot esta expandido
+C 0x4AA7 B = el slot
+C 0x4AA8 lo mira en RAM (p00:4AC9 copiada a 0xC02F)
+C 0x4AAD el slot en A
+C 0x4AAE y busca el texto de la ROM del disco (p00:4AE5 en 0xC04B)
+C 0x4AB3 encontrado: sale
+C 0x4AB5 el slot siguiente
+C 0x4AB7 los 4 slots primarios
+C 0x4AD4 B = el subslot
+C 0x4AD5 lo mira (0xC02F)
+C 0x4ADB y busca el texto de la ROM del disco (0xC04B)
+C 0x4AF4 busca una 'D' (0x44)...
+C 0x4AF6 ...en los 256 bytes copiados
+C 0x4AF8 no hay mas: no es la ROM del disco
+C 0x4AFA se acabo la busqueda (BC = 0)
+C 0x4B00 compara 9 letras con 'isk BASIC' (0xC07E)
+C 0x4B03 letra a letra
+C 0x4B04 no coincide: sigue buscando
+C 0x4B0D no era 'Disk BASIC': sigue buscando
+C 0x4B10 el slot de la ROM del disco a 0xD33B
+C 0x4B13 C: la encontro
+C 0x4CC9 lee 0x67 registros de 128 bytes
+C 0x4CCB BDOS 0x1A: el bufer de los registros (DTA) en DE
+C 0x4CD0 un registro de 128 bytes
+C 0x4CD7 el bufer avanza 128 bytes
+C 0x4CDD los B registros
+C 0x4DCB D y E: el color en el formato del VDP
+C 0x4DD0 a la paleta
+C 0x4DD4 el color siguiente
+C 0x4DD5 los B colores
+C 0x4DD7 A = 0: bien
+C 0x4FB5 guarda el primer byte del gancho...
+C 0x4FB9 ...y lo cambia por `ret`: la interrupcion no entra en el juego
+C 0x4FBB guarda la RAM del juego de 0xC000 (0x3380 bytes) en 0xAC80, que es RAM en la pagina 2
+C 0x4FC6 y la de 0x9B80 (0x1100 bytes) va a 0xE280
+C 0x4FD1 0xDD9E: si hay que devolver otra copia...
+C 0x4FD7 ...la de 0xAC80 pasa a 0xE280
+C 0x4FE2 borra 0xF1C0
+C 0x4FE8 la pila...
+C 0x4FEC ...baja 0x1380 bytes (0x10000 - 0xEC80)
+C 0x4FF1 con las interrupciones abiertas
+C 0x4FF7 espera 0x200 vueltas...
+C 0x4FF8 ...llamando a 0xDF61 (la RAM del juego que se devolvio)
+C 0x4FFF hasta que BC llega a 0
+C 0x5002 devuelve los 0x1100 bytes de 0xE280 a 0x9B80
+C 0x500D y 0x3380 bytes hacia atras hasta 0xF37F (lo que bajo p00:4FBB)
+C 0x501B sin disco no hay nada mas que devolver
+C 0x501E con disco, 0x9B80 tambien vuelve a 0xC000
+C 0x5035 el byte que se quito del gancho (p00:4FB6)...
+C 0x5038 ...vuelve a su sitio
+C 0x5039 la pila sube los 0x1380 bytes que bajo p00:4FEC
+C 0x5042 con las interrupciones abiertas
+C 0x5099 guarda A
+C 0x509A la cifra alta...
+C 0x509C ...bajada a los cuatro bits de abajo
+C 0x50A0 en ASCII ('0'-'?', sin pasar a letras)
+C 0x50A2 la escribe
+C 0x50A4 la cifra baja
+C 0x50A7 en ASCII
+C 0x50A9 la escribe
+C 0x50AB el FCB desde 0x982F...
+C 0x50B1 ...a cero
+C 0x50B3 24 bytes
+C 0x50D9 el byte 12 del FCB (el bloque actual)...
+C 0x50DD ...a cero, y el 13
+C 0x50E1 el tamano de registro a 1 (bytes 14 y 15)
+C 0x50E7 el byte 33 del FCB: el registro aleatorio...
+C 0x50EB ...5 bytes...
+C 0x50ED ...a cero
+C 0x5109 HL = el FCB
+C 0x510A el byte 33: el registro aleatorio
+C 0x510E = DE
+C 0x516A guarda A
+C 0x516B el byte guardado en la pila...
+C 0x5170 ...es el bufer (DE)
+C 0x5171 BDOS 0x1A: el bufer de los registros (DTA)
+C 0x5177 un registro de 1 byte por la rutina de BC
+C 0x517A A = el byte
+C 0x527C la direccion de vuelta
+C 0x527E copia 13 bytes de p00:5294 a 0x9803: la pasarela entre slots
+C 0x5287 en 0x9808 el slot...
+C 0x528A ...del Game Master
+C 0x5290 y la direccion de DE
+C 0x5402 ya esta en el ultimo fichero
+C 0x5408 el siguiente
+C 0x5409 la primera fila que se ve
+C 0x540B la fila elegida menos la primera
+C 0x540D si cabe en las 3 filas de la ventana, no se mueve
+C 0x5411 si no, la ventana baja una fila
+C 0x543A la fila elegida
+C 0x543C ya esta en la primera
+C 0x543E la anterior
+C 0x5440 si queda por encima de la ventana...
+C 0x5444 ...la ventana sube una fila
+C 0x54AC la letra siguiente
+C 0x54AD las 8 letras del nombre
+C 0x54AF 0x92CF: el tipo de lista; con 1, la extension
+C 0x54B6 si el fichero tiene extension...
+C 0x54BA ...pinta un punto ('<' en la fuente del menu)
+C 0x54CA la fila siguiente de la pantalla
+C 0x54D0 las B filas
+C 0x5565 HL = la fila A
+C 0x5568 el tipo de lista: 1 = nombre y extension (11 bytes); si no, 8
+C 0x556F 8 bytes por fila
+C 0x5574 BC = la fila
+C 0x5576 HL = fila x 12...
+C 0x557B ...menos fila: 11 bytes por fila
+C 0x56B7 la parte alta
+C 0x56B9 distinta: NZ
+C 0x56BA la parte baja
+C 0x57BB el slot siguiente
+C 0x57BD encontrado: sale
+C 0x57C1 los 4 slots primarios
+C 0x57C3 A = 0xFF: no hay otro cartucho
+C 0x57FF prueba si el byte es RAM:
+C 0x5800 lo invierte
+C 0x5802 si sigue igual, no es RAM
+C 0x5804 y lo deja como estaba
+C 0x5805 no es RAM: sale con NC
+C 0x5807 el siguiente
+C 0x580B BC bytes
+C 0x580E C: todo es RAM
+C 0x5838 recorre los 4 slots primarios
+C 0x583A el byte de EXPTBL
+C 0x583B bit 7: expandido
+C 0x583F B = el slot
+C 0x5840 lo mira (0xE0F5, dentro de la copia de p00:5832)
+C 0x5846 y lo prueba (0xE046)
+C 0x584B encontrado: sale
+C 0x584F los 4 slots
+C 0x5866 un subslot
+C 0x5868 lo mira (0xE0F5)
+C 0x586E y lo prueba (0xE046)
+C 0x58E5 recorre la tabla de juegos (p00:44BE): la suma...
+C 0x58EB ...0 acaba la tabla
+C 0x58EF ¿es la del juego?
+C 0x58F0 si: la ficha
+C 0x58F2 la entrada siguiente, de 4 bytes
+C 0x5910 la direccion de la ficha del juego
+C 0x5916 su primera palabra
+C 0x594B recorre los 4 slots primarios
+C 0x594D el byte de EXPTBL
+C 0x594E bit 7: expandido
+C 0x5953 lo mira (0xE02F, dentro de la copia de p00:5945)
+C 0x5959 y busca 'isk BASIC' (0xE04B)
+C 0x595E encontrado: sale
+C 0x5962 los 4 slots
+C 0x597E un subslot
+C 0x5980 lo mira (0xE02F)
+C 0x5986 y busca 'isk BASIC' (0xE04B)
+C 0x599F busca una 'D' (0x44)...
+C 0x59A1 ...en los 256 bytes copiados
+C 0x59A3 no hay mas: no es la ROM del disco
+C 0x59A5 se acabo la busqueda
+C 0x59AB compara 9 letras con 'isk BASIC' (0xE07E)
+C 0x59AE letra a letra
+C 0x59B8 no era 'Disk BASIC': sigue buscando
+C 0x59BB el slot de la ROM del disco a 0x9800
+C 0x59BE C: la encontro
+C 0x5A82 copia un byte...
+C 0x5A85 ...con DE hacia atras
+C 0x5A86 B bytes
+C 0x5A8F compara las cifras BCD de la mas alta a la mas baja
+C 0x5A91 menor: sale con C
+C 0x5A95 las B cifras
+# --- fin de lo escrito a mano ---
+
 # --- BLOQUES QUE LEE EL CODIGO (seccion que reescribe tools/bloques.py; no editar a mano) ---
 D 0x4000 0x4020 resto_4000  lo apuntan con el banco puesto p00:4A7C (0x4000), p00:4AEB (0x4000), p00:4AF1 (0x4000), p00:573B (0x4000), p00:578D (0x4000), p00:57F9 (0x4000); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p00:4A7C, p00:4AEB, p00:4AF1, p00:573B, p00:578D, p00:57F9 (32 bytes)
 F 0x4000 16
@@ -290,8 +497,6 @@ C 0x4414 sram_pinta_filas: pinta 8 filas de la lista
 C 0x441F sram_pinta_fila: pinta una fila: nombre de 5 letras y sus datos
 C 0x442A de_mas_a: DE = DE + A
 C 0x4437 pon_letra: escribe A en la VRAM HL guardando los registros
-C 0x4466 pon_letra: escribe A en la VRAM HL guardando los registros
-C 0x446F pon_letra: escribe A en la VRAM HL guardando los registros
 C 0x447F apunta a la lista de la SRAM
 C 0x44B4 pon_letra: escribe A en la VRAM HL guardando los registros
 C 0x4997 lee el slot del cartucho del juego (copia)
@@ -423,7 +628,6 @@ C 0x4D8E bdos_lee: BDOS 0x27, leer HL registros; si falla, el error 3
 C 0x4D9A la version del MSX (0 = MSX1)
 C 0x4DAB bdos_lee: BDOS 0x27, leer HL registros; si falla, el error 3
 C 0x4DB5 pon_registros_vdp: escribe E registros del VDP desde HL, empezando por C
-C 0x4DD0 pon_color: MSX2: el color B de la paleta con D y E (R#16 y puerto 2)
 C 0x4DE7 bdos_lee: BDOS 0x27, leer HL registros; si falla, el error 3
 C 0x4DF1 pon_registros_vdp: escribe E registros del VDP desde HL, empezando por C
 C 0x4DF4 la version del MSX (0 = MSX1)
@@ -497,7 +701,6 @@ C 0x5122 lee el puntero al FCB y el byte siguiente (16 bits)
 C 0x5132 lee el puntero al FCB y el byte siguiente (16 bits)
 C 0x5142 lee el puntero al FCB y el byte siguiente (16 bits)
 C 0x5152 lee el puntero al FCB y el byte siguiente (16 bits)
-C 0x5177 un_registro: HL = 1 y salta a la rutina de BC
 C 0x5183 disco_graba_byte: graba el byte A en el fichero (por la pila)
 C 0x518A disco_lee_byte: lee un byte del fichero (por la pila)
 C 0x518F disco_lee_byte: lee un byte del fichero (por la pila)
@@ -515,7 +718,6 @@ C 0x51D7 hl_mas_a: HL = HL + A
 C 0x51DF pinta_texto_en: pinta el texto de HL en la VRAM DE
 C 0x51EB pinta_texto_en: pinta el texto de HL en la VRAM DE
 C 0x5273 lee hay disco
-C 0x528A lee el slot del Game Master
 C 0x5394 guarda cuantas letras lleva el nombre
 C 0x5397 guarda la opcion elegida
 C 0x539D guarda la posicion del cursor en la VRAM y el byte siguiente (16 bits)
@@ -536,7 +738,6 @@ C 0x53E2 fila_de_fichero: HL = la fila A de la lista de ficheros
 C 0x53E6 fcb_comodin: FCB con '?' en el nombre para buscar ficheros
 C 0x53EA apunta a el FCB
 C 0x53ED guarda el puntero al FCB y el byte siguiente (16 bits)
-C 0x5402 lee cuantos ficheros hay
 C 0x541C cursor_borra: borra el cursor
 C 0x5421 lee la posicion de la primera opcion en la VRAM y el byte siguiente (16 bits)
 C 0x5428 lee la ultima opcion del menu
@@ -643,7 +844,6 @@ C 0x58B3 DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 C 0x58B9 DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 C 0x58C3 DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 C 0x58D8 lee el slot del Game Master
-C 0x58EF DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 C 0x58FF guarda la ficha del juego y el byte siguiente (16 bits)
 C 0x5902 lee el slot del cartucho del juego
 C 0x591F guarda la ficha del juego y el byte siguiente (16 bits)

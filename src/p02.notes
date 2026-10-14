@@ -1,4 +1,253 @@
 # Notas del banco 02
+# --- COMENTARIOS COPIADOS DE LAS GEMELAS (tools/gemelas.py; no editar a mano) ---
+C 0x83C0 recorre los 4 slots primarios
+C 0x83C2 el byte de EXPTBL de ese slot
+C 0x83C3 bit 7: el slot esta expandido
+C 0x83C7 B = el slot
+C 0x83CD el slot en A
+C 0x83D3 encontrado: sale
+C 0x83D5 el slot siguiente
+C 0x83D7 los 4 slots primarios
+C 0x83EE un subslot
+C 0x83EF B = el subslot
+C 0x845D ...0 acaba la tabla
+C 0x8461 ¿es la del juego?
+C 0x8462 si: la ficha
+C 0x8464 la entrada siguiente, de 4 bytes
+C 0x8D0B con dos teclas en el bufer, un numero de dos cifras
+C 0x8D0E la primera cifra
+C 0x8D11 por 10 (x2, x8 y suma)
+C 0x8D17 la segunda cifra
+C 0x8D1B decenas y unidades
+C 0x8D1C el numero en binario
+C 0x8D32 con dos teclas en el bufer, un byte de dos cifras hexadecimales
+C 0x8D35 la primera cifra
+C 0x8D38 por 16
+C 0x8D3D la segunda cifra
+C 0x8D41 las dos juntas
+C 0x8D42 el byte
+C 0x8F2D copia un byte...
+C 0x8F30 ...con DE hacia atras
+C 0x8F31 B bytes
+C 0x8F3A compara las cifras BCD de la mas alta a la mas baja
+C 0x8F3C menor: sale con C
+C 0x8F40 las B cifras
+C 0x943D guarda A
+C 0x943E la cifra alta...
+C 0x9440 ...bajada a los cuatro bits de abajo
+C 0x9444 en ASCII ('0'-'?', sin pasar a letras)
+C 0x9446 la escribe
+C 0x9448 la cifra baja
+C 0x944B en ASCII
+C 0x944D la escribe
+C 0x9455 ...a cero
+C 0x9457 24 bytes
+C 0x9485 el byte 12 del FCB (el bloque actual)...
+C 0x9489 ...a cero, y el 13
+C 0x948D el tamano de registro a 1 (bytes 14 y 15)
+C 0x9493 el byte 33 del FCB: el registro aleatorio...
+C 0x9497 ...5 bytes...
+C 0x9499 ...a cero
+C 0x94B5 HL = el FCB
+C 0x94B6 el byte 33: el registro aleatorio
+C 0x94BA = DE
+C 0x9516 guarda A
+C 0x9517 el byte guardado en la pila...
+C 0x951C ...es el bufer (DE)
+C 0x951D BDOS 0x1A: el bufer de los registros (DTA)
+C 0x9523 un registro de 1 byte por la rutina de BC
+C 0x9526 A = el byte
+C 0x961F la direccion de vuelta
+C 0x962D ...del Game Master
+C 0x9633 y la direccion de DE
+C 0x97A2 ya esta en el ultimo fichero
+C 0x97A8 el siguiente
+C 0x97A9 la primera fila que se ve
+C 0x97AB la fila elegida menos la primera
+C 0x97AD si cabe en las 3 filas de la ventana, no se mueve
+C 0x97B1 si no, la ventana baja una fila
+C 0x97DA la fila elegida
+C 0x97DC ya esta en la primera
+C 0x97DE la anterior
+C 0x97E0 si queda por encima de la ventana...
+C 0x97E4 ...la ventana sube una fila
+C 0x9868 la fila siguiente de la pantalla
+C 0x986E las B filas
+C 0x9903 HL = la fila A
+C 0x9906 el tipo de lista: 1 = nombre y extension (11 bytes); si no, 8
+C 0x990D 8 bytes por fila
+C 0x9912 BC = la fila
+C 0x9914 HL = fila x 12...
+C 0x9919 ...menos fila: 11 bytes por fila
+C 0x9B44 pone a cero 3 bytes
+C 0x9B4E sin puntos no hay ranking
+C 0x9B54 tampoco sin el
+C 0x9B5A C = el codigo del juego
+C 0x9B5B los juegos de codigo 3 y 4...
+C 0x9B61 ...y los de 0x10 y 0x11...
+C 0x9B68 ...miran el bit 0 de su variable: si esta a 1, no hay ranking
+C 0x9C4B guarda los registros para la comparacion
+C 0x9C4F los puntos son 3 bytes BCD
+C 0x9C52 compara de la cifra alta a la baja
+C 0x9C54 menor: se queda debajo
+C 0x9C56 mayor: entra aqui
+C 0x9C58 la cifra siguiente
+C 0x9C5A los 3 bytes
+C 0x9C6D la fila siguiente (3 bytes de puntos)
+C 0x9C70 C = la posicion
+C 0x9C71 las B filas
+C 0x9C76 y pinta el ranking
+C 0x9C97 E = la fila
+C 0x9C98 C + B...
+C 0x9C9B ...por 3 (puntos)
+C 0x9C9D bit 0 de D: los nombres...
+C 0x9CA1 ...que son 9 bytes (por 3 otra vez)
+C 0x9CA4 BC = el desplazamiento
+C 0x9CA7 IX e IY a esa fila
+C 0x9CAB E por 3...
+C 0x9CAE ...o por 9 si son nombres
+C 0x9CB5 BC = los bytes que hay que mover
+C 0x9CB8 HL = IX
+C 0x9CBB DE = IY
+C 0x9CBE baja las filas una posicion
+C 0x9CDB copia los 3 bytes de los puntos
+C 0x9CFF la marca de la fila...
+C 0x9D02 ...y los 8 bytes del nombre
+C 0x9D4C ya esta en la ultima fila (9)
+C 0x9D51 la siguiente
+C 0x9D52 la primera fila que se ve
+C 0x9D54 la elegida menos la primera
+C 0x9D56 si cabe en las 5 filas de la ventana, no se mueve
+C 0x9D5A si no, la ventana baja una fila
+C 0x9D86 la fila elegida
+C 0x9D88 ya esta en la primera
+C 0x9D8A la anterior
+C 0x9D8C si queda por encima de la ventana...
+C 0x9D90 ...la ventana sube una fila
+C 0x9F56 la fase pedida...
+C 0x9F59 ...con tope 10
+# --- fin de los comentarios copiados ---
+
+# --- A MANO: comentarios escritos leyendo el codigo ---
+C 0x8086 rellena con 0
+C 0x8087 C' = el puerto de datos del VDP
+C 0x8088 un byte a la VRAM
+C 0x808B la direccion siguiente
+C 0x808C cada 32 KB...
+C 0x8090 ...cambia de mitad
+C 0x8093 BC bytes
+C 0x80C9 C' = el puerto de datos del VDP
+C 0x80CA un byte de la VRAM...
+C 0x80CD ...a DE
+C 0x80CF la direccion siguiente
+C 0x80D0 cada 32 KB...
+C 0x80D4 ...cambia de mitad
+C 0x80D7 BC bytes
+C 0x8146 un byte de DE...
+C 0x8148 ...a la VRAM
+C 0x814C la direccion siguiente
+C 0x814D cada 32 KB...
+C 0x8151 ...cambia de mitad
+C 0x8154 BC bytes
+C 0x8364 vuelve al juego: sin interrupciones
+C 0x8365 0xD13D = 0xFF
+C 0x836A borra 0xD33A y 0xD13B
+C 0x8371 devuelve el gancho H.TIMI del juego (5 bytes guardados en 0xD4F0)
+C 0x837C y sigue en 0xD83B (p02:8DBF, en RAM)
+C 0x8D5D busca el byte bajo de 0xFD9B...
+C 0x8D5F ...en los 0x100 bytes copiados del INIT del juego
+C 0x8D61 no esta
+C 0x8D62 se acabaron los bytes
+C 0x8D63 ¿le sigue 0xFD?
+C 0x8D68 si: apunta al operando del `ld (0xFD9B),hl`
+C 0x8D69 lo cambia por los 5 bytes de p02:8D87
+C 0x8D72 A = 0: hecho
+C 0x8E1C sin opciones de MODIFY, nada
+C 0x8E1F la variable del juego que se mira (0xD304)
+C 0x8E23 la ultima que se vio
+C 0x8E26 sin cambios, nada
+C 0x8E29 cambio: la apunta
+C 0x8E2A ¿es la que se espera (0xD312)?
+C 0x8E30 si: el ranking (p02:99FA) por el puente de RAM
+C 0x8E37 0xD332: hay puntos que mirar
+C 0x8E3E 0xD339 bit 0...
+C 0x8E44 los puntos del juego: 0xD30E y 0xD310
+C 0x8E4B guarda la segunda direccion
+C 0x8E4C los puntos de la primera a 0xD31E (0xD2BF en RAM)
+C 0x8E52 los de la segunda a 0xD321
+C 0x8E56 si hay segunda
+C 0x8E64 lee los puntos de las dos direcciones (0xD2B6 en RAM)...
+C 0x8E6D ...a 0xD335 y 0xD338
+C 0x8E76 y los compara con 0xD333/0xD336
+C 0x8EB9 0xD13A: el volumen pedido; 0xD139: el que suena
+C 0x8EBF bit 1 de las teclas: bajar el volumen
+C 0x8EC3 ya esta a 0
+C 0x8EC6 baja 13
+C 0x8ECC al llegar a 0...
+C 0x8ECE ...guarda los volumenes del PSG...
+C 0x8ED5 ...y lo deja en silencio
+C 0x8EDE A = 0
+C 0x8EE3 bit 2: subir el volumen
+C 0x8EE7 sube 13
+C 0x8EEC con tope 0xFF
+C 0x8EEE el volumen pedido
+C 0x8EEF si acaba de salir del 0...
+C 0x8EF4 ...devuelve los volumenes del PSG
+C 0x8EFF lo que hay que sumar al volumen
+C 0x8F03 suma al que suena
+C 0x8F06 sin pasarse, vuelve
+C 0x8F07 si se pasa, sigue en IX
+C 0x9000 0xD135: el congelado esta en marcha
+C 0x9004 si: sigue congelado
+C 0x900A el bit 7 de las teclas: el congelado
+C 0x900E el bit 6
+C 0x9011 el bit 5
+C 0x93B5 espera 0x200 vueltas...
+C 0x93B6 ...llamando a 0xD4F0
+C 0x93BD hasta que BC llega a 0
+C 0x93C0 devuelve los 0x1100 bytes de 0xE280 a 0xE000
+C 0x93CB e intercambia otra vez 0xE000 con 0xC000
+C 0x93CE con las interrupciones abiertas
+C 0x93D9 intercambia un byte de HL con uno de DE
+C 0x93E0 el siguiente
+C 0x93E2 BC bytes
+C 0x945D 0xD4F9: hay disco aunque H.PHYD no lo diga
+C 0x9463 H.PHYD es un `ret` si no hay disco
+C 0x9970 rellena B bytes con A
+C 0x9974 borra 0xD134 y 0xD13B
+C 0x997B y vuelve al juego
+C 0x9CC3 guarda los registros
+C 0x9CC6 la fila x 3: los puntos
+C 0x9CCA en el ranking (0xD459)
+C 0x9CD1 los puntos que entran (0xD31C)...
+C 0x9CD4 ...o, con la marca 2 ('2'), los de 0xD31F
+C 0x9CE4 guarda los registros
+C 0x9CE7 la fila x 9: el nombre
+C 0x9CEE en el ranking (0xD477)
+C 0x9CF5 el nombre que entra (0xD322)...
+C 0x9CF8 ...o, con la marca 2, el de 0xD32A
+C 0x9E23 se salta los ceros de la izquierda
+C 0x9E2C bit 0 de C: si el numero es impar de cifras...
+C 0x9E30 ...retrocede una
+C 0x9E4F pinta las tres letras de p02:9E6F
+C 0x9E59 la fila siguiente del ranking: 9 bytes de nombre...
+C 0x9E5E ...y 3 de puntos
+C 0x9E64 la fila siguiente de la pantalla
+C 0x9E69 la posicion
+C 0x9E6A las B filas
+C 0x9FAF la fase pedida
+C 0x9FB2 entre 10
+C 0x9FB7 el resto...
+C 0x9FB8 ...a 0xE0E1 y 0xE0E8 de la RAM del juego
+C 0x9FBF 0xD303: segun la opcion...
+C 0x9FC3 ...una tabla (p02:9FD6)...
+C 0x9FC8 ...u otra (p02:9FE0)
+C 0x9FEA la fase pedida
+C 0x9FED entre 4
+C 0x9FF2 el resto + 1
+C 0x9FF4 a la variable del juego (0xD30A)
+C 0x9FF8 y a 0xE015 de la RAM del juego
+# --- fin de lo escrito a mano ---
 
 # --- BLOQUES QUE LEE EL CODIGO (seccion que reescribe tools/bloques.py; no editar a mano) ---
 D 0x8170 0x8178 resto_8170  lo apuntan con el banco puesto p02:815F (0x8170); el tamano es lo que hay hasta lo siguiente, no sale de recorrerlo; lo leen p02:815F (8 bytes)
@@ -233,11 +482,9 @@ C 0x8072 vram_pagina: H y el puerto de datos del VDP para la pagina de VRAM que 
 C 0x8075 lee_vram_128k: lee BC bytes de la VRAM HL (128 KB) a DE
 C 0x8078 lee el slot del Game Master
 C 0x8080 vram_pagina: H y el puerto de datos del VDP para la pagina de VRAM que se ve (0xF3E1)
-C 0x8090 vram_alta_escribe: H xor 0x80 y NSTWRT: la otra mitad de los 128 KB de VRAM
 C 0x80A1 el puerto de lectura del VDP (VDP.DR)
 C 0x80A6 lee el registro 2 del VDP (copia de la BIOS)
 C 0x80B2 lee el registro 14 del VDP (copia de la BIOS)
-C 0x80D4 vram_alta_lee: H xor 0x80 y NSETRD
 C 0x80EC lee el slot de la RAM de la pagina 1
 C 0x80F4 lee el modo de pantalla guardado y el byte siguiente (16 bits)
 C 0x80FA DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
@@ -249,7 +496,6 @@ C 0x8132 vram_pagina: H y el puerto de datos del VDP para la pagina de VRAM que 
 C 0x8135 escribe_vram_128k: escribe BC bytes de DE en la VRAM HL (128 KB)
 C 0x8138 lee el slot del Game Master
 C 0x8140 sprites_encendidos: R
-C 0x8151 vram_alta_escribe: H xor 0x80 y NSTWRT: la otra mitad de los 128 KB de VRAM
 C 0x8178 lee el registro 8 del VDP (copia de la BIOS)
 C 0x8183 lee el registro 8 del VDP (copia de la BIOS)
 C 0x8319 salta_a_da00: copia p02:83BA a 0xDA00 (0xCD bytes) y salta alli
@@ -272,7 +518,6 @@ C 0x8429 DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 C 0x842F DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 C 0x8435 DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 C 0x844A lee el slot del Game Master (copia)
-C 0x8461 DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 C 0x8472 guarda el slot del cartucho del juego (copia)
 C 0x8477 lee el slot del Game Master (copia)
 C 0x8487 ventana_menu: las esquinas de la ventana del menu (0x9235, 0x9237)
@@ -592,7 +837,6 @@ C 0x936B disco_graba_100_de_vram: lee 0x100 bytes de la VRAM y los graba
 C 0x9377 disco_graba_100_de_vram: lee 0x100 bytes de la VRAM y los graba
 C 0x9393 bdos_graba: BDOS 0x26, grabar HL registros; si falla, el error 4
 C 0x939B intercambia_e000_c000: intercambia 0x1100 bytes de 0xE000 y 0xC000
-C 0x93CB intercambia_e000_c000: intercambia 0x1100 bytes de 0xE000 y 0xC000
 C 0x93E9 menu: menu de B opciones con el cursor A: devuelve la elegida (gemela de p01:750E)
 C 0x93EC lee cuantas letras lleva el nombre
 C 0x93F1 apunta a el nombre del fichero (FCB)
@@ -616,7 +860,6 @@ C 0x94CE lee el puntero al FCB y el byte siguiente (16 bits)
 C 0x94DE lee el puntero al FCB y el byte siguiente (16 bits)
 C 0x94EE lee el puntero al FCB y el byte siguiente (16 bits)
 C 0x94FE lee el puntero al FCB y el byte siguiente (16 bits)
-C 0x9523 un_registro_b: HL = 1 y salta a la rutina de BC
 C 0x952F disco_graba_byte: graba el byte A en el fichero (por la pila)
 C 0x9536 disco_lee_byte_b: lee un byte del fichero (por la pila)
 C 0x953B disco_lee_byte_b: lee un byte del fichero (por la pila)
@@ -628,7 +871,6 @@ C 0x9554 lee la esquina de la ventana pequena y el byte siguiente (16 bits)
 C 0x9563 error_de_disco: pinta el mensaje del error C (tabla de p00:5209)
 C 0x9569 lee la pila guardada al ir al disco y el byte siguiente (16 bits)
 C 0x9583 hl_mas_a: HL = HL + A (gemela de p01:7251)
-C 0x962D lee el slot del Game Master (copia)
 C 0x9734 guarda cuantas letras lleva el nombre
 C 0x9737 guarda la fila elegida
 C 0x973D guarda la posicion del cursor en la VRAM y el byte siguiente (16 bits)
@@ -669,7 +911,6 @@ C 0x98D5 copia_nombre: copia un nombre de la lista
 C 0x98D8 sale_del_disco_b: espera y devuelve la RAM del juego
 C 0x98DE sale_del_disco_b: espera y devuelve la RAM del juego
 C 0x98F5 fila_de_fichero: HL = la fila A de la lista de ficheros
-C 0x9906 lee el tipo de fichero elegido
 C 0x9921 pon_opcion_b: copia 0xD13C a 0xE000
 C 0x9924 p09_801b: pasarela: 1-9-10, p09:801B y vuelve a 2-3
 C 0x9929 pon_opcion_b: copia 0xD13C a 0xE000
@@ -769,12 +1010,12 @@ C 0x9E07 byte_a_hex: escribe A en hexadecimal (dos letras) en HL
 C 0x9E19 lee el codigo del juego (copia)
 C 0x9E7B hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x9E86 hl_mas_a: HL = HL + A (gemela de p01:7251)
-C 0x9F82 multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
+C 0x9F82 divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit) (gemela de p01:706C)
 C 0x9F97 binario_a_bcd: HL a BCD en DE (gemela de p01:746C)
 C 0x9FA6 bcd_a_binario: A en BCD a binario (gemela de p01:747D)
 C 0x9FAC pon_valor: escribe 0xF29C en la variable del juego (0xF28A) (gemela de p01:6F70)
-C 0x9FB4 multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
+C 0x9FB4 divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit) (gemela de p01:706C)
 C 0x9FCC hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x9FD3 pon_valor: escribe 0xF29C en la variable del juego (0xF28A) (gemela de p01:6F70)
-C 0x9FEF multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
+C 0x9FEF divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit) (gemela de p01:706C)
 # --- fin de las anotaciones de anota.py ---

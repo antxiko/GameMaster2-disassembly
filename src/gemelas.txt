@@ -63,7 +63,7 @@ p02 9E72 fila_de_ranking HL = la fila A del ranking (0x9257, 9 bytes) (gemela de
 p02 9E80 puntos_de_ranking HL = los puntos de la fila A (0x9239, 3 bytes) (gemela de p01:6C46)
 p02 9F61 pon_valor escribe 0xF29C en la variable del juego (0xF28A) (gemela de p01:6F70)
 p03 A122 pon_valor escribe 0xF29C en la variable del juego (0xF28A) (gemela de p01:6F70)
-p03 A21E multiplica HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
+p03 A21E divide_a_menos_1 DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit) (gemela de p01:706C)
 p03 A23D borra_pantalla_b borra la tabla de nombres y esconde los sprites (gemela de p01:708B)
 p03 A263 lee_cabecera_juego lee la cabecera de 0x4028 del juego y sus opciones (gemela de p01:70AA)
 p03 A2E2 busca_ficha copia la ficha por defecto (p00:45D0) y busca la del juego por su suma (gemela de p01:7136)

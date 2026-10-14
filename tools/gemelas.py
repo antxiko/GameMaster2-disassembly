@@ -105,7 +105,91 @@ def main(argv):
         with open(os.path.join(RAIZ, "src", "gemelas.txt"), "w", encoding="utf-8", newline="\n") as f:
             f.write("# Nombres repartidos a las copias (tools/gemelas.py; no editar a mano)\n")
             f.write("\n".join(fuera) + "\n")
+    copia_comentarios(bancos, ins, por_firma, "--escribe" in argv)
     return 0
+
+
+INI_C = "# --- COMENTARIOS COPIADOS DE LAS GEMELAS (tools/gemelas.py; no editar a mano) ---"
+FIN_C = "# --- fin de los comentarios copiados ---"
+A_MANO = "# --- A MANO: comentarios escritos leyendo el codigo ---"
+FIN_A_MANO = "# --- fin de lo escrito a mano ---"
+# Un comentario que nombra una direccion de ROM o de RAM (0x4000 arriba) o
+# una rutina por su banco no vale en la copia, donde las direcciones son otras.
+NO_SE_COPIA = re.compile(r"0x[4-9A-Fa-f][0-9A-Fa-f]{3}|p\d\d:")
+
+
+def a_mano(b):
+    """Los comentarios de la seccion A MANO del banco: {direccion: texto}."""
+    ruta = os.path.join(RAIZ, "src", "p%02d.notes" % b)
+    fuera, dentro = {}, False
+    for ln in open(ruta, encoding="utf-8"):
+        if ln.startswith(A_MANO):
+            dentro = True
+        elif ln.startswith(FIN_A_MANO):
+            dentro = False
+        elif dentro and ln.startswith("C "):
+            p = ln.rstrip("\n").split(None, 2)
+            fuera[int(p[1], 0)] = p[2] if len(p) > 2 else ""
+    return fuera
+
+
+def etiquetas(b):
+    """La primera instruccion detras de cada etiqueta del listado."""
+    ruta = glob.glob(os.path.join(RAIZ, "src", "*_p%02d.asm" % b))[0]
+    fuera, pendiente = [], False
+    for ln in open(ruta, encoding="utf-8"):
+        if re.match(r"^[A-Za-z_][A-Za-z_0-9]*:", ln):
+            pendiente = True
+            continue
+        m = re.match(r"\t([a-z][^\t;]*?)\s*;([0-9a-f]{4})", ln)
+        if m and pendiente and not ln.startswith(("\tdefb", "\tdefw")):
+            fuera.append(int(m.group(2), 16))
+            pendiente = False
+    return fuera
+
+
+def copia_comentarios(bancos, ins, por_firma, escribe):
+    """Los comentarios escritos a mano en una rutina pasan a su gemela,
+    instruccion por instruccion, si la gemela no lleva ya uno a mano."""
+    manos = {b: a_mano(b) for b in bancos}
+    nuevos = defaultdict(dict)
+    for b in bancos:
+        if not manos[b]:
+            continue
+        pos = {x: k for k, (x, _) in enumerate(ins[b])}
+        for a in etiquetas(b):
+            k = pos.get(a)
+            if k is None:
+                continue
+            f = firma(ins[b], k)
+            if not f or len(f) < MIN or propias(f) < 3:
+                continue
+            for b2 in bancos:
+                if b2 == b:
+                    continue
+                hay = por_firma[b2].get(f, [])
+                if len(hay) != 1:
+                    continue
+                pos2 = {x: j for j, (x, _) in enumerate(ins[b2])}
+                k2 = pos2[hay[0]]
+                for i in range(len(f)):
+                    a1, a2 = ins[b][k + i][0], ins[b2][k2 + i][0]
+                    txt = manos[b].get(a1)
+                    if txt and a2 not in manos[b2] and not NO_SE_COPIA.search(txt):
+                        nuevos[b2].setdefault(a2, txt)
+    print("%d comentarios copiados a las gemelas" % sum(len(v) for v in nuevos.values()))
+    if not escribe:
+        return
+    for b in bancos:
+        ruta = os.path.join(RAIZ, "src", "p%02d.notes" % b)
+        filas = open(ruta, encoding="utf-8").read().split("\n")
+        if INI_C in filas:
+            i, f = filas.index(INI_C), filas.index(FIN_C)
+            del filas[i:f + 1]
+        cuerpo = ["C 0x%04X %s" % (a, t) for a, t in sorted(nuevos[b].items())]
+        if cuerpo:
+            filas[1:1] = [INI_C] + cuerpo + [FIN_C]
+        open(ruta, "w", encoding="utf-8", newline="\n").write("\n".join(filas))
 
 
 if __name__ == "__main__":

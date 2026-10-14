@@ -22,13 +22,13 @@ DATA_partida_A000:
 
 
 L_A001:
-	cp 010h		;a001
+	cp 010h		;a001   ; el canal que se esta tocando (bit): 0x10 el quinto...
 	jp z,L_A021		;a003
-	cp 008h		;a006
+	cp 008h		;a006   ; ...0x08 el cuarto...
 	jp z,L_A019		;a008
-	cp 004h		;a00b
+	cp 004h		;a00b   ; ...0x04 el tercero...
 	jp z,L_A013		;a00d
-	cp 002h		;a010
+	cp 002h		;a010   ; ...0x02 el segundo
 	ret nz			;a012
 L_A013:
 	res 3,(hl)		;a013
@@ -49,11 +49,11 @@ L_A021:
 	set 3,(hl)		;a026
 	ret			;a028
 L_A029:
-	cp 0e0h		;a029
-	jp c,L_A275		;a02b
-	and 01fh		;a02e
+	cp 0e0h		;a029   ; 0xE0-0xFF son ordenes
+	jp c,L_A275		;a02b   ; lo de debajo es una nota
+	and 01fh		;a02e   ; el numero de orden
 	push hl			;a030
-	ld hl,0a03eh		;a031
+	ld hl,0a03eh		;a031   ; en la tabla de saltos de p08:A03E
 	add a,a			;a034
 	ld e,a			;a035
 	ld d,000h		;a036
@@ -62,7 +62,7 @@ L_A029:
 	inc hl			;a03a
 	ld d,(hl)			;a03b
 	ex de,hl			;a03c
-	jp (hl)			;a03d
+	jp (hl)			;a03d   ; a la orden
 
 ; ----------------------------------------------------------------------
 ; DATOS saltos_A03E: tabla de 31 palabras del despachador (call 0x408D en
@@ -109,18 +109,18 @@ DATA_saltos_A03E:
 L_A07C:
 	pop hl			;a07c
 L_A07D:
-	res 6,(ix+00eh)		;a07d
-	ld a,(hl)			;a081
+	res 6,(ix+00eh)		;a07d   ; quita el bit 6 del estado
+	ld a,(hl)			;a081   ; el byte de la orden: el modo (0-3)...
 	and 003h		;a082
-	ld (ix+00dh),a		;a084
+	ld (ix+00dh),a		;a084   ; ...a (ix+0x0D)
 	ld b,a			;a087
 	inc hl			;a088
-	ld a,(hl)			;a089
+	ld a,(hl)			;a089   ; el siguiente a (ix+0x13)
 	ld (ix+013h),a		;a08a
-	ld a,b			;a08d
+	ld a,b			;a08d   ; con modo 0...
 	or a			;a08e
 	ret nz			;a08f
-	dec hl			;a090
+	dec hl			;a090   ; ...el byte no se consume
 	ret			;a091
 L_A092:
 	pop hl			;a092
@@ -217,20 +217,20 @@ L_A12B:
 	ld (ix+015h),a		;a12e
 	ret			;a131
 L_A132:
-	pop hl			;a132
+	pop hl			;a132   ; el parametro
 	inc hl			;a133
-	ld a,(ix+00fh)		;a134
+	ld a,(ix+00fh)		;a134   ; conserva solo el bit 7 de (ix+0x0F)
 	and 080h		;a137
 	ld (ix+00fh),a		;a139
-	ld a,(hl)			;a13c
+	ld a,(hl)			;a13c   ; la parte alta del parametro...
 	and 0f0h		;a13d
 	rrca			;a13f
 	rrca			;a140
 	rrca			;a141
 	rrca			;a142
-	cp 008h		;a143
+	cp 008h		;a143   ; ...si es menor de 8...
 	jp nc,L_A14C		;a145
-	set 2,(ix+00fh)		;a148
+	set 2,(ix+00fh)		;a148   ; ...pone el bit 2
 L_A14C:
 	res 3,a		;a14c
 	inc a			;a14e
@@ -238,28 +238,28 @@ L_A14C:
 	jp nz,L_A15A		;a153
 	set 1,(ix+00fh)		;a156
 L_A15A:
-	ld (ix+021h),a		;a15a
-	ld a,(hl)			;a15d
+	ld (ix+021h),a		;a15a   ; guarda la parte alta en (ix+0x21)
+	ld a,(hl)			;a15d   ; la parte baja...
 	and 00fh		;a15e
-	cp 008h		;a160
+	cp 008h		;a160   ; ...de 8 en adelante...
 	jp c,L_A169		;a162
-	set 4,(ix+00fh)		;a165
+	set 4,(ix+00fh)		;a165   ; ...pone el bit 4
 L_A169:
-	res 3,a		;a169
-	inc a			;a16b
+	res 3,a		;a169   ; sin el bit 3...
+	inc a			;a16b   ; ...mas uno, a (ix+0x22)
 	ld (ix+022h),a		;a16c
-	inc hl			;a16f
+	inc hl			;a16f   ; el byte siguiente: sus dos mitades...
 	ld a,(hl)			;a170
 	and 0f0h		;a171
 	rrca			;a173
 	rrca			;a174
 	rrca			;a175
 	rrca			;a176
-	ld (ix+023h),a		;a177
+	ld (ix+023h),a		;a177   ; ...a (ix+0x23)...
 	ld a,(hl)			;a17a
 	and 00fh		;a17b
-	ld (ix+024h),a		;a17d
-	set 0,(ix+00fh)		;a180
+	ld (ix+024h),a		;a17d   ; ...y a (ix+0x24)
+	set 0,(ix+00fh)		;a180   ; y enciende el efecto (bit 0 de ix+0x0F)
 	ret			;a184
 L_A185:
 	pop hl			;a185
@@ -273,11 +273,11 @@ L_A18F:
 	ld (ix+025h),a		;a192
 	ret			;a195
 L_A196:
-	pop hl			;a196
+	pop hl			;a196   ; el parametro...
 	inc hl			;a197
 	ld a,(hl)			;a198
-	ld (ix+026h),a		;a199
-	set 1,(ix+00eh)		;a19c
+	ld (ix+026h),a		;a199   ; ...a (ix+0x26): el desplazamiento de la frecuencia
+	set 1,(ix+00eh)		;a19c   ; y lo enciende (bit 1 de ix+0x0E)
 	ret			;a1a0
 L_A1A1:
 	pop hl			;a1a1
@@ -290,15 +290,15 @@ L_A1A7:
 	ld (ix+00eh),a		;a1ad
 	ret			;a1b0
 L_A1B1:
-	pop hl			;a1b1
+	pop hl			;a1b1   ; el parametro
 	inc hl			;a1b2
-	ld a,(ix+00eh)		;a1b3
+	ld a,(ix+00eh)		;a1b3   ; enciende los bits 2 y 4 del estado
 	or 014h		;a1b6
 	ld (ix+00eh),a		;a1b8
-	ld a,(hl)			;a1bb
+	ld a,(hl)			;a1bb   ; la parte baja a (ix+0x1C)
 	and 00fh		;a1bc
 	ld (ix+01ch),a		;a1be
-	ld a,(hl)			;a1c1
+	ld a,(hl)			;a1c1   ; y la alta a (ix+0x1B)
 	and 0f0h		;a1c2
 	rrca			;a1c4
 	rrca			;a1c5
@@ -307,11 +307,11 @@ L_A1B1:
 	ld (ix+01bh),a		;a1c8
 	ret			;a1cb
 L_A1CC:
-	pop hl			;a1cc
+	pop hl			;a1cc   ; el parametro...
 	inc hl			;a1cd
 	ld a,(hl)			;a1ce
-	ld (ix+01ah),a		;a1cf
-	ld a,(ix+00eh)		;a1d2
+	ld (ix+01ah),a		;a1cf   ; ...a (ix+0x1A)
+	ld a,(ix+00eh)		;a1d2   ; y enciende los bits 2 y 3 del estado
 	or 00ch		;a1d5
 	ld (ix+00eh),a		;a1d7
 	ret			;a1da
@@ -334,11 +334,11 @@ L_A1ED:
 	ld (ix+00eh),a		;a1f3
 	ret			;a1f6
 L_A1F7:
-	pop hl			;a1f7
+	pop hl			;a1f7   ; el parametro...
 	inc hl			;a1f8
 	ld a,(hl)			;a1f9
-	ld (ix+015h),a		;a1fa
-	set 7,(ix+00eh)		;a1fd
+	ld (ix+015h),a		;a1fa   ; ...a (ix+0x15)
+	set 7,(ix+00eh)		;a1fd   ; y enciende el bit 7 del estado
 	ret			;a201
 L_A202:
 	pop hl			;a202
@@ -358,20 +358,20 @@ L_A214:
 	ld h,(ix+008h)		;a218
 	ret			;a21b
 L_A21C:
-	pop hl			;a21c
+	pop hl			;a21c   ; el parametro: cuantas veces se repite
 	inc hl			;a21d
-	ld a,(ix+005h)		;a21e
+	ld a,(ix+005h)		;a21e   ; la cuenta (ix+0x05)
 	inc a			;a221
-	cp (hl)			;a222
+	cp (hl)			;a222   ; ¿ya llego?
 	jp z,L_A230		;a223
-	ld (ix+005h),a		;a226
+	ld (ix+005h),a		;a226   ; no: sube la cuenta...
 palabra_y_retrocede:		; HL = la palabra siguiente - 1
-	inc hl			;a229
+	inc hl			;a229   ; HL = la palabra siguiente...
 	ld e,(hl)			;a22a
 	inc hl			;a22b
 	ld d,(hl)			;a22c
 	ex de,hl			;a22d
-	dec hl			;a22e
+	dec hl			;a22e   ; ...menos uno (el bucle vuelve alli)
 	ret			;a22f
 L_A230:
 	inc hl			;a230
@@ -396,30 +396,30 @@ L_A24E:
 	pop hl			;a24e
 	jp palabra_y_retrocede		;a24f   ; palabra_y_retrocede: HL = la palabra siguiente - 1
 L_A252:
-	pop hl			;a252
+	pop hl			;a252   ; el parametro...
 	inc hl			;a253
 	ld a,(hl)			;a254
-	ld (ix+009h),a		;a255
-	cp 004h		;a258
+	ld (ix+009h),a		;a255   ; ...a (ix+0x09)
+	cp 004h		;a258   ; de 4 en adelante...
 	jp c,L_A270		;a25a
-	ld a,(ix+00eh)		;a25d
+	ld a,(ix+00eh)		;a25d   ; ...enciende el bit 0 del estado y deja solo el 4...
 	set 0,a		;a260
 	and 011h		;a262
 	ld (ix+00eh),a		;a264
-	res 0,(ix+00fh)		;a267
+	res 0,(ix+00fh)		;a267   ; ...y apaga los bits 0 y 1 de (ix+0x0F)
 	res 1,(ix+00fh)		;a26b
 	ret			;a26f
 L_A270:
 	res 0,(ix+00eh)		;a270
 	ret			;a274
 L_A275:
-	ld a,(hl)			;a275
+	ld a,(hl)			;a275   ; una nota: la parte baja
 	and 00fh		;a276
-	cp 00fh		;a278
+	cp 00fh		;a278   ; 0x0F: silencio
 	jp z,L_A28C		;a27a
-	cp 006h		;a27d
+	cp 006h		;a27d   ; de 6 en adelante...
 	jp nc,L_A286		;a27f
-	ld (ix+016h),a		;a282
+	ld (ix+016h),a		;a282   ; la parte baja a (ix+0x16)
 	ret			;a285
 L_A286:
 	ld a,001h		;a286
@@ -438,13 +438,13 @@ L_A291:
 	jp c,L_A2A3		;a29e
 	set 0,(hl)		;a2a1
 L_A2A3:
-	res 2,(hl)		;a2a3
-	ld a,(0e22dh)		;a2a5
+	res 2,(hl)		;a2a3   ; quita el bit 2 del mezclador
+	ld a,(0e22dh)		;a2a5   ; el canal de 0xE22D...
 	ld b,a			;a2a8
-	ld a,(0e2b1h)		;a2a9
-	cp b			;a2ac
+	ld a,(0e2b1h)		;a2a9   ; ...y el de 0xE2B1
+	cp b			;a2ac   ; si el segundo no es menor...
 	jp c,L_A2B2		;a2ad
-	set 2,(hl)		;a2b0
+	set 2,(hl)		;a2b0   ; ...el bit 2 vuelve
 L_A2B2:
 	call sonido_al_psg		;a2b2   ; sonido_al_psg: manda al PSG los registros de los canales
 	call sonido_ruido		;a2b5   ; sonido_ruido: el periodo del ruido (R#6) si hay que cambiarlo
@@ -522,15 +522,15 @@ sonido_ruido:		; el periodo del ruido (R#6) si hay que cambiarlo
 	call 00093h		;a33e   ; BIOS WRTPSG - Writes data to PSG-register
 	ret			;a341
 L_A342:
-	bit 1,(hl)		;a342
+	bit 1,(hl)		;a342   ; bit 1: ya esta mandado
 	ret nz			;a344
-	bit 2,(hl)		;a345
+	bit 2,(hl)		;a345   ; bit 2: hay que mandar el ruido
 	ret z			;a347
-	res 2,(hl)		;a348
+	res 2,(hl)		;a348   ; lo apunta como mandado (bit 3)
 	set 3,(hl)		;a34a
-	ld a,(0e2f1h)		;a34c
+	ld a,(0e2f1h)		;a34c   ; el periodo del ruido (0xE2F1)...
 	ld e,a			;a34f
-	ld a,006h		;a350
+	ld a,006h		;a350   ; ...a R#6 del PSG
 	call 00093h		;a352   ; BIOS WRTPSG - Writes data to PSG-register
 	ret			;a355
 sonido_envolvente:		; la envolvente (R#11-13) si hay que cambiarla

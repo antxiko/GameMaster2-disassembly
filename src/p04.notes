@@ -1,4 +1,139 @@
 # Notas del banco 04
+# --- COMENTARIOS COPIADOS DE LAS GEMELAS (tools/gemelas.py; no editar a mano) ---
+C 0x866E la direccion de la tabla, que va pegada al `call`
+C 0x866F A x 2: cada destino es una palabra
+# --- fin de los comentarios copiados ---
+
+# --- A MANO: comentarios escritos leyendo el codigo ---
+C 0x80D1 la entrada del directorio
+C 0x80D2 0x10: libre
+C 0x80D6 la siguiente (8 bytes)
+C 0x80D7 C = su numero
+C 0x80D8 las 0x3B entradas
+C 0x80DA ninguna libre: NZ
+C 0x80E9 un byte de la tabla de bloques
+C 0x80EA 0: libre
+C 0x80ED C = su numero
+C 0x80EF los 0x3B bloques
+C 0x80F1 ninguno libre: NZ
+C 0x8115 el tamano del fichero (ix+0x0B)
+C 0x811B 0xFFFF: sin tamano, nada
+C 0x8120 la entrada (ix+0x07)...
+C 0x8125 ...x 8...
+C 0x8128 ...en 0xB006: su tamano
+C 0x812C lo guarda
+C 0x812F NZ: hecho
+C 0x8132 el tamano del fichero
+C 0x8138 menos uno
+C 0x8139 x 2: H = los bloques de 128 bytes
+C 0x813A si pasa de 0x7FFF, error
+C 0x813D B = cuantos bloques
+C 0x813F el primer bloque (ix+0x08)
+C 0x81F3 la entrada (ix+0x12)...
+C 0x81F8 ...x 8...
+C 0x81FB ...en el directorio de 0xB000
+C 0x81FF a donde la quiere la orden (ix+0x0D)
+C 0x8205 sus 8 bytes
+C 0x820A la siguiente para la proxima vez
+C 0x820D A = 0: bien
+C 0x8221 la entrada
+C 0x8222 0x10: libre, no se copia
+C 0x8228 la ocupada se copia (8 bytes)
+C 0x822E C = cuantas
+C 0x8257 la entrada (ix+0x12)...
+C 0x825C ...x 8 en el directorio
+C 0x8263 queda libre (0x10)
+C 0x8265 el byte 5: el primer bloque del fichero
+C 0x826A libera toda su cadena
+C 0x826D si falla, error
+C 0x8270 A = 0: borrado
+C 0x82EB DE = el destino en la RAM (ix+0x0D)
+C 0x82F1 HL = la posicion en la SRAM (ix+0x15)
+C 0x82F7 BC = cuantos bytes (ix+0x0F)
+C 0x8372 HL = el origen en la RAM (ix+0x0D)
+C 0x8378 DE = la posicion en la SRAM (ix+0x15)
+C 0x837E BC = cuantos bytes (ix+0x0F)
+C 0x8384 un byte a la SRAM
+C 0x8386 BC a 0: se acabo
+C 0x838A el puntero del fichero (ix+0x09)...
+C 0x8390 ...sube...
+C 0x8391 ...y el tamano (ix+0x0B) con el
+C 0x839E ¿se lleno el bloque de 128 bytes?
+C 0x83A1 no: sigue
+C 0x83A5 lleno: guarda su CRC
+C 0x83A8 y pasa al bloque siguiente
+C 0x83AD si no hay sitio, error
+C 0x83AE la posicion del bloque nuevo
+C 0x83B4 el bloque actual pasa a ser el anterior
+C 0x83BC el puntero del fichero (ix+0x09)...
+C 0x83C2 ...sube uno...
+C 0x83C3 ...y el tamano (ix+0x0B) con el
+C 0x83CF guarda el CRC del ultimo bloque
+C 0x83D2 vuelve a la mitad 0x10 de la SRAM
+C 0x83D7 A = 0: bien
+C 0x83F3 la mitad 0x10 de la SRAM...
+C 0x83F5 ...para los bloques 0-0x1F...
+C 0x83FE ...y la 0x30 para los 0x20-0x3F
+C 0x8400 el bloque x 128...
+C 0x8407 ...mas la posicion dentro del bloque
+C 0x840E en la ventana de 0xB000
+C 0x8412 la posicion en la SRAM a (ix+0x15)
+C 0x8418 y pone esa mitad en 0xA000
+C 0x841D el puntero del fichero (ix+0x09)
+C 0x8423 x 2: H = el numero de bloque dentro del fichero
+C 0x8424 mas alla de 0x7FFF: error
+C 0x8427 hasta 0x3A bloques
+C 0x842D B = cuantos bloques hay que saltar
+C 0x842E el primer bloque del fichero
+C 0x8434 si es el primero, ya esta
+C 0x8456 busca un bloque libre en la tabla de 0xB206
+C 0x8457 0: libre
+C 0x845C hasta el bloque 0x40
+C 0x8467 el bloque nuevo, enlazado detras del anterior
+C 0x8468 y es el actual
+C 0x846C el nuevo es el ultimo de la cadena (0xFF)
+C 0x846E los B bloques
+C 0x8470 A = 0: bien
+C 0x84EC la marca de la SRAM formateada: 0xFFFA...
+C 0x84F2 ...y 0xFF en 0xB202-0xB205
+C 0x8508 compara la marca de 0xB200 con la de p04:8513
+C 0x850A distinta: la SRAM no esta formateada
+C 0x8511 A = 0: formateada
+C 0x8519 el CRC del bloque y donde se guarda
+C 0x851C lo guarda...
+C 0x851D ...en la tabla de 0xB280
+C 0x8521 el CRC de los 128 bytes
+C 0x8524 y le pasa los dos bytes guardados
+C 0x852F si el bloque esta bien, el CRC queda a 0
+C 0x8531 si no, error
+C 0x8535 el bloque (ix+0x13)
+C 0x8538 en la mitad 0x10 de la SRAM...
+C 0x853E ...o en la 0x30
+C 0x8542 el bloque x 128
+C 0x8543 pone la mitad en 0xA000
+C 0x854D en la ventana de 0xB000
+C 0x8552 128 bytes
+C 0x8554 el CRC empieza en 0
+C 0x8578 un bit: el bajo del byte...
+C 0x857C ...entra por arriba en HL al desplazarlo
+C 0x8580 el bit que sale de HL...
+C 0x8582 ...decide
+C 0x8585 si es 1, XOR con el polinomio 0xA001 (DE)
+C 0x859E una letra del nombre
+C 0x85A0 '*' no vale en el nombre de un fichero nuevo
+C 0x85A5 '?' tampoco
+C 0x85AA ni los codigos de control (0x01-0x1F)
+C 0x85B1 las 5 letras
+C 0x85B6 la primera letra...
+C 0x85B8 ...no puede ser 0 ni un espacio
+C 0x8651 desplaza el nombre una letra
+C 0x8655 las B letras
+C 0x8657 la que sale: 0...
+C 0x8659 ...un espacio...
+C 0x865C ...un '?'...
+C 0x865F ...o un '*' estan bien
+C 0x8662 otra cosa: C
+# --- fin de lo escrito a mano ---
 
 # --- BLOQUES QUE LEE EL CODIGO (seccion que reescribe tools/bloques.py; no editar a mano) ---
 D 0x8033 0x804F saltos_8033  tabla de 14 palabras del despachador (call 0x408D en 0x8030); lo leen el despachador (28 bytes)
@@ -35,10 +170,10 @@ L 0x84C8 sram_borra_mitad pone a cero 0xB000-0xBFFF de la mitad A
 L 0x84D9 sram_directorio_vacio marca libres las 0x40 entradas del directorio
 L 0x84EC sram_cabecera escribe la cabecera de la SRAM en 0xB200
 L 0x84FB sram_formateada compara la marca de 0xB200 con p04:8513: la SRAM esta formateada
-L 0x8519 sram_enlaza escribe el bloque siguiente de la cadena
-L 0x8521 sram_bloque_siguiente lee el bloque siguiente de la cadena
-L 0x8535 sram_tabla_de_bloques la tabla de bloques: la mitad (0x10 o 0x30) y la posicion
-L 0x8572 sram_bits los bits del bloque en la tabla de 0xA001
+L 0x8519 sram_guarda_crc calcula el CRC-16 del bloque y lo guarda en su sitio de la tabla de 0xB280
+L 0x8521 sram_comprueba_crc comprueba el CRC-16 del bloque con el guardado: si no da 0, error
+L 0x8535 sram_crc_bloque HL = el CRC-16 de los 128 bytes del bloque (ix+0x13) y DE = donde se guarda (0xB280 + 2 x bloque)
+L 0x8572 crc16_byte pasa el byte A por el CRC-16 de HL (polinomio 0xA001, reflejado)
 L 0x858E sram_abierto comprueba que el fichero esta abierto (ix+0x18)
 L 0x8597 sram_nombre_valido comprueba el nombre de IX: 5 letras, sin '*' ni '?'
 L 0x85C9 letra_valida lee la letra: Z si es 0 o espacio
@@ -85,7 +220,6 @@ C 0x8240 el mapper: pone en 0xA000 el banco de A
 C 0x8243 sram_busca: busca el nombre de IX en el directorio
 C 0x8249 sram_borra: borra el fichero: marca la entrada y libera sus bloques
 C 0x8250 sram_busca: busca el nombre de IX en el directorio
-C 0x826A sram_libera_cadena: libera la cadena de bloques de un fichero
 C 0x8274 el mapper: pone en 0xA000 el banco de A
 C 0x8277 sram_nombre_valido: comprueba el nombre de IX: 5 letras, sin '*' ni '?'
 C 0x827D sram_busca: busca el nombre de IX en el directorio
@@ -107,13 +241,10 @@ C 0x834F el mapper: pone en 0xA000 el banco de A
 C 0x8356 sram_siguiente_bloque: pasa al bloque siguiente del fichero
 C 0x8362 sram_copia_escribe: copia de la RAM a la SRAM, bloque a bloque
 C 0x836D el mapper: pone en 0xA000 el banco de A
-C 0x83A5 sram_enlaza: escribe el bloque siguiente de la cadena
-C 0x83A8 sram_siguiente_bloque: pasa al bloque siguiente del fichero
-C 0x83CF sram_enlaza: escribe el bloque siguiente de la cadena
 C 0x83D4 el mapper: pone en 0xA000 el banco de A
 C 0x83DB el mapper: pone en 0xA000 el banco de A
 C 0x83DE sram_situa: situa el puntero del fichero (ix+0x09)
-C 0x83E8 sram_bloque_siguiente: lee el bloque siguiente de la cadena
+C 0x83E8 sram_comprueba_crc: comprueba el CRC-16 del bloque con el guardado: si no da 0, error
 C 0x83EE sram_direccion_bloque: la direccion en la SRAM del bloque (ix+0x13): mitad 0x10 o 0x30
 C 0x8419 el mapper: pone en 0xA000 el banco de A
 C 0x843B hl_mas_a: HL = HL + A (gemela de p01:7251)
@@ -135,15 +266,12 @@ C 0x84C3 sram_borra_mitad: pone a cero 0xB000-0xBFFF de la mitad A
 C 0x84C8 el mapper: pone en 0xA000 el banco de A
 C 0x84DB el mapper: pone en 0xA000 el banco de A
 C 0x84FD el mapper: pone en 0xA000 el banco de A
-C 0x8519 sram_tabla_de_bloques: la tabla de bloques: la mitad (0x10 o 0x30) y la posicion
-C 0x8521 sram_tabla_de_bloques: la tabla de bloques: la mitad (0x10 o 0x30) y la posicion
-C 0x8526 sram_bits: los bits del bloque en la tabla de 0xA001
-C 0x852C sram_bits: los bits del bloque en la tabla de 0xA001
+C 0x8526 crc16_byte: pasa el byte A por el CRC-16 de HL (polinomio 0xA001, reflejado)
+C 0x852C crc16_byte: pasa el byte A por el CRC-16 de HL (polinomio 0xA001, reflejado)
 C 0x8544 el mapper: pone en 0xA000 el banco de A
-C 0x855A sram_bits: los bits del bloque en la tabla de 0xA001
+C 0x855A crc16_byte: pasa el byte A por el CRC-16 de HL (polinomio 0xA001, reflejado)
 C 0x8569 de_mas_a: DE = DE + A (gemela de p01:7256)
 C 0x856E el mapper: pone en 0xA000 el banco de A
-C 0x85B8 letra_valida: lee la letra: Z si es 0 o espacio
 C 0x85C0 letra_valida: lee la letra: Z si es 0 o espacio
 C 0x85D3 letra_valida: lee la letra: Z si es 0 o espacio
 C 0x85DE sram_copia_nombre: copia el nombre de IX+0x19 (5 letras) a DE

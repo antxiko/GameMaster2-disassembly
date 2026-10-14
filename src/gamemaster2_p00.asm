@@ -305,26 +305,26 @@ L_427A:
 	ret			;4281
 L_4282:
 	ld hl,0e250h		;4282   ; apunta a el nombre de 5 letras
-	ld a,(hl)			;4285
-	cp 000h		;4286
+	ld a,(hl)			;4285   ; la primera letra del nombre
+	cp 000h		;4286   ; sin nombre no hay nada que borrar
 	jp z,L_42B8		;4288
-	cp 020h		;428b
+	cp 020h		;428b   ; un espacio tampoco vale
 	jp z,L_42B8		;428d
-	ld de,0e210h		;4290
+	ld de,0e210h		;4290   ; copia el nombre (5 letras) al bloque de la orden, 0xE210
 	ld bc,00005h		;4293
 	ldir		;4296
-	ld iy,(0dfffh)		;4298
-	ld de,0e210h		;429c
-	ld c,006h		;429f
-	ld ix,04020h		;42a1
+	ld iy,(0dfffh)		;4298   ; IY para CALSLT: el slot va en el byte de 0xE000
+	ld de,0e210h		;429c   ; DE = el bloque de la orden
+	ld c,006h		;429f   ; la orden 6 de la SRAM (p04:8000)
+	ld ix,04020h		;42a1   ; IX = la pasarela de la SRAM, p00:4020
 	call 0001ch		;42a5   ; BIOS CALSLT - Executes inter-slot call
-	and a			;42a8
+	and a			;42a8   ; 0: borrado (p00:42C9 pinta FILE DELETED)
 	jr z,L_42C9		;42a9
-	cp 0feh		;42ab
+	cp 0feh		;42ab   ; 0xFE: la SRAM no esta formateada (p00:42BF, RAM DISK UNFORMATED)
 	jr z,L_42BF		;42ad
-	cp 0f7h		;42af
+	cp 0f7h		;42af   ; 0xF7: no hay ese fichero (p00:42C4, FILE NOT FOUND)
 	jr z,L_42C4		;42b1
-	ld hl,042f4h		;42b3
+	ld hl,042f4h		;42b3   ; cualquier otro: FAILED
 	jr L_42CC		;42b6
 L_42B8:
 	call borra_zona_3a80		;42b8   ; borra_zona_3a80: borra 0x3A80 (0x40 bytes)
@@ -483,66 +483,66 @@ sram_pinta_fila:		; pinta una fila: nombre de 5 letras y sus datos
 	and a			;4434
 	ret z			;4435
 L_4436:
-	ld a,(de)			;4436
+	ld a,(de)			;4436   ; una letra del nombre
 	call 07646h		;4437   ; pon_letra: escribe A en la VRAM HL guardando los registros
 	inc de			;443a
 	inc hl			;443b
-	djnz L_4436		;443c
-	inc hl			;443e
+	djnz L_4436		;443c   ; las 5 letras
+	inc hl			;443e   ; salta tres columnas
 	inc hl			;443f
 	inc hl			;4440
 	inc de			;4441
 	push hl			;4442
 	ex de,hl			;4443
-	ld e,(hl)			;4444
+	ld e,(hl)			;4444   ; DE = el tamano del fichero
 	inc hl			;4445
 	ld d,(hl)			;4446
-	dec de			;4447
-	ld a,d			;4448
+	dec de			;4447   ; menos uno
+	ld a,d			;4448   ; si era 0, se queda en 0
 	add a,a			;4449
 	jr nc,L_444F		;444a
 	ld de,00000h		;444c
 L_444F:
 	ex de,hl			;444f
-	add hl,hl			;4450
-	ld c,h			;4451
+	add hl,hl			;4450   ; HL x 2: H = los bloques de 128 bytes
+	ld c,h			;4451   ; C = los bloques
 	pop hl			;4452
-	inc c			;4453
-	ld b,008h		;4454
+	inc c			;4453   ; redondea hacia arriba
+	ld b,008h		;4454   ; pasa C a BCD bit a bit (8 bits)
 	xor a			;4456
 L_4457:
-	rl c		;4457
-	adc a,a			;4459
-	daa			;445a
+	rl c		;4457   ; el bit alto de C...
+	adc a,a			;4459   ; ...entra en A doblandolo
+	daa			;445a   ; en decimal
 	djnz L_4457		;445b
-	ld c,a			;445d
-	rra			;445e
+	ld c,a			;445d   ; C = los bloques en BCD
+	rra			;445e   ; la cifra de las decenas
 	rra			;445f
 	rra			;4460
 	rra			;4461
 	and 00fh		;4462
-	add a,030h		;4464
-	call 07646h		;4466   ; pon_letra: escribe A en la VRAM HL guardando los registros
+	add a,030h		;4464   ; en ASCII
+	call 07646h		;4466   ; a la pantalla
 	inc hl			;4469
-	ld a,c			;446a
+	ld a,c			;446a   ; la cifra de las unidades
 	and 00fh		;446b
-	add a,030h		;446d
-	call 07646h		;446f   ; pon_letra: escribe A en la VRAM HL guardando los registros
+	add a,030h		;446d   ; en ASCII
+	call 07646h		;446f   ; a la pantalla
 	ret			;4472
 sram_fila_ocupada:		; mira si la fila A de 0xE010 esta ocupada
 	push hl			;4473
-	cp 004h		;4474
+	cp 004h		;4474   ; solo hay 4 filas por pagina (0-3)
 	jr nc,L_448A		;4476
-	ld h,a			;4478
+	ld h,a			;4478   ; HL = la fila x 64...
 	ld l,000h		;4479
 	srl h		;447b
 	rr l		;447d
 	ld de,0e010h		;447f   ; apunta a la lista de la SRAM
-	add hl,de			;4482
-	ld a,(hl)			;4483
-	and a			;4484
+	add hl,de			;4482   ; ...dentro de la lista de 0xE010
+	ld a,(hl)			;4483   ; la primera letra del nombre de la fila
+	and a			;4484   ; 0: la fila esta vacia
 	jr z,L_448A		;4485
-	xor a			;4487
+	xor a			;4487   ; ocupada: Z y A = 0
 	pop hl			;4488
 	ret			;4489
 L_448A:
@@ -782,21 +782,21 @@ L_4A9A:
 L_4AA0:
 	push bc			;4aa0
 	push hl			;4aa1
-	ld a,(hl)			;4aa2
-	bit 7,a		;4aa3
+	ld a,(hl)			;4aa2   ; el byte de EXPTBL de ese slot
+	bit 7,a		;4aa3   ; bit 7: el slot esta expandido
 	jr nz,L_4AC4		;4aa5
-	ld b,c			;4aa7
-	call 0c02fh		;4aa8
+	ld b,c			;4aa7   ; B = el slot
+	call 0c02fh		;4aa8   ; lo mira en RAM (p00:4AC9 copiada a 0xC02F)
 	jr z,L_4AB1		;4aab
-	ld a,c			;4aad
-	call 0c04bh		;4aae
+	ld a,c			;4aad   ; el slot en A
+	call 0c04bh		;4aae   ; y busca el texto de la ROM del disco (p00:4AE5 en 0xC04B)
 L_4AB1:
 	pop hl			;4ab1
 	pop bc			;4ab2
-	jr c,L_4AB9		;4ab3
-	inc hl			;4ab5
+	jr c,L_4AB9		;4ab3   ; encontrado: sale
+	inc hl			;4ab5   ; el slot siguiente
 	inc c			;4ab6
-	djnz L_4AA0		;4ab7
+	djnz L_4AA0		;4ab7   ; los 4 slots primarios
 L_4AB9:
 	push af			;4ab9
 	ld a,(0d12eh)		;4aba   ; lee el slot del Game Master (copia)
@@ -817,11 +817,11 @@ L_4ACE:
 	ld b,004h		;4ad1
 L_4AD3:
 	push bc			;4ad3
-	ld b,a			;4ad4
-	call 0c02fh		;4ad5
+	ld b,a			;4ad4   ; B = el subslot
+	call 0c02fh		;4ad5   ; lo mira (0xC02F)
 	jr z,L_4ADE		;4ad8
 	ld a,b			;4ada
-	call 0c04bh		;4adb
+	call 0c04bh		;4adb   ; y busca el texto de la ROM del disco (0xC04B)
 L_4ADE:
 	pop bc			;4ade
 	ret c			;4adf
@@ -836,18 +836,18 @@ L_4AE5:
 	ld de,0c07eh		;4aee
 	ld bc,04000h		;4af1
 L_4AF4:
-	ld a,044h		;4af4
-	cpir		;4af6
-	jr nz,L_4B15		;4af8
-	jp po,0c07bh		;4afa
+	ld a,044h		;4af4   ; busca una 'D' (0x44)...
+	cpir		;4af6   ; ...en los 256 bytes copiados
+	jr nz,L_4B15		;4af8   ; no hay mas: no es la ROM del disco
+	jp po,0c07bh		;4afa   ; se acabo la busqueda (BC = 0)
 	push bc			;4afd
 	push de			;4afe
 	push hl			;4aff
-	ld b,009h		;4b00
+	ld b,009h		;4b00   ; compara 9 letras con 'isk BASIC' (0xC07E)
 L_4B02:
 	ld a,(de)			;4b02
-	cp (hl)			;4b03
-	jr nz,L_4B0A		;4b04
+	cp (hl)			;4b03   ; letra a letra
+	jr nz,L_4B0A		;4b04   ; no coincide: sigue buscando
 	inc hl			;4b06
 	inc de			;4b07
 	djnz L_4B02		;4b08
@@ -855,10 +855,10 @@ L_4B0A:
 	pop hl			;4b0a
 	pop de			;4b0b
 	pop bc			;4b0c
-	jr nz,L_4AF4		;4b0d
+	jr nz,L_4AF4		;4b0d   ; no era 'Disk BASIC': sigue buscando
 	pop af			;4b0f
-	ld (0d33bh),a		;4b10
-	scf			;4b13
+	ld (0d33bh),a		;4b10   ; el slot de la ROM del disco a 0xD33B
+	scf			;4b13   ; C: la encontro
 	ret			;4b14
 L_4B15:
 	pop af			;4b15
@@ -1063,18 +1063,18 @@ disco_lee_ac80:		; lee 0x67 registros a 0xAC80
 	ld de,0ac80h		;4cc4
 	ld b,067h		;4cc7
 L_4CC9:
-	push bc			;4cc9
+	push bc			;4cc9   ; lee 0x67 registros de 128 bytes
 	push de			;4cca
-	ld c,01ah		;4ccb
+	ld c,01ah		;4ccb   ; BDOS 0x1A: el bufer de los registros (DTA) en DE
 	call 0f37dh		;4ccd
-	ld hl,00080h		;4cd0
+	ld hl,00080h		;4cd0   ; un registro de 128 bytes
 	call bdos_lee		;4cd3   ; bdos_lee: BDOS 0x27, leer HL registros; si falla, el error 3
 	pop de			;4cd6
-	ld hl,00080h		;4cd7
+	ld hl,00080h		;4cd7   ; el bufer avanza 128 bytes
 	add hl,de			;4cda
 	ex de,hl			;4cdb
 	pop bc			;4cdc
-	djnz L_4CC9		;4cdd
+	djnz L_4CC9		;4cdd   ; los B registros
 	ret			;4cdf
 disco_lee_9239:		; lee 0x95 registros a 0x9239
 	ld de,09239h		;4ce0
@@ -1192,16 +1192,16 @@ disco_lee_cabecera_vram:		; lee el primer registro: modo y registros del VDP (MS
 	ld b,010h		;4dc6
 	ld hl,0801ah		;4dc8
 L_4DCB:
-	ld d,(hl)			;4dcb
+	ld d,(hl)			;4dcb   ; D y E: el color en el formato del VDP
 	inc hl			;4dcc
 	ld e,(hl)			;4dcd
 	inc hl			;4dce
 	push af			;4dcf
-	call 0725bh		;4dd0   ; pon_color: MSX2: el color B de la paleta con D y E (R#16 y puerto 2)
+	call 0725bh		;4dd0   ; a la paleta
 	pop af			;4dd3
-	inc a			;4dd4
-	djnz L_4DCB		;4dd5
-	xor a			;4dd7
+	inc a			;4dd4   ; el color siguiente
+	djnz L_4DCB		;4dd5   ; los B colores
+	xor a			;4dd7   ; A = 0: bien
 	ret			;4dd8
 L_4DD9:
 	or 0ffh		;4dd9
@@ -1453,58 +1453,58 @@ entra_al_disco:		; pone la RAM en la pagina 2, desengancha la interrupcion y gua
 	jr z,L_4FB5		;4fb0
 	ld hl,0fd9ah		;4fb2   ; apunta a el gancho H.KEYI
 L_4FB5:
-	ld a,(hl)			;4fb5
+	ld a,(hl)			;4fb5   ; guarda el primer byte del gancho...
 	ld (0984eh),a		;4fb6
-	ld (hl),0c9h		;4fb9
-	ld hl,0c000h		;4fbb
+	ld (hl),0c9h		;4fb9   ; ...y lo cambia por `ret`: la interrupcion no entra en el juego
+	ld hl,0c000h		;4fbb   ; guarda la RAM del juego de 0xC000 (0x3380 bytes) en 0xAC80, que es RAM en la pagina 2
 	ld de,0ac80h		;4fbe
 	ld bc,03380h		;4fc1
 	ldir		;4fc4
-	ld hl,09b80h		;4fc6
+	ld hl,09b80h		;4fc6   ; y la de 0x9B80 (0x1100 bytes) va a 0xE280
 	ld de,0e280h		;4fc9
 	ld bc,01100h		;4fcc
 	ldir		;4fcf
-	ld a,(0dd9eh)		;4fd1
+	ld a,(0dd9eh)		;4fd1   ; 0xDD9E: si hay que devolver otra copia...
 	and a			;4fd4
 	jr z,L_4FE2		;4fd5
-	ld hl,0ac80h		;4fd7
+	ld hl,0ac80h		;4fd7   ; ...la de 0xAC80 pasa a 0xE280
 	ld de,0e280h		;4fda
 	ld bc,01100h		;4fdd
 	ldir		;4fe0
 L_4FE2:
-	ld hl,00000h		;4fe2
+	ld hl,00000h		;4fe2   ; borra 0xF1C0
 	ld (0f1c0h),hl		;4fe5
-	ld hl,00000h		;4fe8
+	ld hl,00000h		;4fe8   ; la pila...
 	add hl,sp			;4feb
-	ld de,0ec80h		;4fec
+	ld de,0ec80h		;4fec   ; ...baja 0x1380 bytes (0x10000 - 0xEC80)
 	add hl,de			;4fef
 	ld sp,hl			;4ff0
-	ei			;4ff1
+	ei			;4ff1   ; con las interrupciones abiertas
 	ret			;4ff2
 sale_del_disco:		; espera, devuelve la RAM del juego, los ganchos y la pila (0x984A)
 	di			;4ff3
 	ld bc,00200h		;4ff4
 L_4FF7:
-	push bc			;4ff7
-	call 0df61h		;4ff8
+	push bc			;4ff7   ; espera 0x200 vueltas...
+	call 0df61h		;4ff8   ; ...llamando a 0xDF61 (la RAM del juego que se devolvio)
 	pop bc			;4ffb
 	dec bc			;4ffc
 	ld a,b			;4ffd
 	or c			;4ffe
-	jr nz,L_4FF7		;4fff
+	jr nz,L_4FF7		;4fff   ; hasta que BC llega a 0
 	di			;5001
-	ld hl,0e280h		;5002
+	ld hl,0e280h		;5002   ; devuelve los 0x1100 bytes de 0xE280 a 0x9B80
 	ld de,09b80h		;5005
 	ld bc,01100h		;5008
 	ldir		;500b
-	ld hl,0dfffh		;500d
+	ld hl,0dfffh		;500d   ; y 0x3380 bytes hacia atras hasta 0xF37F (lo que bajo p00:4FBB)
 	ld de,0f37fh		;5010
 	ld bc,03380h		;5013
 	lddr		;5016
 	ld a,(0f11eh)		;5018   ; lee hay disco
-	and a			;501b
+	and a			;501b   ; sin disco no hay nada mas que devolver
 	jr z,L_5029		;501c
-	ld hl,09b80h		;501e
+	ld hl,09b80h		;501e   ; con disco, 0x9B80 tambien vuelve a 0xC000
 	ld de,0c000h		;5021
 	ld bc,01100h		;5024
 	ldir		;5027
@@ -1515,14 +1515,14 @@ L_5029:
 	jr z,L_5035		;5030
 	ld hl,0fd9ah		;5032   ; apunta a el gancho H.KEYI
 L_5035:
-	ld a,(0984eh)		;5035
-	ld (hl),a			;5038
-	ld hl,00000h		;5039
+	ld a,(0984eh)		;5035   ; el byte que se quito del gancho (p00:4FB6)...
+	ld (hl),a			;5038   ; ...vuelve a su sitio
+	ld hl,00000h		;5039   ; la pila sube los 0x1380 bytes que bajo p00:4FEC
 	add hl,sp			;503c
 	ld de,01380h		;503d
 	add hl,de			;5040
 	ld sp,hl			;5041
-	ei			;5042
+	ei			;5042   ; con las interrupciones abiertas
 	ret			;5043
 L_5044:
 	xor a			;5044
@@ -1582,25 +1582,25 @@ DATA_resto_5095:
 
 
 byte_a_hex:		; escribe A en hexadecimal (dos letras) en HL
-	ld d,a			;5099
-	and 0f0h		;509a
-	rrca			;509c
+	ld d,a			;5099   ; guarda A
+	and 0f0h		;509a   ; la cifra alta...
+	rrca			;509c   ; ...bajada a los cuatro bits de abajo
 	rrca			;509d
 	rrca			;509e
 	rrca			;509f
-	or 030h		;50a0
-	ld (hl),a			;50a2
+	or 030h		;50a0   ; en ASCII ('0'-'?', sin pasar a letras)
+	ld (hl),a			;50a2   ; la escribe
 	inc hl			;50a3
-	ld a,d			;50a4
+	ld a,d			;50a4   ; la cifra baja
 	and 00fh		;50a5
-	or 030h		;50a7
-	ld (hl),a			;50a9
+	or 030h		;50a7   ; en ASCII
+	ld (hl),a			;50a9   ; la escribe
 	ret			;50aa
 borra_fcb:		; pone a cero el FCB de 0x982F
-	ld hl,0982fh		;50ab
+	ld hl,0982fh		;50ab   ; el FCB desde 0x982F...
 	ld de,09830h		;50ae
-	ld (hl),000h		;50b1
-	ld bc,00018h		;50b3
+	ld (hl),000h		;50b1   ; ...a cero
+	ld bc,00018h		;50b3   ; 24 bytes
 	ldir		;50b6
 	ret			;50b8
 hay_disco:		; Z si no hay disco: mira si H.PHYD (0xFFA7) es un `ret`
@@ -1625,20 +1625,20 @@ L_50D3:
 	ld (09848h),hl		;50d3   ; guarda el puntero al FCB y el byte siguiente (16 bits)
 fcb_prepara:		; registro 0, tamano de registro 1 y bloque actual en el FCB de 0x9848
 	ld hl,(09848h)		;50d6   ; lee el puntero al FCB y el byte siguiente (16 bits)
-	ld bc,0000ch		;50d9
+	ld bc,0000ch		;50d9   ; el byte 12 del FCB (el bloque actual)...
 	add hl,bc			;50dc
-	ld (hl),b			;50dd
+	ld (hl),b			;50dd   ; ...a cero, y el 13
 	inc hl			;50de
 	ld (hl),b			;50df
 	inc hl			;50e0
-	ld bc,00001h		;50e1
+	ld bc,00001h		;50e1   ; el tamano de registro a 1 (bytes 14 y 15)
 	ld (hl),c			;50e4
 	inc hl			;50e5
 	ld (hl),b			;50e6
-	ld bc,00011h		;50e7
+	ld bc,00011h		;50e7   ; el byte 33 del FCB: el registro aleatorio...
 	add hl,bc			;50ea
-	ld b,005h		;50eb
-	xor a			;50ed
+	ld b,005h		;50eb   ; ...5 bytes...
+	xor a			;50ed   ; ...a cero
 L_50EE:
 	ld (hl),a			;50ee
 	inc hl			;50ef
@@ -1659,10 +1659,10 @@ L_50FF:
 fcb_registro:		; pone HL como registro aleatorio del FCB
 	ld de,(09848h)		;5105   ; lee el puntero al FCB y el byte siguiente (16 bits)
 L_5109:
-	ex de,hl			;5109
-	ld bc,00021h		;510a
+	ex de,hl			;5109   ; HL = el FCB
+	ld bc,00021h		;510a   ; el byte 33: el registro aleatorio
 	add hl,bc			;510d
-	ld (hl),e			;510e
+	ld (hl),e			;510e   ; = DE
 	inc hl			;510f
 	ld (hl),d			;5110
 	ret			;5111
@@ -1712,16 +1712,16 @@ disco_lee_byte:		; lee un byte del fichero (por la pila)
 disco_graba_byte:		; graba el byte A en el fichero (por la pila)
 	ld bc,bdos_graba		;5167
 L_516A:
-	push af			;516a
-	ld hl,00001h		;516b
+	push af			;516a   ; guarda A
+	ld hl,00001h		;516b   ; el byte guardado en la pila...
 	add hl,sp			;516e
 	push bc			;516f
-	ex de,hl			;5170
-	ld c,01ah		;5171
+	ex de,hl			;5170   ; ...es el bufer (DE)
+	ld c,01ah		;5171   ; BDOS 0x1A: el bufer de los registros (DTA)
 	call 0f37dh		;5173
 	pop bc			;5176
-	call un_registro		;5177   ; un_registro: HL = 1 y salta a la rutina de BC
-	pop af			;517a
+	call un_registro		;5177   ; un registro de 1 byte por la rutina de BC
+	pop af			;517a   ; A = el byte
 	ret			;517b
 un_registro:		; HL = 1 y salta a la rutina de BC
 	ld hl,00001h		;517c
@@ -1833,18 +1833,18 @@ ventana:		; abre una ventana de texto con el marco de DE
 	jr z,L_527C		;5277
 	ld (0d0a3h),hl		;5279
 L_527C:
-	pop hl			;527c
+	pop hl			;527c   ; la direccion de vuelta
 	push de			;527d
-	ld de,05294h		;527e
+	ld de,05294h		;527e   ; copia 13 bytes de p00:5294 a 0x9803: la pasarela entre slots
 	ld bc,0000dh		;5281
 	ex de,hl			;5284
 	ldir		;5285
-	ld hl,09808h		;5287
-	ld a,(0f103h)		;528a   ; lee el slot del Game Master
+	ld hl,09808h		;5287   ; en 0x9808 el slot...
+	ld a,(0f103h)		;528a   ; ...del Game Master
 	ld (hl),a			;528d
 	inc hl			;528e
 	pop de			;528f
-	ld (hl),e			;5290
+	ld (hl),e			;5290   ; y la direccion de DE
 	inc hl			;5291
 	ld (hl),d			;5292
 	ret			;5293
@@ -1931,17 +1931,17 @@ L_53FE:
 	or a			;5400
 	ret			;5401
 L_5402:
-	ld a,(09100h)		;5402   ; lee cuantos ficheros hay
+	ld a,(09100h)		;5402   ; ya esta en el ultimo fichero
 	cp (hl)			;5405
 	jr z,L_53C4		;5406
-	inc (hl)			;5408
-	ld a,(de)			;5409
+	inc (hl)			;5408   ; el siguiente
+	ld a,(de)			;5409   ; la primera fila que se ve
 	ld b,a			;540a
-	ld a,(hl)			;540b
+	ld a,(hl)			;540b   ; la fila elegida menos la primera
 	sub b			;540c
-	cp 003h		;540d
+	cp 003h		;540d   ; si cabe en las 3 filas de la ventana, no se mueve
 	jr c,L_5419		;540f
-	inc b			;5411
+	inc b			;5411   ; si no, la ventana baja una fila
 	ld a,b			;5412
 	ld (de),a			;5413
 	ld bc,00000h		;5414
@@ -1966,15 +1966,15 @@ L_5435:
 	call 07633h		;5435   ; cursor_pinta: pinta el cursor (':' o el de MSX2)
 	jr L_53BE		;5438
 L_543A:
-	ld a,(hl)			;543a
+	ld a,(hl)			;543a   ; la fila elegida
 	or a			;543b
-	jr z,L_53C4		;543c
-	dec (hl)			;543e
+	jr z,L_53C4		;543c   ; ya esta en la primera
+	dec (hl)			;543e   ; la anterior
 	ex de,hl			;543f
-	ld a,(de)			;5440
+	ld a,(de)			;5440   ; si queda por encima de la ventana...
 	cp (hl)			;5441
 	jr nc,L_5445		;5442
-	dec (hl)			;5444
+	dec (hl)			;5444   ; ...la ventana sube una fila
 L_5445:
 	ld bc,0ffe0h		;5445
 	jr L_541C		;5448
@@ -2037,15 +2037,15 @@ L_54A3:
 	call 07646h		;54a8   ; pon_letra: escribe A en la VRAM HL guardando los registros
 	inc hl			;54ab
 L_54AC:
-	inc de			;54ac
-	djnz L_54A3		;54ad
-	ld a,(092cfh)		;54af
+	inc de			;54ac   ; la letra siguiente
+	djnz L_54A3		;54ad   ; las 8 letras del nombre
+	ld a,(092cfh)		;54af   ; 0x92CF: el tipo de lista; con 1, la extension
 	cp 001h		;54b2
 	jr nz,L_54CA		;54b4
-	ld a,(de)			;54b6
+	ld a,(de)			;54b6   ; si el fichero tiene extension...
 	or a			;54b7
 	jr z,L_54BC		;54b8
-	ld a,03ch		;54ba
+	ld a,03ch		;54ba   ; ...pinta un punto ('<' en la fuente del menu)
 L_54BC:
 	call 07646h		;54bc   ; pon_letra: escribe A en la VRAM HL guardando los registros
 	inc hl			;54bf
@@ -2057,11 +2057,11 @@ L_54C2:
 	inc hl			;54c7
 	djnz L_54C2		;54c8
 L_54CA:
-	pop hl			;54ca
+	pop hl			;54ca   ; la fila siguiente de la pantalla
 	ld bc,00020h		;54cb
 	add hl,bc			;54ce
 	pop bc			;54cf
-	djnz L_5494		;54d0
+	djnz L_5494		;54d0   ; las B filas
 	ret			;54d2
 borra_lista_ficheros:		; pone a cero la lista de ficheros (0x9103) y el FCB
 	ld hl,09103h		;54d3   ; apunta a la lista de ficheros
@@ -2148,24 +2148,24 @@ L_5562:
 	ldir		;5562
 	ret			;5564
 fila_de_fichero:		; HL = la fila A de la lista de ficheros
-	ld l,a			;5565
+	ld l,a			;5565   ; HL = la fila A
 	ld h,000h		;5566
-	ld a,(092cfh)		;5568
+	ld a,(092cfh)		;5568   ; el tipo de lista: 1 = nombre y extension (11 bytes); si no, 8
 	cp 001h		;556b
 	jr z,L_5574		;556d
-	add hl,hl			;556f
+	add hl,hl			;556f   ; 8 bytes por fila
 	add hl,hl			;5570
 	add hl,hl			;5571
 	jr L_557D		;5572
 L_5574:
-	ld b,h			;5574
+	ld b,h			;5574   ; BC = la fila
 	ld c,l			;5575
-	add hl,hl			;5576
+	add hl,hl			;5576   ; HL = fila x 12...
 	add hl,bc			;5577
 	add hl,hl			;5578
 	add hl,hl			;5579
 	and a			;557a
-	sbc hl,bc		;557b
+	sbc hl,bc		;557b   ; ...menos fila: 11 bytes por fila
 L_557D:
 	ld bc,09124h		;557d
 	add hl,bc			;5580
@@ -2317,10 +2317,10 @@ L_56A6:
 	jr z,$+34		;56b3
 	jr L_56A6		;56b5
 compara_de_bc:		; Z si DE = BC
-	ld a,d			;56b7
+	ld a,d			;56b7   ; la parte alta
 	sub b			;56b8
-	ret nz			;56b9
-	ld a,e			;56ba
+	ret nz			;56b9   ; distinta: NZ
+	ld a,e			;56ba   ; la parte baja
 	sub c			;56bb
 	ret			;56bc
 
@@ -2457,13 +2457,13 @@ L_57AA:
 	ld a,c			;57b7
 	call 0e075h		;57b8
 L_57BB:
-	pop hl			;57bb
+	pop hl			;57bb   ; el slot siguiente
 	pop bc			;57bc
-	jr c,L_57C5		;57bd
+	jr c,L_57C5		;57bd   ; encontrado: sale
 	inc hl			;57bf
 	inc c			;57c0
-	djnz L_57AA		;57c1
-	ld a,0ffh		;57c3
+	djnz L_57AA		;57c1   ; los 4 slots primarios
+	ld a,0ffh		;57c3   ; A = 0xFF: no hay otro cartucho
 L_57C5:
 	ld c,a			;57c5
 	ld hl,0f29fh		;57c6   ; apunta a el slot de la RAM de la pagina 1
@@ -2502,20 +2502,20 @@ L_57F2:
 	ld bc,04000h		;57f9
 	ld hl,(0e000h)		;57fc
 L_57FF:
-	ld a,(hl)			;57ff
-	cpl			;5800
+	ld a,(hl)			;57ff   ; prueba si el byte es RAM:
+	cpl			;5800   ; lo invierte
 	ld (hl),a			;5801
-	cp (hl)			;5802
+	cp (hl)			;5802   ; si sigue igual, no es RAM
 	cpl			;5803
-	ld (hl),a			;5804
-	jr nz,L_5810		;5805
-	inc hl			;5807
+	ld (hl),a			;5804   ; y lo deja como estaba
+	jr nz,L_5810		;5805   ; no es RAM: sale con NC
+	inc hl			;5807   ; el siguiente
 	dec bc			;5808
 	ld a,b			;5809
 	or c			;580a
-	jr nz,L_57FF		;580b
+	jr nz,L_57FF		;580b   ; BC bytes
 	pop af			;580d
-	scf			;580e
+	scf			;580e   ; C: todo es RAM
 	ret			;580f
 L_5810:
 	pop af			;5810
@@ -2542,23 +2542,23 @@ L_5832:
 	ld bc,00400h		;5832
 	ld hl,0fcc1h		;5835   ; apunta a EXPTBL, que slots estan expandidos
 L_5838:
-	push bc			;5838
+	push bc			;5838   ; recorre los 4 slots primarios
 	push hl			;5839
-	ld a,(hl)			;583a
-	bit 7,a		;583b
+	ld a,(hl)			;583a   ; el byte de EXPTBL
+	bit 7,a		;583b   ; bit 7: expandido
 	jr nz,L_585C		;583d
-	ld b,c			;583f
-	call 0e0f5h		;5840
+	ld b,c			;583f   ; B = el slot
+	call 0e0f5h		;5840   ; lo mira (0xE0F5, dentro de la copia de p00:5832)
 	jr z,L_5849		;5843
 	ld a,c			;5845
-	call 0e046h		;5846
+	call 0e046h		;5846   ; y lo prueba (0xE046)
 L_5849:
 	pop hl			;5849
 	pop bc			;584a
-	jr c,L_5851		;584b
+	jr c,L_5851		;584b   ; encontrado: sale
 	inc hl			;584d
 	inc c			;584e
-	djnz L_5838		;584f
+	djnz L_5838		;584f   ; los 4 slots
 L_5851:
 	push af			;5851
 	ld a,(0f103h)		;5852   ; lee el slot del Game Master
@@ -2574,12 +2574,12 @@ L_5861:
 	or c			;5863
 	ld b,004h		;5864
 L_5866:
-	push bc			;5866
+	push bc			;5866   ; un subslot
 	ld b,a			;5867
-	call 0e0f5h		;5868
+	call 0e0f5h		;5868   ; lo mira (0xE0F5)
 	jr z,L_5871		;586b
 	ld a,b			;586d
-	call 0e046h		;586e
+	call 0e046h		;586e   ; y lo prueba (0xE046)
 L_5871:
 	pop bc			;5871
 	ret c			;5872
@@ -2644,14 +2644,14 @@ L_58D4:
 	pop de			;58e0
 	ld ix,044beh		;58e1
 L_58E5:
-	ld l,(ix+000h)		;58e5
+	ld l,(ix+000h)		;58e5   ; recorre la tabla de juegos (p00:44BE): la suma...
 	ld h,(ix+001h)		;58e8
-	ld a,l			;58eb
+	ld a,l			;58eb   ; ...0 acaba la tabla
 	or h			;58ec
 	jr z,L_58FC		;58ed
-	rst 20h			;58ef   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
-	jr z,L_5910		;58f0
-	inc ix		;58f2
+	rst 20h			;58ef   ; ¿es la del juego?
+	jr z,L_5910		;58f0   ; si: la ficha
+	inc ix		;58f2   ; la entrada siguiente, de 4 bytes
 	inc ix		;58f4
 	inc ix		;58f6
 	inc ix		;58f8
@@ -2668,9 +2668,9 @@ L_5907:
 	ld h,a			;590d
 	jr L_591F		;590e
 L_5910:
-	ld l,(ix+002h)		;5910
+	ld l,(ix+002h)		;5910   ; la direccion de la ficha del juego
 	ld h,(ix+003h)		;5913
-	ld e,(hl)			;5916
+	ld e,(hl)			;5916   ; su primera palabra
 	inc hl			;5917
 	ld d,(hl)			;5918
 	ex de,hl			;5919
@@ -2704,23 +2704,23 @@ L_5945:
 	ld bc,00400h		;5945
 	ld hl,0fcc1h		;5948   ; apunta a EXPTBL, que slots estan expandidos
 L_594B:
-	push bc			;594b
+	push bc			;594b   ; recorre los 4 slots primarios
 	push hl			;594c
-	ld a,(hl)			;594d
-	bit 7,a		;594e
+	ld a,(hl)			;594d   ; el byte de EXPTBL
+	bit 7,a		;594e   ; bit 7: expandido
 	jr nz,L_596F		;5950
 	ld b,c			;5952
-	call 0e02fh		;5953
+	call 0e02fh		;5953   ; lo mira (0xE02F, dentro de la copia de p00:5945)
 	jr z,L_595C		;5956
 	ld a,c			;5958
-	call 0e04bh		;5959
+	call 0e04bh		;5959   ; y busca 'isk BASIC' (0xE04B)
 L_595C:
 	pop hl			;595c
 	pop bc			;595d
-	jr c,L_5964		;595e
+	jr c,L_5964		;595e   ; encontrado: sale
 	inc hl			;5960
 	inc c			;5961
-	djnz L_594B		;5962
+	djnz L_594B		;5962   ; los 4 slots
 L_5964:
 	push af			;5964
 	ld a,(0f103h)		;5965   ; lee el slot del Game Master
@@ -2740,12 +2740,12 @@ L_5979:
 	or c			;597b
 	ld b,004h		;597c
 L_597E:
-	push bc			;597e
+	push bc			;597e   ; un subslot
 	ld b,a			;597f
-	call 0e02fh		;5980
+	call 0e02fh		;5980   ; lo mira (0xE02F)
 	jr z,L_5989		;5983
 	ld a,b			;5985
-	call 0e04bh		;5986
+	call 0e04bh		;5986   ; y busca 'isk BASIC' (0xE04B)
 L_5989:
 	pop bc			;5989
 	ret c			;598a
@@ -2760,17 +2760,17 @@ L_5990:
 	ld de,0e07eh		;5999
 	ld bc,04000h		;599c
 L_599F:
-	ld a,044h		;599f
-	cpir		;59a1
-	jr nz,L_59C0		;59a3
-	jp po,0e07bh		;59a5
+	ld a,044h		;599f   ; busca una 'D' (0x44)...
+	cpir		;59a1   ; ...en los 256 bytes copiados
+	jr nz,L_59C0		;59a3   ; no hay mas: no es la ROM del disco
+	jp po,0e07bh		;59a5   ; se acabo la busqueda
 	push bc			;59a8
 	push de			;59a9
 	push hl			;59aa
-	ld b,009h		;59ab
+	ld b,009h		;59ab   ; compara 9 letras con 'isk BASIC' (0xE07E)
 L_59AD:
 	ld a,(de)			;59ad
-	cp (hl)			;59ae
+	cp (hl)			;59ae   ; letra a letra
 	jr nz,L_59B5		;59af
 	inc hl			;59b1
 	inc de			;59b2
@@ -2779,10 +2779,10 @@ L_59B5:
 	pop hl			;59b5
 	pop de			;59b6
 	pop bc			;59b7
-	jr nz,L_599F		;59b8
+	jr nz,L_599F		;59b8   ; no era 'Disk BASIC': sigue buscando
 	pop af			;59ba
-	ld (09800h),a		;59bb
-	scf			;59be
+	ld (09800h),a		;59bb   ; el slot de la ROM del disco a 0x9800
+	scf			;59be   ; C: la encontro
 	ret			;59bf
 L_59C0:
 	pop af			;59c0
@@ -2905,11 +2905,11 @@ L_5A6F:
 copia_3_al_reves:		; copia 3 bytes de HL hacia atras en DE
 	ld b,003h		;5a80
 L_5A82:
-	ld a,(hl)			;5a82
+	ld a,(hl)			;5a82   ; copia un byte...
 	ld (de),a			;5a83
 	inc hl			;5a84
-	dec de			;5a85
-	djnz L_5A82		;5a86
+	dec de			;5a85   ; ...con DE hacia atras
+	djnz L_5A82		;5a86   ; B bytes
 	ret			;5a88
 compara_3:		; compara 3 bytes (BCD) de HL y DE
 	inc hl			;5a89
@@ -2918,12 +2918,12 @@ compara_3:		; compara 3 bytes (BCD) de HL y DE
 	push de			;5a8c
 	ld b,003h		;5a8d
 L_5A8F:
-	ld a,(de)			;5a8f
+	ld a,(de)			;5a8f   ; compara las cifras BCD de la mas alta a la mas baja
 	cp (hl)			;5a90
-	jr c,L_5A9A		;5a91
+	jr c,L_5A9A		;5a91   ; menor: sale con C
 	dec hl			;5a93
 	dec de			;5a94
-	djnz L_5A8F		;5a95
+	djnz L_5A8F		;5a95   ; las B cifras
 	pop de			;5a97
 	pop hl			;5a98
 	ret			;5a99

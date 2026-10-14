@@ -30,16 +30,16 @@ L_A006:
 	call bio_rejilla		;a00c   ; bio_rejilla: dibuja la rejilla de la grafica
 	ret			;a00f
 bio_marco:		; dibuja los marcos de la grafica
-	ld hl,01858h		;a010
+	ld hl,01858h		;a010   ; un rectangulo de color 1 en (0x58, 0x18) de 0x60 x 0xD0
 	ld bc,0d060h		;a013
 	ld a,001h		;a016
 	ld d,000h		;a018
 	call 083c8h		;a01a   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
-	ld hl,01858h		;a01d
+	ld hl,01858h		;a01d   ; su marco de color 0x0F
 	ld de,0d060h		;a020
 	ld c,00fh		;a023
 	call 0839ch		;a025
-	ld hl,01757h		;a028
+	ld hl,01757h		;a028   ; y otro marco por fuera
 	ld de,0d262h		;a02b
 	ld c,00fh		;a02e
 	call 0839ch		;a030
@@ -122,16 +122,16 @@ L_A0D3:
 L_A0DA:
 	ret			;a0da
 bio_casilla:		; pinta una casilla con el comando del VDP
-	xor a			;a0db
+	xor a			;a0db   ; la casilla empieza una fila y una columna antes
 	ld de,00101h		;a0dc
 	sbc hl,de		;a0df
 	push hl			;a0e1
-	ld bc,00c0ah		;a0e2
-	ld a,055h		;a0e5
+	ld bc,00c0ah		;a0e2   ; de 0x0A x 0x0C
+	ld a,055h		;a0e5   ; color 0x55
 	ld d,000h		;a0e7
 	call 083c8h		;a0e9   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 	pop hl			;a0ec
-	ld de,00a0ah		;a0ed
+	ld de,00a0ah		;a0ed   ; y su marco de color 0x0F
 	ld c,00fh		;a0f0
 	call 0839ch		;a0f2
 	ret			;a0f5
@@ -374,7 +374,7 @@ L_A33D:
 	jr nc,L_A342		;a33f
 	ex de,hl			;a341
 L_A342:
-	ld a,h			;a342
+	ld a,h			;a342   ; ordena las coordenadas: que B sea la mayor
 	cp b			;a343
 	jr nc,L_A34A		;a344
 	push bc			;a346
@@ -382,7 +382,7 @@ L_A342:
 	ld c,l			;a348
 	pop hl			;a349
 L_A34A:
-	ld a,d			;a34a
+	ld a,d			;a34a   ; y que D tambien
 	cp b			;a34b
 	jr nc,L_A352		;a34c
 	push bc			;a34e
@@ -453,19 +453,19 @@ bio_niveles:		; clasifica los tres ciclos (0xE05A, 0xE05C, 0xE05E)
 	call bio_nivel		;a3c9   ; bio_nivel: B = el nivel de A (umbrales 0xA8, 0x94, 0x7E...)
 	ret			;a3cc
 bio_nivel:		; B = el nivel de A (umbrales 0xA8, 0x94, 0x7E...)
-	ld b,000h		;a3cd
+	ld b,000h		;a3cd   ; B = el nivel: 0 desde 0xA8
 	cp 0a8h		;a3cf
 	jr nc,L_A3E8		;a3d1
-	inc b			;a3d3
+	inc b			;a3d3   ; 1 desde 0x94
 	cp 094h		;a3d4
 	jr nc,L_A3E8		;a3d6
-	inc b			;a3d8
+	inc b			;a3d8   ; 2 desde 0x7E
 	cp 07eh		;a3d9
 	jr nc,L_A3E8		;a3db
-	inc b			;a3dd
+	inc b			;a3dd   ; 3 desde 0x6C
 	cp 06ch		;a3de
 	jr nc,L_A3E8		;a3e0
-	inc b			;a3e2
+	inc b			;a3e2   ; 4 por debajo
 	cp 000h		;a3e3
 	jr L_A3E8		;a3e5
 L_A3E7:

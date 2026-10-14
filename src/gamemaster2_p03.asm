@@ -63,7 +63,7 @@ L_A033:
 	jr c,L_A044		;a03c
 	inc a			;a03e
 	ld c,005h		;a03f
-	call multiplica		;a041   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
+	call divide_a_menos_1		;a041   ; divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit) (gemela de p01:706C)
 L_A044:
 	ld a,l			;a044
 	ld (0e052h),a		;a045
@@ -86,7 +86,7 @@ L_A05A:
 	ld (0e056h),a		;a066
 	ld a,b			;a069
 	ld c,009h		;a06a
-	call multiplica		;a06c   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
+	call divide_a_menos_1		;a06c   ; divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit) (gemela de p01:706C)
 	ld a,l			;a06f
 	add a,a			;a070
 	ld hl,0a089h		;a071
@@ -119,21 +119,21 @@ L_A09E:
 L_A0A5:
 	ld a,(0d31ah)		;a0a5
 	ld c,003h		;a0a8
-	call multiplica		;a0aa   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
+	call divide_a_menos_1		;a0aa   ; divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit) (gemela de p01:706C)
 	ld a,l			;a0ad
 	jp L_A125		;a0ae
 L_A0B1:
-	ld a,(0d31ah)		;a0b1
-	ld c,00dh		;a0b4
-	call multiplica		;a0b6   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
-	ld a,l			;a0b9
+	ld a,(0d31ah)		;a0b1   ; el juego de codigo 0x18 (tabla p02:9F11): la fase pedida
+	ld c,00dh		;a0b4   ; entre 13
+	call divide_a_menos_1		;a0b6   ; divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit) (gemela de p01:706C)
+	ld a,l			;a0b9   ; el resto + 1...
 	inc a			;a0ba
-	ld (0e060h),a		;a0bb
+	ld (0e060h),a		;a0bb   ; ...a 0xE060 de la RAM del juego
 	dec a			;a0be
-	add a,a			;a0bf
+	add a,a			;a0bf   ; y dos bytes de la tabla de p03:A0CF...
 	ld hl,0a0cfh		;a0c0
 	call hl_mas_a		;a0c3   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
-	ld de,0e05bh		;a0c6
+	ld de,0e05bh		;a0c6   ; ...a 0xE05B del juego
 	ld bc,00002h		;a0c9
 	ldir		;a0cc
 	ret			;a0ce
@@ -155,30 +155,30 @@ DATA_resto_A0CF:
 L_A0E9:
 	ld a,(0d31ah)		;a0e9
 	ld c,008h		;a0ec
-	call multiplica		;a0ee   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
+	call divide_a_menos_1		;a0ee   ; divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit) (gemela de p01:706C)
 	ld h,l			;a0f1
 	ld l,000h		;a0f2
 	ld (0e1b8h),hl		;a0f4
 	jp pon_valor		;a0f7   ; pon_valor: escribe 0xF29C en la variable del juego (0xF28A) (gemela de p01:6F70)
 L_A0FA:
-	call pon_valor		;a0fa   ; pon_valor: escribe 0xF29C en la variable del juego (0xF28A) (gemela de p01:6F70)
-	ld a,(0d31ah)		;a0fd
+	call pon_valor		;a0fa   ; el juego de codigo 0x25 (tabla p02:9F11): el valor elegido
+	ld a,(0d31ah)		;a0fd   ; la fase pedida
 	push af			;a100
-	ld c,005h		;a101
-	call multiplica		;a103   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
-	ld a,l			;a106
+	ld c,005h		;a101   ; entre 5
+	call divide_a_menos_1		;a103   ; divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit) (gemela de p01:706C)
+	ld a,l			;a106   ; el resto a 0xE054 del juego
 	ld (0e054h),a		;a107
 	pop af			;a10a
-	cp 006h		;a10b
+	cp 006h		;a10b   ; de la 6 en adelante...
 	ret c			;a10d
 	ld b,a			;a10e
-	sub 005h		;a10f
+	sub 005h		;a10f   ; ...la parte de arriba (con tope 3)...
 	cp 004h		;a111
 	jr c,L_A117		;a113
 	ld a,003h		;a115
 L_A117:
-	ld (0e056h),a		;a117
-	ld a,b			;a11a
+	ld (0e056h),a		;a117   ; ...a 0xE056 del juego
+	ld a,b			;a11a   ; y (fase - 1) & 3 a 0xE059
 	dec a			;a11b
 	and 003h		;a11c
 	ld (0e059h),a		;a11e
@@ -190,25 +190,25 @@ L_A125:
 	ld (hl),a			;a128
 	ret			;a129
 L_A12A:
-	ld a,(0d31ah)		;a12a
-	ld c,00fh		;a12d
-	call multiplica		;a12f   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
-	ld a,e			;a132
+	ld a,(0d31ah)		;a12a   ; el juego de codigo 0x27 (tabla p02:9F11): la fase pedida
+	ld c,00fh		;a12d   ; entre 15
+	call divide_a_menos_1		;a12f   ; divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit) (gemela de p01:706C)
+	ld a,e			;a132   ; el cociente a 0xE058 del juego
 	ld (0e058h),a		;a133
-	ld a,l			;a136
+	ld a,l			;a136   ; el resto + 1 a 0xE055...
 	inc a			;a137
 	ld (0e055h),a		;a138
-	dec a			;a13b
+	dec a			;a13b   ; ...y el resto a 0xE054
 	ld (0e054h),a		;a13c
-	ld hl,0a15bh		;a13f
+	ld hl,0a15bh		;a13f   ; dos bytes de la tabla de p03:A15B...
 	add a,a			;a142
 	call hl_mas_a		;a143   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
-	ld a,(hl)			;a146
+	ld a,(hl)			;a146   ; ...a 0xE056 y 0xE057 del juego
 	ld (0e056h),a		;a147
 	inc hl			;a14a
 	ld a,(hl)			;a14b
 	ld (0e057h),a		;a14c
-	ld a,(0e055h)		;a14f
+	ld a,(0e055h)		;a14f   ; en la primera fase...
 	cp 001h		;a152
 	jr z,L_A157		;a154
 	xor a			;a156
@@ -236,36 +236,36 @@ L_A17B:
 	jr c,L_A184		;a180
 	sub 032h		;a182
 L_A184:
-	dec a			;a184
+	dec a			;a184   ; A - 1 a 0xE053 del juego
 	ld (0e053h),a		;a185
-	ld a,(0d31bh)		;a188
-	cp 051h		;a18b
+	ld a,(0d31bh)		;a188   ; el valor elegido...
+	cp 051h		;a18b   ; ...de 0x51 en adelante...
 	jr c,L_A192		;a18d
-	sub 050h		;a18f
+	sub 050h		;a18f   ; ...resta 0x50 en BCD
 	daa			;a191
 L_A192:
 	ld (0e052h),a		;a192
 	ret			;a195
 L_A196:
-	ld a,(0d31ah)		;a196
-	ld c,008h		;a199
-	call multiplica		;a19b   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
-	ld a,l			;a19e
+	ld a,(0d31ah)		;a196   ; el juego de codigo 0x29 (tabla p02:9F11): la fase pedida
+	ld c,008h		;a199   ; entre 8
+	call divide_a_menos_1		;a19b   ; divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit) (gemela de p01:706C)
+	ld a,l			;a19e   ; el resto a 0xE103 del juego
 	ld (0e103h),a		;a19f
-	ld hl,000c0h		;a1a2
+	ld hl,000c0h		;a1a2   ; y 0x00C0 a 0xE1B8
 	ld (0e1b8h),hl		;a1a5
 	ret			;a1a8
 L_A1A9:
-	ld a,(0d31ah)		;a1a9
-	ld c,006h		;a1ac
-	call multiplica		;a1ae   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
-	ld a,e			;a1b1
+	ld a,(0d31ah)		;a1a9   ; el juego de codigo 0x30 (tabla p02:9F11): la fase pedida
+	ld c,006h		;a1ac   ; entre 6
+	call divide_a_menos_1		;a1ae   ; divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit) (gemela de p01:706C)
+	ld a,e			;a1b1   ; el cociente a 0xE042 del juego
 	ld (0e042h),a		;a1b2
-	ld a,l			;a1b5
+	ld a,l			;a1b5   ; el resto a la variable del juego (0xD30A)
 	ld hl,(0d30ah)		;a1b6
 	ld (hl),a			;a1b9
-	call borra_pantalla_b		;a1ba   ; borra_pantalla_b: borra la tabla de nombres y esconde los sprites (gemela de p01:708B)
-	ld a,004h		;a1bd
+	call borra_pantalla_b		;a1ba   ; borra la pantalla
+	ld a,004h		;a1bd   ; y pone 4 en 0xE001 y 8 en 0xE000 del juego
 	ld (0e001h),a		;a1bf
 	ld a,008h		;a1c2
 	ld (0e000h),a		;a1c4
@@ -288,7 +288,7 @@ L_A1DA:
 	call pon_valor		;a1e1   ; pon_valor: escribe 0xF29C en la variable del juego (0xF28A) (gemela de p01:6F70)
 	ld a,(0d31ah)		;a1e4
 	ld c,003h		;a1e7
-	call multiplica		;a1e9   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
+	call divide_a_menos_1		;a1e9   ; divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit) (gemela de p01:706C)
 	ld a,e			;a1ec
 	and 00fh		;a1ed
 	rrca			;a1ef
@@ -302,13 +302,13 @@ L_A1DA:
 	ld (hl),a			;a1fc
 	jp borra_pantalla_b		;a1fd   ; borra_pantalla_b: borra la tabla de nombres y esconde los sprites (gemela de p01:708B)
 L_A200:
-	ld a,(0d31ah)		;a200
-	ld c,008h		;a203
-	call multiplica		;a205   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
-	ld a,l			;a208
+	ld a,(0d31ah)		;a200   ; el juego de codigo 0x37 (tabla p02:9F11): la fase pedida
+	ld c,008h		;a203   ; entre 8
+	call divide_a_menos_1		;a205   ; divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit) (gemela de p01:706C)
+	ld a,l			;a208   ; el resto a la variable del juego (0xD30A)
 	ld hl,(0d30ah)		;a209
 	ld (hl),a			;a20c
-	ld a,e			;a20d
+	ld a,e			;a20d   ; el cociente, con tope 2
 	cp 002h		;a20e
 	jr c,L_A214		;a210
 	ld a,002h		;a212
@@ -317,7 +317,7 @@ L_A214:
 	ld a,(0d31bh)		;a217
 	ld (0e053h),a		;a21a
 	ret			;a21d
-multiplica:		; HL = (A - 1) * ... (multiplicacion de 16 bits) (gemela de p01:706C)
+divide_a_menos_1:		; DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit) (gemela de p01:706C)
 	dec a			;a21e
 	ld e,a			;a21f
 	ld d,000h		;a220
@@ -327,13 +327,13 @@ divide:		; DE / BC: cociente en DE y resto en HL (gemela de p05:9430)
 	exx			;a226
 	ld b,010h		;a227
 L_A229:
-	exx			;a229
+	exx			;a229   ; un paso de la division: el bit alto de DE...
 	sla e		;a22a
 	rl d		;a22c
-	adc hl,hl		;a22e
-	sbc hl,bc		;a230
+	adc hl,hl		;a22e   ; ...entra en HL
+	sbc hl,bc		;a230   ; si cabe el divisor, se resta...
 	jr c,L_A237		;a232
-	inc e			;a234
+	inc e			;a234   ; ...y el bit del cociente es 1
 	jr L_A238		;a235
 L_A237:
 	add hl,bc			;a237
@@ -384,15 +384,15 @@ L_A289:
 	ex de,hl			;a289
 	ld hl,0a2bdh		;a28a
 L_A28D:
-	ld a,(hl)			;a28d
+	ld a,(hl)			;a28d   ; recorre la tabla de RC: 0xFF acaba
 	inc hl			;a28e
 	cp 0ffh		;a28f
 	jr z,L_A2A2		;a291
-	cp e			;a293
+	cp e			;a293   ; ¿la parte baja?
 	jr nz,L_A29A		;a294
-	ld a,(hl)			;a296
+	ld a,(hl)			;a296   ; ¿y la alta?
 	cp d			;a297
-	jr z,L_A29D		;a298
+	jr z,L_A29D		;a298   ; es este juego
 L_A29A:
 	inc hl			;a29a
 	jr L_A28D		;a29b
@@ -423,14 +423,14 @@ DATA_resto_A2B1:
 
 
 L_A2CB:
-	ld a,b			;a2cb
+	ld a,b			;a2cb   ; B = el codigo del juego: los de 3 y 4...
 	sub 003h		;a2cc
 	cp 002h		;a2ce
 	jr c,L_A2D8		;a2d0
-	ld a,b			;a2d2
+	ld a,b			;a2d2   ; ...y los de 0x10 y 0x11...
 	sub 010h		;a2d3
 	cp 002h		;a2d5
-	ret nc			;a2d7
+	ret nc			;a2d7   ; ...siguen; los demas vuelven
 L_A2D8:
 	ld a,001h		;a2d8
 	ld (0d339h),a		;a2da
@@ -484,23 +484,23 @@ L_A317:
 	ld de,0d312h		;a33f
 	ldi		;a342
 L_A344:
-	rra			;a344
-	jr c,L_A353		;a345
-	ld de,0d30ah		;a347
+	rra			;a344   ; un bit de la cabecera por cada palabra
+	jr c,L_A353		;a345   ; bit a 1: se salta
+	ld de,0d30ah		;a347   ; la direccion de la variable a 0xD30A...
 	ldi		;a34a
 	ldi		;a34c
-	ld de,0d313h		;a34e
+	ld de,0d313h		;a34e   ; ...y un byte a 0xD313
 	ldi		;a351
 L_A353:
 	ld ix,0a392h		;a353
 	ld b,006h		;a357
 L_A359:
-	push bc			;a359
-	rra			;a35a
+	push bc			;a359   ; un bit de la cabecera por cada palabra
+	rra			;a35a   ; bit a 1: se salta
 	jr c,L_A368		;a35b
-	ld e,(ix+000h)		;a35d
+	ld e,(ix+000h)		;a35d   ; DE = el destino de IX
 	ld d,(ix+001h)		;a360
-	ld bc,00002h		;a363
+	ld bc,00002h		;a363   ; copia 2 bytes
 	ldir		;a366
 L_A368:
 	pop bc			;a368
@@ -567,12 +567,12 @@ L_A3B6:
 L_A3BE:
 	ld l,(ix+000h)		;a3be
 	ld h,(ix+001h)		;a3c1
-	ld a,l			;a3c4
+	ld a,l			;a3c4   ; ...0 acaba la tabla
 	or h			;a3c5
 	ret z			;a3c6
-	rst 20h			;a3c7   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
-	jr z,L_A3D4		;a3c8
-	inc ix		;a3ca
+	rst 20h			;a3c7   ; ¿es la del juego?
+	jr z,L_A3D4		;a3c8   ; si: la ficha
+	inc ix		;a3ca   ; la entrada siguiente, de 4 bytes
 	inc ix		;a3cc
 	inc ix		;a3ce
 	inc ix		;a3d0
@@ -602,19 +602,19 @@ de_mas_a:		; DE = DE + A (gemela de p01:7256)
 pon_color:		; MSX2: el color B de la paleta con D y E (R
 	push bc			;a3f0
 	push hl			;a3f1
-	ld b,a			;a3f2
+	ld b,a			;a3f2   ; B = el numero de color
 	ld a,(00007h)		;a3f3   ; el puerto de escritura del VDP (VDP.DW)
-	inc a			;a3f6
+	inc a			;a3f6   ; el puerto de los registros (VDP.DW + 1)
 	ld c,a			;a3f7
 	di			;a3f8
-	out (c),b		;a3f9
-	ld a,090h		;a3fb
+	out (c),b		;a3f9   ; el numero de color...
+	ld a,090h		;a3fb   ; ...a R#16, el puntero de la paleta
 	out (c),a		;a3fd
-	inc c			;a3ff
-	out (c),d		;a400
-	push af			;a402
+	inc c			;a3ff   ; el puerto de la paleta (VDP.DW + 2)
+	out (c),d		;a400   ; rojo y azul
+	push af			;a402   ; una pausa para el VDP
 	pop af			;a403
-	out (c),e		;a404
+	out (c),e		;a404   ; verde
 	pop hl			;a406
 	pop bc			;a407
 	ei			;a408
@@ -655,16 +655,16 @@ DATA_resto_A423:
 
 
 paleta_lista:		; MSX2: colores de una lista [color, d, e] que acaba en 0xFF (gemela de p01:72AE)
-	ld a,(hl)			;a443
+	ld a,(hl)			;a443   ; el numero de color
 	inc hl			;a444
-	inc a			;a445
+	inc a			;a445   ; 0xFF acaba la lista
 	ret z			;a446
 	dec a			;a447
-	ld d,(hl)			;a448
+	ld d,(hl)			;a448   ; D y E: el color
 	inc hl			;a449
 	ld e,(hl)			;a44a
 	inc hl			;a44b
-	call pon_color		;a44c   ; pon_color: MSX2: el color B de la paleta con D y E (R
+	call pon_color		;a44c   ; a la paleta
 	jr paleta_lista		;a44f
 registros_vdp:		; los 8 registros del VDP de p01:72E2 y, en MSX2, R
 	ld hl,0a477h		;a451
@@ -725,35 +725,35 @@ L_A493:
 copia_tercios:		; LDIRVM en los tres tercios de la pantalla (gemela de p01:730D)
 	ld a,003h		;a4a2
 L_A4A4:
-	push af			;a4a4
+	push af			;a4a4   ; A tercios: copia BC bytes de HL a la VRAM DE
 	push bc			;a4a5
 	push hl			;a4a6
 	push de			;a4a7
 	call 0005ch		;a4a8   ; BIOS LDIRVM - Block transfers to VRAM from memory
 	pop de			;a4ab
-	ld hl,00800h		;a4ac
+	ld hl,00800h		;a4ac   ; el tercio siguiente esta 0x800 mas alla
 	add hl,de			;a4af
 	ex de,hl			;a4b0
 	pop hl			;a4b1
 	pop bc			;a4b2
 	pop af			;a4b3
-	dec a			;a4b4
+	dec a			;a4b4   ; los A tercios
 	jr nz,L_A4A4		;a4b5
 	ret			;a4b7
 descomprime_tercios:		; descomprime HL en los tres tercios de la pantalla (gemela de p01:7323)
 	ld b,003h		;a4b8
 L_A4BA:
-	push bc			;a4ba
+	push bc			;a4ba   ; B tercios: descomprime HL en la VRAM DE
 	push hl			;a4bb
 	push de			;a4bc
 	call descomprime		;a4bd   ; descomprime: descomprime HL a la VRAM DE: n & 0x7F repeticiones o copias (gemela de p01:733A)
 	pop de			;a4c0
-	ld hl,00800h		;a4c1
+	ld hl,00800h		;a4c1   ; el tercio siguiente esta 0x800 mas alla
 	add hl,de			;a4c4
 	ex de,hl			;a4c5
 	pop hl			;a4c6
 	pop bc			;a4c7
-	djnz L_A4BA		;a4c8
+	djnz L_A4BA		;a4c8   ; los B tercios
 	ret			;a4ca
 descomprime_con_direccion:		; descomprime a la VRAM de la palabra de HL (gemela de p01:7336)
 	ld e,(hl)			;a4cb
@@ -767,34 +767,34 @@ descomprime:		; descomprime HL a la VRAM DE: n & 0x7F repeticiones o copias (gem
 	ld a,(00007h)		;a4d4   ; el puerto de escritura del VDP (VDP.DW)
 	ld c,a			;a4d7
 L_A4D8:
-	ld a,(hl)			;a4d8
-	and 07fh		;a4d9
+	ld a,(hl)			;a4d8   ; el byte de cuenta
+	and 07fh		;a4d9   ; n & 0x7F: cuantos
 	ld b,a			;a4db
-	ld a,(hl)			;a4dc
+	ld a,(hl)			;a4dc   ; el bit 7 dice que hacer
 	inc hl			;a4dd
-	jr nz,L_A4E4		;a4de
-	cp b			;a4e0
-	jr nz,descomprime_con_direccion		;a4e1
+	jr nz,L_A4E4		;a4de   ; 0x80-0xFF: copiar los n bytes que siguen
+	cp b			;a4e0   ; 0x00 acaba; 0x01-0x7F: repetir
+	jr nz,descomprime_con_direccion		;a4e1   ; (0x80 justo: otra direccion de VRAM)
 	ret			;a4e3
 L_A4E4:
 	cp b			;a4e4
 	jr z,L_A4F2		;a4e5
 L_A4E7:
-	ld a,(hl)			;a4e7
+	ld a,(hl)			;a4e7   ; copia: un byte...
 	inc hl			;a4e8
-	out (c),a		;a4e9
+	out (c),a		;a4e9   ; ...a la VRAM
 	inc de			;a4eb
-	push hl			;a4ec
+	push hl			;a4ec   ; una pausa para el VDP
 	pop hl			;a4ed
-	djnz L_A4E7		;a4ee
+	djnz L_A4E7		;a4ee   ; los n bytes
 	jr L_A4D8		;a4f0
 L_A4F2:
 	ld a,(hl)			;a4f2
 	inc hl			;a4f3
 L_A4F4:
-	out (c),a		;a4f4
+	out (c),a		;a4f4   ; repite: el mismo byte n veces
 	inc de			;a4f6
-	push ix		;a4f7
+	push ix		;a4f7   ; una pausa para el VDP
 	pop ix		;a4f9
 	djnz L_A4F4		;a4fb
 	jr L_A4D8		;a4fd
@@ -811,8 +811,8 @@ L_A50B:
 	pop af			;a50e
 	ret			;a50f
 despacha:		; salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
-	pop hl			;a510
-	add a,a			;a511
+	pop hl			;a510   ; la direccion de la tabla, que va pegada al `call`
+	add a,a			;a511   ; A x 2: cada destino es una palabra
 	add a,l			;a512
 	ld l,a			;a513
 	jr nc,L_A517		;a514
@@ -837,18 +837,18 @@ L_A526:
 	ld d,(hl)			;a528
 	inc hl			;a529
 L_A52A:
-	ld a,(hl)			;a52a
+	ld a,(hl)			;a52a   ; la letra
 	inc hl			;a52b
 	ld b,a			;a52c
-	inc b			;a52d
+	inc b			;a52d   ; 0xFF acaba
 	ret z			;a52e
-	inc b			;a52f
+	inc b			;a52f   ; 0xFE: otra direccion de VRAM
 	jr z,L_A526		;a530
-	and c			;a532
+	and c			;a532   ; con la mascara C
 	ex de,hl			;a533
-	call 0004dh		;a534   ; BIOS WRTVRM - Writes data in VRAM
+	call 0004dh		;a534   ; BIOS WRTVRM - Writes data in VRAM | a la VRAM
 	ex de,hl			;a537
-	inc de			;a538
+	inc de			;a538   ; la columna siguiente
 	jr L_A52A		;a539
 L_A53B:
 	push bc			;a53b
@@ -865,33 +865,33 @@ binario_a_bcd:		; HL a BCD en DE (gemela de p01:746C)
 	ld b,010h		;a54b
 	ld de,00000h		;a54d
 L_A550:
-	add hl,hl			;a550
-	ld a,e			;a551
+	add hl,hl			;a550   ; HL a BCD bit a bit: el bit alto de HL...
+	ld a,e			;a551   ; ...entra en E doblandolo...
 	adc a,a			;a552
-	daa			;a553
+	daa			;a553   ; ...en decimal...
 	ld e,a			;a554
-	ld a,d			;a555
+	ld a,d			;a555   ; ...y en D
 	adc a,a			;a556
 	daa			;a557
 	ld d,a			;a558
-	djnz L_A550		;a559
+	djnz L_A550		;a559   ; los B bits
 	ret			;a55b
 bcd_a_binario:		; A en BCD a binario (gemela de p01:747D)
-	ld c,a			;a55c
-	and 0f0h		;a55d
+	ld c,a			;a55c   ; guarda A
+	and 0f0h		;a55d   ; la cifra alta...
 	rrca			;a55f
 	rrca			;a560
 	rrca			;a561
 	rrca			;a562
-	add a,a			;a563
+	add a,a			;a563   ; ...por 10 (x2, x8 y suma)
 	ld b,a			;a564
 	add a,a			;a565
 	add a,a			;a566
 	add a,b			;a567
 	ld b,a			;a568
-	ld a,c			;a569
+	ld a,c			;a569   ; la cifra baja
 	and 00fh		;a56a
-	add a,b			;a56c
+	add a,b			;a56c   ; mas las decenas
 	ret			;a56d
 borra_ventana:		; borra la ventana de 0x9237 (gemela de p01:748F)
 	ld bc,00613h		;a56e
@@ -1052,24 +1052,24 @@ L_A6A3:
 	call cursor_pinta_b		;a6ae   ; cursor_pinta_b: pinta el cursor (':' o el de MSX2)
 	jp L_A677		;a6b1
 L_A6B4:
-	cp 02eh		;a6b4
+	cp 02eh		;a6b4   ; '.': la tecla del punto
 	jr nz,L_A6CF		;a6b6
-	ld a,(0d167h)		;a6b8
+	ld a,(0d167h)		;a6b8   ; solo en el menu de letras (0xFE)
 	cp 0feh		;a6bb
 	jp nz,L_A677		;a6bd
 	call opcion_cero		;a6c0   ; opcion_cero: si no hay opcion elegida, vuelve al menu (gemela de p01:766D)
-	ld a,03ch		;a6c3
+	ld a,03ch		;a6c3   ; '<', el punto en la fuente del menu
 	ld hl,0d166h		;a6c5
-	cp (hl)			;a6c8
+	cp (hl)			;a6c8   ; si ya esta, nada
 	jp z,L_A677		;a6c9
 	ld (hl),a			;a6cc
 	jr L_A6F9		;a6cd
 L_A6CF:
-	ld c,a			;a6cf
+	ld c,a			;a6cf   ; ¿es una cifra?
 	sub 030h		;a6d0
 	cp 00ah		;a6d2
 	jr nc,L_A6D9		;a6d4
-	ld a,c			;a6d6
+	ld a,c			;a6d6   ; si: tal cual
 	jr L_A6F9		;a6d7
 L_A6D9:
 	ld a,c			;a6d9
@@ -1078,18 +1078,18 @@ L_A6D9:
 	jr nc,L_A6EC		;a6de
 	ld a,c			;a6e0
 L_A6E1:
-	ex af,af'			;a6e1
-	ld a,(0d167h)		;a6e2
+	ex af,af'			;a6e1   ; guarda la tecla
+	ld a,(0d167h)		;a6e2   ; 0xD167 = 0xFF: el menu no admite letras
 	inc a			;a6e5
 	jp z,L_A677		;a6e6
 	ex af,af'			;a6e9
 	jr L_A6F9		;a6ea
 L_A6EC:
-	ld a,c			;a6ec
+	ld a,c			;a6ec   ; ¿es una minuscula (a-z)?
 	sub 061h		;a6ed
 	cp 01ah		;a6ef
-	jp nc,L_A677		;a6f1
-	ld a,c			;a6f4
+	jp nc,L_A677		;a6f1   ; no: no vale
+	ld a,c			;a6f4   ; a mayuscula
 	sub 020h		;a6f5
 	jr L_A6E1		;a6f7
 L_A6F9:
@@ -1226,12 +1226,12 @@ menu_prepara:		; prepara el menu: opciones, posicion y cursor (gemela de p01:76A
 	ld (0d168h),hl		;a7dd   ; guarda la posicion del cursor en la VRAM y el byte siguiente (16 bits)
 	jp cursor_pinta_b		;a7e0   ; cursor_pinta_b: pinta el cursor (':' o el de MSX2)
 menu_cursor:		; mueve el cursor con las flechas (0x1E arriba, 0x1F abajo) (gemela de p01:76C1)
-	ld c,0ffh		;a7e3
-	cp 01eh		;a7e5
+	ld c,0ffh		;a7e3   ; C = -1: arriba
+	cp 01eh		;a7e5   ; 0x1E es la flecha arriba
 	jr z,L_A7EE		;a7e7
-	ld c,001h		;a7e9
-	cp 01fh		;a7eb
-	ret nz			;a7ed
+	ld c,001h		;a7e9   ; C = +1: abajo
+	cp 01fh		;a7eb   ; 0x1F es la flecha abajo
+	ret nz			;a7ed   ; otra tecla: nada
 L_A7EE:
 	ld hl,0d164h		;a7ee
 	ld de,0d165h		;a7f1   ; apunta a la fila elegida
@@ -1271,21 +1271,21 @@ comprime:		; comprime 0x8802 en 0x8002 (lo contrario de p01:733A) (gemela de p01
 	ld hl,0c442h		;a829
 	ld de,0c002h		;a82c
 L_A82F:
-	ld a,081h		;a82f
+	ld a,081h		;a82f   ; 0x81: empieza un trozo de copias (bit 7 a 1, uno)
 	ld (0d13eh),a		;a831
-	ld c,(hl)			;a834
-	ld (0d13fh),de		;a835
+	ld c,(hl)			;a834   ; el byte
+	ld (0d13fh),de		;a835   ; donde va la cuenta de este trozo
 	inc de			;a839
 	ld a,c			;a83a
-	ld (de),a			;a83b
+	ld (de),a			;a83b   ; lo copia
 	inc hl			;a83c
 	inc de			;a83d
-	call fin_de_8882		;a83e   ; fin_de_8882: compara HL con 0x8882 (gemela de p01:7790)
+	call fin_de_8882		;a83e   ; ¿se acabo la pantalla?
 	jp z,L_A8D1		;a841
-	ld a,c			;a844
+	ld a,c			;a844   ; ¿el siguiente es igual?
 	cp (hl)			;a845
-	jr z,L_A885		;a846
-	ld a,001h		;a848
+	jr z,L_A885		;a846   ; si: empieza una repeticion
+	ld a,001h		;a848   ; no: un trozo de copias que lleva 1
 	ld (0d13eh),a		;a84a
 L_A84D:
 	ld c,(hl)			;a84d
@@ -1304,21 +1304,21 @@ L_A84D:
 	dec hl			;a862
 	jr nz,L_A878		;a863
 L_A865:
-	dec hl			;a865
+	dec hl			;a865   ; retrocede un byte
 	dec de			;a866
 	push hl			;a867
-	ld hl,(0d13fh)		;a868
+	ld hl,(0d13fh)		;a868   ; cierra el trozo: su cuenta...
 	ld a,(0d13eh)		;a86b
-	set 7,a		;a86e
+	set 7,a		;a86e   ; ...con el bit 7 (copias)
 	ld (hl),a			;a870
 	pop hl			;a871
-	ld (0d13fh),de		;a872
+	ld (0d13fh),de		;a872   ; el trozo siguiente empieza aqui
 	jr L_A82F		;a876
 L_A878:
-	ld a,(0d13eh)		;a878
-	cp 07bh		;a87b
+	ld a,(0d13eh)		;a878   ; la cuenta de la repeticion
+	cp 07bh		;a87b   ; con tope 0x7B
 	jr z,L_A865		;a87d
-	inc a			;a87f
+	inc a			;a87f   ; una mas
 	ld (0d13eh),a		;a880
 	jr L_A84D		;a883
 L_A885:
@@ -1332,35 +1332,35 @@ L_A88A:
 	cp (hl)			;a891
 	jr z,L_A8A5		;a892
 L_A894:
-	ld de,(0d13fh)		;a894
+	ld de,(0d13fh)		;a894   ; cierra la repeticion: su cuenta...
 	ld a,(0d13eh)		;a898
-	ld (de),a			;a89b
-	inc de			;a89c
+	ld (de),a			;a89b   ; ...delante del byte
+	inc de			;a89c   ; el trozo siguiente
 	inc de			;a89d
 	ld (0d13fh),de		;a89e
 	jp L_A82F		;a8a2
 L_A8A5:
-	ld a,(0d13eh)		;a8a5
-	cp 07bh		;a8a8
+	ld a,(0d13eh)		;a8a5   ; la cuenta de las copias
+	cp 07bh		;a8a8   ; con tope 0x7B
 	jr z,L_A894		;a8aa
-	inc a			;a8ac
+	inc a			;a8ac   ; una mas
 	ld (0d13eh),a		;a8ad
 	jr L_A88A		;a8b0
 fin_de_8882:		; compara HL con 0x8882 (gemela de p01:7790)
 	push hl			;a8b2
 	push de			;a8b3
-	ld de,0c4c2h		;a8b4
+	ld de,0c4c2h		;a8b4   ; el final del bloque que se comprime
 	and a			;a8b7
-	sbc hl,de		;a8b8
+	sbc hl,de		;a8b8   ; Z si HL ha llegado
 	pop de			;a8ba
 	pop hl			;a8bb
 	ret			;a8bc
 L_A8BD:
-	dec hl			;a8bd
+	dec hl			;a8bd   ; el byte...
 	ld a,(hl)			;a8be
-	ld (de),a			;a8bf
+	ld (de),a			;a8bf   ; ...se copia
 	inc de			;a8c0
-	ld a,(0d13eh)		;a8c1
+	ld a,(0d13eh)		;a8c1   ; una copia mas
 	inc a			;a8c4
 	ld (0d13eh),a		;a8c5
 L_A8C8:
@@ -1369,12 +1369,12 @@ L_A8C8:
 	set 7,a		;a8cc
 	ld (0d13eh),a		;a8ce
 L_A8D1:
-	xor a			;a8d1
+	xor a			;a8d1   ; el 0 que acaba...
 	ld (de),a			;a8d2
-	ld a,(0d13eh)		;a8d3
+	ld a,(0d13eh)		;a8d3   ; ...y la cuenta del ultimo trozo
 	ld hl,(0d13fh)		;a8d6
 	ld (hl),a			;a8d9
-	ex de,hl			;a8da
+	ex de,hl			;a8da   ; el tamano comprimido...
 	ld de,0c001h		;a8db
 	and a			;a8de
 	sbc hl,de		;a8df

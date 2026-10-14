@@ -244,21 +244,21 @@ teclado_a_nibble:		; pasa la tecla del bufer (0x920B) a un nibble
 	or a			;62ef
 	ret			;62f0
 L_62F1:
-	cp 002h		;62f1
+	cp 002h		;62f1   ; con dos teclas en el bufer, un numero de dos cifras
 	ret nz			;62f3
-	ld a,(de)			;62f4
+	ld a,(de)			;62f4   ; la primera cifra
 	and 00fh		;62f5
-	add a,a			;62f7
+	add a,a			;62f7   ; por 10 (x2, x8 y suma)
 	ld b,a			;62f8
 	add a,a			;62f9
 	add a,a			;62fa
 	add a,b			;62fb
 	ld b,a			;62fc
-	inc de			;62fd
+	inc de			;62fd   ; la segunda cifra
 	ld a,(de)			;62fe
 	and 00fh		;62ff
-	add a,b			;6301
-	ld (hl),a			;6302
+	add a,b			;6301   ; decenas y unidades
+	ld (hl),a			;6302   ; el numero en binario
 	ret			;6303
 teclado_a_nibble_b:		; pasa las teclas del bufer (0x920B) a un byte
 	xor a			;6304
@@ -275,20 +275,20 @@ teclado_a_nibble_b:		; pasa las teclas del bufer (0x920B) a un byte
 	or a			;6316
 	ret			;6317
 L_6318:
-	cp 002h		;6318
+	cp 002h		;6318   ; con dos teclas en el bufer, un byte de dos cifras hexadecimales
 	ret nz			;631a
-	ld a,(de)			;631b
+	ld a,(de)			;631b   ; la primera cifra
 	and 00fh		;631c
-	add a,a			;631e
+	add a,a			;631e   ; por 16
 	add a,a			;631f
 	add a,a			;6320
 	add a,a			;6321
 	ld b,a			;6322
-	inc de			;6323
+	inc de			;6323   ; la segunda cifra
 	ld a,(de)			;6324
 	and 00fh		;6325
-	add a,b			;6327
-	ld (hl),a			;6328
+	add a,b			;6327   ; las dos juntas
+	ld (hl),a			;6328   ; el byte
 	ret			;6329
 engancha_al_juego:		; copia p01:6395 a 0xF130 y cambia el gancho del juego por el suyo
 	ld hl,06395h		;632a
@@ -313,19 +313,19 @@ engancha_al_juego:		; copia p01:6395 a 0xF130 y cambia el gancho del juego por e
 busca_gancho:		; busca en la copia del INIT del juego el `ld (0xFD9B),hl` (9B FD)
 	ld bc,00100h		;6353
 L_6356:
-	ld a,e			;6356
-	cpir		;6357
-	ret nz			;6359
-	jp po,L_636E		;635a
-	ld a,0fdh		;635d
+	ld a,e			;6356   ; busca el byte bajo (E = 0x9B)...
+	cpir		;6357   ; ...en los 0x100 bytes copiados del INIT del juego
+	ret nz			;6359   ; no esta: el juego no pone su gancho asi
+	jp po,L_636E		;635a   ; se acabaron los bytes
+	ld a,0fdh		;635d   ; ¿le sigue 0xFD? (la palabra 0xFD9B, la direccion de H.KEYI)
 	cp (hl)			;635f
 	jr nz,L_6356		;6360
-	dec hl			;6362
-	ld de,06384h		;6363
+	dec hl			;6362   ; si: apunta al operando del `ld (0xFD9B),hl`
+	ld de,06384h		;6363   ; lo cambia por los 5 bytes de p01:6384
 	ex de,hl			;6366
 	ld bc,00005h		;6367
 	ldir		;636a
-	xor a			;636c
+	xor a			;636c   ; A = 0: hecho
 	ret			;636d
 L_636E:
 	or 0ffh		;636e
@@ -484,14 +484,14 @@ vuelve_tras_menu:		; devuelve la RAM a la pagina 2 y sigue segun 0xF10A
 	jr z,L_647E		;6479
 	jp L_6594		;647b
 L_647E:
-	ld hl,0f10fh		;647e
+	ld hl,0f10fh		;647e   ; 0xF10F: el volumen pedido; 0xF10E: el que suena
 	ld de,0f10eh		;6481
-	bit 1,c		;6484
+	bit 1,c		;6484   ; bit 1 de las teclas: bajar el volumen
 	jr z,L_64A0		;6486
-	ld a,(hl)			;6488
+	ld a,(hl)			;6488   ; ya esta a 0
 	or a			;6489
 	ret z			;648a
-	sub 00dh		;648b
+	sub 00dh		;648b   ; baja 13
 	jr z,L_6491		;648d
 	jr nc,L_649C		;648f
 L_6491:
@@ -508,12 +508,12 @@ L_649C:
 	ld (de),a			;649e
 	ret			;649f
 L_64A0:
-	bit 2,c		;64a0
+	bit 2,c		;64a0   ; bit 2: subir el volumen
 	jr z,L_64B8		;64a2
-	ld a,00dh		;64a4
+	ld a,00dh		;64a4   ; sube 13
 	add a,(hl)			;64a6
 	jr nc,L_64AB		;64a7
-	ld a,0ffh		;64a9
+	ld a,0ffh		;64a9   ; con tope 0xFF
 L_64AB:
 	ld (hl),a			;64ab
 	cp 00dh		;64ac
@@ -526,14 +526,14 @@ L_64B5:
 	ld (de),a			;64b6
 	ret			;64b7
 L_64B8:
-	ld a,(hl)			;64b8
+	ld a,(hl)			;64b8   ; lo que hay que sumar al volumen
 	or a			;64b9
 	jr z,L_64C3		;64ba
-	ld a,(de)			;64bc
+	ld a,(de)			;64bc   ; suma al que suena
 	add a,(hl)			;64bd
 	ld (de),a			;64be
-	ret nc			;64bf
-	jp 0f1abh		;64c0
+	ret nc			;64bf   ; sin pasarse, vuelve
+	jp 0f1abh		;64c0   ; si se pasa, a 0xF1AB (p01:6455, en RAM)
 L_64C3:
 	jp silencia_psg		;64c3   ; silencia_psg: pone a cero los tres volumenes del PSG (y el SCC del juego si lo tiene)
 L_64C6:
@@ -647,14 +647,14 @@ congela:		; congela el juego: silencio y espera la tecla
 	ld iy,(0f103h)		;65a8   ; lee el slot del Game Master y el byte siguiente (16 bits)
 	ld a,(0f10ah)		;65ac   ; lee la opcion que eligio el menu
 	or a			;65af
-	jp nz,05a0fh		;65b0
+	jp nz,05a0fh		;65b0   ; si: sigue congelado
 	call lee_teclas		;65b3   ; lee_teclas: las teclas del Game Master (SNSMAT 1, 6 y 7) en 0xF10D: C = las recien pulsadas
-	ld a,c			;65b6
+	ld a,c			;65b6   ; el bit 7 de las teclas: el congelado
 	rla			;65b7
 	jr c,L_65CE		;65b8
-	rla			;65ba
+	rla			;65ba   ; el bit 6
 	jr c,L_65E4		;65bb
-	rla			;65bd
+	rla			;65bd   ; el bit 5
 	jr c,L_65C1		;65be
 	ret			;65c0
 L_65C1:
@@ -802,13 +802,13 @@ L_66BF:
 	ld a,0c9h		;66c3
 	ld b,00ah		;66c5
 L_66C7:
-	ld (hl),a			;66c7
+	ld (hl),a			;66c7   ; rellena B bytes con A
 	inc hl			;66c8
 	djnz L_66C7		;66c9
 	xor a			;66cb
 	ld (0f109h),a		;66cc
 	ld (0f110h),a		;66cf   ; guarda el menu esta abierto
-	jp 0563fh		;66d2
+	jp 0563fh		;66d2   ; y vuelve al juego
 L_66D5:
 	ld sp,0f380h		;66d5
 	ld a,0ffh		;66d8
@@ -1093,7 +1093,7 @@ menu_ocho:		; menu de 8 opciones (p01:750E)
 	ld b,008h		;68d5
 	jp menu		;68d7   ; menu: menu de B opciones con el cursor A: devuelve la elegida
 borra_3:		; pone a cero 3 bytes en HL
-	xor a			;68da
+	xor a			;68da   ; pone a cero 3 bytes
 	ld (hl),a			;68db
 	inc hl			;68dc
 	ld (hl),a			;68dd
@@ -1102,23 +1102,23 @@ borra_3:		; pone a cero 3 bytes en HL
 	ret			;68e0
 hay_ranking:		; Z si el juego no tiene ranking (0xF290, 0xF286)
 	ld hl,(0f290h)		;68e1   ; lee los puntos del juego (para el ranking) y el byte siguiente (16 bits)
-	ld a,h			;68e4
+	ld a,h			;68e4   ; sin puntos no hay ranking
 	or l			;68e5
 	ret z			;68e6
-	ld hl,(0f286h)		;68e7
-	ld a,h			;68ea
+	ld hl,(0f286h)		;68e7   ; 0xF286: donde guarda el juego los puntos
+	ld a,h			;68ea   ; tampoco sin el
 	or l			;68eb
 	ret z			;68ec
 	ld a,(0f281h)		;68ed   ; lee el codigo del juego
-	ld c,a			;68f0
-	sub 003h		;68f1
+	ld c,a			;68f0   ; C = el codigo del juego
+	sub 003h		;68f1   ; los juegos de codigo 3 y 4...
 	cp 002h		;68f3
 	jr c,L_6907		;68f5
-	ld a,c			;68f7
+	ld a,c			;68f7   ; ...y los de 0x10 y 0x11...
 	sub 010h		;68f8
 	cp 002h		;68fa
 	jr nc,L_6903		;68fc
-	ld a,(hl)			;68fe
+	ld a,(hl)			;68fe   ; ...miran el bit 0 de su variable: si esta a 1, no hay ranking
 	cpl			;68ff
 	and 001h		;6900
 	ret			;6902
@@ -1220,20 +1220,20 @@ L_69DB:
 	ld c,000h		;69dc
 	ld hl,0923bh		;69de
 L_69E1:
-	push af			;69e1
+	push af			;69e1   ; guarda los registros para la comparacion
 	push bc			;69e2
 	push hl			;69e3
 	push de			;69e4
-	ld b,003h		;69e5
+	ld b,003h		;69e5   ; los puntos son 3 bytes BCD
 	ex de,hl			;69e7
 L_69E8:
-	ld a,(de)			;69e8
+	ld a,(de)			;69e8   ; compara de la cifra alta a la baja
 	cp (hl)			;69e9
-	jr c,L_69F2		;69ea
-	jr nz,L_69FF		;69ec
-	dec de			;69ee
+	jr c,L_69F2		;69ea   ; menor: se queda debajo
+	jr nz,L_69FF		;69ec   ; mayor: entra aqui
+	dec de			;69ee   ; la cifra siguiente
 	dec hl			;69ef
-	djnz L_69E8		;69f0
+	djnz L_69E8		;69f0   ; los 3 bytes
 L_69F2:
 	pop de			;69f2
 	pop hl			;69f3
@@ -1247,13 +1247,13 @@ L_69FF:
 	pop hl			;6a00
 	pop bc			;6a01
 	pop af			;6a02
-	inc hl			;6a03
+	inc hl			;6a03   ; la fila siguiente (3 bytes de puntos)
 	inc hl			;6a04
 	inc hl			;6a05
-	inc c			;6a06
-	djnz L_69E1		;6a07
+	inc c			;6a06   ; C = la posicion
+	djnz L_69E1		;6a07   ; las B filas
 	call ranking_mueve		;6a09   ; ranking_mueve: mueve una fila del ranking
-	jp L_6A7A		;6a0c
+	jp L_6A7A		;6a0c   ; y pinta el ranking
 L_6A0F:
 	ld a,c			;6a0f
 	ld c,b			;6a10
@@ -1269,46 +1269,46 @@ ranking_ordena:		; ordena el ranking
 ranking_compara:		; compara dos filas del ranking
 	push af			;6a2b
 	push bc			;6a2c
-	ld e,b			;6a2d
-	ld a,c			;6a2e
+	ld e,b			;6a2d   ; E = la fila
+	ld a,c			;6a2e   ; C + B...
 	add a,b			;6a2f
 	ld b,a			;6a30
-	add a,a			;6a31
+	add a,a			;6a31   ; ...por 3 (puntos)
 	add a,b			;6a32
-	bit 0,d		;6a33
+	bit 0,d		;6a33   ; bit 0 de D: los nombres...
 	jr z,L_6A3A		;6a35
-	ld b,a			;6a37
+	ld b,a			;6a37   ; ...que son 9 bytes (por 3 otra vez)
 	add a,a			;6a38
 	add a,b			;6a39
 L_6A3A:
-	ld c,a			;6a3a
+	ld c,a			;6a3a   ; BC = el desplazamiento
 	ld b,000h		;6a3b
-	add ix,bc		;6a3d
+	add ix,bc		;6a3d   ; IX e IY a esa fila
 	add iy,bc		;6a3f
-	ld a,e			;6a41
+	ld a,e			;6a41   ; E por 3...
 	add a,a			;6a42
 	add a,e			;6a43
-	bit 0,d		;6a44
+	bit 0,d		;6a44   ; ...o por 9 si son nombres
 	jr z,L_6A4B		;6a46
 	ld b,a			;6a48
 	add a,a			;6a49
 	add a,b			;6a4a
 L_6A4B:
-	ld c,a			;6a4b
+	ld c,a			;6a4b   ; BC = los bytes que hay que mover
 	ld b,000h		;6a4c
-	push ix		;6a4e
+	push ix		;6a4e   ; HL = IX
 	pop hl			;6a50
-	push iy		;6a51
+	push iy		;6a51   ; DE = IY
 	pop de			;6a53
-	lddr		;6a54
+	lddr		;6a54   ; baja las filas una posicion
 	pop bc			;6a56
 	pop af			;6a57
 	ret			;6a58
 ranking_mueve:		; mueve una fila del ranking
-	push af			;6a59
+	push af			;6a59   ; guarda los registros
 	push bc			;6a5a
 	push af			;6a5b
-	ld a,c			;6a5c
+	ld a,c			;6a5c   ; la fila x 3: los puntos
 	ld b,a			;6a5d
 	add a,a			;6a5e
 	add a,b			;6a5f
@@ -1320,17 +1320,17 @@ ranking_mueve:		; mueve una fila del ranking
 	jr nz,L_6A71		;6a6c
 	ld de,092b4h		;6a6e
 L_6A71:
-	ex de,hl			;6a71
+	ex de,hl			;6a71   ; copia los 3 bytes de los puntos
 	ld bc,00003h		;6a72
 	ldir		;6a75
 	pop bc			;6a77
 	pop af			;6a78
 	ret			;6a79
 L_6A7A:
-	push af			;6a7a
+	push af			;6a7a   ; guarda los registros
 	push bc			;6a7b
 	push af			;6a7c
-	ld a,c			;6a7d
+	ld a,c			;6a7d   ; la fila x 9: el nombre
 	ld b,a			;6a7e
 	add a,a			;6a7f
 	add a,b			;6a80
@@ -1345,10 +1345,10 @@ L_6A7A:
 	jr nz,L_6A95		;6a90
 	ld de,092bfh		;6a92
 L_6A95:
-	ex de,hl			;6a95
+	ex de,hl			;6a95   ; la marca de la fila...
 	ld (de),a			;6a96
 	inc de			;6a97
-	ld bc,00008h		;6a98
+	ld bc,00008h		;6a98   ; ...y los 8 bytes del nombre
 	ldir		;6a9b
 	pop bc			;6a9d
 	pop af			;6a9e
@@ -1384,17 +1384,17 @@ L_6ACC:
 	jr nz,L_6ACC		;6adf
 	ret			;6ae1
 L_6AE2:
-	ld a,009h		;6ae2
+	ld a,009h		;6ae2   ; ya esta en la ultima fila (9)
 	cp (hl)			;6ae4
 	jr z,L_6ACC		;6ae5
-	inc (hl)			;6ae7
-	ld a,(de)			;6ae8
+	inc (hl)			;6ae7   ; la siguiente
+	ld a,(de)			;6ae8   ; la primera fila que se ve
 	ld b,a			;6ae9
-	ld a,(hl)			;6aea
+	ld a,(hl)			;6aea   ; la elegida menos la primera
 	sub b			;6aeb
-	cp 005h		;6aec
+	cp 005h		;6aec   ; si cabe en las 5 filas de la ventana, no se mueve
 	jr c,L_6AF8		;6aee
-	inc b			;6af0
+	inc b			;6af0   ; si no, la ventana baja una fila
 	ld a,b			;6af1
 	ld (de),a			;6af2
 	ld bc,00000h		;6af3
@@ -1423,15 +1423,15 @@ L_6B01:
 L_6B1A:
 	jr L_6AC6		;6b1a
 L_6B1C:
-	ld a,(hl)			;6b1c
+	ld a,(hl)			;6b1c   ; la fila elegida
 	or a			;6b1d
-	jr z,L_6ACC		;6b1e
-	dec (hl)			;6b20
+	jr z,L_6ACC		;6b1e   ; ya esta en la primera
+	dec (hl)			;6b20   ; la anterior
 	ex de,hl			;6b21
-	ld a,(de)			;6b22
+	ld a,(de)			;6b22   ; si queda por encima de la ventana...
 	cp (hl)			;6b23
 	jr nc,L_6B27		;6b24
-	dec (hl)			;6b26
+	dec (hl)			;6b26   ; ...la ventana sube una fila
 L_6B27:
 	ld bc,0ffe0h		;6b27
 	ld a,(de)			;6b2a
@@ -1543,15 +1543,15 @@ L_6BA6:
 	dec b			;6be7
 	inc c			;6be8
 L_6BE9:
-	ld a,(de)			;6be9
+	ld a,(de)			;6be9   ; se salta los ceros de la izquierda
 	cp 030h		;6bea
 	jr nz,L_6BFD		;6bec
 	inc hl			;6bee
 	inc de			;6bef
 	djnz L_6BE9		;6bf0
-	bit 0,c		;6bf2
+	bit 0,c		;6bf2   ; bit 0 de C: si el numero es impar de cifras...
 	jr nz,L_6BF7		;6bf4
-	dec hl			;6bf6
+	dec hl			;6bf6   ; ...retrocede una
 L_6BF7:
 	call pon_letra		;6bf7   ; pon_letra: escribe A en la VRAM HL guardando los registros
 	inc hl			;6bfa
@@ -1574,20 +1574,20 @@ L_6BFD:
 	call pon_letra		;6c11   ; pon_letra: escribe A en la VRAM HL guardando los registros
 	inc hl			;6c14
 L_6C15:
-	ld de,06c35h		;6c15
+	ld de,06c35h		;6c15   ; pinta las tres letras de p01:6C35
 	ex de,hl			;6c18
 	ld bc,00003h		;6c19
 	call copia_a_vram		;6c1c   ; copia_a_vram: copia BC bytes de HL a la VRAM DE (letra a letra si es de texto)
-	ld bc,00009h		;6c1f
+	ld bc,00009h		;6c1f   ; la fila siguiente del ranking: 9 bytes de nombre...
 	add ix,bc		;6c22
-	ld bc,00003h		;6c24
+	ld bc,00003h		;6c24   ; ...y 3 de puntos
 	add iy,bc		;6c27
 	pop hl			;6c29
-	ld bc,00020h		;6c2a
+	ld bc,00020h		;6c2a   ; la fila siguiente de la pantalla
 	add hl,bc			;6c2d
 	pop bc			;6c2e
-	inc c			;6c2f
-	dec b			;6c30
+	inc c			;6c2f   ; la posicion
+	dec b			;6c30   ; las B filas
 	jp nz,L_6B80		;6c31
 	ret			;6c34
 
@@ -1650,10 +1650,10 @@ DATA_resto_6C50:
 
 
 L_6D17:
-	ld a,0ffh		;6d17
+	ld a,0ffh		;6d17   ; 0xE052 = 0xFF en la RAM del juego
 	ld (0e052h),a		;6d19
-	ld a,(0f299h)		;6d1c
-	cp 00bh		;6d1f
+	ld a,(0f299h)		;6d1c   ; la fase pedida...
+	cp 00bh		;6d1f   ; ...con tope 10
 	jr c,L_6D25		;6d21
 	ld a,00ah		;6d23
 L_6D25:
@@ -1677,7 +1677,7 @@ truco_6d41:		; calcula el valor que se escribe en el juego (p01:706C)
 	ld a,(0f293h)		;6d41   ; lee la fase elegida
 	ld c,a			;6d44
 	ld a,(0f29bh)		;6d45   ; lee la fase que se pide
-	call multiplica		;6d48   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits)
+	call divide_a_menos_1		;6d48   ; divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit)
 	ld a,l			;6d4b
 	inc a			;6d4c
 	ld hl,(0f28ah)		;6d4d   ; lee la variable del juego que se cambia y el byte siguiente (16 bits)
@@ -1699,21 +1699,21 @@ truco_6d41:		; calcula el valor que se escribe en el juego (p01:706C)
 	xor a			;6d64
 	ld b,008h		;6d65
 L_6D67:
-	rl l		;6d67
+	rl l		;6d67   ; pasa L a BCD bit a bit
 	adc a,a			;6d69
-	daa			;6d6a
+	daa			;6d6a   ; en decimal
 	djnz L_6D67		;6d6b
-	ld (0c411h),a		;6d6d
+	ld (0c411h),a		;6d6d   ; a la RAM del juego (0xC411)
 	ld a,c			;6d70
-	ld (0d000h),a		;6d71
-	ld hl,06d87h		;6d74
+	ld (0d000h),a		;6d71   ; y C a 0xD000
+	ld hl,06d87h		;6d74   ; el valor de la tabla de p01:6D87
 	call hl_mas_a		;6d77   ; hl_mas_a: HL = HL + A
 	ld a,(hl)			;6d7a
-	ld (0d002h),a		;6d7b
-	xor a			;6d7e
+	ld (0d002h),a		;6d7b   ; a 0xD002 del juego
+	xor a			;6d7e   ; 0xD001 del juego a 0
 	ld (0d001h),a		;6d7f
 	inc a			;6d82
-	ld (0c40dh),a		;6d83
+	ld (0c40dh),a		;6d83   ; y 0xC40D a 1
 	ret			;6d86
 
 ; ----------------------------------------------------------------------
@@ -1735,35 +1735,35 @@ L_6D9A:
 	ld (hl),a			;6d9b
 	ret			;6d9c
 L_6D9D:
-	ld (0c481h),a		;6d9d
+	ld (0c481h),a		;6d9d   ; la fase a 0xC481 de la RAM del juego
 	dec a			;6da0
-	ld (0c482h),a		;6da1
-	ld l,a			;6da4
+	ld (0c482h),a		;6da1   ; y la anterior a 0xC482
+	ld l,a			;6da4   ; por 3, mas 1...
 	add a,a			;6da5
 	add a,l			;6da6
 	inc a			;6da7
-	ld (0c480h),a		;6da8
+	ld (0c480h),a		;6da8   ; ...a 0xC480
 	ld a,001h		;6dab
-	ld (0c483h),a		;6dad
+	ld (0c483h),a		;6dad   ; 0xC483 a 1
 	ret			;6db0
 busca_juego_6dc9:		; busca el juego (0xF280) en la tabla de p01:6DC9
 	ld hl,06dc9h		;6db1
 	ld de,(0f280h)		;6db4   ; lee la ficha del juego y el byte siguiente (16 bits)
 L_6DB8:
-	ld b,(hl)			;6db8
+	ld b,(hl)			;6db8   ; recorre la tabla [palabra, byte]: B = la parte alta...
 	inc hl			;6db9
-	ld a,(hl)			;6dba
-	or b			;6dbb
+	ld a,(hl)			;6dba   ; ...y la baja
+	or b			;6dbb   ; 0x0000 acaba
 	ld a,(hl)			;6dbc
 	inc hl			;6dbd
-	ld c,(hl)			;6dbe
+	ld c,(hl)			;6dbe   ; C = el valor
 	ret z			;6dbf
 	inc hl			;6dc0
-	cp e			;6dc1
+	cp e			;6dc1   ; ¿coincide con la del juego (DE)?
 	jr nz,L_6DB8		;6dc2
 	ld a,b			;6dc4
 	cp d			;6dc5
-	ret z			;6dc6
+	ret z			;6dc6   ; si: C es el valor
 	jr L_6DB8		;6dc7
 
 ; ----------------------------------------------------------------------
@@ -1802,10 +1802,10 @@ L_6DD8:
 	ld (0e054h),a		;6df7
 	jp pon_valor		;6dfa   ; pon_valor: escribe 0xF29C en la variable del juego (0xF28A)
 L_6DFD:
-	ld a,(0f29bh)		;6dfd   ; lee la fase que se pide
-	ld c,00ah		;6e00
-	call multiplica		;6e02   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits)
-	ld a,l			;6e05
+	ld a,(0f29bh)		;6dfd   ; la fase pedida
+	ld c,00ah		;6e00   ; entre 10
+	call divide_a_menos_1		;6e02   ; divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit)
+	ld a,l			;6e05   ; el resto...
 	ld (0e0e1h),a		;6e06
 	ld (0e0e8h),a		;6e09
 	ld b,a			;6e0c
@@ -1838,7 +1838,7 @@ DATA_resto_6E24:
 L_6E38:
 	ld a,(0f29bh)		;6e38   ; lee la fase que se pide
 	ld c,004h		;6e3b
-	call multiplica		;6e3d   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits)
+	call divide_a_menos_1		;6e3d   ; divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit)
 	ld a,l			;6e40
 	inc a			;6e41
 	ld hl,(0f28ah)		;6e42   ; lee la variable del juego que se cambia y el byte siguiente (16 bits)
@@ -1890,7 +1890,7 @@ L_6E81:
 	jr c,L_6E92		;6e8a
 	inc a			;6e8c
 	ld c,005h		;6e8d
-	call multiplica		;6e8f   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits)
+	call divide_a_menos_1		;6e8f   ; divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit)
 L_6E92:
 	ld a,l			;6e92
 	ld (0e052h),a		;6e93
@@ -1913,7 +1913,7 @@ L_6EA8:
 	ld (0e056h),a		;6eb4
 	ld a,b			;6eb7
 	ld c,009h		;6eb8
-	call multiplica		;6eba   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits)
+	call divide_a_menos_1		;6eba   ; divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit)
 	ld a,l			;6ebd
 	add a,a			;6ebe
 	ld hl,06ed7h		;6ebf
@@ -1946,14 +1946,14 @@ L_6EEC:
 L_6EF3:
 	ld a,(0f29bh)		;6ef3   ; lee la fase que se pide
 	ld c,003h		;6ef6
-	call multiplica		;6ef8   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits)
+	call divide_a_menos_1		;6ef8   ; divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit)
 	ld a,l			;6efb
 	jp L_6F73		;6efc
 L_6EFF:
 	ld a,(0f29bh)		;6eff   ; lee la fase que se pide
-	ld c,00dh		;6f02
-	call multiplica		;6f04   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits)
-	ld a,l			;6f07
+	ld c,00dh		;6f02   ; entre 13
+	call divide_a_menos_1		;6f04   ; divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit)
+	ld a,l			;6f07   ; el resto + 1...
 	inc a			;6f08
 	ld (0e060h),a		;6f09
 	dec a			;6f0c
@@ -1982,30 +1982,30 @@ DATA_resto_6F1D:
 L_6F37:
 	ld a,(0f29bh)		;6f37   ; lee la fase que se pide
 	ld c,008h		;6f3a
-	call multiplica		;6f3c   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits)
+	call divide_a_menos_1		;6f3c   ; divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit)
 	ld h,l			;6f3f
 	ld l,000h		;6f40
 	ld (0e1b8h),hl		;6f42
 	jp pon_valor		;6f45   ; pon_valor: escribe 0xF29C en la variable del juego (0xF28A)
 L_6F48:
 	call pon_valor		;6f48   ; pon_valor: escribe 0xF29C en la variable del juego (0xF28A)
-	ld a,(0f29bh)		;6f4b   ; lee la fase que se pide
+	ld a,(0f29bh)		;6f4b   ; la fase pedida
 	push af			;6f4e
-	ld c,005h		;6f4f
-	call multiplica		;6f51   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits)
+	ld c,005h		;6f4f   ; entre 5
+	call divide_a_menos_1		;6f51   ; divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit)
 	ld a,l			;6f54
 	ld (0e054h),a		;6f55
 	pop af			;6f58
-	cp 006h		;6f59
+	cp 006h		;6f59   ; de la 6 en adelante...
 	ret c			;6f5b
 	ld b,a			;6f5c
-	sub 005h		;6f5d
+	sub 005h		;6f5d   ; ...la parte de arriba (con tope 3)...
 	cp 004h		;6f5f
 	jr c,L_6F65		;6f61
 	ld a,003h		;6f63
 L_6F65:
-	ld (0e056h),a		;6f65
-	ld a,b			;6f68
+	ld (0e056h),a		;6f65   ; A a 0xE056 de la RAM del juego
+	ld a,b			;6f68   ; y B - 1 (0-3) a 0xE059
 	dec a			;6f69
 	and 003h		;6f6a
 	ld (0e059h),a		;6f6c
@@ -2018,8 +2018,8 @@ L_6F73:
 	ret			;6f77
 L_6F78:
 	ld a,(0f29bh)		;6f78   ; lee la fase que se pide
-	ld c,00fh		;6f7b
-	call multiplica		;6f7d   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits)
+	ld c,00fh		;6f7b   ; entre 15
+	call divide_a_menos_1		;6f7d   ; divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit)
 	ld a,e			;6f80
 	ld (0e058h),a		;6f81
 	ld a,l			;6f84
@@ -2035,7 +2035,7 @@ L_6F78:
 	inc hl			;6f98
 	ld a,(hl)			;6f99
 	ld (0e057h),a		;6f9a
-	ld a,(0e055h)		;6f9d
+	ld a,(0e055h)		;6f9d   ; en la primera fase...
 	cp 001h		;6fa0
 	jr z,L_6FA5		;6fa2
 	xor a			;6fa4
@@ -2065,18 +2065,18 @@ L_6FC9:
 L_6FD2:
 	dec a			;6fd2
 	ld (0e053h),a		;6fd3
-	ld a,(0f29ch)		;6fd6   ; lee el valor que se escribe
-	cp 051h		;6fd9
+	ld a,(0f29ch)		;6fd6   ; el valor elegido...
+	cp 051h		;6fd9   ; ...de 0x51 en adelante...
 	jr c,L_6FE0		;6fdb
-	sub 050h		;6fdd
+	sub 050h		;6fdd   ; ...resta 0x50 en BCD
 	daa			;6fdf
 L_6FE0:
 	ld (0e052h),a		;6fe0
 	ret			;6fe3
 L_6FE4:
 	ld a,(0f29bh)		;6fe4   ; lee la fase que se pide
-	ld c,008h		;6fe7
-	call multiplica		;6fe9   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits)
+	ld c,008h		;6fe7   ; entre 8
+	call divide_a_menos_1		;6fe9   ; divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit)
 	ld a,l			;6fec
 	ld (0e103h),a		;6fed
 	ld hl,000c0h		;6ff0
@@ -2084,14 +2084,14 @@ L_6FE4:
 	ret			;6ff6
 L_6FF7:
 	ld a,(0f29bh)		;6ff7   ; lee la fase que se pide
-	ld c,006h		;6ffa
-	call multiplica		;6ffc   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits)
+	ld c,006h		;6ffa   ; entre 6
+	call divide_a_menos_1		;6ffc   ; divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit)
 	ld a,e			;6fff
 	ld (0e042h),a		;7000
 	ld a,l			;7003
 	ld hl,(0f28ah)		;7004   ; lee la variable del juego que se cambia y el byte siguiente (16 bits)
 	ld (hl),a			;7007
-	call borra_pantalla_b		;7008   ; borra_pantalla_b: borra la tabla de nombres y esconde los sprites
+	call borra_pantalla_b		;7008   ; borra la pantalla
 	ld a,004h		;700b
 	ld (0e001h),a		;700d
 	ld a,008h		;7010
@@ -2115,7 +2115,7 @@ L_7028:
 	call pon_valor		;702f   ; pon_valor: escribe 0xF29C en la variable del juego (0xF28A)
 	ld a,(0f29bh)		;7032   ; lee la fase que se pide
 	ld c,003h		;7035
-	call multiplica		;7037   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits)
+	call divide_a_menos_1		;7037   ; divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit)
 	ld a,e			;703a
 	and 00fh		;703b
 	rrca			;703d
@@ -2130,12 +2130,12 @@ L_7028:
 	jp borra_pantalla_b		;704b   ; borra_pantalla_b: borra la tabla de nombres y esconde los sprites
 L_704E:
 	ld a,(0f29bh)		;704e   ; lee la fase que se pide
-	ld c,008h		;7051
-	call multiplica		;7053   ; multiplica: HL = (A - 1) * ... (multiplicacion de 16 bits)
+	ld c,008h		;7051   ; entre 8
+	call divide_a_menos_1		;7053   ; divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit)
 	ld a,l			;7056
 	ld hl,(0f28ah)		;7057   ; lee la variable del juego que se cambia y el byte siguiente (16 bits)
 	ld (hl),a			;705a
-	ld a,e			;705b
+	ld a,e			;705b   ; el cociente, con tope 2
 	cp 002h		;705c
 	jr c,L_7062		;705e
 	ld a,002h		;7060
@@ -2144,7 +2144,7 @@ L_7062:
 	ld a,(0f29ch)		;7065   ; lee el valor que se escribe
 	ld (0e053h),a		;7068
 	ret			;706b
-multiplica:		; HL = (A - 1) * ... (multiplicacion de 16 bits)
+divide_a_menos_1:		; DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit)
 	dec a			;706c
 	ld e,a			;706d
 	ld d,000h		;706e
@@ -2154,13 +2154,13 @@ divide:		; DE / BC: cociente en DE y resto en HL (gemela de p05:9430)
 	exx			;7074
 	ld b,010h		;7075
 L_7077:
-	exx			;7077
+	exx			;7077   ; un paso de la division: el bit alto de DE...
 	sla e		;7078
 	rl d		;707a
-	adc hl,hl		;707c
-	sbc hl,bc		;707e
+	adc hl,hl		;707c   ; ...entra en HL
+	sbc hl,bc		;707e   ; si cabe el divisor, se resta...
 	jr c,L_7085		;7080
-	inc e			;7082
+	inc e			;7082   ; ...y el bit del cociente es 1
 	jr L_7086		;7083
 L_7085:
 	add hl,bc			;7085
@@ -2207,15 +2207,15 @@ L_70D0:
 	ex de,hl			;70d0
 	ld hl,07104h		;70d1
 L_70D4:
-	ld a,(hl)			;70d4
+	ld a,(hl)			;70d4   ; recorre la tabla de RC: 0xFF acaba
 	inc hl			;70d5
 	cp 0ffh		;70d6
 	jr z,L_70E9		;70d8
-	cp e			;70da
+	cp e			;70da   ; ¿la parte baja?
 	jr nz,L_70E1		;70db
-	ld a,(hl)			;70dd
+	ld a,(hl)			;70dd   ; ¿y la alta?
 	cp d			;70de
-	jr z,L_70E4		;70df
+	jr z,L_70E4		;70df   ; es este juego
 L_70E1:
 	inc hl			;70e1
 	jr L_70D4		;70e2
@@ -2255,14 +2255,14 @@ ficha_del_juego:		; busca la ficha del juego (p00:44BE) y la copia a 0xF280
 	ld (0f292h),a		;711f   ; guarda el numero de jugadores del juego
 	ret			;7122
 L_7123:
-	ld a,b			;7123
+	ld a,b			;7123   ; B = el codigo del juego: los de 3 y 4...
 	sub 003h		;7124
 	cp 002h		;7126
 	jr c,L_7130		;7128
-	ld a,b			;712a
+	ld a,b			;712a   ; ...y los de 0x10 y 0x11...
 	sub 010h		;712b
 	cp 002h		;712d
-	ret nc			;712f
+	ret nc			;712f   ; ...siguen; los demas vuelven
 L_7130:
 	ld a,001h		;7130
 	ld (092ceh),a		;7132
@@ -2326,8 +2326,8 @@ L_719C:
 	ld de,0f292h		;71a6   ; apunta a el numero de jugadores del juego
 	ldi		;71a9
 L_71AB:
-	rra			;71ab
-	jr c,L_71BA		;71ac
+	rra			;71ab   ; un bit de la cabecera por cada palabra
+	jr c,L_71BA		;71ac   ; bit a 1: se salta
 	ld de,0f28ah		;71ae   ; apunta a la variable del juego que se cambia
 	ldi		;71b1
 	ldi		;71b3
@@ -2337,12 +2337,12 @@ L_71BA:
 	ld ix,071edh		;71ba
 	ld b,006h		;71be
 L_71C0:
-	push bc			;71c0
-	rra			;71c1
+	push bc			;71c0   ; un bit de la cabecera por cada palabra
+	rra			;71c1   ; bit a 1: se salta
 	jr c,L_71CF		;71c2
-	ld e,(ix+000h)		;71c4
+	ld e,(ix+000h)		;71c4   ; DE = el destino de IX
 	ld d,(ix+001h)		;71c7
-	ld bc,00002h		;71ca
+	ld bc,00002h		;71ca   ; copia 2 bytes
 	ldir		;71cd
 L_71CF:
 	pop bc			;71cf
@@ -2400,14 +2400,14 @@ L_7211:
 	djnz L_7204		;7213
 	ld ix,044beh		;7215
 L_7219:
-	ld l,(ix+000h)		;7219
+	ld l,(ix+000h)		;7219   ; recorre la tabla de juegos (p00:44BE): la suma...
 	ld h,(ix+001h)		;721c
-	ld a,l			;721f
+	ld a,l			;721f   ; ...0 acaba la tabla
 	or h			;7220
 	ret z			;7221
-	rst 20h			;7222   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
-	jr z,L_722F		;7223
-	inc ix		;7225
+	rst 20h			;7222   ; ¿es la del juego?
+	jr z,L_722F		;7223   ; si: la ficha
+	inc ix		;7225   ; la entrada siguiente, de 4 bytes
 	inc ix		;7227
 	inc ix		;7229
 	inc ix		;722b
@@ -2449,19 +2449,19 @@ de_mas_a:		; DE = DE + A
 pon_color:		; MSX2: el color B de la paleta con D y E (R#16 y puerto 2)
 	push bc			;725b
 	push hl			;725c
-	ld b,a			;725d
+	ld b,a			;725d   ; B = el numero de color
 	ld a,(00007h)		;725e   ; el puerto de escritura del VDP (VDP.DW)
-	inc a			;7261
+	inc a			;7261   ; el puerto de los registros (VDP.DW + 1)
 	ld c,a			;7262
 	di			;7263
-	out (c),b		;7264
-	ld a,090h		;7266
+	out (c),b		;7264   ; el numero de color...
+	ld a,090h		;7266   ; ...a R#16, el puntero de la paleta
 	out (c),a		;7268
-	inc c			;726a
-	out (c),d		;726b
-	push af			;726d
+	inc c			;726a   ; el puerto de la paleta (VDP.DW + 2)
+	out (c),d		;726b   ; rojo y azul
+	push af			;726d   ; una pausa para el VDP
 	pop af			;726e
-	out (c),e		;726f
+	out (c),e		;726f   ; verde
 	pop hl			;7271
 	pop bc			;7272
 	ei			;7273
@@ -2502,16 +2502,16 @@ DATA_resto_728E:
 
 
 paleta_lista:		; MSX2: colores de una lista [color, d, e] que acaba en 0xFF
-	ld a,(hl)			;72ae
+	ld a,(hl)			;72ae   ; el numero de color
 	inc hl			;72af
-	inc a			;72b0
+	inc a			;72b0   ; 0xFF acaba la lista
 	ret z			;72b1
 	dec a			;72b2
-	ld d,(hl)			;72b3
+	ld d,(hl)			;72b3   ; D y E: el color
 	inc hl			;72b4
 	ld e,(hl)			;72b5
 	inc hl			;72b6
-	call pon_color		;72b7   ; pon_color: MSX2: el color B de la paleta con D y E (R#16 y puerto 2)
+	call pon_color		;72b7   ; a la paleta
 	jr paleta_lista		;72ba
 registros_vdp:		; los 8 registros del VDP de p01:72E2 y, en MSX2, R#23 y R#9
 	ld hl,072e2h		;72bc
@@ -2572,35 +2572,35 @@ L_72FE:
 copia_tercios:		; LDIRVM en los tres tercios de la pantalla
 	ld a,003h		;730d
 L_730F:
-	push af			;730f
+	push af			;730f   ; A tercios: copia BC bytes de HL a la VRAM DE
 	push bc			;7310
 	push hl			;7311
 	push de			;7312
 	call 0005ch		;7313   ; BIOS LDIRVM - Block transfers to VRAM from memory
 	pop de			;7316
-	ld hl,00800h		;7317
+	ld hl,00800h		;7317   ; el tercio siguiente esta 0x800 mas alla
 	add hl,de			;731a
 	ex de,hl			;731b
 	pop hl			;731c
 	pop bc			;731d
 	pop af			;731e
-	dec a			;731f
+	dec a			;731f   ; los A tercios
 	jr nz,L_730F		;7320
 	ret			;7322
 descomprime_tercios:		; descomprime HL en los tres tercios de la pantalla
 	ld b,003h		;7323
 L_7325:
-	push bc			;7325
+	push bc			;7325   ; B tercios: descomprime HL en la VRAM DE
 	push hl			;7326
 	push de			;7327
 	call descomprime		;7328   ; descomprime: descomprime HL a la VRAM DE: n & 0x7F repeticiones o copias
 	pop de			;732b
-	ld hl,00800h		;732c
+	ld hl,00800h		;732c   ; el tercio siguiente esta 0x800 mas alla
 	add hl,de			;732f
 	ex de,hl			;7330
 	pop hl			;7331
 	pop bc			;7332
-	djnz L_7325		;7333
+	djnz L_7325		;7333   ; los B tercios
 	ret			;7335
 descomprime_con_direccion:		; descomprime a la VRAM de la palabra de HL
 	ld e,(hl)			;7336
@@ -2614,34 +2614,34 @@ descomprime:		; descomprime HL a la VRAM DE: n & 0x7F repeticiones o copias
 	ld a,(00007h)		;733f   ; el puerto de escritura del VDP (VDP.DW)
 	ld c,a			;7342
 L_7343:
-	ld a,(hl)			;7343
-	and 07fh		;7344
+	ld a,(hl)			;7343   ; el byte de cuenta
+	and 07fh		;7344   ; n & 0x7F: cuantos
 	ld b,a			;7346
-	ld a,(hl)			;7347
+	ld a,(hl)			;7347   ; el bit 7 dice que hacer
 	inc hl			;7348
-	jr nz,L_734F		;7349
-	cp b			;734b
-	jr nz,descomprime_con_direccion		;734c
+	jr nz,L_734F		;7349   ; 0x80-0xFF: copiar los n bytes que siguen
+	cp b			;734b   ; 0x00 acaba; 0x01-0x7F: repetir
+	jr nz,descomprime_con_direccion		;734c   ; (0x80 justo: otra direccion de VRAM)
 	ret			;734e
 L_734F:
 	cp b			;734f
 	jr z,L_735D		;7350
 L_7352:
-	ld a,(hl)			;7352
+	ld a,(hl)			;7352   ; copia: un byte...
 	inc hl			;7353
-	out (c),a		;7354
+	out (c),a		;7354   ; ...a la VRAM
 	inc de			;7356
-	push hl			;7357
+	push hl			;7357   ; una pausa para el VDP
 	pop hl			;7358
-	djnz L_7352		;7359
+	djnz L_7352		;7359   ; los n bytes
 	jr L_7343		;735b
 L_735D:
 	ld a,(hl)			;735d
 	inc hl			;735e
 L_735F:
-	out (c),a		;735f
+	out (c),a		;735f   ; repite: el mismo byte n veces
 	inc de			;7361
-	push ix		;7362
+	push ix		;7362   ; una pausa para el VDP
 	pop ix		;7364
 	djnz L_735F		;7366
 	jr L_7343		;7368
@@ -2658,8 +2658,8 @@ L_7376:
 	pop af			;7379
 	ret			;737a
 despacha:		; salta a la palabra A de la tabla pegada detras del `call`
-	pop hl			;737b
-	add a,a			;737c
+	pop hl			;737b   ; la direccion de la tabla, que va pegada al `call`
+	add a,a			;737c   ; A x 2: cada destino es una palabra
 	add a,l			;737d
 	ld l,a			;737e
 	jr nc,L_7382		;737f
@@ -2686,18 +2686,18 @@ L_7391:
 L_7395:
 	call modo_de_texto		;7395   ; modo_de_texto: Z si la pantalla es de texto (0xFCAF < 5)
 	jr z,pinta_texto_grafico		;7398
-	ld a,(hl)			;739a
+	ld a,(hl)			;739a   ; la letra
 	inc hl			;739b
 	ld b,a			;739c
-	inc b			;739d
+	inc b			;739d   ; 0xFF acaba
 	ret z			;739e
-	inc b			;739f
+	inc b			;739f   ; 0xFE: otra direccion de VRAM
 	jr z,L_7391		;73a0
-	and c			;73a2
+	and c			;73a2   ; con la mascara C
 	ex de,hl			;73a3
-	call 0004dh		;73a4   ; BIOS WRTVRM - Writes data in VRAM
+	call 0004dh		;73a4   ; BIOS WRTVRM - Writes data in VRAM | a la VRAM
 	ex de,hl			;73a7
-	inc de			;73a8
+	inc de			;73a8   ; la columna siguiente
 	jr L_7395		;73a9
 pinta_texto_grafico:		; pinta el texto en modo grafico
 	call letra_grafica		;73ab   ; letra_grafica: pinta una letra en modo grafico
@@ -2761,37 +2761,37 @@ L_73F6:
 	jr z,L_7412		;740e
 	set 7,h		;7410
 L_7412:
-	ld (0f2d1h),hl		;7412
-	pop hl			;7415
-	ld de,0c800h		;7416
+	ld (0f2d1h),hl		;7412   ; guarda la pagina de VRAM
+	pop hl			;7415   ; la posicion en la tabla de nombres (0x3800 + ...)
+	ld de,0c800h		;7416   ; +0xC800: queda en 0x0000 (fila y columna)
 	add hl,de			;7419
-	ld a,l			;741a
+	ld a,l			;741a   ; la columna x 4: el pixel en SCREEN 5/7 (4 bits, 2 por byte)
 	and 01fh		;741b
 	add a,a			;741d
 	add a,a			;741e
 	ld c,a			;741f
 	ld b,000h		;7420
-	ld a,l			;7422
+	ld a,l			;7422   ; la fila de 8 en 8...
 	and 0e0h		;7423
 	ld l,a			;7425
-	add hl,hl			;7426
+	add hl,hl			;7426   ; ...x 32: 128 bytes por linea x 8 lineas
 	add hl,hl			;7427
 	add hl,hl			;7428
 	add hl,hl			;7429
 	add hl,hl			;742a
-	add hl,bc			;742b
-	ld de,(0f2d1h)		;742c
-	ld a,h			;7430
+	add hl,bc			;742b   ; mas la columna
+	ld de,(0f2d1h)		;742c   ; mas la pagina
+	ld a,h			;7430   ; si cruza la mitad de 32 KB...
 	add hl,de			;7431
 	xor h			;7432
 	and 080h		;7433
-	call nz,hl_otra_mitad		;7435   ; hl_otra_mitad: H xor 0x80
+	call nz,hl_otra_mitad		;7435   ; ...cambia de mitad (NSTWRT solo ve 16 bits)
 	pop bc			;7438
-	ld a,c			;7439
+	ld a,c			;7439   ; el ancho x 4
 	add a,a			;743a
 	add a,a			;743b
 	ld c,a			;743c
-	ld a,b			;743d
+	ld a,b			;743d   ; el alto x 8
 	add a,a			;743e
 	add a,a			;743f
 	add a,a			;7440
@@ -2830,33 +2830,33 @@ binario_a_bcd:		; HL a BCD en DE
 	ld b,010h		;746c
 	ld de,00000h		;746e
 L_7471:
-	add hl,hl			;7471
-	ld a,e			;7472
+	add hl,hl			;7471   ; HL a BCD bit a bit: el bit alto de HL...
+	ld a,e			;7472   ; ...entra en E doblandolo...
 	adc a,a			;7473
-	daa			;7474
+	daa			;7474   ; ...en decimal...
 	ld e,a			;7475
-	ld a,d			;7476
+	ld a,d			;7476   ; ...y en D
 	adc a,a			;7477
 	daa			;7478
 	ld d,a			;7479
-	djnz L_7471		;747a
+	djnz L_7471		;747a   ; los B bits
 	ret			;747c
 bcd_a_binario:		; A en BCD a binario
-	ld c,a			;747d
-	and 0f0h		;747e
+	ld c,a			;747d   ; guarda A
+	and 0f0h		;747e   ; la cifra alta...
 	rrca			;7480
 	rrca			;7481
 	rrca			;7482
 	rrca			;7483
-	add a,a			;7484
+	add a,a			;7484   ; ...por 10 (x2, x8 y suma)
 	ld b,a			;7485
 	add a,a			;7486
 	add a,a			;7487
 	add a,b			;7488
 	ld b,a			;7489
-	ld a,c			;748a
+	ld a,c			;748a   ; la cifra baja
 	and 00fh		;748b
-	add a,b			;748d
+	add a,b			;748d   ; mas las decenas
 	ret			;748e
 borra_ventana:		; borra la ventana de 0x9237
 	ld bc,00613h		;748f
@@ -2978,24 +2978,24 @@ L_7552:
 	call cursor_pinta		;755d   ; cursor_pinta: pinta el cursor (':' o el de MSX2)
 	jp L_7526		;7560
 L_7563:
-	cp 02eh		;7563
+	cp 02eh		;7563   ; '.': la tecla del punto
 	jr nz,L_757E		;7565
-	ld a,(09230h)		;7567   ; lee el menu es de cursor (0) o de letras
+	ld a,(09230h)		;7567   ; solo en el menu de letras (0xFE)
 	cp 0feh		;756a
 	jp nz,L_7526		;756c
 	call opcion_cero		;756f   ; opcion_cero: si no hay opcion elegida, vuelve al menu
-	ld a,03ch		;7572
+	ld a,03ch		;7572   ; '<', el punto en la fuente del menu
 	ld hl,0922fh		;7574
-	cp (hl)			;7577
+	cp (hl)			;7577   ; si ya esta, nada
 	jp z,L_7526		;7578
 	ld (hl),a			;757b
 	jr L_75A8		;757c
 L_757E:
-	ld c,a			;757e
+	ld c,a			;757e   ; ¿es una cifra?
 	sub 030h		;757f
 	cp 00ah		;7581
 	jr nc,L_7588		;7583
-	ld a,c			;7585
+	ld a,c			;7585   ; si: tal cual
 	jr L_75A8		;7586
 L_7588:
 	ld a,c			;7588
@@ -3004,18 +3004,18 @@ L_7588:
 	jr nc,L_759B		;758d
 	ld a,c			;758f
 L_7590:
-	ex af,af'			;7590
+	ex af,af'			;7590   ; guarda la tecla
 	ld a,(09230h)		;7591   ; lee el menu es de cursor (0) o de letras
 	inc a			;7594
 	jp z,L_7526		;7595
 	ex af,af'			;7598
 	jr L_75A8		;7599
 L_759B:
-	ld a,c			;759b
+	ld a,c			;759b   ; ¿es una minuscula (a-z)?
 	sub 061h		;759c
 	cp 01ah		;759e
-	jp nc,L_7526		;75a0
-	ld a,c			;75a3
+	jp nc,L_7526		;75a0   ; no: no vale
+	ld a,c			;75a3   ; a mayuscula
 	sub 020h		;75a4
 	jr L_7590		;75a6
 L_75A8:
@@ -3184,12 +3184,12 @@ menu_prepara:		; prepara el menu: opciones, posicion y cursor
 	ld (09231h),hl		;76bb   ; guarda la posicion del cursor en la VRAM y el byte siguiente (16 bits)
 	jp cursor_pinta		;76be   ; cursor_pinta: pinta el cursor (':' o el de MSX2)
 menu_cursor:		; mueve el cursor con las flechas (0x1E arriba, 0x1F abajo)
-	ld c,0ffh		;76c1
-	cp 01eh		;76c3
+	ld c,0ffh		;76c1   ; C = -1: arriba
+	cp 01eh		;76c3   ; 0x1E es la flecha arriba
 	jr z,L_76CC		;76c5
-	ld c,001h		;76c7
-	cp 01fh		;76c9
-	ret nz			;76cb
+	ld c,001h		;76c7   ; C = +1: abajo
+	cp 01fh		;76c9   ; 0x1F es la flecha abajo
+	ret nz			;76cb   ; otra tecla: nada
 L_76CC:
 	ld hl,0922dh		;76cc   ; apunta a la ultima opcion del menu
 	ld de,0922eh		;76cf   ; apunta a la opcion elegida
@@ -3229,21 +3229,21 @@ comprime:		; comprime 0x8802 en 0x8002 (lo contrario de p01:733A)
 	ld hl,08802h		;7707
 	ld de,08002h		;770a
 L_770D:
-	ld a,081h		;770d
+	ld a,081h		;770d   ; 0x81: empieza un trozo de copias (bit 7 a 1, uno)
 	ld (0dd93h),a		;770f
-	ld c,(hl)			;7712
-	ld (0dd94h),de		;7713
+	ld c,(hl)			;7712   ; el byte
+	ld (0dd94h),de		;7713   ; donde va la cuenta de este trozo
 	inc de			;7717
 	ld a,c			;7718
-	ld (de),a			;7719
+	ld (de),a			;7719   ; lo copia
 	inc hl			;771a
 	inc de			;771b
-	call fin_de_8882		;771c   ; fin_de_8882: compara HL con 0x8882
+	call fin_de_8882		;771c   ; ¿se acabo la pantalla?
 	jp z,L_77AF		;771f
-	ld a,c			;7722
+	ld a,c			;7722   ; ¿el siguiente es igual?
 	cp (hl)			;7723
-	jr z,L_7763		;7724
-	ld a,001h		;7726
+	jr z,L_7763		;7724   ; si: empieza una repeticion
+	ld a,001h		;7726   ; no: un trozo de copias que lleva 1
 	ld (0dd93h),a		;7728
 L_772B:
 	ld c,(hl)			;772b
@@ -3262,21 +3262,21 @@ L_772B:
 	dec hl			;7740
 	jr nz,L_7756		;7741
 L_7743:
-	dec hl			;7743
+	dec hl			;7743   ; retrocede un byte
 	dec de			;7744
 	push hl			;7745
-	ld hl,(0dd94h)		;7746
+	ld hl,(0dd94h)		;7746   ; cierra el trozo: su cuenta...
 	ld a,(0dd93h)		;7749
-	set 7,a		;774c
+	set 7,a		;774c   ; ...con el bit 7 (copias)
 	ld (hl),a			;774e
 	pop hl			;774f
-	ld (0dd94h),de		;7750
+	ld (0dd94h),de		;7750   ; el trozo siguiente empieza aqui
 	jr L_770D		;7754
 L_7756:
-	ld a,(0dd93h)		;7756
-	cp 07bh		;7759
+	ld a,(0dd93h)		;7756   ; la cuenta de la repeticion
+	cp 07bh		;7759   ; con tope 0x7B
 	jr z,L_7743		;775b
-	inc a			;775d
+	inc a			;775d   ; una mas
 	ld (0dd93h),a		;775e
 	jr L_772B		;7761
 L_7763:
@@ -3290,35 +3290,35 @@ L_7768:
 	cp (hl)			;776f
 	jr z,L_7783		;7770
 L_7772:
-	ld de,(0dd94h)		;7772
+	ld de,(0dd94h)		;7772   ; cierra la repeticion: su cuenta...
 	ld a,(0dd93h)		;7776
-	ld (de),a			;7779
-	inc de			;777a
+	ld (de),a			;7779   ; ...delante del byte
+	inc de			;777a   ; el trozo siguiente
 	inc de			;777b
 	ld (0dd94h),de		;777c
 	jp L_770D		;7780
 L_7783:
-	ld a,(0dd93h)		;7783
-	cp 07bh		;7786
+	ld a,(0dd93h)		;7783   ; la cuenta de las copias
+	cp 07bh		;7786   ; con tope 0x7B
 	jr z,L_7772		;7788
-	inc a			;778a
+	inc a			;778a   ; una mas
 	ld (0dd93h),a		;778b
 	jr L_7768		;778e
 fin_de_8882:		; compara HL con 0x8882
 	push hl			;7790
 	push de			;7791
-	ld de,08882h		;7792
+	ld de,08882h		;7792   ; el final del bloque que se comprime
 	and a			;7795
-	sbc hl,de		;7796
+	sbc hl,de		;7796   ; Z si HL ha llegado
 	pop de			;7798
 	pop hl			;7799
 	ret			;779a
 L_779B:
-	dec hl			;779b
+	dec hl			;779b   ; el byte...
 	ld a,(hl)			;779c
-	ld (de),a			;779d
+	ld (de),a			;779d   ; ...se copia
 	inc de			;779e
-	ld a,(0dd93h)		;779f
+	ld a,(0dd93h)		;779f   ; una copia mas
 	inc a			;77a2
 	ld (0dd93h),a		;77a3
 L_77A6:
@@ -3327,16 +3327,16 @@ L_77A6:
 	set 7,a		;77aa
 	ld (0dd93h),a		;77ac
 L_77AF:
-	xor a			;77af
+	xor a			;77af   ; el 0 que acaba...
 	ld (de),a			;77b0
-	ld a,(0dd93h)		;77b1
+	ld a,(0dd93h)		;77b1   ; ...y la cuenta del ultimo trozo
 	ld hl,(0dd94h)		;77b4
 	ld (hl),a			;77b7
-	ex de,hl			;77b8
+	ex de,hl			;77b8   ; el tamano comprimido...
 	ld de,08001h		;77b9
 	and a			;77bc
 	sbc hl,de		;77bd
-	ld (08000h),hl		;77bf
+	ld (08000h),hl		;77bf   ; ...va en 0x8000
 	ret			;77c2
 L_77C3:
 	ld a,(0f2a0h)		;77c3   ; lee el slot de la RAM de la pagina 2
@@ -3448,17 +3448,17 @@ L_78B4:
 letra_grafica:		; pinta una letra en modo grafico
 	call posicion_grafica		;78ba   ; posicion_grafica: la posicion en modo grafico de la letra
 L_78BD:
-	ld a,(hl)			;78bd
-	and c			;78be
+	ld a,(hl)			;78bd   ; la letra
+	and c			;78be   ; con la mascara C
 	inc hl			;78bf
 	ld b,a			;78c0
-	inc b			;78c1
+	inc b			;78c1   ; 0xFF acaba
 	ret z			;78c2
-	inc b			;78c3
+	inc b			;78c3   ; 0xFE: otra posicion
 	jr z,L_78B4		;78c4
 	and c			;78c6
-	call dibuja_letra		;78c7   ; dibuja_letra: dibuja la letra A con la fuente de p00:4837
-	inc de			;78ca
+	call dibuja_letra		;78c7   ; la dibuja
+	inc de			;78ca   ; cuatro bytes a la derecha: 8 pixeles en SCREEN 5
 	inc de			;78cb
 	inc de			;78cc
 	inc de			;78cd
@@ -3466,29 +3466,29 @@ L_78BD:
 posicion_grafica:		; la posicion en modo grafico de la letra
 	push af			;78d0
 	push hl			;78d1
-	ld hl,0c800h		;78d2
-	add hl,de			;78d5
-	ld a,l			;78d6
+	ld hl,0c800h		;78d2   ; la posicion en la tabla de nombres (0x3800 + ...)
+	add hl,de			;78d5   ; +0xC800: queda en 0x0000 (fila y columna)
+	ld a,l			;78d6   ; la columna x 4...
 	and 01fh		;78d7
 	add a,a			;78d9
 	add a,a			;78da
-	ld (0f2b1h),a		;78db
-	ld a,l			;78de
+	ld (0f2b1h),a		;78db   ; ...en 0xF2B1
+	ld a,l			;78de   ; la fila de 8 en 8...
 	and 0e0h		;78df
 	ld l,a			;78e1
-	add hl,hl			;78e2
+	add hl,hl			;78e2   ; ...x 32
 	add hl,hl			;78e3
 	add hl,hl			;78e4
 	add hl,hl			;78e5
 	add hl,hl			;78e6
-	ld a,(0f2b1h)		;78e7
+	ld a,(0f2b1h)		;78e7   ; mas la columna
 	ld e,a			;78ea
 	ld d,000h		;78eb
 	add hl,de			;78ed
-	ld a,(0f3e1h)		;78ee   ; lee el registro 2 del VDP (copia de la BIOS)
+	ld a,(0f3e1h)		;78ee   ; R#2 bit 5: la pagina 1...
 	and 020h		;78f1
 	jr z,L_78F7		;78f3
-	set 7,h		;78f5
+	set 7,h		;78f5   ; ...en la mitad alta de la VRAM
 L_78F7:
 	ld a,(0fff6h)		;78f7   ; lee el registro 14 del VDP (copia de la BIOS)
 	ld e,000h		;78fa
@@ -3508,20 +3508,20 @@ dibuja_letra:		; dibuja la letra A con la fuente de p00:4837
 	push hl			;790d
 	push bc			;790e
 	push de			;790f
-	sub 02fh		;7910
+	sub 02fh		;7910   ; la fuente empieza en el 0x2F...
 	jr nc,L_7915		;7912
-	xor a			;7914
+	xor a			;7914   ; ...y lo de antes es un espacio
 L_7915:
-	ld de,04837h		;7915
+	ld de,04837h		;7915   ; la letra en la fuente del Game Master (p00:4837), 8 bytes cada una
 	ld l,a			;7918
 	ld h,000h		;7919
 	add hl,hl			;791b
 	add hl,hl			;791c
 	add hl,hl			;791d
 	add hl,de			;791e
-	ex de,hl			;791f
-	ld hl,0f2b1h		;7920
-	ld c,008h		;7923
+	ex de,hl			;791f   ; DE = la letra
+	ld hl,0f2b1h		;7920   ; la fila de 4 bytes que se monta en 0xF2B1
+	ld c,008h		;7923   ; 8 lineas
 L_7925:
 	ld b,004h		;7925
 	ld a,(de)			;7927
@@ -3532,10 +3532,10 @@ L_7929:
 	jr nc,L_7930		;792c
 	ld (hl),0e0h		;792e
 L_7930:
-	add a,a			;7930
+	add a,a			;7930   ; un pixel encendido...
 	jr nc,L_7939		;7931
 	ex af,af'			;7933
-	ld a,(hl)			;7934
+	ld a,(hl)			;7934   ; ...pone el color 0x0E en su mitad del byte
 	or 00eh		;7935
 	ld (hl),a			;7937
 	ex af,af'			;7938
@@ -3551,23 +3551,23 @@ L_7939:
 	ld hl,0f2b1h		;7945
 	ld b,008h		;7948
 L_794A:
-	push bc			;794a
+	push bc			;794a   ; una linea de la letra
 	ex de,hl			;794b
-	call 00171h		;794c   ; BIOS NSTWRT - Same function as SETWRT (with 16-bit VRAM-address)
+	call 00171h		;794c   ; BIOS NSTWRT - Same function as SETWRT (with 16-bit VRAM-address) | la VRAM en DE
 	ex de,hl			;794f
-	ld b,004h		;7950
+	ld b,004h		;7950   ; cuatro bytes (8 pixeles)
 	otir		;7952
-	ld a,d			;7954
+	ld a,d			;7954   ; guarda la mitad de la VRAM
 	push hl			;7955
-	ld hl,00080h		;7956
+	ld hl,00080h		;7956   ; la linea siguiente esta 128 bytes mas abajo
 	add hl,de			;7959
 	ex de,hl			;795a
 	pop hl			;795b
-	xor d			;795c
+	xor d			;795c   ; si cruza la mitad de 32 KB...
 	and 080h		;795d
-	call nz,de_otra_mitad		;795f   ; de_otra_mitad: D xor 0x80
+	call nz,de_otra_mitad		;795f   ; ...cambia de mitad
 	pop bc			;7962
-	djnz L_794A		;7963
+	djnz L_794A		;7963   ; las 8 lineas
 	pop de			;7965
 	pop bc			;7966
 	pop hl			;7967

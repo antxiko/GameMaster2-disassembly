@@ -1,5 +1,22 @@
 # Notas del banco 06
 
+# --- A MANO: comentarios escritos leyendo el codigo ---
+C 0xA010 un rectangulo de color 1 en (0x58, 0x18) de 0x60 x 0xD0
+C 0xA01D su marco de color 0x0F
+C 0xA028 y otro marco por fuera
+C 0xA0DB la casilla empieza una fila y una columna antes
+C 0xA0E2 de 0x0A x 0x0C
+C 0xA0E5 color 0x55
+C 0xA0ED y su marco de color 0x0F
+C 0xA342 ordena las coordenadas: que B sea la mayor
+C 0xA34A y que D tambien
+C 0xA3CD B = el nivel: 0 desde 0xA8
+C 0xA3D3 1 desde 0x94
+C 0xA3D8 2 desde 0x7E
+C 0xA3DD 3 desde 0x6C
+C 0xA3E2 4 por debajo
+# --- fin de lo escrito a mano ---
+
 # --- BLOQUES QUE LEE EL CODIGO (seccion que reescribe tools/bloques.py; no editar a mano) ---
 D 0xA000 0xA002 partida_A000  los 2 ultimos bytes de la instruccion de p05:9FFF (CD 57 A1), que empieza en el banco 5; lo leen p05:9FFF (2 bytes)
 F 0xA000 2

@@ -47,8 +47,8 @@ de_mas_a:		; DE = DE + A (gemela de p01:7256)
 	inc d			;802c
 	ret			;802d
 despacha:		; salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
-	pop hl			;802e
-	add a,a			;802f
+	pop hl			;802e   ; la direccion de la tabla, que va pegada al `call`
+	add a,a			;802f   ; A x 2: cada destino es una palabra
 	add a,l			;8030
 	ld l,a			;8031
 	jr nc,L_8035		;8032

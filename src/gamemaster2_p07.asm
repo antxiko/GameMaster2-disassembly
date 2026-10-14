@@ -310,23 +310,23 @@ L_81D8:
 	ld (0e400h),hl		;81e0
 	ret			;81e3
 L_81E4:
-	call th_esconde_sprites		;81e4   ; th_esconde_sprites: pone 0xE0 en la tabla de sprites (0x3B00)
-	ld a,(0e409h)		;81e7
+	call th_esconde_sprites		;81e4   ; esconde los sprites
+	ld a,(0e409h)		;81e7   ; 0xE409: alguien hizo un tanto
 	and a			;81ea
-	call nz,th_tanto		;81eb   ; th_tanto: suma el tanto al jugador que toca
-	xor a			;81ee
+	call nz,th_tanto		;81eb   ; si: lo suma
+	xor a			;81ee   ; ya esta contado
 	ld (0e409h),a		;81ef
-	ld a,(0e40ah)		;81f2
+	ld a,(0e40ah)		;81f2   ; 0xE40A: el partido sigue
 	and a			;81f5
 	jp z,L_8214		;81f6
-	xor a			;81f9
+	xor a			;81f9   ; sigue: borra el tanto
 	ld (0e409h),a		;81fa
-	ld hl,0e41fh		;81fd
+	ld hl,0e41fh		;81fd   ; 0xE41F: acaba de terminar un set
 	ld a,(hl)			;8200
 	ld (hl),000h		;8201
 	and a			;8203
 	jr z,L_820D		;8204
-	ld hl,00006h		;8206
+	ld hl,00006h		;8206   ; si: una espera de 6 cuadros (0xE400)
 	ld (0e400h),hl		;8209
 	ret			;820c
 L_820D:
@@ -353,34 +353,34 @@ th_esconde_sprites:		; pone 0xE0 en la tabla de sprites (0x3B00)
 	ret			;8238
 L_8239:
 	ld a,(0e412h)		;8239   ; lee el juego: 1 tenis, 2 hockey
-	dec a			;823c
+	dec a			;823c   ; el tenis cuenta los tantos en p07:82CC
 	jp z,L_82CC		;823d
-	dec b			;8240
+	dec b			;8240   ; B = quien gano: 1...
 	jr z,$+112		;8241
-	dec b			;8243
+	dec b			;8243   ; ...2...
 	jr z,$+126		;8244
-	ld hl,0e2f7h		;8246
+	ld hl,0e2f7h		;8246   ; 0xE2F7: se acabo el partido
 	ld a,(hl)			;8249
 	and a			;824a
 	ret z			;824b
-	ld (hl),000h		;824c
-	ld a,011h		;824e
+	ld (hl),000h		;824c   ; lo apaga
+	ld a,011h		;824e   ; la musica 0x11: fin del partido
 	call pide_sonido		;8250   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
-	call th_borra_pantalla		;8253   ; th_borra_pantalla: borra los sprites y la tabla de nombres
-	ld de,08294h		;8256
+	call th_borra_pantalla		;8253   ; pantalla limpia
+	ld de,08294h		;8256   ; el texto de p07:8294 (GAME)...
 	call th_pinta_texto		;8259   ; th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
-	ld de,0827eh		;825c
+	ld de,0827eh		;825c   ; ...y el de p07:827E
 	call th_pinta_texto		;825f   ; th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
-	ld hl,03971h		;8262
+	ld hl,03971h		;8262   ; los tantos del jugador 1...
 	ld de,0e410h		;8265   ; apunta a los tantos del jugador 1
 	call th_pinta_bcd		;8268   ; th_pinta_bcd: pinta el byte BCD de DE en dos cifras grandes
-	ld hl,0396dh		;826b
+	ld hl,0396dh		;826b   ; ...y los del 2, en cifras grandes
 	ld de,0e411h		;826e   ; apunta a los tantos del jugador 2
 	call th_pinta_bcd		;8271   ; th_pinta_bcd: pinta el byte BCD de DE en dos cifras grandes
-	xor a			;8274
+	xor a			;8274   ; 0xE41E y 0xE403 a cero
 	ld (0e41eh),a		;8275
 	ld (0e403h),a		;8278
-	jp L_80EC		;827b
+	jp L_80EC		;827b   ; y vuelve al menu
 
 ; ----------------------------------------------------------------------
 ; DATOS resto_827E: lo apuntan con el banco puesto p07:825C (0x827E), p07:8256
@@ -873,23 +873,23 @@ th_vuelca_sprites:		; vuelca a la tabla de sprites la copia de 0xE500
 	ld h,0e5h		;8682
 L_8684:
 	ld l,e			;8684   ; un sprite de la copia: Y - 1 (el VDP pinta una linea mas abajo)
-	ld a,(hl)			;8685
+	ld a,(hl)			;8685   ; Y
 	inc hl			;8686
 	dec a			;8687
-	out (c),a		;8688
+	out (c),a		;8688   ; al VDP
 	ld a,(hl)			;868a   ; X
 	inc hl			;868b
-	out (c),a		;868c
+	out (c),a		;868c   ; al VDP
 	ld a,(hl)			;868e   ; el patron
 	inc hl			;868f
-	out (c),a		;8690
+	out (c),a		;8690   ; al VDP
 	ld a,(hl)			;8692   ; el color
 	inc hl			;8693
-	out (c),a		;8694
+	out (c),a		;8694   ; al VDP
 	ld a,(hl)			;8696   ; el segundo sprite: Y - 1
 	inc hl			;8697
 	dec a			;8698
-	out (c),a		;8699
+	out (c),a		;8699   ; al VDP
 	ld a,(hl)			;869b   ; X
 	inc hl			;869c
 	out (c),a		;869d
@@ -977,10 +977,10 @@ th_teclas_1:		; las teclas del jugador 1 (SNSMAT 7 y 8)
 	ld e,a			;871c
 	ld a,008h		;871d   ; la fila 8 (espacio y flechas)
 	call 00141h		;871f   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
-	cpl			;8722
-	rrca			;8723
+	cpl			;8722   ; a nivel alto
+	rrca			;8723   ; la fila de nuevo...
 	rrca			;8724
-	ld b,a			;8725
+	ld b,a			;8725   ; B = la fila rotada
 	and 004h		;8726   ; el espacio, al bit 2
 	or e			;8728
 	ld c,a			;8729
@@ -995,15 +995,15 @@ th_teclas_1:		; las teclas del jugador 1 (SNSMAT 7 y 8)
 	rrca			;8733
 	and 003h		;8734   ; izquierda/derecha, a los bits 0 y 1
 	or c			;8736
-	pop bc			;8737
+	pop bc			;8737   ; lo que traia el mando...
 	or b			;8738   ; junto con lo del mando
 	ret			;8739
 th_teclas_2:		; las teclas del jugador 2 (SNSMAT 3...)
 	push af			;873a
 	ld a,003h		;873b   ; la fila 3 del teclado
 	call 00141h		;873d   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
-	cpl			;8740
-	ld c,a			;8741
+	cpl			;8740   ; a nivel alto (1 = pulsada)
+	ld c,a			;8741   ; C = la fila
 	and 008h		;8742   ; una tecla al bit 3
 	ld e,a			;8744
 	ld a,c			;8745
@@ -1019,7 +1019,7 @@ th_teclas_2:		; las teclas del jugador 2 (SNSMAT 3...)
 	ld e,a			;8751
 	ld a,005h		;8752   ; la fila 5
 	call 00141h		;8754   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
-	cpl			;8757
+	cpl			;8757   ; a nivel alto
 	rlca			;8758   ; una tecla al bit 2
 	rlca			;8759
 	and 004h		;875a
@@ -1027,14 +1027,14 @@ th_teclas_2:		; las teclas del jugador 2 (SNSMAT 3...)
 	ld e,a			;875d
 	ld a,006h		;875e   ; la fila 6
 	call 00141h		;8760   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
-	cpl			;8763
+	cpl			;8763   ; a nivel alto
 	rlca			;8764   ; dos teclas a los bits 4 y 5
 	rlca			;8765
 	rlca			;8766
 	rlca			;8767
 	and 030h		;8768
 	or e			;876a
-	pop bc			;876b
+	pop bc			;876b   ; lo que trae el mando
 	or b			;876c   ; junto con lo del mando
 	ret			;876d
 
@@ -1517,16 +1517,16 @@ L_8BF9:
 	ld c,007h		;8c12
 	ld a,(0e436h)		;8c14
 th_sprite_raqueta:		; escribe los sprites de una raqueta (C de alto)
-	push af			;8c17
+	push af			;8c17   ; guarda la columna
 	ld a,(de)			;8c18   ; Y del primer sprite
-	ld b,a			;8c19
-	ld (hl),a			;8c1a
+	ld b,a			;8c19   ; B = Y para el segundo sprite
+	ld (hl),a			;8c1a   ; Y a la copia
 	inc l			;8c1b
 	pop af			;8c1c
 	exx			;8c1d   ; X
-	ld b,a			;8c1e
+	ld b,a			;8c1e   ; B' = X para el segundo sprite
 	exx			;8c1f
-	ld (hl),a			;8c20
+	ld (hl),a			;8c20   ; X a la copia
 	inc e			;8c21   ; el patron, 6 bytes mas alla en la ficha
 	inc e			;8c22
 	inc e			;8c23
@@ -1534,17 +1534,17 @@ th_sprite_raqueta:		; escribe los sprites de una raqueta (C de alto)
 	inc e			;8c25
 	inc e			;8c26
 	inc l			;8c27
-	ld a,(de)			;8c28
-	ld (hl),a			;8c29
+	ld a,(de)			;8c28   ; el patron de la raqueta...
+	ld (hl),a			;8c29   ; ...a la copia
 	inc l			;8c2a
 	ld (hl),c			;8c2b   ; el color (C)
 	inc l			;8c2c
 	dec e			;8c2d   ; la raqueta corta (LENGTH = 1)...
-	ld a,(de)			;8c2e
-	dec a			;8c2f
+	ld a,(de)			;8c2e   ; LENGTH...
+	dec a			;8c2f   ; ...es 1?
 	jr nz,L_8C3C		;8c30
 	ld a,0e0h		;8c32   ; ...esconde el segundo sprite (Y = 0xE0)
-	ld (hl),a			;8c34
+	ld (hl),a			;8c34   ; Y, X, patron y color del segundo sprite, todos a 0xE0
 	inc l			;8c35
 	ld (hl),a			;8c36
 	inc l			;8c37
@@ -1622,13 +1622,13 @@ th_sprite_barra:		; con BAR, los tres sprites de la barra del centro
 	ld hl,0e524h		;8c8b   ; los sprites 9-11 de la copia (0xE524)
 	ld de,0e452h		;8c8e   ; la altura y la columna de la barra
 	ld a,(de)			;8c91
-	ld b,a			;8c92
-	ld (hl),a			;8c93
+	ld b,a			;8c92   ; B = la altura
+	ld (hl),a			;8c93   ; Y del primer sprite
 	inc l			;8c94
 	inc e			;8c95
 	ld a,(de)			;8c96
-	ld c,a			;8c97
-	ld (hl),a			;8c98
+	ld c,a			;8c97   ; C = la columna
+	ld (hl),a			;8c98   ; X
 	inc l			;8c99
 	ld (hl),018h		;8c9a   ; patron 0x18
 	inc l			;8c9c
@@ -1638,20 +1638,20 @@ th_sprite_barra:		; con BAR, los tres sprites de la barra del centro
 	add a,010h		;8ca1
 	ld (hl),a			;8ca3
 	inc l			;8ca4
-	ld (hl),c			;8ca5
+	ld (hl),c			;8ca5   ; la misma X
 	inc l			;8ca6
 	ld (hl),01ch		;8ca7   ; patron 0x1C
 	inc l			;8ca9
-	ld (hl),00dh		;8caa
+	ld (hl),00dh		;8caa   ; el mismo color
 	inc l			;8cac
 	add a,010h		;8cad   ; el tercero, 16 mas
 	ld (hl),a			;8caf
 	inc l			;8cb0
-	ld (hl),c			;8cb1
+	ld (hl),c			;8cb1   ; la misma X
 	inc l			;8cb2
 	ld (hl),020h		;8cb3   ; patron 0x20
 	inc l			;8cb5
-	ld (hl),00dh		;8cb6
+	ld (hl),00dh		;8cb6   ; el mismo color
 	ret			;8cb8
 th_prepara_pelota:		; la pelota al centro (0xE440)
 	ld hl,0e448h		;8cb9   ; 0xE448 = 0
@@ -1793,27 +1793,27 @@ DATA_resto_8D80:
 
 
 th_choques:		; los choques de la pelota con las raquetas
-	ld hl,0e44bh		;8d84
+	ld hl,0e44bh		;8d84   ; 0xE44B: la pelota ha tocado algo
 	ld (hl),000h		;8d87
-	ex af,af'			;8d89
+	ex af,af'			;8d89   ; A' = 0: las raquetas
 	xor a			;8d8a
 	ex af,af'			;8d8b
 	exx			;8d8c
-	ld c,006h		;8d8d
+	ld c,006h		;8d8d   ; C' = 6: el ancho que se mira
 	exx			;8d8f
 	call th_choque		;8d90   ; th_choque: comprueba un choque de la pelota
-	ex af,af'			;8d93
+	ex af,af'			;8d93   ; A' = 1: los bordes
 	ld a,001h		;8d94
 	ex af,af'			;8d96
 	call th_choque		;8d97   ; th_choque: comprueba un choque de la pelota
-	ld a,(0e416h)		;8d9a   ; lee hay barra en el centro
+	ld a,(0e416h)		;8d9a   ; sin barra, ya esta
 	or a			;8d9d
 	ret z			;8d9e
-	ex af,af'			;8d9f
+	ex af,af'			;8d9f   ; A' = 2: la barra...
 	ld a,002h		;8da0
 	ex af,af'			;8da2
 	exx			;8da3
-	ld c,00ah		;8da4
+	ld c,00ah		;8da4   ; ...con C' = 10
 	exx			;8da6
 	jp th_choque		;8da7   ; th_choque: comprueba un choque de la pelota
 L_8DAA:
@@ -1948,30 +1948,30 @@ L_8E6A:
 	ret			;8e7c
 L_8E7D:
 	ld a,(0e443h)		;8e7d   ; lee la columna de la pelota (0x78 es el centro)
-	add a,00bh		;8e80
+	add a,00bh		;8e80   ; la columna de la pelota mas 11...
 	ld h,a			;8e82
 	ld a,(0e441h)		;8e83   ; lee la altura de la pelota
-	add a,008h		;8e86
+	add a,008h		;8e86   ; ...y su altura mas 8: el centro
 	ld l,a			;8e88
 	push hl			;8e89
-	call th_choca_raqueta		;8e8a   ; th_choca_raqueta: mira si la pelota toca una raqueta
+	call th_choca_raqueta		;8e8a   ; ¿toca una raqueta?
 	pop hl			;8e8d
-	jp z,L_8DB8		;8e8e
-	ld a,l			;8e91
+	jp z,L_8DB8		;8e8e   ; si: rebota
+	ld a,l			;8e91   ; tres pixeles arriba...
 	sub 003h		;8e92
 	ld l,a			;8e94
-	ld a,h			;8e95
+	ld a,h			;8e95   ; ...y tres a la izquierda
 	sub 003h		;8e96
 	ld h,a			;8e98
 	push hl			;8e99
-	call th_choca_raqueta		;8e9a   ; th_choca_raqueta: mira si la pelota toca una raqueta
+	call th_choca_raqueta		;8e9a   ; ¿toca?
 	pop hl			;8e9d
-	jp z,L_8DAA		;8e9e
-	ld a,h			;8ea1
+	jp z,L_8DAA		;8e9e   ; si: rebota de otra manera
+	ld a,h			;8ea1   ; tres a la derecha
 	add a,003h		;8ea2
 	ld h,a			;8ea4
-	call th_choca_raqueta		;8ea5   ; th_choca_raqueta: mira si la pelota toca una raqueta
-	jp z,L_8DE3		;8ea8
+	call th_choca_raqueta		;8ea5   ; ¿toca?
+	jp z,L_8DE3		;8ea8   ; si: rebota de la tercera
 	ret			;8eab
 L_8EAC:
 	ld a,(0e443h)		;8eac   ; lee la columna de la pelota (0x78 es el centro)
@@ -1985,30 +1985,30 @@ L_8EAC:
 	ret			;8ebe
 L_8EBF:
 	ld a,(0e443h)		;8ebf   ; lee la columna de la pelota (0x78 es el centro)
-	add a,008h		;8ec2
+	add a,008h		;8ec2   ; la columna de la pelota mas 8...
 	ld h,a			;8ec4
 	ld a,(0e441h)		;8ec5   ; lee la altura de la pelota
-	add a,005h		;8ec8
+	add a,005h		;8ec8   ; ...y su altura mas 5: el borde de arriba
 	ld l,a			;8eca
 	push hl			;8ecb
-	call th_choca_raqueta		;8ecc   ; th_choca_raqueta: mira si la pelota toca una raqueta
+	call th_choca_raqueta		;8ecc   ; ¿toca una raqueta?
 	pop hl			;8ecf
-	jp z,L_8DAA		;8ed0
-	ld a,l			;8ed3
+	jp z,L_8DAA		;8ed0   ; si: rebota en horizontal
+	ld a,l			;8ed3   ; tres pixeles abajo...
 	add a,003h		;8ed4
 	ld l,a			;8ed6
-	ld a,h			;8ed7
+	ld a,h			;8ed7   ; ...y tres a la izquierda
 	sub 003h		;8ed8
 	ld h,a			;8eda
 	push hl			;8edb
-	call th_choca_raqueta		;8edc   ; th_choca_raqueta: mira si la pelota toca una raqueta
+	call th_choca_raqueta		;8edc   ; ¿toca?
 	pop hl			;8edf
-	jp z,L_8DB8		;8ee0
-	ld a,l			;8ee3
+	jp z,L_8DB8		;8ee0   ; si: rebota en vertical
+	ld a,l			;8ee3   ; tres arriba
 	sub 003h		;8ee4
 	ld l,a			;8ee6
-	call th_choca_raqueta		;8ee7   ; th_choca_raqueta: mira si la pelota toca una raqueta
-	jp z,L_8DE3		;8eea
+	call th_choca_raqueta		;8ee7   ; ¿toca?
+	jp z,L_8DE3		;8eea   ; si: rebota en diagonal
 	ret			;8eed
 L_8EEE:
 	ld a,(0e443h)		;8eee   ; lee la columna de la pelota (0x78 es el centro)
@@ -2022,30 +2022,30 @@ L_8EEE:
 	ret			;8f00
 L_8F01:
 	ld a,(0e443h)		;8f01   ; lee la columna de la pelota (0x78 es el centro)
-	add a,005h		;8f04
+	add a,005h		;8f04   ; la columna de la pelota mas 5...
 	ld h,a			;8f06
 	ld a,(0e441h)		;8f07   ; lee la altura de la pelota
-	add a,008h		;8f0a
+	add a,008h		;8f0a   ; ...y su altura mas 8: el borde de la izquierda
 	ld l,a			;8f0c
 	push hl			;8f0d
-	call th_choca_raqueta		;8f0e   ; th_choca_raqueta: mira si la pelota toca una raqueta
+	call th_choca_raqueta		;8f0e   ; ¿toca una raqueta?
 	pop hl			;8f11
-	jp z,L_8DB8		;8f12
-	ld a,l			;8f15
+	jp z,L_8DB8		;8f12   ; si: rebota en vertical
+	ld a,l			;8f15   ; tres pixeles abajo...
 	add a,003h		;8f16
 	ld l,a			;8f18
-	ld a,h			;8f19
+	ld a,h			;8f19   ; ...y tres a la derecha
 	add a,003h		;8f1a
 	ld h,a			;8f1c
 	push hl			;8f1d
-	call th_choca_raqueta		;8f1e   ; th_choca_raqueta: mira si la pelota toca una raqueta
+	call th_choca_raqueta		;8f1e   ; ¿toca?
 	pop hl			;8f21
-	jp z,L_8DAA		;8f22
-	ld a,h			;8f25
+	jp z,L_8DAA		;8f22   ; si: rebota en horizontal
+	ld a,h			;8f25   ; tres a la izquierda
 	sub 003h		;8f26
 	ld h,a			;8f28
-	call th_choca_raqueta		;8f29   ; th_choca_raqueta: mira si la pelota toca una raqueta
-	jp z,L_8DE3		;8f2c
+	call th_choca_raqueta		;8f29   ; ¿toca?
+	jp z,L_8DE3		;8f2c   ; si: rebota en diagonal
 	ret			;8f2f
 L_8F30:
 	ld a,(0e443h)		;8f30   ; lee la columna de la pelota (0x78 es el centro)
@@ -2059,60 +2059,60 @@ L_8F30:
 	ret			;8f42
 L_8F43:
 	ld a,(0e443h)		;8f43   ; lee la columna de la pelota (0x78 es el centro)
-	add a,008h		;8f46
+	add a,008h		;8f46   ; la columna de la pelota mas 8...
 	ld h,a			;8f48
 	ld a,(0e441h)		;8f49   ; lee la altura de la pelota
-	add a,00bh		;8f4c
+	add a,00bh		;8f4c   ; ...y su altura mas 11: el borde de abajo
 	ld l,a			;8f4e
 	push hl			;8f4f
-	call th_choca_raqueta		;8f50   ; th_choca_raqueta: mira si la pelota toca una raqueta
+	call th_choca_raqueta		;8f50   ; ¿toca una raqueta?
 	pop hl			;8f53
-	jp z,L_8DAA		;8f54
-	ld a,l			;8f57
+	jp z,L_8DAA		;8f54   ; si: rebota en horizontal
+	ld a,l			;8f57   ; tres pixeles arriba...
 	sub 003h		;8f58
 	ld l,a			;8f5a
-	ld a,h			;8f5b
+	ld a,h			;8f5b   ; ...y tres a la derecha
 	add a,003h		;8f5c
 	ld h,a			;8f5e
 	push hl			;8f5f
-	call th_choca_raqueta		;8f60   ; th_choca_raqueta: mira si la pelota toca una raqueta
+	call th_choca_raqueta		;8f60   ; ¿toca?
 	pop hl			;8f63
-	jp z,L_8DB8		;8f64
-	ld a,l			;8f67
+	jp z,L_8DB8		;8f64   ; si: rebota en vertical
+	ld a,l			;8f67   ; tres abajo
 	add a,003h		;8f68
 	ld l,a			;8f6a
-	call th_choca_raqueta		;8f6b   ; th_choca_raqueta: mira si la pelota toca una raqueta
-	jp z,L_8DE3		;8f6e
+	call th_choca_raqueta		;8f6b   ; ¿toca?
+	jp z,L_8DE3		;8f6e   ; si: rebota en diagonal
 	ret			;8f71
 th_choca_raqueta:		; mira si la pelota toca una raqueta
-	ex af,af'			;8f72
+	ex af,af'			;8f72   ; en que fase del choque va (A')
 	ld b,a			;8f73
 	ex af,af'			;8f74
-	dec b			;8f75
+	dec b			;8f75   ; la 1: las raquetas; la 2: los bordes y la barra
 	jp nz,L_8FFE		;8f76
-	xor a			;8f79
+	xor a			;8f79   ; el jugador 1
 	ld b,a			;8f7a
 	ld (0e44ch),a		;8f7b
 	push hl			;8f7e
-	ex de,hl			;8f7f
-	ld hl,(0e422h)		;8f80
+	ex de,hl			;8f7f   ; DE = la posicion de la pelota
+	ld hl,(0e422h)		;8f80   ; HL = la raqueta del jugador 1
 	call th_choca_borde		;8f83   ; th_choca_borde: mira si la pelota toca el borde de la raqueta
 	pop de			;8f86
-	dec b			;8f87
+	dec b			;8f87   ; la toca: sale
 	ret z			;8f88
 	ld b,000h		;8f89
-	ld a,001h		;8f8b
+	ld a,001h		;8f8b   ; el jugador 2
 	ld (0e44ch),a		;8f8d
 	push de			;8f90
-	ld hl,(0e432h)		;8f91
+	ld hl,(0e432h)		;8f91   ; HL = la raqueta del jugador 2
 	call th_choca_borde		;8f94   ; th_choca_borde: mira si la pelota toca el borde de la raqueta
 	pop de			;8f97
-	dec b			;8f98
+	dec b			;8f98   ; la toca: sale
 	ret z			;8f99
 	ld a,(0e415h)		;8f9a   ; lee TYPE
-	or a			;8f9d
+	or a			;8f9d   ; con TYPE 0...
 	jr nz,L_8FA2		;8f9e
-	inc a			;8fa0
+	inc a			;8fa0   ; ...NZ: no rebota en los bordes
 	ret			;8fa1
 L_8FA2:
 	xor a			;8fa2   ; la raqueta del jugador 1
@@ -2430,7 +2430,7 @@ L_9188:
 	call pide_sonido		;9193   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 	jp L_9199		;9196
 L_9199:
-	xor a			;9199
+	xor a			;9199   ; borra las cuatro marcas del menu GAME MODIFY
 	ld hl,038cfh		;919a
 	call 0004dh		;919d   ; BIOS WRTVRM - Writes data in VRAM
 	xor a			;91a0
@@ -2443,28 +2443,28 @@ L_9199:
 	ld hl,0398fh		;91af
 	call 0004dh		;91b2   ; BIOS WRTVRM - Writes data in VRAM
 	ld a,(0e460h)		;91b5   ; lee la opcion elegida del GAME MODIFY
-	ld hl,0920ch		;91b8
+	ld hl,0920ch		;91b8   ; la posicion de la opcion elegida (tabla de p07:920C)...
 	add a,a			;91bb
 	call hl_mas_a		;91bc   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld e,(hl)			;91bf
 	inc hl			;91c0
 	ld d,(hl)			;91c1
 	ex de,hl			;91c2
-	ld a,08dh		;91c3
+	ld a,08dh		;91c3   ; ...pinta la flecha (0x8D)
 	call 0004dh		;91c5   ; BIOS WRTVRM - Writes data in VRAM
-	ld a,(0e461h)		;91c8   ; lee LENGTH, SPEED, TYPE y BAR (de dos en dos bytes: valor y tope)
-	ld bc,0e500h		;91cb   ; apunta a la copia de la tabla de sprites
-	ld hl,09214h		;91ce
+	ld a,(0e461h)		;91c8   ; el valor de LENGTH...
+	ld bc,0e500h		;91cb   ; ...en el primer sprite de la copia...
+	ld hl,09214h		;91ce   ; ...con la tabla de p07:9214
 	call th_pon_palabra		;91d1   ; th_pon_palabra: escribe en HL la palabra A de la tabla y vuelca los sprites
-	ld a,(0e463h)		;91d4
+	ld a,(0e463h)		;91d4   ; SPEED, en el segundo sprite (tabla de p07:921C)
 	ld bc,0e504h		;91d7
 	ld hl,0921ch		;91da
 	call th_pon_palabra		;91dd   ; th_pon_palabra: escribe en HL la palabra A de la tabla y vuelca los sprites
-	ld a,(0e465h)		;91e0
+	ld a,(0e465h)		;91e0   ; TYPE, en el tercero (tabla de p07:9226)
 	ld bc,0e508h		;91e3
 	ld hl,09226h		;91e6
 	call th_pon_palabra		;91e9   ; th_pon_palabra: escribe en HL la palabra A de la tabla y vuelca los sprites
-	ld a,(0e467h)		;91ec
+	ld a,(0e467h)		;91ec   ; BAR, en el cuarto (tabla de p07:922C)
 	ld bc,0e50ch		;91ef
 	ld hl,0922ch		;91f2
 th_pon_palabra:		; escribe en HL la palabra A de la tabla y vuelca los sprites
@@ -2499,37 +2499,37 @@ DATA_resto_9204:
 
 th_aplica_opciones:		; copia LENGTH, SPEED, TYPE y BAR (0xE461...) a 0xE413...
 	ld hl,0e461h		;9230   ; apunta a LENGTH, SPEED, TYPE y BAR (de dos en dos bytes: valor y tope)
-	ld a,(hl)			;9233
+	ld a,(hl)			;9233   ; LENGTH
 	ld (0e413h),a		;9234   ; guarda LENGTH, el largo de la raqueta
 	inc hl			;9237
 	inc hl			;9238
-	ld a,(hl)			;9239
+	ld a,(hl)			;9239   ; SPEED
 	ld (0e414h),a		;923a   ; guarda SPEED
 	inc hl			;923d
 	inc hl			;923e
-	ld a,(hl)			;923f
+	ld a,(hl)			;923f   ; TYPE
 	ld (0e415h),a		;9240   ; guarda TYPE
 	inc hl			;9243
 	inc hl			;9244
-	ld a,(hl)			;9245
+	ld a,(hl)			;9245   ; BAR
 	ld (0e416h),a		;9246   ; guarda hay barra en el centro
-	xor a			;9249
+	xor a			;9249   ; el marcador a cero...
 	ld (0e410h),a		;924a   ; guarda los tantos del jugador 1
 	ld (0e411h),a		;924d   ; guarda los tantos del jugador 2
-	ld (0e417h),a		;9250
+	ld (0e417h),a		;9250   ; ...los juegos, los sets...
 	ld (0e418h),a		;9253
 	ld (0e41bh),a		;9256
 	ld (0e41ch),a		;9259
 	ld (0e419h),a		;925c   ; guarda el tiempo del hockey (BCD)
-	ld (0e41dh),a		;925f
+	ld (0e41dh),a		;925f   ; ...quien saca...
 	ld (0e41eh),a		;9262
-	inc a			;9265
+	inc a			;9265   ; ...y el primero en sacar, el jugador 1
 	ld (0e41ah),a		;9266
 	ld a,(0e412h)		;9269   ; lee el juego: 1 tenis, 2 hockey
 	dec a			;926c
-	ld c,00eh		;926d
+	ld c,00eh		;926d   ; la musica del tenis (0x0E)...
 	jr z,L_9273		;926f
-	ld c,00fh		;9271
+	ld c,00fh		;9271   ; ...o la del hockey (0x0F)
 L_9273:
 	ld a,c			;9273
 	jp pide_sonido		;9274   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
@@ -3351,26 +3351,26 @@ canal_avanza:		; avanza el puntero de la pista (ix+0x02)
 	ret			;9fc0
 L_9FC1:
 	xor a			;9fc1   ; la pista acabo: apaga el canal
-	ld (ix+000h),a		;9fc2
+	ld (ix+000h),a		;9fc2   ; la pista (ix+0x00)...
 	ld (ix+001h),a		;9fc5
-	ld (ix+005h),a		;9fc8
+	ld (ix+005h),a		;9fc8   ; ...la repeticion...
 	ld (ix+006h),a		;9fcb
-	ld (ix+00ah),a		;9fce
+	ld (ix+00ah),a		;9fce   ; ...la frecuencia, el volumen y los modos, todo a cero
 	ld (ix+00bh),a		;9fd1
 	ld (ix+00ch),a		;9fd4
 	ld (ix+00dh),a		;9fd7
 	ld (ix+00eh),a		;9fda
 	ld (ix+00fh),a		;9fdd
-	call th_9ffb		;9fe0   ; th_9ffb: HL = 0xE2F6 y sigue en p08
+	call th_9ffb		;9fe0   ; HL = 0xE2F6 (sigue en p08)
 	ld hl,0e2f2h		;9fe3   ; lo que hay que mandar al PSG
 	ld a,(0e2efh)		;9fe6   ; si era el canal del ruido (8)...
 	cp 008h		;9fe9
 	jp nz,L_9FF8		;9feb
 	res 1,(hl)		;9fee   ; ...ya no hay ruido que mandar
-	bit 3,(hl)		;9ff0
+	bit 3,(hl)		;9ff0   ; bit 3: el ruido estaba mandado...
 	ret z			;9ff2
-	res 3,(hl)		;9ff3
-	set 2,(hl)		;9ff5
+	res 3,(hl)		;9ff3   ; ...lo apaga...
+	set 2,(hl)		;9ff5   ; ...y apunta que hay que mandarlo de nuevo
 	ret			;9ff7
 L_9FF8:
 	res 3,(hl)		;9ff8

@@ -78,20 +78,20 @@ L_A049:
 	jr c,L_A05A		;a056
 	ld a,008h		;a058
 L_A05A:
-	ld hl,0a080h		;a05a
+	ld hl,0a080h		;a05a   ; el valor de la tabla de p03:A080...
 	call hl_mas_a		;a05d   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;a060
-	ld (0e05dh),a		;a061
-	ld a,08ah		;a064
+	ld (0e05dh),a		;a061   ; ...a 0xE05D de la RAM del juego
+	ld a,08ah		;a064   ; 0x8A a 0xE056
 	ld (0e056h),a		;a066
-	ld a,b			;a069
-	ld c,009h		;a06a
+	ld a,b			;a069   ; la fase pedida
+	ld c,009h		;a06a   ; entre 9
 	call divide_a_menos_1		;a06c   ; divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit) (gemela de p01:706C)
-	ld a,l			;a06f
+	ld a,l			;a06f   ; el resto x 2...
 	add a,a			;a070
-	ld hl,0a089h		;a071
+	ld hl,0a089h		;a071   ; ...en la tabla de p03:A089...
 	call hl_mas_a		;a074   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
-	ld de,0e054h		;a077
+	ld de,0e054h		;a077   ; ...dos bytes a 0xE054 del juego
 	ld bc,00002h		;a07a
 	ldir		;a07d
 	ret			;a07f
@@ -282,25 +282,25 @@ L_A1D1:
 	ld (hl),a			;a1d8
 	ret			;a1d9
 L_A1DA:
-	ld a,(0d31ah)		;a1da
+	ld a,(0d31ah)		;a1da   ; el juego de codigo 0x36 (tabla p02:9F11): la fase pedida - 1...
 	dec a			;a1dd
-	ld (0e206h),a		;a1de
+	ld (0e206h),a		;a1de   ; ...a 0xE206 de la RAM del juego
 	call pon_valor		;a1e1   ; pon_valor: escribe 0xF29C en la variable del juego (0xF28A) (gemela de p01:6F70)
-	ld a,(0d31ah)		;a1e4
-	ld c,003h		;a1e7
+	ld a,(0d31ah)		;a1e4   ; la fase pedida
+	ld c,003h		;a1e7   ; entre 3
 	call divide_a_menos_1		;a1e9   ; divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit) (gemela de p01:706C)
-	ld a,e			;a1ec
+	ld a,e			;a1ec   ; el cociente a la parte alta...
 	and 00fh		;a1ed
 	rrca			;a1ef
 	rrca			;a1f0
 	rrca			;a1f1
 	rrca			;a1f2
-	add a,l			;a1f3
-	ld (0e207h),a		;a1f4
-	ld a,009h		;a1f7
+	add a,l			;a1f3   ; ...y el resto a la baja...
+	ld (0e207h),a		;a1f4   ; ...a 0xE207 del juego
+	ld a,009h		;a1f7   ; 9 en la variable del juego (0xD304)
 	ld hl,(0d304h)		;a1f9
 	ld (hl),a			;a1fc
-	jp borra_pantalla_b		;a1fd   ; borra_pantalla_b: borra la tabla de nombres y esconde los sprites (gemela de p01:708B)
+	jp borra_pantalla_b		;a1fd   ; y borra la pantalla
 L_A200:
 	ld a,(0d31ah)		;a200   ; el juego de codigo 0x37 (tabla p02:9F11): la fase pedida
 	ld c,008h		;a203   ; entre 8
@@ -361,21 +361,21 @@ L_A24F:
 	ld (0d312h),a		;a25f
 	ret			;a262
 lee_cabecera_juego:		; lee la cabecera de 0x4028 del juego y sus opciones (gemela de p01:70AA)
-	ld hl,(0d300h)		;a263   ; lee la ficha del juego (copia) y el byte siguiente (16 bits)
-	ld a,l			;a266
+	ld hl,(0d300h)		;a263   ; el RC del juego
+	ld a,l			;a266   ; en orden
 	ld l,h			;a267
 	ld h,a			;a268
-	ld de,00754h		;a269
+	ld de,00754h		;a269   ; antes del RC-754...
 	rst 20h			;a26c   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
-	jr c,L_A289		;a26d
-	ld hl,04028h		;a26f
-	ld de,0d4f6h		;a272
+	jr c,L_A289		;a26d   ; ...no hay cabecera de 0x4028
+	ld hl,04028h		;a26f   ; la cabecera de 0x4028 del juego...
+	ld de,0d4f6h		;a272   ; ...6 bytes a 0xD4F6
 	ld bc,00006h		;a275
 	call 08d74h		;a278   ; copia_del_juego: copia BC bytes de HL del cartucho del juego (RDSLT) a DE (gemela de p01:6371)
 	ld hl,0d4f6h		;a27b
-	ld a,(hl)			;a27e
-	res 7,(hl)		;a27f
-	add a,a			;a281
+	ld a,(hl)			;a27e   ; el primer byte
+	res 7,(hl)		;a27f   ; sin el bit 7
+	add a,a			;a281   ; el bit 7: el juego tiene SCC
 	ret nc			;a282
 	ld a,001h		;a283
 	ld (0d4d4h),a		;a285   ; guarda el juego tiene SCC (copia)
@@ -462,26 +462,26 @@ L_A30A:
 	rst 20h			;a313   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	jp nz,L_A39E		;a314
 L_A317:
-	ld hl,04012h		;a317
-	ld de,0d351h		;a31a
+	ld hl,04012h		;a317   ; la cabecera del juego desde 0x4012...
+	ld de,0d351h		;a31a   ; ...45 bytes a 0xD351
 	ld bc,0002dh		;a31d
 	call 08d74h		;a320   ; copia_del_juego: copia BC bytes de HL del cartucho del juego (RDSLT) a DE (gemela de p01:6371)
-	call rc_751_o_752_b		;a323   ; rc_751_o_752_b: compara el RC del juego (0xD351, al reves) con 0x751 y 0x752
-	ld hl,0d351h		;a326
+	call rc_751_o_752_b		;a323   ; el RC del juego
+	ld hl,0d351h		;a326   ; el RC (2 bytes) a la ficha
 	ld de,0d300h		;a329   ; apunta a la ficha del juego (copia)
 	ldi		;a32c
 	ldi		;a32e
-	ld a,0ffh		;a330
+	ld a,0ffh		;a330   ; 0xFF: el codigo de juego, aun sin saber
 	ld (de),a			;a332
 	inc de			;a333
 	inc de			;a334
-	ld a,(hl)			;a335
+	ld a,(hl)			;a335   ; un bit por cada dato de la cabecera
 	rra			;a336
-	jr c,L_A344		;a337
-	inc hl			;a339
+	jr c,L_A344		;a337   ; bit a 1: no lo trae
+	inc hl			;a339   ; la direccion de los puntos (2 bytes)...
 	ld bc,00002h		;a33a
 	ldir		;a33d
-	ld de,0d312h		;a33f
+	ld de,0d312h		;a33f   ; ...y un byte a 0xD312
 	ldi		;a342
 L_A344:
 	rra			;a344   ; un bit de la cabecera por cada palabra
@@ -509,20 +509,20 @@ L_A368:
 	djnz L_A359		;a36d
 	ret			;a36f
 rc_751_o_752_b:		; compara el RC del juego (0xD351, al reves) con 0x751 y 0x752
-	ld hl,(0d351h)		;a370
-	ld a,h			;a373
+	ld hl,(0d351h)		;a370   ; el RC del juego...
+	ld a,h			;a373   ; ...en orden
 	ld h,l			;a374
 	ld l,a			;a375
-	ld de,00751h		;a376
+	ld de,00751h		;a376   ; ¿RC-751...
 	rst 20h			;a379   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	jr z,L_A38C		;a37a
-	ld de,00752h		;a37c
+	ld de,00752h		;a37c   ; ...o RC-752?
 	rst 20h			;a37f   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	jr z,L_A38C		;a380
-	ld de,00758h		;a382
+	ld de,00758h		;a382   ; por debajo del RC-758...
 	rst 20h			;a385   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
-	ret c			;a386
-	ld a,(0d379h)		;a387
+	ret c			;a386   ; ...ya esta
+	ld a,(0d379h)		;a387   ; si no, el bit 7 de la cabecera (0xD379)
 	add a,a			;a38a
 	ret nc			;a38b
 L_A38C:
@@ -899,41 +899,41 @@ borra_ventana:		; borra la ventana de 0x9237 (gemela de p01:748F)
 	xor a			;a574
 	jp L_A53B		;a575
 L_A578:
-	ld hl,0d12ah		;a578
+	ld hl,0d12ah		;a578   ; 0xD12A: la pantalla ya esta guardada
 	ld a,(hl)			;a57b
 	or a			;a57c
-	ret nz			;a57d
-	dec a			;a57e
+	ret nz			;a57d   ; si: nada
+	dec a			;a57e   ; la apunta
 	ld (hl),a			;a57f
-	ld de,0d8b1h		;a580
+	ld de,0d8b1h		;a580   ; guarda los patrones de 0x1000 (0x80 de cada tercio) en 0xD8B1
 	ld hl,01000h		;a583
 	ld bc,00080h		;a586
 	call lee_vram_tercios		;a589   ; lee_vram_tercios: LDIRMV de los tres tercios (0x2000 de paso) (gemela de p01:7834)
-	ld de,0d500h		;a58c
+	ld de,0d500h		;a58c   ; los de 0x1180 (0x158) en 0xD500
 	ld hl,01180h		;a58f
 	ld bc,00158h		;a592
 	call lee_vram_tercios		;a595   ; lee_vram_tercios: LDIRMV de los tres tercios (0x2000 de paso) (gemela de p01:7834)
-	ld hl,03a00h		;a598
+	ld hl,03a00h		;a598   ; la tabla de nombres de 0x3A00 en 0xD7B0
 	ld de,0d7b0h		;a59b
 	ld bc,00100h		;a59e
 	call 00059h		;a5a1   ; BIOS LDIRMV - Block transfers to memory from VRAM
-	ld hl,03b00h		;a5a4
+	ld hl,03b00h		;a5a4   ; y el primer byte de los sprites
 	ld de,0d8b0h		;a5a7
 	ld bc,00001h		;a5aa
 	call 00059h		;a5ad   ; BIOS LDIRMV - Block transfers to memory from VRAM
-	ld hl,01000h		;a5b0
+	ld hl,01000h		;a5b0   ; la casilla 0x200 a 0x55
 	ld bc,00008h		;a5b3
 	ld a,055h		;a5b6
 	call 00056h		;a5b8   ; BIOS FILVRM - Fills VRAM with value
-	call borra_zona_3a00		;a5bb   ; borra_zona_3a00: borra 0x3A00 (0x100 bytes)
-	ld ix,0409dh		;a5be
-	ld iy,(0d12dh)		;a5c2   ; lee volumen del PSG, canal C y el byte siguiente (16 bits)
+	call borra_zona_3a00		;a5bb   ; borra 0x3A00
+	ld ix,0409dh		;a5be   ; la fuente del Game Master a la VRAM (p00:409D por CALSLT)
+	ld iy,(0d12dh)		;a5c2   ; IY para CALSLT: en IYh el slot del Game Master (copia)
 	call 0001ch		;a5c6   ; BIOS CALSLT - Executes inter-slot call
-	ld hl,01180h		;a5c9
+	ld hl,01180h		;a5c9   ; con el color 0xF5
 	ld a,0f5h		;a5cc
 	ld bc,00158h		;a5ce
 	call 00056h		;a5d1   ; BIOS FILVRM - Fills VRAM with value
-	ld hl,03b00h		;a5d4
+	ld hl,03b00h		;a5d4   ; sin sprites (0xD0)
 	ld a,0d0h		;a5d7
 	jp 0004dh		;a5d9   ; BIOS WRTVRM - Writes data in VRAM
 lee_vram_tercios:		; LDIRMV de los tres tercios (0x2000 de paso) (gemela de p01:7834)
@@ -951,26 +951,26 @@ lee_vram_tercios:		; LDIRMV de los tres tercios (0x2000 de paso) (gemela de p01:
 	ex de,hl			;a5eb
 	jp 00059h		;a5ec   ; BIOS LDIRMV - Block transfers to memory from VRAM
 L_A5EF:
-	ld hl,0d12ah		;a5ef
+	ld hl,0d12ah		;a5ef   ; 0xD12A: hay pantalla guardada
 	ld a,(hl)			;a5f2
 	or a			;a5f3
-	ret z			;a5f4
-	xor a			;a5f5
+	ret z			;a5f4   ; no: nada
+	xor a			;a5f5   ; ya no la habra
 	ld (hl),a			;a5f6
-	call borra_zona_3a00		;a5f7   ; borra_zona_3a00: borra 0x3A00 (0x100 bytes)
-	ld hl,0d8b1h		;a5fa
+	call borra_zona_3a00		;a5f7   ; borra 0x3A00
+	ld hl,0d8b1h		;a5fa   ; devuelve los patrones de 0x1000
 	ld de,01000h		;a5fd
 	ld bc,00080h		;a600
 	call copia_vram_tercios		;a603   ; copia_vram_tercios: LDIRVM de los tres tercios (0x2000 de paso) (gemela de p01:788E)
-	ld hl,0d500h		;a606
+	ld hl,0d500h		;a606   ; los de 0x1180
 	ld de,01180h		;a609
 	ld bc,00158h		;a60c
 	call copia_vram_tercios		;a60f   ; copia_vram_tercios: LDIRVM de los tres tercios (0x2000 de paso) (gemela de p01:788E)
-	ld hl,0d7b0h		;a612
+	ld hl,0d7b0h		;a612   ; la tabla de nombres de 0x3A00
 	ld de,03a00h		;a615
 	ld bc,00100h		;a618
 	call 0005ch		;a61b   ; BIOS LDIRVM - Block transfers to VRAM from memory
-	ld hl,0d8b0h		;a61e
+	ld hl,0d8b0h		;a61e   ; y el primer byte de los sprites
 	ld de,03b00h		;a621
 	ld bc,00001h		;a624
 	jp 0005ch		;a627   ; BIOS LDIRVM - Block transfers to VRAM from memory
@@ -1288,19 +1288,19 @@ L_A82F:
 	ld a,001h		;a848   ; no: un trozo de copias que lleva 1
 	ld (0d13eh),a		;a84a
 L_A84D:
-	ld c,(hl)			;a84d
+	ld c,(hl)			;a84d   ; el byte
 	inc hl			;a84e
-	ld a,c			;a84f
+	ld a,c			;a84f   ; se copia
 	ld (de),a			;a850
 	inc de			;a851
-	call fin_de_8882		;a852   ; fin_de_8882: compara HL con 0x8882 (gemela de p01:7790)
+	call fin_de_8882		;a852   ; ¿se acabo la pantalla?
 	jp z,L_A8C8		;a855
-	cp (hl)			;a858
-	jr nz,L_A878		;a859
-	inc hl			;a85b
+	cp (hl)			;a858   ; ¿el siguiente es igual?
+	jr nz,L_A878		;a859   ; no: copias
+	inc hl			;a85b   ; ¿y el otro?
 	call fin_de_8882		;a85c   ; fin_de_8882: compara HL con 0x8882 (gemela de p01:7790)
 	jr z,L_A8BD		;a85f
-	cp (hl)			;a861
+	cp (hl)			;a861   ; tres iguales: repeticion
 	dec hl			;a862
 	jr nz,L_A878		;a863
 L_A865:
@@ -1381,32 +1381,32 @@ L_A8D1:
 	ld (0c000h),hl		;a8e1
 	ret			;a8e4
 menu_principal:		; el menu del Game Master: engancha H.TIMI y pinta (gemela de p01:7973)
-	di			;a8e5
+	di			;a8e5   ; sin interrupciones
 	ld hl,0a965h		;a8e6
 	ld de,0fd9fh		;a8e9   ; apunta a el gancho H.TIMI
 	ld bc,00003h		;a8ec
 	ldir		;a8ef
-	ld hl,00000h		;a8f1
+	ld hl,00000h		;a8f1   ; guarda la pila
 	add hl,sp			;a8f4
 	ld (0f000h),hl		;a8f5   ; guarda la pila del menu principal y el byte siguiente (16 bits)
-	ei			;a8f8
-	call 0448dh		;a8f9   ; borra_pantalla: borra la tabla de nombres (0x3800, 0x300 bytes)
+	ei			;a8f8   ; abre las interrupciones
+	call 0448dh		;a8f9   ; borra la pantalla
 	ld hl,0e000h		;a8fc
 	ld de,0e001h		;a8ff
 	ld bc,00fffh		;a902
 	ld (hl),000h		;a905
 	ldir		;a907
-	ld hl,(00004h)		;a909   ; CGTABL: donde esta la fuente de la BIOS
-	ld de,02000h		;a90c
+	ld hl,(00004h)		;a909   ; la fuente de la BIOS...
+	ld de,02000h		;a90c   ; ...a los patrones (0x2000), en los tres tercios
 	ld bc,007f0h		;a90f
 	call copia_tercios		;a912   ; copia_tercios: LDIRVM en los tres tercios de la pantalla (gemela de p01:730D)
-	ld hl,00000h		;a915
+	ld hl,00000h		;a915   ; el color 0xF0 en los tres tercios
 	ld bc,007f0h		;a918
 	ld a,0f0h		;a91b
 	call rellena_tercios		;a91d   ; rellena_tercios: FILVRM en los tres tercios de la pantalla (gemela de p01:72FC)
 	ld a,(0d12eh)		;a920   ; lee el slot del Game Master (copia)
 	ld (0e000h),a		;a923
-	ld a,001h		;a926
+	ld a,001h		;a926   ; el menu va en MSX2
 	ld (0d4d3h),a		;a928   ; guarda el menu va en MSX2 (copia)
 L_A92B:
 	ld hl,04123h		;a92b

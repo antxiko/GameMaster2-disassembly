@@ -232,6 +232,9 @@ def comentario(b, filas, k, fichas, ventanas=None, medido=None):
                    % (rango, rango), t)
     if m16:
         v = int(m16.group(2) or m16.group(3), 16)
+        # `ld iy,(nn)` para CALSLT: lo que cuenta es IYh, el byte nn + 1
+        if m16.group(1) == "iy" and v + 1 in ram and "slot" in ram[v + 1][0]:
+            return "IY para CALSLT: en IYh %s" % ram[v + 1][0]
         if v in RAM16:
             return ("lee " if m16.group(1) else "guarda ") + RAM16[v]
         if v in ram:

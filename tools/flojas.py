@@ -2,7 +2,7 @@
 """Las rutinas con menos de un comentario por cada diez instrucciones, con su
 codigo, para comentarlas a mano. Herramienta de mano: no escribe nada.
 
-Uso: flojas.py <banco> [desde] [cuantas] [--todas]
+Uso: flojas.py <banco> [desde] [cuantas] [--todas] [--huecos]
      --todas: tambien las que ya llegan al 10 %, para subir la densidad
 """
 import glob
@@ -45,6 +45,9 @@ def main(argv):
         c = sum(1 for _, _, x in cu if x)
         if n >= 6 and (todas or c * 10 < n):
             sel.append((nom, cu, c))
+    if "--huecos" in argv:
+        # primero las que tienen mas instrucciones sin comentar
+        sel.sort(key=lambda r: -(len(r[1]) - r[2]))
     print("%d rutinas" % len(sel))
     for nom, cu, c in sel[desde:desde + cuantas]:
         print("== %s (%d instrucciones, %d comentarios)" % (nom, len(cu), c))

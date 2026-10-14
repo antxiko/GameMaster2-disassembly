@@ -5,10 +5,31 @@ C 0x802F A x 2: cada destino es una palabra
 # --- fin de los comentarios copiados ---
 
 # --- A MANO: comentarios escritos leyendo el codigo ---
+C 0x81E4 esconde los sprites
+C 0x81E7 0xE409: alguien hizo un tanto
+C 0x81EB si: lo suma
+C 0x81EE ya esta contado
+C 0x81F2 0xE40A: el partido sigue
+C 0x81F9 sigue: borra el tanto
+C 0x81FD 0xE41F: acaba de terminar un set
+C 0x8206 si: una espera de 6 cuadros (0xE400)
 C 0x8217 el tenis no tiene esto
 C 0x821B 0xE41E: ya esta hecho
 C 0x8222 lo apunta
 C 0x8226 y una espera de 7 cuadros (0xE400)
+C 0x823C el tenis cuenta los tantos en p07:82CC
+C 0x8240 B = quien gano: 1...
+C 0x8243 ...2...
+C 0x8246 0xE2F7: se acabo el partido
+C 0x824C lo apaga
+C 0x824E la musica 0x11: fin del partido
+C 0x8253 pantalla limpia
+C 0x8256 el texto de p07:8294 (GAME)...
+C 0x825C ...y el de p07:827E
+C 0x8262 los tantos del jugador 1...
+C 0x826B ...y los del 2, en cifras grandes
+C 0x8274 0xE41E y 0xE403 a cero
+C 0x827B y vuelve al menu
 C 0x831B quien saca (0xE41D): 0...
 C 0x831F ...el texto de p07:881C
 C 0x8324 1: el de p07:8808
@@ -39,10 +60,16 @@ C 0x8658 un byte...
 C 0x865B ...a la VRAM
 C 0x865E los n bytes
 C 0x8684 un sprite de la copia: Y - 1 (el VDP pinta una linea mas abajo)
+C 0x8685 Y
+C 0x8688 al VDP
 C 0x868A X
+C 0x868C al VDP
 C 0x868E el patron
+C 0x8690 al VDP
 C 0x8692 el color
+C 0x8694 al VDP
 C 0x8696 el segundo sprite: Y - 1
+C 0x8699 al VDP
 C 0x869B X
 C 0x869F el patron
 C 0x86A3 el color
@@ -57,18 +84,27 @@ C 0x8713 la fila 7 del teclado...
 C 0x8718 ...a nivel alto
 C 0x8719 ESC al bit 5? (bit 2 de la fila 7, rotado)
 C 0x871D la fila 8 (espacio y flechas)
+C 0x8722 a nivel alto
+C 0x8723 la fila de nuevo...
+C 0x8725 B = la fila rotada
 C 0x8726 el espacio, al bit 2
 C 0x872E las flechas arriba/abajo, a los bits 3 y 4
 C 0x8734 izquierda/derecha, a los bits 0 y 1
+C 0x8737 lo que traia el mando...
 C 0x8738 junto con lo del mando
 C 0x873B la fila 3 del teclado
+C 0x8740 a nivel alto (1 = pulsada)
+C 0x8741 C = la fila
 C 0x8742 una tecla al bit 3
 C 0x8746 otra al bit 0
 C 0x874D otra al bit 1
 C 0x8752 la fila 5
+C 0x8757 a nivel alto
 C 0x8758 una tecla al bit 2
 C 0x875E la fila 6
+C 0x8763 a nivel alto
 C 0x8764 dos teclas a los bits 4 y 5
+C 0x876B lo que trae el mando
 C 0x876C junto con lo del mando
 C 0x8AAF LENGTH...
 C 0x8AB2 ...elige dos bytes de la tabla de p07:8AD9...
@@ -90,12 +126,22 @@ C 0x8BB2 los dos a la vez: nada
 C 0x8BB5 arriba: C = 1
 C 0x8BBA abajo: C = 2
 C 0x8BBF lo recien pulsado
+C 0x8C17 guarda la columna
 C 0x8C18 Y del primer sprite
+C 0x8C19 B = Y para el segundo sprite
+C 0x8C1A Y a la copia
 C 0x8C1D X
+C 0x8C1E B' = X para el segundo sprite
+C 0x8C20 X a la copia
 C 0x8C21 el patron, 6 bytes mas alla en la ficha
+C 0x8C28 el patron de la raqueta...
+C 0x8C29 ...a la copia
 C 0x8C2B el color (C)
 C 0x8C2D la raqueta corta (LENGTH = 1)...
+C 0x8C2E LENGTH...
+C 0x8C2F ...es 1?
 C 0x8C32 ...esconde el segundo sprite (Y = 0xE0)
+C 0x8C34 Y, X, patron y color del segundo sprite, todos a 0xE0
 C 0x8C3C el segundo sprite, 16 lineas mas abajo
 C 0x8C41 la misma X
 C 0x8C48 su patron
@@ -108,18 +154,33 @@ C 0x8C75 ...una linea por cuadro
 C 0x8C86 sin barra, nada
 C 0x8C8B los sprites 9-11 de la copia (0xE524)
 C 0x8C8E la altura y la columna de la barra
+C 0x8C92 B = la altura
+C 0x8C93 Y del primer sprite
+C 0x8C97 C = la columna
+C 0x8C98 X
 C 0x8C9A patron 0x18
 C 0x8C9D color 0x0D
 C 0x8CA0 el segundo, 16 lineas mas abajo
+C 0x8CA5 la misma X
 C 0x8CA7 patron 0x1C
+C 0x8CAA el mismo color
 C 0x8CAD el tercero, 16 mas
+C 0x8CB1 la misma X
 C 0x8CB3 patron 0x20
+C 0x8CB6 el mismo color
 C 0x8CB9 0xE448 = 0
 C 0x8CBE 0xE449 = 0x50
 C 0x8CC3 la posicion de partida de p07:8CE6 (8 bytes)
 C 0x8CCE la velocidad de saque: hacia un lado...
 C 0x8CD1 ...segun quien saca (0xE41A)...
 C 0x8CD7 ...o hacia el otro
+C 0x8D84 0xE44B: la pelota ha tocado algo
+C 0x8D89 A' = 0: las raquetas
+C 0x8D8D C' = 6: el ancho que se mira
+C 0x8D93 A' = 1: los bordes
+C 0x8D9A sin barra, ya esta
+C 0x8D9F A' = 2: la barra...
+C 0x8DA4 ...con C' = 10
 C 0x8DAA el angulo de la pelota (0-15)
 C 0x8DAE rebota en horizontal: 16 - angulo
 C 0x8DC3 el angulo
@@ -128,6 +189,61 @@ C 0x8E0A el mando: arriba o abajo
 C 0x8E0D los dos a la vez: nada
 C 0x8E10 arriba: la tabla de p07:8E24
 C 0x8E16 abajo: la de p07:8E34
+C 0x8E80 la columna de la pelota mas 11...
+C 0x8E86 ...y su altura mas 8: el centro
+C 0x8E8A ¿toca una raqueta?
+C 0x8E8E si: rebota
+C 0x8E91 tres pixeles arriba...
+C 0x8E95 ...y tres a la izquierda
+C 0x8E9A ¿toca?
+C 0x8E9E si: rebota de otra manera
+C 0x8EA1 tres a la derecha
+C 0x8EA5 ¿toca?
+C 0x8EA8 si: rebota de la tercera
+C 0x8EC2 la columna de la pelota mas 8...
+C 0x8EC8 ...y su altura mas 5: el borde de arriba
+C 0x8ECC ¿toca una raqueta?
+C 0x8ED0 si: rebota en horizontal
+C 0x8ED3 tres pixeles abajo...
+C 0x8ED7 ...y tres a la izquierda
+C 0x8EDC ¿toca?
+C 0x8EE0 si: rebota en vertical
+C 0x8EE3 tres arriba
+C 0x8EE7 ¿toca?
+C 0x8EEA si: rebota en diagonal
+C 0x8F04 la columna de la pelota mas 5...
+C 0x8F0A ...y su altura mas 8: el borde de la izquierda
+C 0x8F0E ¿toca una raqueta?
+C 0x8F12 si: rebota en vertical
+C 0x8F15 tres pixeles abajo...
+C 0x8F19 ...y tres a la derecha
+C 0x8F1E ¿toca?
+C 0x8F22 si: rebota en horizontal
+C 0x8F25 tres a la izquierda
+C 0x8F29 ¿toca?
+C 0x8F2C si: rebota en diagonal
+C 0x8F46 la columna de la pelota mas 8...
+C 0x8F4C ...y su altura mas 11: el borde de abajo
+C 0x8F50 ¿toca una raqueta?
+C 0x8F54 si: rebota en horizontal
+C 0x8F57 tres pixeles arriba...
+C 0x8F5B ...y tres a la derecha
+C 0x8F60 ¿toca?
+C 0x8F64 si: rebota en vertical
+C 0x8F67 tres abajo
+C 0x8F6B ¿toca?
+C 0x8F6E si: rebota en diagonal
+C 0x8F72 en que fase del choque va (A')
+C 0x8F75 la 1: las raquetas; la 2: los bordes y la barra
+C 0x8F79 el jugador 1
+C 0x8F7F DE = la posicion de la pelota
+C 0x8F80 HL = la raqueta del jugador 1
+C 0x8F87 la toca: sale
+C 0x8F8B el jugador 2
+C 0x8F91 HL = la raqueta del jugador 2
+C 0x8F98 la toca: sale
+C 0x8F9D con TYPE 0...
+C 0x8FA0 ...NZ: no rebota en los bordes
 C 0x8FA2 la raqueta del jugador 1
 C 0x8FA8 su altura
 C 0x8FAC y su columna
@@ -155,6 +271,25 @@ C 0x9019 toca: B + 1
 C 0x9079 HL = A x 2...
 C 0x907D ...en la tabla de DE
 C 0x907E DE = la palabra
+C 0x9199 borra las cuatro marcas del menu GAME MODIFY
+C 0x91B8 la posicion de la opcion elegida (tabla de p07:920C)...
+C 0x91C3 ...pinta la flecha (0x8D)
+C 0x91C8 el valor de LENGTH...
+C 0x91CB ...en el primer sprite de la copia...
+C 0x91CE ...con la tabla de p07:9214
+C 0x91D4 SPEED, en el segundo sprite (tabla de p07:921C)
+C 0x91E0 TYPE, en el tercero (tabla de p07:9226)
+C 0x91EC BAR, en el cuarto (tabla de p07:922C)
+C 0x9233 LENGTH
+C 0x9239 SPEED
+C 0x923F TYPE
+C 0x9245 BAR
+C 0x9249 el marcador a cero...
+C 0x9250 ...los juegos, los sets...
+C 0x925F ...quien saca...
+C 0x9265 ...y el primero en sacar, el jugador 1
+C 0x926D la musica del tenis (0x0E)...
+C 0x9271 ...o la del hockey (0x0F)
 C 0x9290 el tanteo del juego (0x40 en el tenis: juego)
 C 0x9295 0: 15
 C 0x929A 0x15: 30
@@ -271,9 +406,16 @@ C 0x9F9D sin bajar de 0
 C 0x9FAD caida final: cuando quedan (ix+0x24) cuadros de la nota...
 C 0x9FB4 ...baja uno
 C 0x9FC1 la pista acabo: apaga el canal
+C 0x9FC2 la pista (ix+0x00)...
+C 0x9FC8 ...la repeticion...
+C 0x9FCE ...la frecuencia, el volumen y los modos, todo a cero
+C 0x9FE0 HL = 0xE2F6 (sigue en p08)
 C 0x9FE3 lo que hay que mandar al PSG
 C 0x9FE6 si era el canal del ruido (8)...
 C 0x9FEE ...ya no hay ruido que mandar
+C 0x9FF0 bit 3: el ruido estaba mandado...
+C 0x9FF3 ...lo apaga...
+C 0x9FF5 ...y apunta que hay que mandarlo de nuevo
 # --- fin de lo escrito a mano ---
 
 # --- BLOQUES QUE LEE EL CODIGO (seccion que reescribe tools/bloques.py; no editar a mano) ---
@@ -487,12 +629,9 @@ C 0x81A5 th_partido: prepara el partido: tenis (p07:95BC) o hockey (p07:987C)
 C 0x81B2 th_vuelca_sprites: vuelca a la tabla de sprites la copia de 0xE500
 C 0x81C6 th_cuadro: un cuadro del partido: jugadores, pelota, marcador y sprites
 C 0x81DA pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
-C 0x81E4 th_esconde_sprites: pone 0xE0 en la tabla de sprites (0x3B00)
-C 0x81EB th_tanto: suma el tanto al jugador que toca
 C 0x8214 lee el juego: 1 tenis, 2 hockey
 C 0x8239 lee el juego: 1 tenis, 2 hockey
 C 0x8250 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
-C 0x8253 th_borra_pantalla: borra los sprites y la tabla de nombres
 C 0x8259 th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
 C 0x825F th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
 C 0x8265 apunta a los tantos del jugador 1
@@ -649,7 +788,6 @@ C 0x8D77 hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x8D7C guarda la altura de la pelota
 C 0x8D90 th_choque: comprueba un choque de la pelota
 C 0x8D97 th_choque: comprueba un choque de la pelota
-C 0x8D9A lee hay barra en el centro
 C 0x8DA7 th_choque: comprueba un choque de la pelota
 C 0x8DBE th_efecto: el efecto que da la raqueta a la pelota
 C 0x8DE9 th_efecto: el efecto que da la raqueta a la pelota
@@ -661,33 +799,21 @@ C 0x8E70 lee la altura de la pelota
 C 0x8E76 th_choca_raqueta: mira si la pelota toca una raqueta
 C 0x8E7D lee la columna de la pelota (0x78 es el centro)
 C 0x8E83 lee la altura de la pelota
-C 0x8E8A th_choca_raqueta: mira si la pelota toca una raqueta
-C 0x8E9A th_choca_raqueta: mira si la pelota toca una raqueta
-C 0x8EA5 th_choca_raqueta: mira si la pelota toca una raqueta
 C 0x8EAC lee la columna de la pelota (0x78 es el centro)
 C 0x8EB2 lee la altura de la pelota
 C 0x8EB8 th_choca_raqueta: mira si la pelota toca una raqueta
 C 0x8EBF lee la columna de la pelota (0x78 es el centro)
 C 0x8EC5 lee la altura de la pelota
-C 0x8ECC th_choca_raqueta: mira si la pelota toca una raqueta
-C 0x8EDC th_choca_raqueta: mira si la pelota toca una raqueta
-C 0x8EE7 th_choca_raqueta: mira si la pelota toca una raqueta
 C 0x8EEE lee la columna de la pelota (0x78 es el centro)
 C 0x8EF4 lee la altura de la pelota
 C 0x8EFA th_choca_raqueta: mira si la pelota toca una raqueta
 C 0x8F01 lee la columna de la pelota (0x78 es el centro)
 C 0x8F07 lee la altura de la pelota
-C 0x8F0E th_choca_raqueta: mira si la pelota toca una raqueta
-C 0x8F1E th_choca_raqueta: mira si la pelota toca una raqueta
-C 0x8F29 th_choca_raqueta: mira si la pelota toca una raqueta
 C 0x8F30 lee la columna de la pelota (0x78 es el centro)
 C 0x8F36 lee la altura de la pelota
 C 0x8F3C th_choca_raqueta: mira si la pelota toca una raqueta
 C 0x8F43 lee la columna de la pelota (0x78 es el centro)
 C 0x8F49 lee la altura de la pelota
-C 0x8F50 th_choca_raqueta: mira si la pelota toca una raqueta
-C 0x8F60 th_choca_raqueta: mira si la pelota toca una raqueta
-C 0x8F6B th_choca_raqueta: mira si la pelota toca una raqueta
 C 0x8F83 th_choca_borde: mira si la pelota toca el borde de la raqueta
 C 0x8F94 th_choca_borde: mira si la pelota toca el borde de la raqueta
 C 0x8F9A lee TYPE
@@ -721,8 +847,6 @@ C 0x9182 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas
 C 0x9193 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x91B5 lee la opcion elegida del GAME MODIFY
 C 0x91BC hl_mas_a: HL = HL + A (gemela de p01:7251)
-C 0x91C8 lee LENGTH, SPEED, TYPE y BAR (de dos en dos bytes: valor y tope)
-C 0x91CB apunta a la copia de la tabla de sprites
 C 0x91D1 th_pon_palabra: escribe en HL la palabra A de la tabla y vuelca los sprites
 C 0x91DD th_pon_palabra: escribe en HL la palabra A de la tabla y vuelca los sprites
 C 0x91E9 th_pon_palabra: escribe en HL la palabra A de la tabla y vuelca los sprites
@@ -783,5 +907,4 @@ C 0x9E7F canal_volumen_si: el volumen del canal salvo si (ix+0x0D) lleva el bit 
 C 0x9E82 lee el canal que se esta tocando
 C 0x9EA1 canal_bucle: repeticion: guarda donde vuelve (ix+0x17)
 C 0x9F28 canal_volumen: el volumen del canal segun la envolvente de (ix+0x0F)
-C 0x9FE0 th_9ffb: HL = 0xE2F6 y sigue en p08
 # --- fin de las anotaciones de anota.py ---

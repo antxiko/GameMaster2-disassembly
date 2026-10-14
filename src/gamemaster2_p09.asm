@@ -1238,7 +1238,7 @@ vdp_hmmm:		; copia rapida de VRAM a VRAM (HMMM): origen HL, destino DE, tamano B
 	inc a			;8e5a
 	ld c,a			;8e5b
 	ld a,020h		;8e5c   ; R#17 = 32 (SX) con incremento: los 15 registros del comando seguidos
-	di			;8e5e
+	di			;8e5e   ; sin interrupciones
 	out (c),a		;8e5f
 	ld a,091h		;8e61
 	out (c),a		;8e63

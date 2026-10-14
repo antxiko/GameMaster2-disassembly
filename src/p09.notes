@@ -1,4 +1,7 @@
 # Notas del banco 09
+# --- COMENTARIOS COPIADOS DE LAS GEMELAS (tools/gemelas.py; no editar a mano) ---
+C 0x8E5E sin interrupciones
+# --- fin de los comentarios copiados ---
 
 # --- A MANO: comentarios escritos leyendo el codigo ---
 C 0x8261 la fila por 21 (0x15)

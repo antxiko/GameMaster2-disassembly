@@ -6,6 +6,7 @@ C 0x65BA el bit 6
 C 0x65BD el bit 5
 C 0x66C7 rellena B bytes con A
 C 0x66D2 y vuelve al juego
+C 0x68E1 los puntos del juego
 C 0x6A59 guarda los registros
 C 0x6A5C la fila x 3: los puntos
 C 0x6A7A guarda los registros
@@ -13,6 +14,9 @@ C 0x6A7D la fila x 9: el nombre
 C 0x6DFD la fase pedida
 C 0x6E00 entre 10
 C 0x6E05 el resto...
+C 0x6EB7 la fase pedida
+C 0x6EB8 entre 9
+C 0x6EBD el resto x 2...
 C 0x6F02 entre 13
 C 0x6F07 el resto + 1...
 C 0x6F4B la fase pedida
@@ -27,8 +31,19 @@ C 0x6FDD ...resta 0x50 en BCD
 C 0x6FE7 entre 8
 C 0x6FFA entre 6
 C 0x7008 borra la pantalla
+C 0x7032 la fase pedida
+C 0x7035 entre 3
+C 0x703A el cociente a la parte alta...
+C 0x7041 ...y el resto a la baja...
+C 0x704B y borra la pantalla
 C 0x7051 entre 8
 C 0x705B el cociente, con tope 2
+C 0x70AA el RC del juego
+C 0x70AD en orden
+C 0x70B0 antes del RC-754...
+C 0x70C5 el primer byte
+C 0x70C6 sin el bit 7
+C 0x70C8 el bit 7: el juego tiene SCC
 C 0x71AB un bit de la cabecera por cada palabra
 C 0x71AC bit a 1: se salta
 C 0x739A la letra
@@ -42,6 +57,13 @@ C 0x7567 solo en el menu de letras (0xFE)
 C 0x7572 '<', el punto en la fuente del menu
 C 0x7577 si ya esta, nada
 C 0x7590 guarda la tecla
+C 0x772B el byte
+C 0x772D se copia
+C 0x7730 ¿se acabo la pantalla?
+C 0x7736 ¿el siguiente es igual?
+C 0x7737 no: copias
+C 0x7739 ¿y el otro?
+C 0x773F tres iguales: repeticion
 # --- fin de los comentarios copiados ---
 
 # --- A MANO: comentarios escritos leyendo el codigo ---
@@ -65,6 +87,21 @@ C 0x635D ¿le sigue 0xFD? (la palabra 0xFD9B, la direccion de H.KEYI)
 C 0x6362 si: apunta al operando del `ld (0xFD9B),hl`
 C 0x6363 lo cambia por los 5 bytes de p01:6384
 C 0x636C A = 0: hecho
+C 0x63DB si el menu esta abierto, nada
+C 0x63E0 lee el estado del VDP (la interrupcion)
+C 0x63E3 IX = la vuelta del congelado
+C 0x63E7 IY para CALSLT: el slot del Game Master va en IYh (0xF103)
+C 0x63EB la fila 7 del teclado
+C 0x63F0 a nivel alto: el bit 4 (STOP)
+C 0x63F4 la fila 8
+C 0x63F9 los bits 1 y 2 (el espacio y la flecha?)...
+C 0x63FD ...juntos
+C 0x63FE lo que habia pulsado
+C 0x6402 lo de ahora
+C 0x6403 lo recien pulsado
+C 0x6406 a 0xF29E
+C 0x640A STOP: el menu
+C 0x640E salta al menu por CALSLT (p01:651F)
 C 0x647E 0xF10F: el volumen pedido; 0xF10E: el que suena
 C 0x6484 bit 1 de las teclas: bajar el volumen
 C 0x6488 ya esta a 0
@@ -76,6 +113,52 @@ C 0x64B8 lo que hay que sumar al volumen
 C 0x64BC suma al que suena
 C 0x64BF sin pasarse, vuelve
 C 0x64C0 si se pasa, a 0xF1AB (p01:6455, en RAM)
+C 0x6536 R#8 a 0: el volumen A
+C 0x653B R#9: el B
+C 0x653F R#10: el C
+C 0x6547 si el juego no tiene SCC, ya esta
+C 0x6548 0x3F en el registro 0x9000 del juego: el SCC aparece en 0x9800
+C 0x6553 0 en 0x988F: los cinco canales del SCC apagados
+C 0x655E y el banco que tenia el juego en 0x9000 (su copia en 0xF0F2)
+C 0x65EE el volumen A a R#8 del PSG
+C 0x65F7 el B a R#9
+C 0x6600 el C a R#10
+C 0x6609 si el juego no tiene SCC, ya esta
+C 0x660A 0x3F en el registro 0x9000 del juego: el SCC aparece en 0x9800
+C 0x6615 0x1F en 0x988F: los cinco canales del SCC encendidos
+C 0x6620 y el banco que tenia el juego en 0x9000 (su copia en 0xF0F2)
+C 0x6645 los bits de la fila 6 que interesan
+C 0x6648 la fila 7 del teclado
+C 0x664D a nivel alto: los bits 0-2
+C 0x6650 junto con lo de la fila 6
+C 0x6651 en su sitio
+C 0x6654 y la fila 1
+C 0x6658 lo que habia
+C 0x6659 lo de ahora
+C 0x665A lo que cambio...
+C 0x665B ...y esta pulsado
+C 0x665C C = lo recien pulsado
+C 0x678C B = las opciones
+C 0x678D bit 0: vidas infinitas
+C 0x6792 bit 1: la fase elegida
+C 0x6797 bit 2: la rutina propia del juego
+C 0x679C D = el resto de los bits
+C 0x67A0 sin ranking, ya esta
+C 0x67A5 el juego de codigo 0x15 tampoco
+C 0x67AC cada dos cuadros...
+C 0x67B4 ...las opciones se quedan
+C 0x67B8 las opciones del MODIFY
+C 0x67B9 bit 7: la partida acabo
+C 0x67BC lo quita
+C 0x67BE el menu esta abierto
+C 0x67C3 el nombre del ranking a '<' (16 bytes)
+C 0x67D0 y los puntos a cero
+C 0x67DD silencio
+C 0x67E0 guarda la pantalla del juego
+C 0x67E3 el ranking
+C 0x67E6 devuelve la pantalla del juego
+C 0x67E9 el menu ya no esta abierto
+C 0x67ED 0x92C7 = 0xFF: hay ranking
 C 0x68DA pone a cero 3 bytes
 C 0x68E4 sin puntos no hay ranking
 C 0x68E7 0xF286: donde guarda el juego los puntos
@@ -122,9 +205,27 @@ C 0x6B1E ya esta en la primera
 C 0x6B20 la anterior
 C 0x6B22 si queda por encima de la ventana...
 C 0x6B26 ...la ventana sube una fila
+C 0x6BA6 la columna siguiente
+C 0x6BA7 ';'
+C 0x6BAD el nombre de la fila (IX)...
+C 0x6BB1 ...8 letras...
+C 0x6BB6 ...a la VRAM
+C 0x6BB9 los puntos (IY, 3 bytes BCD) en hexadecimal a 0xE000:
+C 0x6BBC el byte alto
+C 0x6BC3 el medio
+C 0x6BCA el bajo
+C 0x6BD3 '>'
+C 0x6BD9 las 6 cifras de 0xE000
+C 0x6BDF el juego de codigo 0x29...
+C 0x6BE6 ...cuenta con 5 cifras: se salta la primera
 C 0x6BE9 se salta los ceros de la izquierda
 C 0x6BF2 bit 0 de C: si el numero es impar de cifras...
 C 0x6BF6 ...retrocede una
+C 0x6BFD las cifras que quedan
+C 0x6C04 a la VRAM
+C 0x6C09 avanza
+C 0x6C0B con un numero impar de cifras...
+C 0x6C0F ...un 0 al final
 C 0x6C15 pinta las tres letras de p01:6C35
 C 0x6C1F la fila siguiente del ranking: 9 bytes de nombre...
 C 0x6C24 ...y 3 de puntos
@@ -134,6 +235,15 @@ C 0x6C30 las B filas
 C 0x6D17 0xE052 = 0xFF en la RAM del juego
 C 0x6D1C la fase pedida...
 C 0x6D1F ...con tope 10
+C 0x6D44 C = cuantas fases tiene el juego
+C 0x6D45 la fase pedida
+C 0x6D48 entre C
+C 0x6D4B el resto + 1...
+C 0x6D4D ...a la variable de fase del juego
+C 0x6D53 ¿el juego tiene mas que poner? (tabla de p01:6DC9)
+C 0x6D58 C = el tipo: 0 nada mas...
+C 0x6D5A ...1, 2 o 3: una de las tres
+C 0x6D62 si no, la fase en BCD
 C 0x6D67 pasa L a BCD bit a bit
 C 0x6D6A en decimal
 C 0x6D6D a la RAM del juego (0xC411)
@@ -153,8 +263,23 @@ C 0x6DBB 0x0000 acaba
 C 0x6DBE C = el valor
 C 0x6DC1 ¿coincide con la del juego (DE)?
 C 0x6DC6 si: C es el valor
+C 0x6DD8 la fase pedida - 1...
+C 0x6DDF ...x 10 (x2, x8 y suma)
+C 0x6DE5 en BCD
+C 0x6DE8 a 0xE059 de la RAM del juego
+C 0x6DEC mas 10 (BCD)...
+C 0x6DF0 ...a 0xE05A
+C 0x6DF4 en binario...
+C 0x6DF7 ...a 0xE054
+C 0x6DFA y el valor elegido
 C 0x6F65 A a 0xE056 de la RAM del juego
 C 0x6F68 y B - 1 (0-3) a 0xE059
+C 0x6F78 el juego de codigo 0x27 (tabla p01:6CD7): la fase pedida
+C 0x6F80 el cociente a 0xE058 del juego
+C 0x6F84 el resto + 1 a 0xE055...
+C 0x6F89 ...y el resto a 0xE054
+C 0x6F8D dos bytes de la tabla de p01:6FA9...
+C 0x6F94 ...a 0xE056 y 0xE057 del juego
 C 0x7077 un paso de la division: el bit alto de DE...
 C 0x707C ...entra en HL
 C 0x707E si cabe el divisor, se resta...
@@ -166,6 +291,12 @@ C 0x70DF es este juego
 C 0x7123 B = el codigo del juego: los de 3 y 4...
 C 0x712A ...y los de 0x10 y 0x11...
 C 0x712F ...siguen; los demas vuelven
+C 0x717A el RC de la cabecera del juego (2 bytes) a la ficha
+C 0x7181 0xFF: el codigo de juego, aun sin saber
+C 0x7186 el RC
+C 0x718A ¿RC-748...
+C 0x7194 ...o RC-750?
+C 0x7196 RC-750: ya esta
 C 0x71C0 un bit de la cabecera por cada palabra
 C 0x71C1 bit a 1: se salta
 C 0x71C4 DE = el destino de IX
@@ -175,6 +306,13 @@ C 0x721F ...0 acaba la tabla
 C 0x7222 ¿es la del juego?
 C 0x7223 si: la ficha
 C 0x7225 la entrada siguiente, de 4 bytes
+C 0x722F guarda DE
+C 0x7230 la ficha que dice la tabla
+C 0x7237 su RC, al reves...
+C 0x723A ...¿llega al RC-744?
+C 0x7240 si: no vale
+C 0x7242 copia la ficha (19 bytes) a 0xF280
+C 0x724B C: encontrada
 C 0x725D B = el numero de color
 C 0x7261 el puerto de los registros (VDP.DW + 1)
 C 0x7264 el numero de color...
@@ -219,6 +357,13 @@ C 0x7430 si cruza la mitad de 32 KB...
 C 0x7435 ...cambia de mitad (NSTWRT solo ve 16 bits)
 C 0x7439 el ancho x 4
 C 0x743D el alto x 8
+C 0x7449 un byte de color...
+C 0x744A ...al VDP
+C 0x744D C bytes por linea
+C 0x7452 la linea siguiente (128 bytes)
+C 0x7457 si cruza la mitad de 32 KB...
+C 0x745E las B lineas
+C 0x7460 devuelve la pagina activa
 C 0x7471 HL a BCD bit a bit: el bit alto de HL...
 C 0x7472 ...entra en E doblandolo...
 C 0x7474 ...en decimal...
@@ -269,6 +414,24 @@ C 0x77AF el 0 que acaba...
 C 0x77B1 ...y la cuenta del ultimo trozo
 C 0x77B8 el tamano comprimido...
 C 0x77BF ...va en 0x8000
+C 0x77C3 la RAM en la pagina 2
+C 0x77CB guarda en 0x8000 los patrones de 0x1000 (0x80 bytes de cada tercio)
+C 0x77D7 los de 0x1180 (0x158 bytes)
+C 0x77E3 los de 0x1400 (0x40 bytes)
+C 0x77EF la tabla de nombres de 0x3A00 (0x300 bytes)
+C 0x77FB y el primer byte de los sprites
+C 0x7807 la casilla 0x200 a 0x55
+C 0x7812 borra la pantalla segun el modo
+C 0x7815 la fuente del Game Master (p00:483F) a 0x3180
+C 0x7821 y su color 0xF5
+C 0x782C sin sprites (0xD0)
+C 0x7847 la RAM en la pagina 2
+C 0x784F borra la pantalla
+C 0x7852 devuelve los patrones de 0x1000 (de 0x8000)
+C 0x785E los de 0x1180
+C 0x786A los de 0x1400
+C 0x7876 la tabla de nombres de 0x3A00
+C 0x7882 y el primer byte de los sprites
 C 0x78BD la letra
 C 0x78BE con la mascara C
 C 0x78C1 0xFF acaba
@@ -284,6 +447,7 @@ C 0x78E2 ...x 32
 C 0x78E7 mas la columna
 C 0x78EE R#2 bit 5: la pagina 1...
 C 0x78F5 ...en la mitad alta de la VRAM
+C 0x78F7 la direccion a la VRAM
 C 0x7910 la fuente empieza en el 0x2F...
 C 0x7914 ...y lo de antes es un espacio
 C 0x7915 la letra en la fuente del Game Master (p00:4837), 8 bytes cada una
@@ -300,6 +464,17 @@ C 0x7956 la linea siguiente esta 128 bytes mas abajo
 C 0x795C si cruza la mitad de 32 KB...
 C 0x795F ...cambia de mitad
 C 0x7963 las 8 lineas
+C 0x7973 sin interrupciones
+C 0x7974 H.TIMI salta a p01:79F6
+C 0x797F guarda la pila
+C 0x7986 abre las interrupciones
+C 0x7987 borra la pantalla
+C 0x798A borra 0xE000-0xEFFF
+C 0x7997 la fuente de la BIOS...
+C 0x799A ...a los patrones (0x2000), en los tres tercios
+C 0x79A3 el color 0xF0 en los tres tercios
+C 0x79AE el slot del Game Master a 0xE000
+C 0x79B4 el menu va en MSX2
 # --- fin de lo escrito a mano ---
 
 # --- BLOQUES QUE LEE EL CODIGO (seccion que reescribe tools/bloques.py; no editar a mano) ---
@@ -533,9 +708,6 @@ C 0x63AC guarda la direccion del gancho H.KEYI y el byte siguiente (16 bits)
 C 0x63B9 lee la direccion INIT del juego y el byte siguiente (16 bits)
 C 0x63BF lee el slot del cartucho del juego
 C 0x63CE lee la direccion INIT del juego y el byte siguiente (16 bits)
-C 0x63DB lee el menu esta abierto
-C 0x63E3 lee la direccion a la que se vuelve del congelado y el byte siguiente (16 bits)
-C 0x63E7 lee volumen del PSG, canal C y el byte siguiente (16 bits)
 C 0x6415 lee las opciones del MODIFY
 C 0x6426 lee el numero de jugadores del juego
 C 0x643B lee el slot del Game Master
@@ -549,7 +721,7 @@ C 0x6493 guarda_volumenes: guarda los tres volumenes del PSG en 0xF100
 C 0x6496 silencia_psg: pone a cero los tres volumenes del PSG (y el SCC del juego si lo tiene)
 C 0x64B1 devuelve_volumenes: devuelve los tres volumenes del PSG (y el SCC)
 C 0x64C3 silencia_psg: pone a cero los tres volumenes del PSG (y el SCC del juego si lo tiene)
-C 0x64CB lee volumen del PSG, canal C y el byte siguiente (16 bits)
+C 0x64CB IY para CALSLT: en IYh el slot del Game Master
 C 0x64D2 lee el slot del cartucho del juego
 C 0x64DE guarda el gancho H.KEYI
 C 0x64E1 guarda el gancho H.TIMI
@@ -576,7 +748,7 @@ C 0x6599 congela: congela el juego: silencio y espera la tecla
 C 0x659D guarda el menu esta abierto
 C 0x65A1 silencia_psg: pone a cero los tres volumenes del PSG (y el SCC del juego si lo tiene)
 C 0x65A4 lee la direccion a la que se vuelve del congelado y el byte siguiente (16 bits)
-C 0x65A8 lee el slot del Game Master y el byte siguiente (16 bits)
+C 0x65A8 IY para CALSLT: en IYh el slot del cartucho del juego
 C 0x65AC lee la opcion que eligio el menu
 C 0x65B3 lee_teclas: las teclas del Game Master (SNSMAT 1, 6 y 7) en 0xF10D: C = las recien pulsadas
 C 0x65C3 guarda la opcion que eligio el menu
@@ -624,15 +796,8 @@ C 0x6789 lee las opciones del MODIFY
 C 0x678F truco_vidas: las vidas: la rutina del juego de la tabla de p01:6CA6
 C 0x6794 truco_fase: la fase: la rutina del juego de la tabla de p01:6CD7
 C 0x6799 truco_propio: llama por CALSLT a la rutina del juego de 0xF294
-C 0x67A0 hay_ranking: Z si el juego no tiene ranking (0xF290, 0xF286)
-C 0x67A5 lee el codigo del juego
 C 0x67B5 apunta a las opciones del MODIFY
 C 0x67C0 guarda el menu esta abierto
-C 0x67C3 apunta a el nombre que se mete en el ranking
-C 0x67DD silencia_psg: pone a cero los tres volumenes del PSG (y el SCC del juego si lo tiene)
-C 0x67E0 p02_8000: p02:8000 con el cartucho en la pagina 2 y vuelta a la RAM
-C 0x67E3 menu_ranking: la pantalla del RANKING
-C 0x67E6 p02_80e4: p02:80E4 con el cartucho en la pagina 2 y vuelta a la RAM
 C 0x67EA guarda el menu esta abierto
 C 0x67F3 lee el truco de vidas del juego
 C 0x67FF truco_6d2f: pone 0xF29A en la variable del juego
@@ -640,7 +805,7 @@ C 0x6804 lee el truco de vidas del juego
 C 0x680E busca_en_tabla_y_salta: busca 0xF281 en la tabla [codigo, direccion] de HL y salta
 C 0x6814 truco_6d41: calcula el valor que se escribe en el juego (p01:706C)
 C 0x681A lee la rutina propia del juego y el byte siguiente (16 bits)
-C 0x681E lee el slot del Game Master y el byte siguiente (16 bits)
+C 0x681E IY para CALSLT: en IYh el slot del cartucho del juego
 C 0x682A lee el codigo del juego
 C 0x683E lee el codigo del juego
 C 0x6851 rellena_ventana: rellena una ventana de B filas por C columnas con A
@@ -665,7 +830,6 @@ C 0x68C0 pinta_texto: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE o
 C 0x68C8 menu_vertical: menu de B opciones: cursores arriba y abajo, espacio elige
 C 0x68CB despacha: salta a la palabra A de la tabla pegada detras del `call`
 C 0x68D7 menu: menu de B opciones con el cursor A: devuelve la elegida
-C 0x68E1 lee los puntos del juego (para el ranking) y el byte siguiente (16 bits)
 C 0x68ED lee el codigo del juego
 C 0x690D ranking_quita_marca: quita la marca A de las 10 filas del ranking (0x9257)
 C 0x6912 apunta a los nombres del ranking (9 bytes por fila)
@@ -727,14 +891,11 @@ C 0x6B96 pon_letra: escribe A en la VRAM HL guardando los registros
 C 0x6B9D pon_letra: escribe A en la VRAM HL guardando los registros
 C 0x6BA3 pon_letra: escribe A en la VRAM HL guardando los registros
 C 0x6BA9 pon_letra: escribe A en la VRAM HL guardando los registros
-C 0x6BB6 copia_a_vram: copia BC bytes de HL a la VRAM DE (letra a letra si es de texto)
 C 0x6BBF byte_a_hex: escribe A en hexadecimal (dos letras) en HL
 C 0x6BC6 byte_a_hex: escribe A en hexadecimal (dos letras) en HL
 C 0x6BCD byte_a_hex: escribe A en hexadecimal (dos letras) en HL
 C 0x6BD5 pon_letra: escribe A en la VRAM HL guardando los registros
-C 0x6BDF lee el codigo del juego
 C 0x6BF7 pon_letra: escribe A en la VRAM HL guardando los registros
-C 0x6C04 copia_a_vram: copia BC bytes de HL a la VRAM DE (letra a letra si es de texto)
 C 0x6C11 pon_letra: escribe A en la VRAM HL guardando los registros
 C 0x6C1C copia_a_vram: copia BC bytes de HL a la VRAM DE (letra a letra si es de texto)
 C 0x6C3E apunta a los nombres del ranking (9 bytes por fila)
@@ -742,16 +903,8 @@ C 0x6C41 hl_mas_a: HL = HL + A
 C 0x6C49 apunta a los puntos del ranking (3 bytes por fila)
 C 0x6C4C hl_mas_a: HL = HL + A
 C 0x6D41 lee la fase elegida
-C 0x6D45 lee la fase que se pide
-C 0x6D48 divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit)
-C 0x6D4D lee la variable del juego que se cambia y el byte siguiente (16 bits)
-C 0x6D53 busca_juego_6dc9: busca el juego (0xF280) en la tabla de p01:6DC9
 C 0x6D77 hl_mas_a: HL = HL + A
 C 0x6DB4 lee la ficha del juego y el byte siguiente (16 bits)
-C 0x6DD8 lee la fase que se pide
-C 0x6DE5 binario_a_bcd: HL a BCD en DE
-C 0x6DF4 bcd_a_binario: A en BCD a binario
-C 0x6DFA pon_valor: escribe 0xF29C en la variable del juego (0xF28A)
 C 0x6E02 divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit)
 C 0x6E1A hl_mas_a: HL = HL + A
 C 0x6E21 pon_valor: escribe 0xF29C en la variable del juego (0xF28A)
@@ -783,7 +936,6 @@ C 0x6F48 pon_valor: escribe 0xF29C en la variable del juego (0xF28A)
 C 0x6F51 divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit)
 C 0x6F70 lee el valor que se escribe
 C 0x6F73 lee la variable del juego que se cambia y el byte siguiente (16 bits)
-C 0x6F78 lee la fase que se pide
 C 0x6F7D divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit)
 C 0x6F91 hl_mas_a: HL = HL + A
 C 0x6FC9 lee la fase que se pide
@@ -797,16 +949,13 @@ C 0x701F lee la fase que se pide
 C 0x7023 lee la variable del juego que se cambia y el byte siguiente (16 bits)
 C 0x7028 lee la fase que se pide
 C 0x702F pon_valor: escribe 0xF29C en la variable del juego (0xF28A)
-C 0x7032 lee la fase que se pide
 C 0x7037 divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit)
-C 0x704B borra_pantalla_b: borra la tabla de nombres y esconde los sprites
 C 0x704E lee la fase que se pide
 C 0x7053 divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit)
 C 0x7057 lee la variable del juego que se cambia y el byte siguiente (16 bits)
 C 0x7065 lee el valor que se escribe
 C 0x709D ficha_del_juego: busca la ficha del juego (p00:44BE) y la copia a 0xF280
 C 0x70A0 lee_cabecera_juego: lee la cabecera de 0x4028 del juego y sus opciones
-C 0x70AA lee la ficha del juego y el byte siguiente (16 bits)
 C 0x70B3 DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 C 0x70B9 apunta a la cabecera de 0x4028 del juego (6 bytes)
 C 0x70BF copia_del_juego: copia BC bytes de HL del cartucho del juego (RDSLT) a DE
@@ -826,8 +975,6 @@ C 0x715B copia_del_juego: copia BC bytes de HL del cartucho del juego (RDSLT) a 
 C 0x7161 DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 C 0x7167 DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 C 0x7174 copia_del_juego: copia BC bytes de HL del cartucho del juego (RDSLT) a DE
-C 0x717A apunta a la ficha del juego
-C 0x7186 lee la ficha del juego y el byte siguiente (16 bits)
 C 0x71A6 apunta a el numero de jugadores del juego
 C 0x71AE apunta a la variable del juego que se cambia
 C 0x71B5 apunta a la fase elegida
@@ -836,7 +983,6 @@ C 0x71E6 DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 C 0x71E9 guarda el juego tiene SCC
 C 0x71F9 lee el slot del cartucho del juego
 C 0x723E DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
-C 0x7242 apunta a la ficha del juego
 C 0x725E el puerto de escritura del VDP (VDP.DW)
 C 0x7275 la version del MSX (0 = MSX1)
 C 0x7286 pon_color: MSX2: el color B de la paleta con D y E (R#16 y puerto 2)
@@ -863,7 +1009,6 @@ C 0x73FF lee el registro 14 del VDP (copia de la BIOS)
 C 0x7409 lee el registro 2 del VDP (copia de la BIOS)
 C 0x7445 vram_escribe_en: SETWRT (o NSTWRT en MSX2) en HL
 C 0x745A hl_otra_mitad: H xor 0x80
-C 0x7460 lee la pagina activa guardada
 C 0x7463 guarda ACPAGE, la pagina activa
 C 0x7492 lee la esquina de la ventana pequena y el byte siguiente (16 bits)
 C 0x7496 rellena_ventana: rellena una ventana de B filas por C columnas con A
@@ -950,16 +1095,11 @@ C 0x76F3 cursor_pinta: pinta el cursor (':' o el de MSX2)
 C 0x76F6 cursor_apaga: quita el cursor
 C 0x76FD guarda cuantas letras lleva el nombre
 C 0x7700 guarda la opcion elegida
-C 0x7730 fin_de_8882: compara HL con 0x8882
 C 0x773A fin_de_8882: compara HL con 0x8882
 C 0x7769 fin_de_8882: compara HL con 0x8882
-C 0x77C3 lee el slot de la RAM de la pagina 2
 C 0x77D4 lee_vram_tercios: LDIRMV de los tres tercios (0x2000 de paso)
 C 0x77E0 lee_vram_tercios: LDIRMV de los tres tercios (0x2000 de paso)
 C 0x77EC lee_vram_tercios: LDIRMV de los tres tercios (0x2000 de paso)
-C 0x7812 borra_por_modo: borra la pantalla segun el modo de 0xF2A1
-C 0x7847 lee el slot de la RAM de la pagina 2
-C 0x784F borra_por_modo: borra la pantalla segun el modo de 0xF2A1
 C 0x785B copia_vram_tercios: LDIRVM de los tres tercios (0x2000 de paso)
 C 0x7867 copia_vram_tercios: LDIRVM de los tres tercios (0x2000 de paso)
 C 0x7873 copia_vram_tercios: LDIRVM de los tres tercios (0x2000 de paso)
@@ -970,17 +1110,13 @@ C 0x78AD DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 C 0x78AE borra_segun_modo: borra la pantalla segun el modo
 C 0x78B1 borra_nombres: borra la tabla de nombres y esconde los sprites (0xD0 en 0x3B00)
 C 0x78BA posicion_grafica: la posicion en modo grafico de la letra
-C 0x78F7 lee el registro 14 del VDP (copia de la BIOS)
 C 0x7907 de_otra_mitad: D xor 0x80
 C 0x7941 el puerto de escritura del VDP (VDP.DW)
 C 0x796E posicion_grafica: la posicion en modo grafico de la letra
 C 0x7977 apunta a el gancho H.TIMI
 C 0x7983 guarda la pila del menu principal y el byte siguiente (16 bits)
-C 0x7987 borra_pantalla: borra la tabla de nombres (0x3800, 0x300 bytes)
-C 0x7997 CGTABL: donde esta la fuente de la BIOS
 C 0x79A0 copia_tercios: LDIRVM en los tres tercios de la pantalla
 C 0x79AB rellena_tercios: FILVRM en los tres tercios de la pantalla
-C 0x79AE lee el slot del Game Master
 C 0x79B6 guarda el menu va en MSX2
 C 0x79BC pinta_texto: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
 C 0x79C4 menu_vertical: menu de B opciones: cursores arriba y abajo, espacio elige

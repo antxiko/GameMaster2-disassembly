@@ -39,7 +39,6 @@ C 0x83F6 y su parte alta
 C 0x83F9 CLR = el color
 C 0x83FC ARG a 0
 C 0x83FE CMD = 0xC0: HMMV
-C 0x8404 guarda las paginas
 C 0x8405 espera al VDP
 C 0x8409 el puerto de los registros (VDP.DW + 1)
 C 0x840E R#17 = 32 (SX) con incremento: los 15 registros del comando seguidos
@@ -123,8 +122,11 @@ C 0x8396 CMD = 0x70: LINE
 C 0x83B4 guarda los registros...
 C 0x83B7 ...traza la linea...
 C 0x83BA ...y los devuelve
+C 0x8404 guarda las paginas
+C 0x8410 sin interrupciones
 C 0x8448 guarda la pagina
 C 0x8452 R#17 = 36 (DX) con incremento
+C 0x8454 sin interrupciones
 C 0x845D DX = D
 C 0x8462 DY = E, en la pagina A
 C 0x8468 NX = B (de la pila)
@@ -132,17 +134,22 @@ C 0x846D NY = C
 C 0x8471 CLR = el primer byte de HL
 C 0x8478 CMD = 0xF0: HMMC (de la CPU a la VRAM)
 C 0x847E R#17 = 44 (CLR) sin incremento, para los bytes que siguen
+C 0x8481 R#17
+C 0x8486 C = el puerto de registros indirectos
 C 0x8488 el estado S#2
 C 0x848D bit 0 (CE): el comando acabo
 C 0x848F bit 7 (TR): el VDP pide otro byte
 C 0x8493 el byte siguiente a CLR
 C 0x8499 guarda las paginas
 C 0x84A2 R#17 = 34 (SY) con incremento
+C 0x84A4 sin interrupciones
+C 0x84AB C = el puerto de registros indirectos
 C 0x84AD SY = L...
 C 0x84B3 ...con la pagina de origen
 C 0x84B5 DX = H
 C 0x84BA DY = E...
 C 0x84BC ...con la pagina de destino
+C 0x84C3 NX no cuenta en YMMM: a cero
 C 0x84C8 NY = D; 0 vale 256
 C 0x84CE su parte alta
 C 0x84D1 ARG a 0
@@ -152,8 +159,10 @@ C 0x84E5 R#17 = 36 (DX) con incremento
 C 0x84F0 DX = D
 C 0x84F5 DY = E...
 C 0x84F8 ...con la pagina (bits 6-7 de A)
+C 0x84F9 la pagina, a los bits 0-1
 C 0x8500 NX = B (de la pila)
 C 0x8505 NY = C; 0 vale 256
+C 0x8507 0 vale 256
 C 0x850B su parte alta
 C 0x850D CLR = el primer byte de HL
 C 0x8514 la operacion logica (bits 0-3)...
@@ -169,14 +178,19 @@ C 0x8548 R#17 = 32 (SX) con incremento
 C 0x8553 SX = H
 C 0x8558 SY = L...
 C 0x855A ...con la pagina (bits 6-7 de A)
+C 0x8562 DX y DY no cuentan en LMCM: a cero
 C 0x856B NX = D (de la pila)
 C 0x8570 NY = E; 0 vale 256
+C 0x8572 0 vale 256
 C 0x8576 su parte alta
 C 0x857A ARG a 0
 C 0x857D la operacion logica...
 C 0x8580 ...con CMD = 0xA0: LMCM (de la VRAM a la CPU)
+C 0x8599 guarda la operacion y las paginas
 C 0x859E el puerto de los registros (VDP.DW + 1)
 C 0x85A3 R#17 = 32 (SX) con incremento
+C 0x85A5 sin interrupciones
+C 0x85AC C = el puerto de registros indirectos (VDP.DW + 3)
 C 0x85AE SX = H
 C 0x85B3 SY = L...
 C 0x85B5 ...con la pagina de origen (bits 6-7 de A)
@@ -188,6 +202,19 @@ C 0x85D2 NY = C
 C 0x85D4 CLR y ARG a 0
 C 0x85DA la operacion logica (bits 0-3 de A)...
 C 0x85DF ...con CMD = 0x90: LMMM
+C 0x85E8 D = la pagina
+C 0x85E9 L = pagina x 2...
+C 0x85EB ...E = pagina x 16...
+C 0x85EF ...H = pagina x 32
+C 0x85F1 R#2: la tabla de nombres de esa pagina
+C 0x85FA a R#2
+C 0x85FD R#10: los colores (la parte alta)
+C 0x8606 a R#10
+C 0x8609 R#4: los patrones
+C 0x8612 a R#4
+C 0x8615 R#11: los atributos de los sprites
+C 0x861B R#6: los patrones de los sprites
+C 0x8624 a R#6
 C 0x8654 un byte de la letra (8 pixeles de 1 bit)
 C 0x8659 4 pares de pixeles
 C 0x865B el color C...
@@ -201,9 +228,34 @@ C 0x86BE 0xFE: otra posicion
 C 0x86C1 con la mascara C
 C 0x86C2 la pinta
 C 0x86C5 8 pixeles a la derecha
+C 0x86CB una letra
+C 0x86CD 0xFF acaba
+C 0x86D1 con la mascara C
+C 0x86D3 a la copia de nombres en la VRAM
+C 0x86D7 la columna siguiente
+C 0x86DB y su dibujo de 8x8...
+C 0x86E1 ...de la hoja de letras de la pagina 1 a la 0
 C 0x8CBD 0, 1, 2... 0xFF
 C 0x8CC4 dos veces
 C 0x8CC6 y 0x40 bytes de 0xE400 a cero
+C 0x8F1F guarda el destino
+C 0x8F21 el mes (ix+0)
+C 0x8F25 los dias de los meses anteriores, en la tabla de p05:959E
+C 0x8F2C D y E: los dias hasta el mes
+C 0x8F2F mas el dia del mes (ix+2)
+C 0x8F37 ¿el ano es bisiesto?
+C 0x8F3B no: ya esta
+C 0x8F3D si, y el mes es marzo o despues...
+C 0x8F44 ...un dia mas (el 29 de febrero)
+C 0x8F4A el ano no es bisiesto...
+C 0x8F4E ...el ano...
+C 0x8F51 ...entre 4
+C 0x8F59 si hay resto, no es bisiesto
+C 0x8F5D entre 100
+C 0x8F65 si hay resto, es bisiesto
+C 0x8F69 entre 400
+C 0x8F6F si hay resto, no lo es
+C 0x8F73 (los dos bytes del resto)
 C 0x9024 un angulo
 C 0x902A menos el retraso de la tabla de IY
 C 0x9039 el siguiente (2 bytes)
@@ -217,6 +269,21 @@ C 0x90A4 ...o H no es 0, no cabe
 C 0x90A7 L < B: cabe
 C 0x90EB la columna 0x88: el dia de hoy
 C 0x90F0 la fila entre 0x58 y 0x5F: la linea del medio
+C 0x90FD la posicion del punto: H = la columna, L = la fila
+C 0x9101 la fila menos 8
+C 0x9106 la columna...
+C 0x9107 ...entre 8...
+C 0x910C H = el resto: el pixel dentro de la casilla
+C 0x9110 el cociente...
+C 0x9113 ...x 256: la fila de casillas
+C 0x9119 mas la fila de pixeles dentro de la casilla
+C 0x9123 la fila...
+C 0x9124 ...entre 8
+C 0x912C el cociente...
+C 0x912F ...x 8: la columna de casillas
+C 0x9136 sumada a la posicion
+C 0x913D el pixel dentro del byte...
+C 0x9141 ...contado desde la izquierda: 7 - resto
 C 0x92D7 la altura + 0x88...
 C 0x92DB ...a la tabla
 C 0x92DD la columna + 0x20
@@ -286,6 +353,13 @@ C 0x94CB ...y se resta
 C 0x94E2 A x 2
 C 0x94E4 x 8
 C 0x94E6 x 8 + x 2 = x 10
+C 0x962B el ano de nacimiento a la copia de nombres (0xE34F)...
+C 0x962E ...4 cifras
+C 0x9633 el mes (0xE356)
+C 0x963E el dia (0xE35B)
+C 0x9649 el ano de hoy (0xE3AF)
+C 0x9654 el mes (0xE3B6)
+C 0x965F el dia (0xE3BB)
 C 0x966B una cifra...
 C 0x966C ...a letra (+0x10)
 C 0x9671 B cifras
@@ -310,6 +384,16 @@ C 0x98C5 los dias del mes...
 C 0x98C6 ...no pueden ser menos que el dia
 C 0x98F5 cuenta los bits hasta el ultimo a 1
 C 0x98F7 D = la posicion
+C 0x993B la primera cifra...
+C 0x9941 ...x 1000
+C 0x9948 la segunda...
+C 0x994E ...x 100
+C 0x9955 sumadas
+C 0x9957 la tercera...
+C 0x995D ...x 10
+C 0x9964 sumadas
+C 0x9965 mas la cuarta
+C 0x996B el numero a 0xE088
 C 0x99AC B = 0: retroceso (BS)
 C 0x99B4 1: flecha derecha (0x1C)
 C 0x99BA 2: flecha izquierda (0x1D)
@@ -341,11 +425,31 @@ C 0x9DAB 1 desde 0x90
 C 0x9DB0 2 desde 0x80
 C 0x9DB5 3 desde 0x70
 C 0x9DBA 4 por debajo
+C 0x9E02 H = la altura del fisico
+C 0x9E05 D = la de la sensibilidad
+C 0x9E08 B = la del intelecto
+C 0x9E0B las letras de cada ciclo: 0x1B, 0x1C y 0x1D
+C 0x9E11 pinta las marcas en la grafica (p06:A33D)
+C 0x9E14 el primer valor...
+C 0x9E17 ...al texto de p05:E441
+C 0x9E1B el segundo
+C 0x9E22 el tercero
+C 0x9E29 y pinta los tres textos de p05:9EF9
 C 0x9F84 una fila de la grafica
 C 0x9F85 0xD0 bytes...
 C 0x9F88 ...con el color 0xF0
 C 0x9F90 la fila siguiente, 0x100 mas alla
 C 0x9F94 las B filas
+C 0x9F97 la linea de arriba de la grafica, a la derecha de 0x0A18...
+C 0x9F9A ...0x1A casillas...
+C 0x9F9C ...con el color 0xFF
+C 0x9FA1 la linea del medio (0x1018), de puntos (0xCC)
+C 0x9FAB la de abajo (0x1618)
+C 0x9FB5 la de la izquierda (0x0919)...
+C 0x9FBF ...y la de la derecha (0x1619)
+C 0x9FC9 las marcas de la escala: 0xC0 en 0x0A18...
+C 0x9FD3 ...0x10 en 0x0A58...
+C 0x9FDD ...y 0x03 en 0x0AE0
 # --- fin de lo escrito a mano ---
 
 # --- BLOQUES QUE LEE EL CODIGO (seccion que reescribe tools/bloques.py; no editar a mano) ---
@@ -736,7 +840,6 @@ C 0x8587 lee_estado_vdp: lee el registro de estado A del VDP (R
 C 0x8592 lee_estado_vdp: lee el registro de estado A del VDP (R
 C 0x859A espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 C 0x85E5 guarda DPPAGE, la pagina que se ve
-C 0x85F1 lee el registro 2 del VDP (copia de la BIOS)
 C 0x8628 letra_1bit_a_4bit: pasa una letra de 1 bit a 4 bits (0xE100) y la escribe (gemela de p09:8EEB)
 C 0x862B siguiente_letra: D += 8; al pasar de fila, E += 8 (gemela de p09:903E)
 C 0x8635 letra_expande: expande los 8 bytes de la letra a 32 con el color C (0xE090)
@@ -747,7 +850,6 @@ C 0x8651 apunta a las cifras de las dos fechas
 C 0x8683 letra_expande: expande los 8 bytes de la letra a 32 con el color C (0xE090)
 C 0x8692 apunta a las cifras de las dos fechas
 C 0x869B escribe_vram_otir: escribe BC bytes de HL en la VRAM DE con OTIR (gemela de p09:8DF6)
-C 0x86DB letra_a_coordenadas: H, L = la columna y la fila de la letra A - 0x20
 C 0x86E3 vdp_hmmm: copia rapida de VRAM a VRAM (HMMM): origen HL, destino DE, tamano BC, paginas en A (gemela de p09:8E52)
 C 0x86ED letra_a_coordenadas: H, L = la columna y la fila de la letra A - 0x20
 C 0x86F5 vdp_hmmm: copia rapida de VRAM a VRAM (HMMM): origen HL, destino DE, tamano BC, paginas en A (gemela de p09:8E52)
@@ -917,7 +1019,6 @@ C 0x8F17 divide: DE / BC: cociente en DE y resto en HL
 C 0x8F1B suma_24: suma DE a los 24 bits de HL
 C 0x8F29 hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x8F32 de_mas_a: DE = DE + A (gemela de p01:7256)
-C 0x8F37 bio_es_bisiesto: mira si el ano es bisiesto (4, 100 y 400): 0xE041
 C 0x8F46 suma_24: suma DE a los 24 bits de HL
 C 0x8F4B guarda el ano es bisiesto
 C 0x8F55 divide: DE / BC: cociente en DE y resto en HL
@@ -985,7 +1086,6 @@ C 0x911F guarda la posicion del punto en la VRAM y el byte siguiente (16 bits)
 C 0x9126 divide_8: L / C: cociente en L y resto en H
 C 0x9129 guarda resultado de 32 bits (parte alta) y el byte siguiente (16 bits)
 C 0x9132 multiplica: HL = DE x BC
-C 0x9136 lee la posicion del punto en la VRAM y el byte siguiente (16 bits)
 C 0x913A guarda la posicion del punto en la VRAM y el byte siguiente (16 bits)
 C 0x9150 lee la posicion del punto en la VRAM y el byte siguiente (16 bits)
 C 0x915D lee la posicion del punto en la VRAM y el byte siguiente (16 bits)
@@ -1107,7 +1207,6 @@ C 0x9628 apunta a las cifras de las dos fechas
 C 0x9630 cifras_a_letras: B cifras de DE a letras (+0x10) en HL
 C 0x963B cifras_a_letras: B cifras de DE a letras (+0x10) en HL
 C 0x9646 cifras_a_letras: B cifras de DE a letras (+0x10) en HL
-C 0x9649 apunta a las cifras de la fecha de hoy
 C 0x9651 cifras_a_letras: B cifras de DE a letras (+0x10) en HL
 C 0x965C cifras_a_letras: B cifras de DE a letras (+0x10) en HL
 C 0x9667 cifras_a_letras: B cifras de DE a letras (+0x10) en HL
@@ -1216,7 +1315,6 @@ C 0x9944 multiplica: HL = DE x BC
 C 0x9951 multiplica: HL = DE x BC
 C 0x9960 multiplica: HL = DE x BC
 C 0x9968 hl_mas_a: HL = HL + A (gemela de p01:7251)
-C 0x996B guarda resultado de 32 bits (parte alta) y el byte siguiente (16 bits)
 C 0x9971 por_10: A x 10
 C 0x9984 bio_espera_tecla_msx2: anima el cursor y espera una tecla (MSX2)
 C 0x9987 bio_tecla: B = la orden de la tecla A: RETURN, flechas o cifra

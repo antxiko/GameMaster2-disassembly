@@ -723,7 +723,7 @@ vdp_hmmm:		; copia rapida de VRAM a VRAM (HMMM): origen HL, destino DE, tamano B
 	inc a			;840c
 	ld c,a			;840d
 	ld a,020h		;840e   ; R#17 = 32 (SX) con incremento: los 15 registros del comando seguidos
-	di			;8410
+	di			;8410   ; sin interrupciones
 	out (c),a		;8411
 	ld a,091h		;8413
 	out (c),a		;8415
@@ -766,7 +766,7 @@ vdp_hmmc:		; copia rapida de la RAM (HL) a un rectangulo de VRAM (HMMC, 0xF0)
 	inc a			;8450
 	ld c,a			;8451
 	ld a,024h		;8452   ; R#17 = 36 (DX) con incremento
-	di			;8454
+	di			;8454   ; sin interrupciones
 	out (c),a		;8455
 	ld a,091h		;8457
 	out (c),a		;8459
@@ -797,7 +797,7 @@ vdp_hmmc:		; copia rapida de la RAM (HL) a un rectangulo de VRAM (HMMC, 0xF0)
 	out (c),a		;8480
 	ld a,091h		;8482
 	out (c),a		;8484
-	inc c			;8486
+	inc c			;8486   ; C = el puerto de registros indirectos
 	inc c			;8487
 L_8488:
 	ld a,002h		;8488   ; el estado S#2
@@ -818,11 +818,11 @@ vdp_ymmm:		; copia en vertical dentro de la VRAM (YMMM, 0xE0)
 	inc a			;84a0
 	ld c,a			;84a1
 	ld a,022h		;84a2   ; R#17 = 34 (SY) con incremento
-	di			;84a4
+	di			;84a4   ; sin interrupciones
 	out (c),a		;84a5
 	ld a,091h		;84a7
 	out (c),a		;84a9
-	inc c			;84ab
+	inc c			;84ab   ; C = el puerto de registros indirectos
 	inc c			;84ac
 	out (c),l		;84ad   ; SY = L...
 	ex af,af'			;84af
@@ -838,7 +838,7 @@ vdp_ymmm:		; copia en vertical dentro de la VRAM (YMMM, 0xE0)
 	rra			;84be
 	and 003h		;84bf
 	out (c),a		;84c1
-	xor a			;84c3
+	xor a			;84c3   ; NX no cuenta en YMMM: a cero
 	out (c),a		;84c4
 	out (c),a		;84c6
 	out (c),d		;84c8   ; NY = D; 0 vale 256
@@ -874,7 +874,7 @@ vdp_lmmc:		; copia de la RAM (HL) a la VRAM con operacion logica (LMMC, 0xB0 | o
 	out (c),e		;84f5   ; DY = E...
 	ex af,af'			;84f7
 	ld b,a			;84f8   ; ...con la pagina (bits 6-7 de A)
-	rlca			;84f9
+	rlca			;84f9   ; la pagina, a los bits 0-1
 	rlca			;84fa
 	and 003h		;84fb
 	out (c),a		;84fd
@@ -883,7 +883,7 @@ vdp_lmmc:		; copia de la RAM (HL) a la VRAM con operacion logica (LMMC, 0xB0 | o
 	xor a			;8502
 	out (c),a		;8503
 	out (c),e		;8505   ; NY = C; 0 vale 256
-	cp e			;8507
+	cp e			;8507   ; 0 vale 256
 	jr nz,L_850B		;8508
 	inc a			;850a
 L_850B:
@@ -944,7 +944,7 @@ vdp_lmcm:		; copia de la VRAM a la RAM con el comando del VDP (LMCM, 0xA0 | op)
 	rlca			;855d
 	and 003h		;855e
 	out (c),a		;8560
-	out (c),a		;8562
+	out (c),a		;8562   ; DX y DY no cuentan en LMCM: a cero
 	out (c),a		;8564
 	out (c),a		;8566
 	out (c),a		;8568
@@ -953,7 +953,7 @@ vdp_lmcm:		; copia de la VRAM a la RAM con el comando del VDP (LMCM, 0xA0 | op)
 	xor a			;856d
 	out (c),a		;856e
 	out (c),e		;8570   ; NY = E; 0 vale 256
-	cp e			;8572
+	cp e			;8572   ; 0 vale 256
 	jr nz,L_8576		;8573
 	inc a			;8575
 L_8576:
@@ -980,18 +980,18 @@ L_8585:
 	inc de			;8596
 	jr L_8585		;8597
 vdp_lmmm:		; copia de VRAM a VRAM con operacion logica (LMMM, desde R#32)
-	ex af,af'			;8599
+	ex af,af'			;8599   ; guarda la operacion y las paginas
 	call espera_vdp		;859a   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 	push bc			;859d
 	ld a,(00007h)		;859e   ; el puerto de los registros (VDP.DW + 1)
 	inc a			;85a1
 	ld c,a			;85a2
 	ld a,020h		;85a3   ; R#17 = 32 (SX) con incremento
-	di			;85a5
+	di			;85a5   ; sin interrupciones
 	out (c),a		;85a6
 	ld a,091h		;85a8
 	out (c),a		;85aa
-	inc c			;85ac
+	inc c			;85ac   ; C = el puerto de registros indirectos (VDP.DW + 3)
 	inc c			;85ad
 	out (c),h		;85ae   ; SX = H
 	xor a			;85b0
@@ -1031,42 +1031,42 @@ vdp_lmmm:		; copia de VRAM a VRAM con operacion logica (LMMM, desde R#32)
 	ret			;85e4
 L_85E5:
 	ld (0faf5h),a		;85e5   ; guarda DPPAGE, la pagina que se ve
-	ld d,a			;85e8
-	add a,a			;85e9
+	ld d,a			;85e8   ; D = la pagina
+	add a,a			;85e9   ; L = pagina x 2...
 	ld l,a			;85ea
-	add a,a			;85eb
+	add a,a			;85eb   ; ...E = pagina x 16...
 	add a,a			;85ec
 	add a,a			;85ed
 	ld e,a			;85ee
-	add a,a			;85ef
+	add a,a			;85ef   ; ...H = pagina x 32
 	ld h,a			;85f0
-	ld a,(0f3e1h)		;85f1   ; lee el registro 2 del VDP (copia de la BIOS)
+	ld a,(0f3e1h)		;85f1   ; R#2: la tabla de nombres de esa pagina
 	and 01fh		;85f4
 	or h			;85f6
 	ld b,a			;85f7
 	ld c,002h		;85f8
-	call 00047h		;85fa   ; BIOS WRTVDP - Writes data in the VDP-register
-	ld a,(0ffe9h)		;85fd
+	call 00047h		;85fa   ; BIOS WRTVDP - Writes data in the VDP-register | a R#2
+	ld a,(0ffe9h)		;85fd   ; R#10: los colores (la parte alta)
 	and 001h		;8600
 	or l			;8602
 	ld b,a			;8603
 	ld c,00ah		;8604
-	call 00047h		;8606   ; BIOS WRTVDP - Writes data in the VDP-register
-	ld a,(0f3e3h)		;8609
+	call 00047h		;8606   ; BIOS WRTVDP - Writes data in the VDP-register | a R#10
+	ld a,(0f3e3h)		;8609   ; R#4: los patrones
 	and 00fh		;860c
 	or e			;860e
 	ld b,a			;860f
 	ld c,004h		;8610
-	call 00047h		;8612   ; BIOS WRTVDP - Writes data in the VDP-register
-	ld b,d			;8615
+	call 00047h		;8612   ; BIOS WRTVDP - Writes data in the VDP-register | a R#4
+	ld b,d			;8615   ; R#11: los atributos de los sprites
 	ld c,00bh		;8616
 	call 00047h		;8618   ; BIOS WRTVDP - Writes data in the VDP-register
-	ld a,(0f3e5h)		;861b
+	ld a,(0f3e5h)		;861b   ; R#6: los patrones de los sprites
 	and 00fh		;861e
 	or e			;8620
 	ld b,a			;8621
 	ld c,006h		;8622
-	call 00047h		;8624   ; BIOS WRTVDP - Writes data in the VDP-register
+	call 00047h		;8624   ; BIOS WRTVDP - Writes data in the VDP-register | a R#6
 	ret			;8627
 letras_1bit_a_4bit:		; pinta B letras de 1 bit en SCREEN 5 (4 bits)
 	call letra_1bit_a_4bit		;8628   ; letra_1bit_a_4bit: pasa una letra de 1 bit a 4 bits (0xE100) y la escribe (gemela de p09:8EEB)
@@ -1188,23 +1188,23 @@ L_86B9:
 	ld d,a			;86c8
 	jr L_86B9		;86c9
 L_86CB:
-	ld a,(hl)			;86cb
+	ld a,(hl)			;86cb   ; una letra
 	inc hl			;86cc
-	ld b,a			;86cd
+	ld b,a			;86cd   ; 0xFF acaba
 	inc b			;86ce
 	ret z			;86cf
 	inc b			;86d0
-	and c			;86d1
+	and c			;86d1   ; con la mascara C
 	ex de,hl			;86d2
-	call 0004dh		;86d3   ; BIOS WRTVRM - Writes data in VRAM
+	call 0004dh		;86d3   ; BIOS WRTVRM - Writes data in VRAM | a la copia de nombres en la VRAM
 	ex de,hl			;86d6
-	inc de			;86d7
+	inc de			;86d7   ; la columna siguiente
 	push bc			;86d8
 	push hl			;86d9
 	push de			;86da
-	call letra_a_coordenadas		;86db   ; letra_a_coordenadas: H, L = la columna y la fila de la letra A - 0x20
+	call letra_a_coordenadas		;86db   ; y su dibujo de 8x8...
 	ld bc,00808h		;86de
-	ld a,001h		;86e1
+	ld a,001h		;86e1   ; ...de la hoja de letras de la pagina 1 a la 0
 	call vdp_hmmm		;86e3   ; vdp_hmmm: copia rapida de VRAM a VRAM (HMMM): origen HL, destino DE, tamano BC, paginas en A (gemela de p09:8E52)
 	pop de			;86e6
 	pop hl			;86e7
@@ -2048,57 +2048,57 @@ bio_divide_400:		; suma (ano - 1) / 400
 L_8F1E:
 	ret			;8f1e
 bio_dias_hasta_el_mes:		; suma los dias de los meses anteriores (tabla p05:959E)
-	push de			;8f1f
+	push de			;8f1f   ; guarda el destino
 	push hl			;8f20
-	ld a,(ix+000h)		;8f21
+	ld a,(ix+000h)		;8f21   ; el mes (ix+0)
 	dec a			;8f24
-	ld hl,0959eh		;8f25
+	ld hl,0959eh		;8f25   ; los dias de los meses anteriores, en la tabla de p05:959E
 	add a,a			;8f28
 	call hl_mas_a		;8f29   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
-	ld d,(hl)			;8f2c
+	ld d,(hl)			;8f2c   ; D y E: los dias hasta el mes
 	inc hl			;8f2d
 	ld e,(hl)			;8f2e
-	ld a,(ix+002h)		;8f2f
+	ld a,(ix+002h)		;8f2f   ; mas el dia del mes (ix+2)
 	call de_mas_a		;8f32   ; de_mas_a: DE = DE + A (gemela de p01:7256)
 	pop hl			;8f35
 	push de			;8f36
-	call bio_es_bisiesto		;8f37   ; bio_es_bisiesto: mira si el ano es bisiesto (4, 100 y 400): 0xE041
+	call bio_es_bisiesto		;8f37   ; ¿el ano es bisiesto?
 	pop de			;8f3a
-	jr nc,L_8F45		;8f3b
-	ld a,002h		;8f3d
+	jr nc,L_8F45		;8f3b   ; no: ya esta
+	ld a,002h		;8f3d   ; si, y el mes es marzo o despues...
 	cp (ix+000h)		;8f3f
 	jr nc,L_8F45		;8f42
-	inc de			;8f44
+	inc de			;8f44   ; ...un dia mas (el 29 de febrero)
 L_8F45:
 	pop hl			;8f45
 	call suma_24		;8f46   ; suma_24: suma DE a los 24 bits de HL
 	ret			;8f49
 bio_es_bisiesto:		; mira si el ano es bisiesto (4, 100 y 400): 0xE041
-	xor a			;8f4a
+	xor a			;8f4a   ; el ano no es bisiesto...
 	ld (0e041h),a		;8f4b   ; guarda el ano es bisiesto
-	ld e,(hl)			;8f4e
+	ld e,(hl)			;8f4e   ; ...el ano...
 	inc hl			;8f4f
 	ld d,(hl)			;8f50
-	ld bc,00004h		;8f51
+	ld bc,00004h		;8f51   ; ...entre 4
 	push de			;8f54
 	call divide		;8f55   ; divide: DE / BC: cociente en DE y resto en HL
 	pop de			;8f58
-	ld a,l			;8f59
+	ld a,l			;8f59   ; si hay resto, no es bisiesto
 	and a			;8f5a
 	jr nz,L_8F7E		;8f5b
-	ld bc,00064h		;8f5d
+	ld bc,00064h		;8f5d   ; entre 100
 	push de			;8f60
 	call divide		;8f61   ; divide: DE / BC: cociente en DE y resto en HL
 	pop de			;8f64
-	ld a,l			;8f65
+	ld a,l			;8f65   ; si hay resto, es bisiesto
 	and a			;8f66
 	jr nz,L_8F77		;8f67
-	ld bc,00190h		;8f69
+	ld bc,00190h		;8f69   ; entre 400
 	call divide		;8f6c   ; divide: DE / BC: cociente en DE y resto en HL
-	ld a,h			;8f6f
+	ld a,h			;8f6f   ; si hay resto, no lo es
 	and a			;8f70
 	jr nz,L_8F7E		;8f71
-	ld a,l			;8f73
+	ld a,l			;8f73   ; (los dos bytes del resto)
 	and a			;8f74
 	jr nz,L_8F7E		;8f75
 L_8F77:
@@ -2314,42 +2314,42 @@ L_90FB:
 	xor a			;90fb
 	ret			;90fc
 bio_posicion:		; la posicion en la pantalla del punto (0xE08C)
-	ld a,h			;90fd
+	ld a,h			;90fd   ; la posicion del punto: H = la columna, L = la fila
 	ld h,a			;90fe
 	ld a,l			;90ff
 	ld l,a			;9100
-	sub 008h		;9101
+	sub 008h		;9101   ; la fila menos 8
 	ld l,a			;9103
 	ex de,hl			;9104
 	push de			;9105
-	ld l,e			;9106
-	ld c,008h		;9107
+	ld l,e			;9106   ; la columna...
+	ld c,008h		;9107   ; ...entre 8...
 	call divide_8		;9109   ; divide_8: L / C: cociente en L y resto en H
-	ld a,h			;910c
+	ld a,h			;910c   ; H = el resto: el pixel dentro de la casilla
 	ld (0e088h),hl		;910d   ; guarda resultado de 32 bits (parte alta) y el byte siguiente (16 bits)
-	ld b,000h		;9110
+	ld b,000h		;9110   ; el cociente...
 	ld c,l			;9112
-	ld de,00100h		;9113
+	ld de,00100h		;9113   ; ...x 256: la fila de casillas
 	call multiplica		;9116   ; multiplica: HL = DE x BC
-	ld a,(0e089h)		;9119
+	ld a,(0e089h)		;9119   ; mas la fila de pixeles dentro de la casilla
 	call hl_mas_a		;911c   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld (0e08ch),hl		;911f   ; guarda la posicion del punto en la VRAM y el byte siguiente (16 bits)
 	pop de			;9122
-	ld l,d			;9123
-	ld c,008h		;9124
+	ld l,d			;9123   ; la fila...
+	ld c,008h		;9124   ; ...entre 8
 	call divide_8		;9126   ; divide_8: L / C: cociente en L y resto en H
 	ld (0e088h),hl		;9129   ; guarda resultado de 32 bits (parte alta) y el byte siguiente (16 bits)
-	ld b,000h		;912c
+	ld b,000h		;912c   ; el cociente...
 	ld c,l			;912e
-	ld de,00008h		;912f
+	ld de,00008h		;912f   ; ...x 8: la columna de casillas
 	call multiplica		;9132   ; multiplica: HL = DE x BC
 	ex de,hl			;9135
-	ld hl,(0e08ch)		;9136   ; lee la posicion del punto en la VRAM y el byte siguiente (16 bits)
+	ld hl,(0e08ch)		;9136   ; sumada a la posicion
 	add hl,de			;9139
 	ld (0e08ch),hl		;913a   ; guarda la posicion del punto en la VRAM y el byte siguiente (16 bits)
-	ld a,(0e089h)		;913d
+	ld a,(0e089h)		;913d   ; el pixel dentro del byte...
 	ld b,a			;9140
-	ld a,007h		;9141
+	ld a,007h		;9141   ; ...contado desde la izquierda: 7 - resto
 	sub b			;9143
 	ret			;9144
 bit_de_pixel:		; A = el bit del pixel
@@ -3072,26 +3072,26 @@ L_9624:
 	ret			;9627
 bio_cifras_a_nombres:		; las cifras de las dos fechas (0xE090...) a la copia de nombres
 	ld de,0e090h		;9628   ; apunta a las cifras de las dos fechas
-	ld hl,0e34fh		;962b
-	ld b,004h		;962e
+	ld hl,0e34fh		;962b   ; el ano de nacimiento a la copia de nombres (0xE34F)...
+	ld b,004h		;962e   ; ...4 cifras
 	call cifras_a_letras		;9630   ; cifras_a_letras: B cifras de DE a letras (+0x10) en HL
-	ld de,0e094h		;9633
+	ld de,0e094h		;9633   ; el mes (0xE356)
 	ld hl,0e356h		;9636
 	ld b,002h		;9639
 	call cifras_a_letras		;963b   ; cifras_a_letras: B cifras de DE a letras (+0x10) en HL
-	ld de,0e096h		;963e
+	ld de,0e096h		;963e   ; el dia (0xE35B)
 	ld hl,0e35bh		;9641
 	ld b,002h		;9644
 	call cifras_a_letras		;9646   ; cifras_a_letras: B cifras de DE a letras (+0x10) en HL
-	ld de,0e098h		;9649   ; apunta a las cifras de la fecha de hoy
+	ld de,0e098h		;9649   ; el ano de hoy (0xE3AF)
 	ld hl,0e3afh		;964c
 	ld b,004h		;964f
 	call cifras_a_letras		;9651   ; cifras_a_letras: B cifras de DE a letras (+0x10) en HL
-	ld de,0e09ch		;9654
+	ld de,0e09ch		;9654   ; el mes (0xE3B6)
 	ld hl,0e3b6h		;9657
 	ld b,002h		;965a
 	call cifras_a_letras		;965c   ; cifras_a_letras: B cifras de DE a letras (+0x10) en HL
-	ld de,0e09eh		;965f
+	ld de,0e09eh		;965f   ; el dia (0xE3BB)
 	ld hl,0e3bbh		;9662
 	ld b,002h		;9665
 	call cifras_a_letras		;9667   ; cifras_a_letras: B cifras de DE a letras (+0x10) en HL
@@ -3548,30 +3548,30 @@ L_992C:
 	ldir		;9938
 	ret			;993a
 cuatro_cifras:		; las 4 cifras de IX a binario (x1000, x100, x10)
-	ld a,(ix+000h)		;993b
+	ld a,(ix+000h)		;993b   ; la primera cifra...
 	ld b,000h		;993e
 	ld c,a			;9940
-	ld de,003e8h		;9941
+	ld de,003e8h		;9941   ; ...x 1000
 	call multiplica		;9944   ; multiplica: HL = DE x BC
 	push hl			;9947
-	ld a,(ix+001h)		;9948
+	ld a,(ix+001h)		;9948   ; la segunda...
 	ld b,000h		;994b
 	ld c,a			;994d
-	ld de,00064h		;994e
+	ld de,00064h		;994e   ; ...x 100
 	call multiplica		;9951   ; multiplica: HL = DE x BC
 	pop de			;9954
-	add hl,de			;9955
+	add hl,de			;9955   ; sumadas
 	push hl			;9956
-	ld a,(ix+002h)		;9957
+	ld a,(ix+002h)		;9957   ; la tercera...
 	ld b,000h		;995a
 	ld c,a			;995c
-	ld de,0000ah		;995d
+	ld de,0000ah		;995d   ; ...x 10
 	call multiplica		;9960   ; multiplica: HL = DE x BC
 	pop de			;9963
-	add hl,de			;9964
-	ld a,(ix+003h)		;9965
+	add hl,de			;9964   ; sumadas
+	ld a,(ix+003h)		;9965   ; mas la cuarta
 	call hl_mas_a		;9968   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
-	ld (0e088h),hl		;996b   ; guarda resultado de 32 bits (parte alta) y el byte siguiente (16 bits)
+	ld (0e088h),hl		;996b   ; el numero a 0xE088
 	ret			;996e
 dos_cifras:		; las 2 cifras de HL a binario (x10)
 	push de			;996f
@@ -4294,23 +4294,23 @@ bio_textos_9f0a:		; pinta los textos de p05:9F0A y p05:9F29
 	ret			;9dfd
 bio_pinta_marcas:		; pinta las marcas de los tres ciclos (p06:A33D)
 	ld ix,0e05ah		;9dfe   ; apunta a la altura del fisico
-	ld h,(ix+000h)		;9e02
-	ld d,(ix+002h)		;9e05
-	ld b,(ix+004h)		;9e08
-	ld l,01bh		;9e0b
+	ld h,(ix+000h)		;9e02   ; H = la altura del fisico
+	ld d,(ix+002h)		;9e05   ; D = la de la sensibilidad
+	ld b,(ix+004h)		;9e08   ; B = la del intelecto
+	ld l,01bh		;9e0b   ; las letras de cada ciclo: 0x1B, 0x1C y 0x1D
 	ld e,01ch		;9e0d
 	ld c,01dh		;9e0f
-	call 0a33dh		;9e11
-	ld a,(0e070h)		;9e14
-	ld hl,0e441h		;9e17
+	call 0a33dh		;9e11   ; pinta las marcas en la grafica (p06:A33D)
+	ld a,(0e070h)		;9e14   ; el primer valor...
+	ld hl,0e441h		;9e17   ; ...al texto de p05:E441
 	ld (hl),a			;9e1a
-	ld a,(0e071h)		;9e1b
+	ld a,(0e071h)		;9e1b   ; el segundo
 	ld hl,0e461h		;9e1e
 	ld (hl),a			;9e21
-	ld a,(0e072h)		;9e22
+	ld a,(0e072h)		;9e22   ; el tercero
 	ld hl,0e481h		;9e25
 	ld (hl),a			;9e28
-	ld de,09ef9h		;9e29
+	ld de,09ef9h		;9e29   ; y pinta los tres textos de p05:9EF9
 	call pinta_texto_bio		;9e2c   ; pinta_texto_bio: pinta un texto [direccion][letras]; 0x80 acaba, 0x81 otra direccion
 	ret			;9e2f
 bio_texto_9e3e:		; pinta el texto de p05:9E3E
@@ -4382,35 +4382,35 @@ L_9F84:
 	djnz L_9F84		;9f94   ; las B filas
 	ret			;9f96
 bio_lineas_guia:		; pinta las lineas guia de la grafica
-	ld hl,00a18h		;9f97
-	ld b,01ah		;9f9a
-	ld a,0ffh		;9f9c
+	ld hl,00a18h		;9f97   ; la linea de arriba de la grafica, a la derecha de 0x0A18...
+	ld b,01ah		;9f9a   ; ...0x1A casillas...
+	ld a,0ffh		;9f9c   ; ...con el color 0xFF
 	call or_en_color		;9f9e   ; or_en_color: OR de A en el color de B casillas (VRAM + 0x2000)
-	ld hl,01018h		;9fa1
+	ld hl,01018h		;9fa1   ; la linea del medio (0x1018), de puntos (0xCC)
 	ld b,01ah		;9fa4
 	ld a,0cch		;9fa6
 	call or_en_color		;9fa8   ; or_en_color: OR de A en el color de B casillas (VRAM + 0x2000)
-	ld hl,01618h		;9fab
+	ld hl,01618h		;9fab   ; la de abajo (0x1618)
 	ld b,01ah		;9fae
 	ld a,0ffh		;9fb0
 	call or_en_color		;9fb2   ; or_en_color: OR de A en el color de B casillas (VRAM + 0x2000)
-	ld hl,00919h		;9fb5
+	ld hl,00919h		;9fb5   ; la de la izquierda (0x0919)...
 	ld b,01ah		;9fb8
 	ld a,0ffh		;9fba
 	call or_en_color		;9fbc   ; or_en_color: OR de A en el color de B casillas (VRAM + 0x2000)
-	ld hl,01619h		;9fbf
+	ld hl,01619h		;9fbf   ; ...y la de la derecha (0x1619)
 	ld b,01ah		;9fc2
 	ld a,0ffh		;9fc4
 	call or_en_color		;9fc6   ; or_en_color: OR de A en el color de B casillas (VRAM + 0x2000)
-	ld hl,00a18h		;9fc9
+	ld hl,00a18h		;9fc9   ; las marcas de la escala: 0xC0 en 0x0A18...
 	ld b,00ch		;9fcc
 	ld a,0c0h		;9fce
 	call or_en_color_8		;9fd0   ; or_en_color_8: OR de A en 8 filas de color de B casillas
-	ld hl,00a58h		;9fd3
+	ld hl,00a58h		;9fd3   ; ...0x10 en 0x0A58...
 	ld b,00ch		;9fd6
 	ld a,010h		;9fd8
 	call or_en_color_8		;9fda   ; or_en_color_8: OR de A en 8 filas de color de B casillas
-	ld hl,00ae0h		;9fdd
+	ld hl,00ae0h		;9fdd   ; ...y 0x03 en 0x0AE0
 	ld b,00ch		;9fe0
 	ld a,003h		;9fe2
 	call or_en_color_8		;9fe4   ; or_en_color_8: OR de A en 8 filas de color de B casillas

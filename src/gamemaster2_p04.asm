@@ -207,7 +207,7 @@ sram_tamano:		; el tamano del fichero de IX
 	ld e,(ix+00bh)		;8115
 	ld d,(ix+00ch)		;8118
 	ld hl,0ffffh		;811b
-	rst 20h			;811e
+	rst 20h			;811e   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	ret z			;811f
 	ld l,(ix+007h)		;8120
 	ld h,000h		;8123
@@ -442,7 +442,7 @@ sram_lee:		; lee del fichero a la RAM
 	ld h,(ix+00ah)		;82cb
 	ld e,(ix+005h)		;82ce
 	ld d,(ix+006h)		;82d1
-	rst 20h			;82d4
+	rst 20h			;82d4   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	jp nc,L_806F		;82d5
 	call sram_siguiente_bloque		;82d8   ; sram_siguiente_bloque: pasa al bloque siguiente del fichero
 	jr nz,L_82E3		;82db
@@ -474,7 +474,7 @@ L_830A:
 	ld h,(ix+00ah)		;830e
 	ld e,(ix+005h)		;8311
 	ld d,(ix+006h)		;8314
-	rst 20h			;8317
+	rst 20h			;8317   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	exx			;8318
 	jr nc,L_8330		;8319
 	ld a,l			;831b

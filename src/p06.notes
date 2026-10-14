@@ -67,17 +67,26 @@ C 0xA2A8 bio_texto_a1bd: pinta el texto de p06:A1BD
 C 0xA2AE bio_borra_zona: borra la zona de la grafica (comando del VDP)
 C 0xA2B1 bio_texto_a1cb: pinta el texto de p06:A1CB
 C 0xA2B7 bio_avanza_dia: pasa el dia (0xE061) cada 64 cuadros
+C 0xA2BA apunta a el dia de la grafica
 C 0xA2CD pon_color: MSX2: el color B de la paleta con D y E (R#16 y puerto 2)
 C 0xA2D3 bio_avanza_dia: pasa el dia (0xE061) cada 64 cuadros
+C 0xA2D6 apunta a el dia de la grafica
 C 0xA2F1 pon_color: MSX2: el color B de la paleta con D y E (R#16 y puerto 2)
 C 0xA2F7 bio_avanza_dia: pasa el dia (0xE061) cada 64 cuadros
+C 0xA2FA apunta a el dia de la grafica
 C 0xA30B pon_color: MSX2: el color B de la paleta con D y E (R#16 y puerto 2)
 C 0xA314 bio_borra_zona: borra la zona de la grafica (comando del VDP)
 C 0xA317 bio_texto_a1da: pinta el texto de p06:A1DA
-C 0xA31E lee fila elegida de la SRAM
+C 0xA31E lee el contador de cuadros
+C 0xA325 apunta a el dia de la grafica
+C 0xA32D guarda el dia de la grafica
 C 0xA336 bio_valores: los tres valores del dia (0xE05A..) a 0xE070
 C 0xA339 bio_pinta_letras: pinta P, S e I (fisico, sensibilidad, intelecto) en su altura
+C 0xA352 apunta a los tres valores del dia
+C 0xA360 apunta a la altura del fisico
+C 0xA363 apunta a los tres valores del dia
 C 0xA36E hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0xA375 apunta a los tres valores del dia
 C 0xA37E bio_pinta_marca: pinta la marca de un ciclo en su altura
 C 0xA386 bio_pinta_marca: pinta la marca de un ciclo en su altura
 C 0xA38E bio_pinta_marca: pinta la marca de un ciclo en su altura
@@ -86,13 +95,22 @@ C 0xA397 bio_casilla: pinta una casilla con el comando del VDP
 C 0xA39C pinta_letra_8x8: copia la letra A de 8x8 de la hoja de letras a DE (LMMM)
 C 0xA3AA bio_niveles: clasifica los tres ciclos (0xE05A, 0xE05C, 0xE05E)
 C 0xA3AD bio_pinta_niveles: pinta el nivel de cada ciclo
+C 0xA3B1 lee la altura del fisico
+C 0xA3B4 apunta a el nivel del fisico
 C 0xA3B7 bio_nivel: B = el nivel de A (umbrales 0xA8, 0x94, 0x7E...)
+C 0xA3BA lee la altura de la sensibilidad
+C 0xA3BD apunta a el nivel de la sensibilidad
 C 0xA3C0 bio_nivel: B = el nivel de A (umbrales 0xA8, 0x94, 0x7E...)
+C 0xA3C3 lee la altura del intelecto
+C 0xA3C6 apunta a el nivel del intelecto
 C 0xA3C9 bio_nivel: B = el nivel de A (umbrales 0xA8, 0x94, 0x7E...)
+C 0xA3EA lee el nivel del fisico
 C 0xA3ED bio_texto_nivel: el texto del nivel A (tabla de p06:A417)
 C 0xA3F3 bio_pinta_texto: pinta el texto del nivel en DE
+C 0xA3F6 lee el nivel de la sensibilidad
 C 0xA3F9 bio_texto_nivel: el texto del nivel A (tabla de p06:A417)
 C 0xA3FF bio_pinta_texto: pinta el texto del nivel en DE
+C 0xA402 lee el nivel del intelecto
 C 0xA405 bio_texto_nivel: el texto del nivel A (tabla de p06:A417)
 C 0xA40B bio_pinta_texto: pinta el texto del nivel en DE
 C 0xA412 tabla_palabra: DE = la palabra A de la tabla de HL

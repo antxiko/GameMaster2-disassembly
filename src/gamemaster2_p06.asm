@@ -294,7 +294,7 @@ L_A2AE:
 	jp L_A32C		;a2b4
 L_A2B7:
 	call bio_avanza_dia		;a2b7   ; bio_avanza_dia: pasa el dia (0xE061) cada 64 cuadros
-	ld hl,0e061h		;a2ba
+	ld hl,0e061h		;a2ba   ; apunta a el dia de la grafica
 	ld a,(hl)			;a2bd
 	cp 013h		;a2be
 	jr nc,L_A311		;a2c0
@@ -308,7 +308,7 @@ L_A2B7:
 	jp L_A335		;a2d0
 L_A2D3:
 	call bio_avanza_dia		;a2d3   ; bio_avanza_dia: pasa el dia (0xE061) cada 64 cuadros
-	ld hl,0e061h		;a2d6
+	ld hl,0e061h		;a2d6   ; apunta a el dia de la grafica
 	ld a,(hl)			;a2d9
 	cp 013h		;a2da
 	jr nc,L_A311		;a2dc
@@ -326,7 +326,7 @@ L_A2D3:
 	jp L_A335		;a2f4
 L_A2F7:
 	call bio_avanza_dia		;a2f7   ; bio_avanza_dia: pasa el dia (0xE061) cada 64 cuadros
-	ld hl,0e061h		;a2fa
+	ld hl,0e061h		;a2fa   ; apunta a el dia de la grafica
 	ld a,(hl)			;a2fd
 	cp 013h		;a2fe
 	jr nc,L_A311		;a300
@@ -346,11 +346,11 @@ L_A314:
 L_A31D:
 	ret			;a31d
 bio_avanza_dia:		; pasa el dia (0xE061) cada 64 cuadros
-	ld a,(0e001h)		;a31e   ; lee fila elegida de la SRAM
+	ld a,(0e001h)		;a31e   ; lee el contador de cuadros
 	and 03fh		;a321
 	jr nz,L_A32B		;a323
 bio_dia_sube:		; sube el dia mostrado (0xE054) (gemela de p05:9B8D)
-	ld hl,0e061h		;a325
+	ld hl,0e061h		;a325   ; apunta a el dia de la grafica
 	ld a,(hl)			;a328
 	inc a			;a329
 	ld (hl),a			;a32a
@@ -358,7 +358,7 @@ L_A32B:
 	ret			;a32b
 L_A32C:
 	xor a			;a32c
-	ld (0e061h),a		;a32d
+	ld (0e061h),a		;a32d   ; guarda el dia de la grafica
 	ld hl,0e003h		;a330
 	inc (hl)			;a333
 	ret			;a334
@@ -390,14 +390,14 @@ L_A34A:
 	ld c,e			;a350
 	pop de			;a351
 L_A352:
-	ld ix,0e070h		;a352
+	ld ix,0e070h		;a352   ; apunta a los tres valores del dia
 	ld (ix+000h),c		;a356
 	ld (ix+001h),e		;a359
 	ld (ix+002h),l		;a35c
 	ret			;a35f
 bio_valores:		; los tres valores del dia (0xE05A..) a 0xE070
-	ld hl,0e05ah		;a360
-	ld de,0e070h		;a363
+	ld hl,0e05ah		;a360   ; apunta a la altura del fisico
+	ld de,0e070h		;a363   ; apunta a los tres valores del dia
 	ld b,003h		;a366
 L_A368:
 	ld a,(hl)			;a368
@@ -409,7 +409,7 @@ L_A368:
 	djnz L_A368		;a372
 	ret			;a374
 bio_pinta_letras:		; pinta P, S e I (fisico, sensibilidad, intelecto) en su altura
-	ld ix,0e070h		;a375
+	ld ix,0e070h		;a375   ; apunta a los tres valores del dia
 	ld a,(ix+000h)		;a379
 	ld b,050h		;a37c
 	call bio_pinta_marca		;a37e   ; bio_pinta_marca: pinta la marca de un ciclo en su altura
@@ -442,14 +442,14 @@ L_A3A4:
 L_A3B0:
 	ret			;a3b0
 bio_niveles:		; clasifica los tres ciclos (0xE05A, 0xE05C, 0xE05E)
-	ld a,(0e05ah)		;a3b1
-	ld hl,0e075h		;a3b4
+	ld a,(0e05ah)		;a3b1   ; lee la altura del fisico
+	ld hl,0e075h		;a3b4   ; apunta a el nivel del fisico
 	call bio_nivel		;a3b7   ; bio_nivel: B = el nivel de A (umbrales 0xA8, 0x94, 0x7E...)
-	ld a,(0e05ch)		;a3ba
-	ld hl,0e074h		;a3bd
+	ld a,(0e05ch)		;a3ba   ; lee la altura de la sensibilidad
+	ld hl,0e074h		;a3bd   ; apunta a el nivel de la sensibilidad
 	call bio_nivel		;a3c0   ; bio_nivel: B = el nivel de A (umbrales 0xA8, 0x94, 0x7E...)
-	ld a,(0e05eh)		;a3c3
-	ld hl,0e073h		;a3c6
+	ld a,(0e05eh)		;a3c3   ; lee la altura del intelecto
+	ld hl,0e073h		;a3c6   ; apunta a el nivel del intelecto
 	call bio_nivel		;a3c9   ; bio_nivel: B = el nivel de A (umbrales 0xA8, 0x94, 0x7E...)
 	ret			;a3cc
 bio_nivel:		; B = el nivel de A (umbrales 0xA8, 0x94, 0x7E...)
@@ -474,15 +474,15 @@ L_A3E8:
 	ld (hl),b			;a3e8
 	ret			;a3e9
 bio_pinta_niveles:		; pinta el nivel de cada ciclo
-	ld a,(0e075h)		;a3ea
+	ld a,(0e075h)		;a3ea   ; lee el nivel del fisico
 	call bio_texto_nivel		;a3ed   ; bio_texto_nivel: el texto del nivel A (tabla de p06:A417)
 	ld de,05030h		;a3f0
 	call bio_pinta_texto		;a3f3   ; bio_pinta_texto: pinta el texto del nivel en DE
-	ld a,(0e074h)		;a3f6
+	ld a,(0e074h)		;a3f6   ; lee el nivel de la sensibilidad
 	call bio_texto_nivel		;a3f9   ; bio_texto_nivel: el texto del nivel A (tabla de p06:A417)
 	ld de,0503ah		;a3fc
 	call bio_pinta_texto		;a3ff   ; bio_pinta_texto: pinta el texto del nivel en DE
-	ld a,(0e073h)		;a402
+	ld a,(0e073h)		;a402   ; lee el nivel del intelecto
 	call bio_texto_nivel		;a405   ; bio_texto_nivel: el texto del nivel A (tabla de p06:A417)
 	ld de,05044h		;a408
 	call bio_pinta_texto		;a40b   ; bio_pinta_texto: pinta el texto del nivel en DE

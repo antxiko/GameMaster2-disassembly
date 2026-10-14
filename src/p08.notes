@@ -19,19 +19,39 @@ L 0xA32C sonido_ruido el periodo del ruido (R#6) si hay que cambiarlo
 L 0xA356 sonido_envolvente la envolvente (R#11-13) si hay que cambiarla
 L 0xA384 sonido_mezclador el mezclador del PSG (R#7) segun los canales
 L 0xA3C7 tabla_por_dos_bits HL = HL + (A and 3)
+C 0xA093 lee el canal que se esta tocando
+C 0xA098 lee lo que hay que mandar al PSG
+C 0xA0A2 guarda lo que hay que mandar al PSG
+C 0xA0AC guarda lo que hay que mandar al PSG
+C 0xA0B8 lee el canal que se esta tocando
+C 0xA0C4 lee lo que hay que mandar al PSG
+C 0xA0CB guarda lo que hay que mandar al PSG
+C 0xA0D2 lee lo que hay que mandar al PSG
+C 0xA0D9 guarda lo que hay que mandar al PSG
+C 0xA0E7 apunta a lo que hay que mandar al PSG
+C 0xA0F7 apunta a lo que hay que mandar al PSG
+C 0xA107 apunta a lo que hay que mandar al PSG
+C 0xA114 apunta a lo que hay que mandar al PSG
 C 0xA20A palabra_y_retrocede: HL = la palabra siguiente - 1
 C 0xA244 palabra_y_retrocede: HL = la palabra siguiente - 1
 C 0xA24F palabra_y_retrocede: HL = la palabra siguiente - 1
+C 0xA291 apunta a el estado del mezclador
 C 0xA2B2 sonido_al_psg: manda al PSG los registros de los canales
 C 0xA2B5 sonido_ruido: el periodo del ruido (R#6) si hay que cambiarlo
 C 0xA2B8 sonido_envolvente: la envolvente (R#11-13) si hay que cambiarla
 C 0xA2BB sonido_mezclador: el mezclador del PSG (R#7) segun los canales
 C 0xA2C6 tres_registros_psg: escribe tres registros del PSG desde HL
+C 0xA2C9 apunta a el estado del mezclador
 C 0xA2E0 tres_registros_psg: escribe tres registros del PSG desde HL
 C 0xA2E9 tres_registros_psg: escribe tres registros del PSG desde HL
+C 0xA2EC apunta a el estado del mezclador
 C 0xA303 tres_registros_psg: escribe tres registros del PSG desde HL
 C 0xA30A tres_registros_psg: escribe tres registros del PSG desde HL
+C 0xA32C apunta a lo que hay que mandar al PSG
+C 0xA356 apunta a lo que hay que mandar al PSG
 C 0xA38B tabla_por_dos_bits: HL = HL + (A and 3)
+C 0xA38F lee el estado del mezclador
 C 0xA3A1 tabla_por_dos_bits: HL = HL + (A and 3)
+C 0xA3A5 lee el estado del mezclador
 C 0xA3B7 tabla_por_dos_bits: HL = HL + (A and 3)
 # --- fin de las anotaciones de anota.py ---

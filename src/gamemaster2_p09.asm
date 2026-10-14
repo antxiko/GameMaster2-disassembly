@@ -17,56 +17,56 @@
 engancha_cuenta:		; pone en H.KEYI (0xFD9A) la cuenta atras de 0xE008 (p09:800E)
 	di			;8000
 	ld hl,L_800E		;8001
-	ld de,0fd9ah		;8004
+	ld de,0fd9ah		;8004   ; apunta a el gancho H.KEYI
 	ld bc,00005h		;8007
 	ldir		;800a
 	ei			;800c
 	ret			;800d
 L_800E:
-	ld hl,0e008h		;800e
+	ld hl,0e008h		;800e   ; apunta a la cuenta atras de la interrupcion
 	dec (hl)			;8011
 	ret			;8012
 desengancha_cuenta:		; devuelve H.KEYI a `ret`
 	di			;8013
 	ld a,0c9h		;8014
-	ld (0fd9ah),a		;8016
+	ld (0fd9ah),a		;8016   ; guarda el gancho H.KEYI
 	ei			;8019
 	ret			;801a
 L_801B:
 	call engancha_cuenta		;801b   ; engancha_cuenta: pone en H.KEYI (0xFD9A) la cuenta atras de 0xE008 (p09:800E)
-	ld a,(0002dh)		;801e
-	ld (0e003h),a		;8021
-	ld a,(0002bh)		;8024
+	ld a,(0002dh)		;801e   ; la version del MSX (0 = MSX1)
+	ld (0e003h),a		;8021   ; guarda es un MSX2
+	ld a,(0002bh)		;8024   ; el juego de caracteres y la frecuencia de la BIOS
 	and 00fh		;8027
-	ld (0e009h),a		;8029
+	ld (0e009h),a		;8029   ; guarda el juego de caracteres de la BIOS (0x002B)
 	jr z,L_8032		;802c
 	xor a			;802e
-	ld (0e003h),a		;802f
+	ld (0e003h),a		;802f   ; guarda es un MSX2
 L_8032:
-	ld a,(0e003h)		;8032
+	ld a,(0e003h)		;8032   ; lee es un MSX2
 	and a			;8035
 	jr z,L_8060		;8036
 	ld a,004h		;8038
-	ld (0f3ebh),a		;803a
+	ld (0f3ebh),a		;803a   ; guarda el color del borde (BDRCLR)
 	call 00062h		;803d   ; BIOS CHGCLR - Changes the screen colors
 	jp L_8091		;8040
 L_8043:
-	ld a,(0002dh)		;8043
-	ld (0e003h),a		;8046
-	ld a,(0002bh)		;8049
+	ld a,(0002dh)		;8043   ; la version del MSX (0 = MSX1)
+	ld (0e003h),a		;8046   ; guarda es un MSX2
+	ld a,(0002bh)		;8049   ; el juego de caracteres y la frecuencia de la BIOS
 	and 00fh		;804c
-	ld (0e009h),a		;804e
+	ld (0e009h),a		;804e   ; guarda el juego de caracteres de la BIOS (0x002B)
 	jr z,L_8057		;8051
 	xor a			;8053
-	ld (0e003h),a		;8054
+	ld (0e003h),a		;8054   ; guarda es un MSX2
 L_8057:
 	call engancha_cuenta		;8057   ; engancha_cuenta: pone en H.KEYI (0xFD9A) la cuenta atras de 0xE008 (p09:800E)
-	ld a,(0e003h)		;805a
+	ld a,(0e003h)		;805a   ; lee es un MSX2
 	and a			;805d
 	jr nz,L_8089		;805e
 L_8060:
 	ld a,002h		;8060
-	ld (0fcafh),a		;8062
+	ld (0fcafh),a		;8062   ; guarda SCRMOD, el modo de pantalla
 	ld hl,00000h		;8065
 	ld bc,04000h		;8068
 	xor a			;806b
@@ -83,7 +83,7 @@ L_8060:
 	ret			;8088
 L_8089:
 	ld a,00fh		;8089
-	ld (0f3ebh),a		;808b
+	ld (0f3ebh),a		;808b   ; guarda el color del borde (BDRCLR)
 	call 00062h		;808e   ; BIOS CHGCLR - Changes the screen colors
 L_8091:
 	ld a,005h		;8091
@@ -129,7 +129,7 @@ DATA_resto_80CA:
 
 
 L_80D2:
-	ld a,(0e003h)		;80d2
+	ld a,(0e003h)		;80d2   ; lee es un MSX2
 	and a			;80d5
 	jr nz,L_80DC		;80d6
 	call titulo_msx1		;80d8   ; titulo_msx1: la presentacion en MSX1: descomprime p09:9988 y pinta
@@ -148,7 +148,7 @@ L_80DC:
 	call vdp_hmmv		;80f5   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0)
 	call titulo_letras		;80f8   ; titulo_letras: dibuja tres rotulos de letras de 1 bit (p09:9B6A, 9BD2, 9C3A)
 	call pantalla_encendida		;80fb   ; pantalla_encendida: R#1 con el bit 6 (pantalla encendida) y R#8 sin el bit 1
-	ld hl,0e001h		;80fe   ; apunta a fila elegida de la SRAM
+	ld hl,0e001h		;80fe   ; apunta a el paso de la animacion
 	ld (hl),031h		;8101
 	inc hl			;8103
 	ld (hl),000h		;8104
@@ -188,7 +188,7 @@ L_8134:
 	ret			;8134
 titulo_msx1:		; la presentacion en MSX1: descomprime p09:9988 y pinta
 	ld hl,00000h		;8135
-	ld (0e001h),hl		;8138   ; guarda fila elegida de la SRAM y el byte siguiente (16 bits)
+	ld (0e001h),hl		;8138   ; guarda el paso de la animacion y el byte siguiente (16 bits)
 	ld hl,09988h		;813b
 	call 07336h		;813e   ; descomprime_con_direccion: descomprime a la VRAM de la palabra de HL
 	ld hl,00b00h		;8141
@@ -287,10 +287,10 @@ fuente_a_vram:		; la fuente de p00:483F a la VRAM 0x2180 y su color 0xF0
 	ld bc,00158h		;824e
 	jp 072fch		;8251   ; rellena_tercios: FILVRM en los tres tercios de la pantalla
 titulo_anima:		; la animacion de la presentacion (0xE001)
-	ld a,(0e003h)		;8254
+	ld a,(0e003h)		;8254   ; lee es un MSX2
 	and a			;8257
 	jr nz,L_828F		;8258
-	ld bc,(0e001h)		;825a   ; lee fila elegida de la SRAM y el byte siguiente (16 bits)
+	ld bc,(0e001h)		;825a   ; lee el paso de la animacion y el byte siguiente (16 bits)
 	ld a,0ebh		;825e
 	inc b			;8260
 L_8261:
@@ -312,7 +312,7 @@ L_827A:
 	call 0004dh		;827a   ; BIOS WRTVRM - Writes data in VRAM
 	add hl,de			;827d
 	djnz L_827A		;827e
-	ld hl,0e001h		;8280   ; apunta a fila elegida de la SRAM
+	ld hl,0e001h		;8280   ; apunta a el paso de la animacion
 	ld a,(hl)			;8283
 	inc a			;8284
 	and 007h		;8285
@@ -324,7 +324,7 @@ L_827A:
 	cp 006h		;828c
 	ret			;828e
 L_828F:
-	ld hl,0e001h		;828f   ; apunta a fila elegida de la SRAM
+	ld hl,0e001h		;828f   ; apunta a el paso de la animacion
 	dec (hl)			;8292
 	jr nz,L_8297		;8293
 	xor a			;8295
@@ -369,7 +369,7 @@ L_82C8:
 	pop de			;82c8
 	ret			;82c9
 L_82CA:
-	ld a,(0e003h)		;82ca
+	ld a,(0e003h)		;82ca   ; lee es un MSX2
 	and a			;82cd
 	jp nz,L_8692		;82ce
 	call 072eah		;82d1   ; borra_nombres: borra la tabla de nombres y esconde los sprites (0xD0 en 0x3B00)
@@ -382,7 +382,7 @@ L_82CA:
 	ld hl,0a32eh		;82e6
 	ld de,01800h		;82e9
 	call 0733ah		;82ec   ; descomprime: descomprime HL a la VRAM DE: n & 0x7F repeticiones o copias
-	ld a,(0e009h)		;82ef
+	ld a,(0e009h)		;82ef   ; lee el juego de caracteres de la BIOS (0x002B)
 	and a			;82f2
 	call nz,titulo_msx1_b		;82f3   ; titulo_msx1_b: la presentacion en MSX1: fuente, colores y texto
 	ld hl,08337h		;82f6
@@ -451,8 +451,8 @@ copia_filas_a_vram:		; copia B filas de C bytes a la VRAM, una fila de 32 de pas
 L_846D:
 	call 00156h		;846d   ; BIOS KILBUF - Clears keyboard buffer
 	xor a			;8470
-	ld (0e010h),a		;8471   ; guarda la lista de la SRAM
-	ld (0e020h),a		;8474
+	ld (0e010h),a		;8471
+	ld (0e020h),a		;8474   ; guarda la animacion esta en marcha
 L_8477:
 	call espera_tecla_animando		;8477   ; espera_tecla_animando: anima hasta que se pulsa una tecla
 	call 0009fh		;847a   ; BIOS CHGET - One character input (waiting)
@@ -463,14 +463,14 @@ L_8477:
 	call titulo_paso		;8487   ; titulo_paso: un paso de la animacion de la presentacion (0xE020)
 	jr L_8477		;848a
 L_848C:
-	ld a,(0e010h)		;848c   ; lee la lista de la SRAM
+	ld a,(0e010h)		;848c
 	cp 002h		;848f
 	jr z,L_8499		;8491
-	ld a,(0e000h)		;8493   ; lee opcion / RC del juego
+	ld a,(0e000h)		;8493
 	inc a			;8496
 	jr nz,L_8477		;8497
 L_8499:
-	ld a,(0e003h)		;8499
+	ld a,(0e003h)		;8499   ; lee es un MSX2
 	and a			;849c
 	jp nz,L_87D4		;849d
 	ld hl,085eah		;84a0
@@ -481,14 +481,14 @@ L_8499:
 	ld de,03b0ch		;84af
 	ld bc,00008h		;84b2
 	call 0005ch		;84b5   ; BIOS LDIRVM - Block transfers to VRAM from memory
-	ld hl,0e008h		;84b8
+	ld hl,0e008h		;84b8   ; apunta a la cuenta atras de la interrupcion
 	ld (hl),032h		;84bb
 L_84BD:
 	ld a,(hl)			;84bd
 	and a			;84be
 	jr nz,L_84BD		;84bf
 	call desengancha_cuenta		;84c1   ; desengancha_cuenta: devuelve H.KEYI a `ret`
-	ld a,(0e010h)		;84c4   ; lee la lista de la SRAM
+	ld a,(0e010h)		;84c4
 	ret			;84c7
 espera_tecla_animando:		; anima hasta que se pulsa una tecla
 	call titulo_cuadro		;84c8   ; titulo_cuadro: un cuadro de la animacion: cada vez que cambia la cuenta (0xE008)
@@ -510,10 +510,10 @@ DATA_resto_84D1:
 
 
 titulo_paso:		; un paso de la animacion de la presentacion (0xE020)
-	ld a,(0e003h)		;84d9
+	ld a,(0e003h)		;84d9   ; lee es un MSX2
 	and a			;84dc
 	ret z			;84dd
-	ld hl,0e020h		;84de
+	ld hl,0e020h		;84de   ; apunta a la animacion esta en marcha
 	ld a,(hl)			;84e1
 	ld (hl),001h		;84e2
 	and a			;84e4
@@ -530,19 +530,19 @@ L_84F3:
 	ld (0e021h),a		;84f5
 	jr L_850D		;84f8
 titulo_cuadro:		; un cuadro de la animacion: cada vez que cambia la cuenta (0xE008)
-	ld a,(0e003h)		;84fa
+	ld a,(0e003h)		;84fa   ; lee es un MSX2
 	and a			;84fd
 	ret z			;84fe
-	ld a,(0e020h)		;84ff
+	ld a,(0e020h)		;84ff   ; lee la animacion esta en marcha
 	and a			;8502
 	ret z			;8503
-	ld a,(0e008h)		;8504
+	ld a,(0e008h)		;8504   ; lee la cuenta atras de la interrupcion
 	ld hl,0e022h		;8507
 	cp (hl)			;850a
 	ret z			;850b
 	ld (hl),a			;850c
 L_850D:
-	ld a,(0e010h)		;850d   ; lee la lista de la SRAM
+	ld a,(0e010h)		;850d
 	add a,a			;8510
 	ld hl,08568h		;8511
 	call 07251h		;8514   ; hl_mas_a: HL = HL + A
@@ -568,7 +568,7 @@ L_850D:
 	ld hl,0f600h		;8534
 	call 00171h		;8537   ; BIOS NSTWRT - Same function as SETWRT (with 16-bit VRAM-address)
 	ld l,c			;853a
-	ld a,(00007h)		;853b
+	ld a,(00007h)		;853b   ; el puerto de escritura del VDP (VDP.DW)
 	ld c,a			;853e
 	ld b,003h		;853f
 L_8541:
@@ -584,7 +584,7 @@ L_8541:
 	ret			;854f
 L_8550:
 	xor a			;8550
-	ld (0e020h),a		;8551
+	ld (0e020h),a		;8551   ; guarda la animacion esta en marcha
 	ld hl,0f600h		;8554
 	ld bc,0000ch		;8557
 	ld a,0e0h		;855a
@@ -617,7 +617,7 @@ flecha:		; 0x1E arriba, 0x1F abajo
 	jr z,L_85D4		;85d1
 	ret			;85d3
 L_85D4:
-	ld hl,0e010h		;85d4   ; apunta a la lista de la SRAM
+	ld hl,0e010h		;85d4
 	inc (hl)			;85d7
 	ld a,(hl)			;85d8
 	cp 003h		;85d9
@@ -625,7 +625,7 @@ L_85D4:
 	ld (hl),000h		;85dc
 	ret			;85de
 L_85DF:
-	ld hl,0e010h		;85df   ; apunta a la lista de la SRAM
+	ld hl,0e010h		;85df
 	dec (hl)			;85e2
 	ld a,(hl)			;85e3
 	cp 003h		;85e4
@@ -649,10 +649,10 @@ DATA_resto_85EA:
 
 
 titulo_menu:		; el menu de la presentacion
-	ld a,(0e003h)		;861a
+	ld a,(0e003h)		;861a   ; lee es un MSX2
 	and a			;861d
 	jp nz,L_879B		;861e
-	ld a,(0e010h)		;8621   ; lee la lista de la SRAM
+	ld a,(0e010h)		;8621
 	add a,a			;8624
 	ld hl,0868ch		;8625
 	call 07251h		;8628   ; hl_mas_a: HL = HL + A
@@ -661,7 +661,7 @@ titulo_menu:		; el menu de la presentacion
 	call 0005ch		;8631   ; BIOS LDIRVM - Block transfers to VRAM from memory
 	ld hl,0864ch		;8634
 	call 0738fh		;8637   ; pinta_texto: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
-	ld a,(0e010h)		;863a   ; lee la lista de la SRAM
+	ld a,(0e010h)		;863a
 	add a,a			;863d
 	ld hl,08669h		;863e
 	call 07251h		;8641   ; hl_mas_a: HL = HL + A
@@ -775,7 +775,7 @@ titulo_dibujos:		; descomprime p09:8C00 y p09:8800 en la VRAM 0xA580 y 0xA390
 	ret			;8743
 descomprime_128k:		; descomprime HL a la VRAM DE de 128 KB: n & 0x7F repeticiones
 	call 00171h		;8744   ; BIOS NSTWRT - Same function as SETWRT (with 16-bit VRAM-address)
-	ld a,(00007h)		;8747
+	ld a,(00007h)		;8747   ; el puerto de escritura del VDP (VDP.DW)
 	exx			;874a
 	ld c,a			;874b
 	exx			;874c
@@ -836,7 +836,7 @@ L_8797:
 	pop de			;8797
 	jp 00171h		;8798   ; BIOS NSTWRT - Same function as SETWRT (with 16-bit VRAM-address)
 L_879B:
-	ld a,(0e010h)		;879b   ; lee la lista de la SRAM
+	ld a,(0e010h)		;879b
 	add a,a			;879e
 	ld hl,08840h		;879f
 	call 07251h		;87a2   ; hl_mas_a: HL = HL + A
@@ -848,7 +848,7 @@ L_879B:
 	ld bc,00805h		;87b4
 	call pinta_letras_8x8		;87b7   ; pinta_letras_8x8: pinta B letras de 8x8 desde HL (p09:8F7D)
 	ld hl,087f8h		;87ba
-	ld a,(0e010h)		;87bd   ; lee la lista de la SRAM
+	ld a,(0e010h)		;87bd
 	add a,a			;87c0
 	call 07251h		;87c1   ; hl_mas_a: HL = HL + A
 	ld e,(hl)			;87c4
@@ -870,14 +870,14 @@ L_87D4:
 	call pinta_letras_8x8		;87dd   ; pinta_letras_8x8: pinta B letras de 8x8 desde HL (p09:8F7D)
 	call titulo_paso		;87e0   ; titulo_paso: un paso de la animacion de la presentacion (0xE020)
 	ld a,032h		;87e3
-	ld (0e008h),a		;87e5
+	ld (0e008h),a		;87e5   ; guarda la cuenta atras de la interrupcion
 L_87E8:
 	call titulo_cuadro		;87e8   ; titulo_cuadro: un cuadro de la animacion: cada vez que cambia la cuenta (0xE008)
-	ld a,(0e008h)		;87eb
+	ld a,(0e008h)		;87eb   ; lee la cuenta atras de la interrupcion
 	and a			;87ee
 	jr nz,L_87E8		;87ef
 	call desengancha_cuenta		;87f1   ; desengancha_cuenta: devuelve H.KEYI a `ret`
-	ld a,(0e010h)		;87f4   ; lee la lista de la SRAM
+	ld a,(0e010h)		;87f4
 	ret			;87f7
 
 ; ----------------------------------------------------------------------
@@ -899,10 +899,10 @@ DATA_resto_87F8:
 
 
 L_8846:
-	ld a,(0e009h)		;8846
+	ld a,(0e009h)		;8846   ; lee el juego de caracteres de la BIOS (0x002B)
 	and a			;8849
 	ret nz			;884a
-	ld a,(0e003h)		;884b
+	ld a,(0e003h)		;884b   ; lee es un MSX2
 	and a			;884e
 	jp nz,L_8B20		;884f
 	call esconde_sprites		;8852   ; esconde_sprites: pone 0xE0 en la tabla de sprites (0x3B00)
@@ -1170,7 +1170,7 @@ escribe_vram_otir:		; escribe BC bytes de HL en la VRAM DE con OTIR
 	call vram_situa_128k		;8df7   ; vram_situa_128k: pone la direccion de 17 bits de la VRAM (R#14 y la direccion)
 	call cuenta_otir		;8dfa   ; cuenta_otir: A y B para un OTIR de BC bytes
 	ex af,af'			;8dfd
-	ld a,(00007h)		;8dfe
+	ld a,(00007h)		;8dfe   ; el puerto de escritura del VDP (VDP.DW)
 	ld c,a			;8e01
 	ex af,af'			;8e02
 L_8E03:
@@ -1180,7 +1180,7 @@ L_8E03:
 	ret			;8e08
 vram_situa_128k:		; pone la direccion de 17 bits de la VRAM (R#14 y la direccion)
 	push bc			;8e09
-	ld a,(00007h)		;8e0a
+	ld a,(00007h)		;8e0a   ; el puerto de escritura del VDP (VDP.DW)
 	inc a			;8e0d
 	ld c,a			;8e0e
 	ld a,h			;8e0f
@@ -1209,7 +1209,7 @@ espera_vdp:		; espera a que el VDP acabe el comando (bit 0 de S#2)
 lee_estado_vdp:		; lee el registro de estado A del VDP (R#15) y vuelve a S#0
 	push bc			;8e32
 	push hl			;8e33
-	ld hl,(00006h)		;8e34
+	ld hl,(00006h)		;8e34   ; el puerto de lectura del VDP (VDP.DR)
 	inc h			;8e37
 	inc l			;8e38
 	ld c,h			;8e39
@@ -1234,7 +1234,7 @@ vdp_hmmm:		; copia rapida de VRAM a VRAM (HMMM): origen HL, destino DE, tamano B
 	ex af,af'			;8e52
 	call espera_vdp		;8e53   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 	push bc			;8e56
-	ld a,(00007h)		;8e57
+	ld a,(00007h)		;8e57   ; el puerto de escritura del VDP (VDP.DW)
 	inc a			;8e5a
 	ld c,a			;8e5b
 	ld a,020h		;8e5c
@@ -1299,25 +1299,25 @@ letra_a_coordenadas:		; H, L = la columna y la fila de la letra A en la hoja de 
 	ld l,a			;8eb4
 	ret			;8eb5
 pantalla_encendida:		; R#1 con el bit 6 (pantalla encendida) y R#8 sin el bit 1
-	ld a,(0f3e0h)		;8eb6
+	ld a,(0f3e0h)		;8eb6   ; lee el registro 1 del VDP (copia de la BIOS)
 	or 040h		;8eb9
 	ld b,a			;8ebb
 	ld c,001h		;8ebc
 	call 00047h		;8ebe   ; BIOS WRTVDP - Writes data in the VDP-register
 sprites_encendidos:		; R#8 sin el bit 1: con sprites
-	ld a,(0ffe7h)		;8ec1
+	ld a,(0ffe7h)		;8ec1   ; lee el registro 8 del VDP (copia de la BIOS)
 	and 0fdh		;8ec4
 	ld b,a			;8ec6
 	ld c,008h		;8ec7
 	jp 00047h		;8ec9   ; BIOS WRTVDP - Writes data in the VDP-register
 pantalla_apagada:		; R#1 sin el bit 6 y R#8 con el bit 1
-	ld a,(0f3e0h)		;8ecc
+	ld a,(0f3e0h)		;8ecc   ; lee el registro 1 del VDP (copia de la BIOS)
 	and 0bfh		;8ecf
 	ld b,a			;8ed1
 	ld c,001h		;8ed2
 	call 00047h		;8ed4   ; BIOS WRTVDP - Writes data in the VDP-register
 sprites_apagados:		; R
-	ld a,(0ffe7h)		;8ed7
+	ld a,(0ffe7h)		;8ed7   ; lee el registro 8 del VDP (copia de la BIOS)
 	or 002h		;8eda
 	ld b,a			;8edc
 	ld c,008h		;8edd
@@ -1342,7 +1342,7 @@ letra_1bit_a_4bit:		; pasa una letra de 1 bit a 4 bits (0xE100) y la escribe
 	ld a,d			;8efa
 	add a,080h		;8efb
 	ld d,a			;8efd
-	ld hl,0e100h		;8efe
+	ld hl,0e100h		;8efe   ; apunta a la letra expandida a 4 bits
 	ld b,008h		;8f01
 L_8F03:
 	push bc			;8f03
@@ -1362,7 +1362,7 @@ L_8F03:
 	ret			;8f1a
 letra_expande:		; expande los 8 bytes de la letra a 32 con el color C
 	ld b,008h		;8f1b
-	ld de,0e100h		;8f1d
+	ld de,0e100h		;8f1d   ; apunta a la letra expandida a 4 bits
 L_8F20:
 	push bc			;8f20
 	push hl			;8f21
@@ -1395,7 +1395,7 @@ vdp_hmmv:		; rellena un rectangulo de VRAM (HMMV, comando 0xC0)
 	ex af,af'			;8f41
 	call espera_vdp		;8f42   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 	push bc			;8f45
-	ld a,(00007h)		;8f46
+	ld a,(00007h)		;8f46   ; el puerto de escritura del VDP (VDP.DW)
 	inc a			;8f49
 	ld c,a			;8f4a
 	ld a,024h		;8f4b
@@ -1460,7 +1460,7 @@ vdp_lmmm:		; copia de VRAM a VRAM con operacion logica (LMMM, 0x90 | op)
 	ex af,af'			;8fa1
 	call espera_vdp		;8fa2   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 	push bc			;8fa5
-	ld a,(00007h)		;8fa6
+	ld a,(00007h)		;8fa6   ; el puerto de escritura del VDP (VDP.DW)
 	inc a			;8fa9
 	ld c,a			;8faa
 	ld a,020h		;8fab
@@ -1510,7 +1510,7 @@ L_8FED:
 	ex af,af'			;8fed
 	call espera_vdp		;8fee   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 	push bc			;8ff1
-	ld a,(00007h)		;8ff2
+	ld a,(00007h)		;8ff2   ; el puerto de escritura del VDP (VDP.DW)
 	inc a			;8ff5
 	ld c,a			;8ff6
 	ld a,024h		;8ff7

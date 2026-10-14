@@ -19,16 +19,16 @@ L_8000:
 	ld hl,00000h		;8001
 	add hl,sp			;8004
 	ld (0f0f6h),hl		;8005
-	ld hl,0e000h		;8008   ; apunta a opcion / RC del juego
-	ld de,0e001h		;800b   ; apunta a fila elegida de la SRAM
+	ld hl,0e000h		;8008
+	ld de,0e001h		;800b   ; apunta a el contador de cuadros
 	ld bc,010f4h		;800e
 	ld (hl),000h		;8011
 	ldir		;8013
 	ld hl,L_8030		;8015
-	ld de,0fd9fh		;8018
+	ld de,0fd9fh		;8018   ; apunta a el gancho H.TIMI
 	ld bc,00003h		;801b
 	ldir		;801e
-	ld a,(0002dh)		;8020
+	ld a,(0002dh)		;8020   ; la version del MSX (0 = MSX1)
 	nop			;8023
 	ld (0f0f5h),a		;8024
 	call bio_pantalla		;8027   ; bio_pantalla: prepara la pantalla: MSX1 (p05:873D) o MSX2 (p05:8768) segun 0xF0F5
@@ -47,7 +47,7 @@ L_8033:
 	rra			;8045
 	jp c,0013eh		;8046   ; BIOS RDVDP - Reads VDP status register
 	ld a,0c9h		;8049
-	ld (0fd9fh),a		;804b
+	ld (0fd9fh),a		;804b   ; guarda el gancho H.TIMI
 	call 0013eh		;804e   ; BIOS RDVDP - Reads VDP status register
 	ld hl,(0f0f6h)		;8051
 	ld sp,hl			;8054
@@ -91,7 +91,7 @@ th_vram_escribe:		; SETWRT en HL y C = el puerto de datos del VDP (gemela de p07
 	ex af,af'			;8082
 	call 00053h		;8083   ; BIOS SETWRT - Enables VDP to write
 	exx			;8086
-	ld a,(00007h)		;8087
+	ld a,(00007h)		;8087   ; el puerto de escritura del VDP (VDP.DW)
 	ld c,a			;808a
 	exx			;808b
 	ex af,af'			;808c
@@ -99,7 +99,7 @@ th_vram_escribe:		; SETWRT en HL y C = el puerto de datos del VDP (gemela de p07
 L_808E:
 	call 00050h		;808e   ; BIOS SETRD - Enables VDP to read
 	exx			;8091
-	ld a,(00006h)		;8092
+	ld a,(00006h)		;8092   ; el puerto de lectura del VDP (VDP.DR)
 	ld c,a			;8095
 	exx			;8096
 	ret			;8097
@@ -216,7 +216,7 @@ L_811C:
 	call vram_situa_lee		;811c   ; vram_situa_lee: pone la direccion de 17 bits de la VRAM para leer
 	call cuenta_otir		;811f   ; cuenta_otir: A y B para un OTIR de BC bytes (gemela de p09:8DEE)
 	ex af,af'			;8122
-	ld a,(00006h)		;8123
+	ld a,(00006h)		;8123   ; el puerto de lectura del VDP (VDP.DR)
 	ld c,a			;8126
 	ex af,af'			;8127
 L_8128:
@@ -239,7 +239,7 @@ escribe_vram_otir:		; escribe BC bytes de HL en la VRAM DE con OTIR (gemela de p
 	call vram_situa_128k		;8138   ; vram_situa_128k: pone la direccion de 17 bits de la VRAM (R
 	call cuenta_otir		;813b   ; cuenta_otir: A y B para un OTIR de BC bytes (gemela de p09:8DEE)
 	ex af,af'			;813e
-	ld a,(00007h)		;813f
+	ld a,(00007h)		;813f   ; el puerto de escritura del VDP (VDP.DW)
 	ld c,a			;8142
 	ex af,af'			;8143
 L_8144:
@@ -257,7 +257,7 @@ rellena_vram_128k:		; rellena BC bytes de la VRAM HL (128 KB) con A
 	jr z,L_8155		;8152
 	inc b			;8154
 L_8155:
-	ld a,(00007h)		;8155
+	ld a,(00007h)		;8155   ; el puerto de escritura del VDP (VDP.DW)
 	ld c,a			;8158
 	pop af			;8159
 L_815A:
@@ -270,7 +270,7 @@ L_815A:
 lee_vram_byte:		; lee el byte de la VRAM HL (128 KB)
 	push bc			;8163
 	call vram_situa_lee		;8164   ; vram_situa_lee: pone la direccion de 17 bits de la VRAM para leer
-	ld a,(00006h)		;8167
+	ld a,(00006h)		;8167   ; el puerto de lectura del VDP (VDP.DR)
 	ld c,a			;816a
 	in a,(c)		;816b
 	pop bc			;816d
@@ -279,7 +279,7 @@ escribe_vram_byte:		; escribe A en la VRAM HL (128 KB)
 	push bc			;816f
 	push af			;8170
 	call vram_situa_128k		;8171   ; vram_situa_128k: pone la direccion de 17 bits de la VRAM (R
-	ld a,(00007h)		;8174
+	ld a,(00007h)		;8174   ; el puerto de escritura del VDP (VDP.DW)
 	ld c,a			;8177
 	pop af			;8178
 	out (c),a		;8179
@@ -287,7 +287,7 @@ escribe_vram_byte:		; escribe A en la VRAM HL (128 KB)
 	ret			;817c
 vram_situa_128k:		; pone la direccion de 17 bits de la VRAM (R
 	push bc			;817d
-	ld a,(00007h)		;817e
+	ld a,(00007h)		;817e   ; el puerto de escritura del VDP (VDP.DW)
 	inc a			;8181
 	ld c,a			;8182
 	ld a,h			;8183
@@ -309,7 +309,7 @@ vram_situa_128k:		; pone la direccion de 17 bits de la VRAM (R
 	ret			;819b
 vram_situa_lee:		; pone la direccion de 17 bits de la VRAM para leer
 	push bc			;819c
-	ld a,(00007h)		;819d
+	ld a,(00007h)		;819d   ; el puerto de escritura del VDP (VDP.DW)
 	inc a			;81a0
 	ld c,a			;81a1
 	ld a,h			;81a2
@@ -340,7 +340,7 @@ L_81BB:
 L_81C1:
 	call vram_situa_128k		;81c1   ; vram_situa_128k: pone la direccion de 17 bits de la VRAM (R
 	exx			;81c4
-	ld a,(00007h)		;81c5
+	ld a,(00007h)		;81c5   ; el puerto de escritura del VDP (VDP.DW)
 	ld c,a			;81c8
 	exx			;81c9
 L_81CA:
@@ -447,14 +447,14 @@ L_8248:
 	ld c,017h		;825c
 	call 00047h		;825e   ; BIOS WRTVDP - Writes data in the VDP-register
 pantalla_encendida:		; R#1 con el bit 6: pantalla encendida
-	ld a,(0f3e0h)		;8261
+	ld a,(0f3e0h)		;8261   ; lee el registro 1 del VDP (copia de la BIOS)
 	or 040h		;8264
 	ld b,a			;8266
 	ld c,001h		;8267
 	call 00047h		;8269   ; BIOS WRTVDP - Writes data in the VDP-register
 	jr sprites_encendidos		;826c
 pantalla_apagada:		; R#1 sin el bit 6: pantalla apagada
-	ld a,(0f3e0h)		;826e
+	ld a,(0f3e0h)		;826e   ; lee el registro 1 del VDP (copia de la BIOS)
 	and 0bfh		;8271
 	ld b,a			;8273
 	ld c,001h		;8274
@@ -465,13 +465,13 @@ esconde_sprites_msx2:		; 0xD8 en la tabla de sprites del MSX2 (0xF600)
 	ld a,0d8h		;827e
 	jp escribe_vram_byte		;8280   ; escribe_vram_byte: escribe A en la VRAM HL (128 KB)
 sprites_apagados:		; R
-	ld a,(0ffe7h)		;8283
+	ld a,(0ffe7h)		;8283   ; lee el registro 8 del VDP (copia de la BIOS)
 	or 002h		;8286
 	ld b,a			;8288
 	ld c,008h		;8289
 	jp 00047h		;828b   ; BIOS WRTVDP - Writes data in the VDP-register
 sprites_encendidos:		; R
-	ld a,(0ffe7h)		;828e
+	ld a,(0ffe7h)		;828e   ; lee el registro 8 del VDP (copia de la BIOS)
 	and 0fdh		;8291
 	ld b,a			;8293
 	ld c,008h		;8294
@@ -480,7 +480,7 @@ pon_color:		; MSX2: el color B de la paleta con D y E (R#16 y puerto 2)
 	push bc			;8299
 	push hl			;829a
 	ld b,a			;829b
-	ld a,(00007h)		;829c
+	ld a,(00007h)		;829c   ; el puerto de escritura del VDP (VDP.DW)
 	inc a			;829f
 	ld c,a			;82a0
 	di			;82a1
@@ -547,7 +547,7 @@ espera_vdp:		; espera a que el VDP acabe el comando (bit 0 de S#2)
 lee_estado_vdp:		; lee el registro de estado A del VDP (R
 	push bc			;830f
 	push hl			;8310
-	ld hl,(00006h)		;8311
+	ld hl,(00006h)		;8311   ; el puerto de lectura del VDP (VDP.DR)
 	inc h			;8314
 	inc l			;8315
 	ld c,h			;8316
@@ -571,7 +571,7 @@ lee_estado_vdp:		; lee el registro de estado A del VDP (R
 vdp_linea:		; traza una linea con el comando del VDP (desde R#36)
 	call espera_vdp		;832f   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 	push bc			;8332
-	ld a,(00007h)		;8333
+	ld a,(00007h)		;8333   ; el puerto de escritura del VDP (VDP.DW)
 	inc a			;8336
 	ld c,a			;8337
 	ld a,024h		;8338
@@ -606,7 +606,7 @@ L_8354:
 vdp_punto:		; pinta un punto con el comando del VDP (desde R#36)
 	call espera_vdp		;8365   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 	push bc			;8368
-	ld a,(00007h)		;8369
+	ld a,(00007h)		;8369   ; el puerto de escritura del VDP (VDP.DW)
 	inc a			;836c
 	ld c,a			;836d
 	ld a,024h		;836e
@@ -678,7 +678,7 @@ vdp_hmmv:		; rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8
 	ex af,af'			;83c8
 	call espera_vdp		;83c9   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 	push bc			;83cc
-	ld a,(00007h)		;83cd
+	ld a,(00007h)		;83cd   ; el puerto de escritura del VDP (VDP.DW)
 	inc a			;83d0
 	ld c,a			;83d1
 	ld a,024h		;83d2
@@ -719,7 +719,7 @@ vdp_hmmm:		; copia rapida de VRAM a VRAM (HMMM): origen HL, destino DE, tamano B
 	ex af,af'			;8404
 	call espera_vdp		;8405   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 	push bc			;8408
-	ld a,(00007h)		;8409
+	ld a,(00007h)		;8409   ; el puerto de escritura del VDP (VDP.DW)
 	inc a			;840c
 	ld c,a			;840d
 	ld a,020h		;840e
@@ -762,7 +762,7 @@ vdp_rellena:		; rellena un rectangulo con el comando del VDP (desde R#36)
 	ex af,af'			;8448
 	call espera_vdp		;8449   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 	push bc			;844c
-	ld a,(00007h)		;844d
+	ld a,(00007h)		;844d   ; el puerto de escritura del VDP (VDP.DW)
 	inc a			;8450
 	ld c,a			;8451
 	ld a,024h		;8452
@@ -814,7 +814,7 @@ L_8488:
 L_8499:
 	ex af,af'			;8499
 	call espera_vdp		;849a   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
-	ld a,(00007h)		;849d
+	ld a,(00007h)		;849d   ; el puerto de escritura del VDP (VDP.DW)
 	inc a			;84a0
 	ld c,a			;84a1
 	ld a,022h		;84a2
@@ -858,7 +858,7 @@ L_84DB:
 	ex af,af'			;84db
 	call espera_vdp		;84dc   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 	push bc			;84df
-	ld a,(00007h)		;84e0
+	ld a,(00007h)		;84e0   ; el puerto de escritura del VDP (VDP.DW)
 	inc a			;84e3
 	ld c,a			;84e4
 	ld a,024h		;84e5
@@ -924,7 +924,7 @@ L_8538:
 	call lee_estado_vdp		;853e   ; lee_estado_vdp: lee el registro de estado A del VDP (R
 	push de			;8541
 	push bc			;8542
-	ld a,(00007h)		;8543
+	ld a,(00007h)		;8543   ; el puerto de escritura del VDP (VDP.DW)
 	inc a			;8546
 	ld c,a			;8547
 	ld a,020h		;8548
@@ -983,7 +983,7 @@ vdp_lmmm:		; copia de VRAM a VRAM con operacion logica (LMMM, desde R#32)
 	ex af,af'			;8599
 	call espera_vdp		;859a   ; espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
 	push bc			;859d
-	ld a,(00007h)		;859e
+	ld a,(00007h)		;859e   ; el puerto de escritura del VDP (VDP.DW)
 	inc a			;85a1
 	ld c,a			;85a2
 	ld a,020h		;85a3
@@ -1030,7 +1030,7 @@ vdp_lmmm:		; copia de VRAM a VRAM con operacion logica (LMMM, desde R#32)
 	ei			;85e3
 	ret			;85e4
 L_85E5:
-	ld (0faf5h),a		;85e5
+	ld (0faf5h),a		;85e5   ; guarda DPPAGE, la pagina que se ve
 	ld d,a			;85e8
 	add a,a			;85e9
 	ld l,a			;85ea
@@ -1040,7 +1040,7 @@ L_85E5:
 	ld e,a			;85ee
 	add a,a			;85ef
 	ld h,a			;85f0
-	ld a,(0f3e1h)		;85f1
+	ld a,(0f3e1h)		;85f1   ; lee el registro 2 del VDP (copia de la BIOS)
 	and 01fh		;85f4
 	or h			;85f6
 	ld b,a			;85f7
@@ -1080,7 +1080,7 @@ L_8631:
 	push de			;8634
 	call letra_expande		;8635   ; letra_expande: expande los 8 bytes de la letra a 32 con el color C (0xE090)
 	pop de			;8638
-	ld hl,0e090h		;8639
+	ld hl,0e090h		;8639   ; apunta a las cifras de las dos fechas
 	ld bc,00808h		;863c
 	ld a,001h		;863f
 	call vdp_rellena		;8641   ; vdp_rellena: rellena un rectangulo con el comando del VDP (desde R#36)
@@ -1093,7 +1093,7 @@ L_8631:
 	ret			;864e
 letra_expande:		; expande los 8 bytes de la letra a 32 con el color C (0xE090)
 	ld b,008h		;864f
-	ld de,0e090h		;8651
+	ld de,0e090h		;8651   ; apunta a las cifras de las dos fechas
 L_8654:
 	push bc			;8654
 	push hl			;8655
@@ -1145,7 +1145,7 @@ letra_1bit_a_4bit:		; pasa una letra de 1 bit a 4 bits (0xE100) y la escribe (ge
 	ld a,d			;868e
 	add a,080h		;868f
 	ld d,a			;8691
-	ld hl,0e090h		;8692
+	ld hl,0e090h		;8692   ; apunta a las cifras de las dos fechas
 	ld b,008h		;8695
 L_8697:
 	push bc			;8697
@@ -1341,7 +1341,7 @@ L_8787:
 	ld a,005h		;8787
 	call 0005fh		;8789   ; BIOS CHGMOD - Switches to given screen mode
 	ld a,00fh		;878c
-	ld (0f3ebh),a		;878e
+	ld (0f3ebh),a		;878e   ; guarda el color del borde (BDRCLR)
 	call 00062h		;8791   ; BIOS CHGCLR - Changes the screen colors
 	ld b,004h		;8794
 	ld hl,087b2h		;8796
@@ -1450,7 +1450,7 @@ DATA_resto_8808:
 
 bio_fuente_msx2:		; la fuente de p05:8B0C en la hoja de letras del MSX2
 	ld a,001h		;896e
-	ld (0faf6h),a		;8970
+	ld (0faf6h),a		;8970   ; guarda ACPAGE, la pagina activa
 	ld de,00000h		;8973
 	ld bc,01000h		;8976
 L_8979:
@@ -1473,12 +1473,12 @@ L_8979:
 	ld bc,02b0fh		;899d
 	call letras_1bit_a_4bit		;89a0   ; letras_1bit_a_4bit: pinta B letras de 1 bit en SCREEN 5 (4 bits)
 	xor a			;89a3
-	ld (0faf6h),a		;89a4
+	ld (0faf6h),a		;89a4   ; guarda ACPAGE, la pagina activa
 	ret			;89a7
 letra_en_bios:		; HL = la letra A de la fuente de la BIOS (0x0004)
 	ld l,a			;89a8
 	ld h,000h		;89a9
-	ld bc,(00004h)		;89ab
+	ld bc,(00004h)		;89ab   ; CGTABL: donde esta la fuente de la BIOS
 	add hl,hl			;89af
 	add hl,hl			;89b0
 	add hl,hl			;89b1
@@ -1546,7 +1546,7 @@ bio_estado:		; la rutina del estado 0xE002 (tabla p05:8B1B en MSX1, p05:8B29 en 
 	jr z,L_8B4C		;8b47
 	ld hl,08b29h		;8b49
 L_8B4C:
-	ld a,(0e002h)		;8b4c
+	ld a,(0e002h)		;8b4c   ; lee el estado del biorritmo
 	add a,a			;8b4f
 	call hl_mas_a		;8b50   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld e,(hl)			;8b53
@@ -1555,7 +1555,7 @@ L_8B4C:
 	ex de,hl			;8b56
 	ret			;8b57
 bio_cuenta:		; sube el contador de cuadros (0xE001)
-	ld hl,0e001h		;8b58   ; apunta a fila elegida de la SRAM
+	ld hl,0e001h		;8b58   ; apunta a el contador de cuadros
 	inc (hl)			;8b5b
 	ret			;8b5c
 L_8B5D:
@@ -1580,23 +1580,23 @@ L_8B84:
 	call 0a336h		;8b87
 	jp L_8C59		;8b8a
 L_8B8D:
-	ld a,(0e001h)		;8b8d   ; lee fila elegida de la SRAM
+	ld a,(0e001h)		;8b8d   ; lee el contador de cuadros
 	and 03fh		;8b90
 	jr nz,L_8BA2		;8b92
 	call bio_avanza_grafica		;8b94   ; bio_avanza_grafica: un paso de la grafica: alturas, puntos y dia siguiente
 	call bio_dia_mas		;8b97   ; bio_dia_mas: pasa al dia siguiente: los tres angulos suben
-	ld a,(0e03fh)		;8b9a
+	ld a,(0e03fh)		;8b9a   ; lee la columna de la grafica
 	cp 0c0h		;8b9d
 	jp nc,L_8C59		;8b9f
 L_8BA2:
 	jp L_8C6A		;8ba2
 L_8BA5:
-	ld a,(0e001h)		;8ba5   ; lee fila elegida de la SRAM
+	ld a,(0e001h)		;8ba5   ; lee el contador de cuadros
 	and 07fh		;8ba8
 	jr nz,L_8BBA		;8baa
 	call bio_avanza_grafica_msx2		;8bac   ; bio_avanza_grafica_msx2: un paso de la grafica en MSX2
 	call bio_dia_mas		;8baf   ; bio_dia_mas: pasa al dia siguiente: los tres angulos suben
-	ld a,(0e03fh)		;8bb2
+	ld a,(0e03fh)		;8bb2   ; lee la columna de la grafica
 	cp 0c0h		;8bb5
 	jp nc,L_8C59		;8bb7
 L_8BBA:
@@ -1614,30 +1614,30 @@ L_8BCF:
 	call 0a3a4h		;8bd5
 	jp L_8C59		;8bd8
 L_8BDB:
-	ld a,(0e001h)		;8bdb   ; lee fila elegida de la SRAM
+	ld a,(0e001h)		;8bdb   ; lee el contador de cuadros
 	and 007h		;8bde
 	jr nz,L_8BFF		;8be0
 	call bio_vuelca_nombres		;8be2   ; bio_vuelca_nombres: vuelca la copia de la tabla de nombres (0xE300) a 0x3800
 	call bio_vuelca_sprites		;8be5   ; bio_vuelca_sprites: vuelca la copia de sprites (0xE280) a 0x3B00
 	call bio_teclas		;8be8   ; bio_teclas: las teclas recien pulsadas (0xE057)
-	ld a,(0e058h)		;8beb
+	ld a,(0e058h)		;8beb   ; lee la tecla pulsada
 	cp 001h		;8bee
 	jr z,L_8C59		;8bf0
 	cp 004h		;8bf2
 	jr z,L_8C2E		;8bf4
 	call bio_estado_grafica_msx2		;8bf6   ; bio_estado_grafica_msx2: el estado de la grafica en MSX2
 	call bio_teclas		;8bf9   ; bio_teclas: las teclas recien pulsadas (0xE057)
-	ld a,(0e058h)		;8bfc
+	ld a,(0e058h)		;8bfc   ; lee la tecla pulsada
 L_8BFF:
 	jp L_8C6A		;8bff
 L_8C02:
-	ld a,(0e001h)		;8c02   ; lee fila elegida de la SRAM
+	ld a,(0e001h)		;8c02   ; lee el contador de cuadros
 	and 00fh		;8c05
 	jr nz,L_8C20		;8c07
 	call bio_vuelca_sprites_msx2		;8c09   ; bio_vuelca_sprites_msx2: vuelca la copia de sprites a 0xF600 y sus colores a 0xF400
 	call 0a27eh		;8c0c
 	call bio_teclas		;8c0f   ; bio_teclas: las teclas recien pulsadas (0xE057)
-	ld a,(0e058h)		;8c12
+	ld a,(0e058h)		;8c12   ; lee la tecla pulsada
 	cp 001h		;8c15
 	jr z,L_8C59		;8c17
 	cp 004h		;8c19
@@ -1656,7 +1656,7 @@ L_8C2B:
 L_8C2E:
 	ret			;8c2e
 bio_teclas:		; las teclas recien pulsadas (0xE057)
-	ld hl,0e057h		;8c2f
+	ld hl,0e057h		;8c2f   ; apunta a las teclas
 	call bio_lee_teclas		;8c32   ; bio_lee_teclas: lee las teclas del biorritmo (SNSMAT 8 y 7)
 	ld (hl),a			;8c35
 	inc hl			;8c36
@@ -1681,11 +1681,11 @@ bio_lee_teclas:		; lee las teclas del biorritmo (SNSMAT 8 y 7)
 	or b			;8c50
 	ret			;8c51
 L_8C52:
-	ld hl,0e002h		;8c52
+	ld hl,0e002h		;8c52   ; apunta a el estado del biorritmo
 	dec (hl)			;8c55
 	jp L_8B14		;8c56
 L_8C59:
-	ld hl,0e002h		;8c59
+	ld hl,0e002h		;8c59   ; apunta a el estado del biorritmo
 	inc (hl)			;8c5c
 	call bio_borra_e003		;8c5d   ; bio_borra_e003: pone a cero 0xE003
 	jp L_8B14		;8c60
@@ -1715,7 +1715,7 @@ bio_color_negro:		; el fondo a 0
 	call pon_color_fondo		;8c8e   ; pon_color_fondo: el color 7 del fondo (R#7)
 	ret			;8c91
 bio_borra_nombres:		; llena la copia de la tabla de nombres (0xE300) con 4
-	ld hl,0e300h		;8c92
+	ld hl,0e300h		;8c92   ; apunta a la copia de la tabla de nombres
 	ld de,0e301h		;8c95
 	ld bc,0013fh		;8c98
 	ld a,004h		;8c9b
@@ -1778,18 +1778,18 @@ DATA_resto_8CE2:
 
 bio_vuelca_sprites:		; vuelca la copia de sprites (0xE280) a 0x3B00
 	ld hl,03b00h		;8cfa
-	ld de,0e280h		;8cfd
+	ld de,0e280h		;8cfd   ; apunta a la copia de la tabla de sprites
 	ld bc,0001eh		;8d00
 	call copia_a_vram_de		;8d03   ; copia_a_vram_de: LDIRVM de DE a HL
 	ret			;8d06
 bio_vuelca_nombres:		; vuelca la copia de la tabla de nombres (0xE300) a 0x3800
 	ld hl,03800h		;8d07
-	ld de,0e300h		;8d0a
+	ld de,0e300h		;8d0a   ; apunta a la copia de la tabla de nombres
 	ld bc,00300h		;8d0d
 	call copia_a_vram_de		;8d10   ; copia_a_vram_de: LDIRVM de DE a HL
 	ret			;8d13
 bio_esconde_sprites:		; pone 0xE0 en la copia de sprites (0xE280)
-	ld hl,0e280h		;8d14
+	ld hl,0e280h		;8d14   ; apunta a la copia de la tabla de sprites
 	ld de,0e281h		;8d17
 	ld bc,0007fh		;8d1a
 	ld (hl),0e0h		;8d1d
@@ -1818,15 +1818,15 @@ bio_casilla:		; pinta una casilla de 8x8 con el comando del VDP
 	jp vdp_hmmv		;8d50   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 L_8D53:
 	xor a			;8d53
-	ld hl,0e000h		;8d54   ; apunta a opcion / RC del juego
-	ld de,0e001h		;8d57   ; apunta a fila elegida de la SRAM
+	ld hl,0e000h		;8d54
+	ld de,0e001h		;8d57   ; apunta a el contador de cuadros
 	ld bc,000ffh		;8d5a
 	ld (hl),a			;8d5d
 	ldir		;8d5e
 	ret			;8d60
 bio_esconde_sprites_msx2:		; pone 0xD8 en la copia de sprites (0xE280)
 	ld a,0d8h		;8d61
-	ld hl,0e280h		;8d63
+	ld hl,0e280h		;8d63   ; apunta a la copia de la tabla de sprites
 	ld de,0e281h		;8d66
 	ld bc,0007fh		;8d69
 	ld (hl),a			;8d6c
@@ -1857,7 +1857,7 @@ bio_sprites_msx2:		; los sprites de p05:8DAA y sus patrones
 	call bio_patrones_sprites		;8d9d   ; bio_patrones_sprites: descomprime p05:8DCC en 0xF800
 	ret			;8da0
 copia_sprites:		; copia 0x18 bytes de HL a la copia de sprites (0xE280)
-	ld de,0e280h		;8da1
+	ld de,0e280h		;8da1   ; apunta a la copia de la tabla de sprites
 	ld bc,00018h		;8da4
 	ldir		;8da7
 	ret			;8da9
@@ -1897,7 +1897,7 @@ DATA_resto_8DCC:
 
 bio_vuelca_sprites_msx2:		; vuelca la copia de sprites a 0xF600 y sus colores a 0xF400
 	ld de,0f600h		;8dd5
-	ld hl,0e280h		;8dd8
+	ld hl,0e280h		;8dd8   ; apunta a la copia de la tabla de sprites
 	ld bc,0001ch		;8ddb
 	call escribe_vram_otir		;8dde   ; escribe_vram_otir: escribe BC bytes de HL en la VRAM DE con OTIR (gemela de p09:8DF6)
 	ld hl,0f400h		;8de1
@@ -1947,11 +1947,11 @@ bio_calcula:		; el calculo entero: los dias vividos y los tres ciclos
 	call bio_angulos_validos		;8e52   ; bio_angulos_validos: deja los tres angulos entre 0 y 359 y calcula sus alturas
 	ret			;8e55
 bio_dias_del_ano:		; los dias de cada fecha por 365 (0x16D)
-	ld ix,0e018h		;8e56
-	ld hl,(0e010h)		;8e5a   ; lee la lista de la SRAM y el byte siguiente (16 bits)
+	ld ix,0e018h		;8e56   ; apunta a los dias de la fecha de nacimiento (32 bits)
+	ld hl,(0e010h)		;8e5a   ; lee el ano de nacimiento y el byte siguiente (16 bits)
 	call por_365		;8e5d   ; por_365: multiplica HL por 365 en IX (32 bits)
-	ld ix,0e01ch		;8e60
-	ld hl,(0e012h)		;8e64
+	ld ix,0e01ch		;8e60   ; apunta a los dias de la fecha de hoy (32 bits)
+	ld hl,(0e012h)		;8e64   ; lee el ano de hoy y el byte siguiente (16 bits)
 	call por_365		;8e67   ; por_365: multiplica HL por 365 en IX (32 bits)
 	ret			;8e6a
 por_365:		; multiplica HL por 365 en IX (32 bits)
@@ -1963,37 +1963,37 @@ por_365:		; multiplica HL por 365 en IX (32 bits)
 	ld (ix+003h),h		;8e7a
 	ret			;8e7d
 bio_bisiestos_4:		; suma los anos divisibles por 4
-	ld hl,(0e010h)		;8e7e   ; lee la lista de la SRAM y el byte siguiente (16 bits)
-	ld de,0e018h		;8e81
+	ld hl,(0e010h)		;8e7e   ; lee el ano de nacimiento y el byte siguiente (16 bits)
+	ld de,0e018h		;8e81   ; apunta a los dias de la fecha de nacimiento (32 bits)
 	call bio_divide_4		;8e84   ; bio_divide_4: suma (ano - 1) / 4
-	ld hl,(0e012h)		;8e87
-	ld de,0e01ch		;8e8a
+	ld hl,(0e012h)		;8e87   ; lee el ano de hoy y el byte siguiente (16 bits)
+	ld de,0e01ch		;8e8a   ; apunta a los dias de la fecha de hoy (32 bits)
 	call bio_divide_4		;8e8d   ; bio_divide_4: suma (ano - 1) / 4
 	ret			;8e90
 bio_bisiestos_100:		; resta los anos divisibles por 100
-	ld hl,(0e010h)		;8e91   ; lee la lista de la SRAM y el byte siguiente (16 bits)
-	ld de,0e018h		;8e94
+	ld hl,(0e010h)		;8e91   ; lee el ano de nacimiento y el byte siguiente (16 bits)
+	ld de,0e018h		;8e94   ; apunta a los dias de la fecha de nacimiento (32 bits)
 	call bio_divide_100		;8e97   ; bio_divide_100: resta (ano - 1) / 100
-	ld hl,(0e012h)		;8e9a
-	ld de,0e01ch		;8e9d
+	ld hl,(0e012h)		;8e9a   ; lee el ano de hoy y el byte siguiente (16 bits)
+	ld de,0e01ch		;8e9d   ; apunta a los dias de la fecha de hoy (32 bits)
 	call bio_divide_100		;8ea0   ; bio_divide_100: resta (ano - 1) / 100
 	ret			;8ea3
 bio_bisiestos_400:		; suma los anos divisibles por 400
-	ld hl,(0e010h)		;8ea4   ; lee la lista de la SRAM y el byte siguiente (16 bits)
-	ld de,0e018h		;8ea7
+	ld hl,(0e010h)		;8ea4   ; lee el ano de nacimiento y el byte siguiente (16 bits)
+	ld de,0e018h		;8ea7   ; apunta a los dias de la fecha de nacimiento (32 bits)
 	call bio_divide_400		;8eaa   ; bio_divide_400: suma (ano - 1) / 400
-	ld hl,(0e012h)		;8ead
-	ld de,0e01ch		;8eb0
+	ld hl,(0e012h)		;8ead   ; lee el ano de hoy y el byte siguiente (16 bits)
+	ld de,0e01ch		;8eb0   ; apunta a los dias de la fecha de hoy (32 bits)
 	call bio_divide_400		;8eb3   ; bio_divide_400: suma (ano - 1) / 400
 	ret			;8eb6
 bio_dias_del_mes:		; suma los dias de los meses (tabla p05:959E)
-	ld hl,0e010h		;8eb7   ; apunta a la lista de la SRAM
-	ld ix,0e014h		;8eba
-	ld de,0e018h		;8ebe
+	ld hl,0e010h		;8eb7   ; apunta a el ano de nacimiento
+	ld ix,0e014h		;8eba   ; apunta a el mes de nacimiento
+	ld de,0e018h		;8ebe   ; apunta a los dias de la fecha de nacimiento (32 bits)
 	call bio_dias_hasta_el_mes		;8ec1   ; bio_dias_hasta_el_mes: suma los dias de los meses anteriores (tabla p05:959E)
-	ld hl,0e012h		;8ec4
-	ld ix,0e015h		;8ec7
-	ld de,0e01ch		;8ecb
+	ld hl,0e012h		;8ec4   ; apunta a el ano de hoy
+	ld ix,0e015h		;8ec7   ; apunta a el mes de hoy
+	ld de,0e01ch		;8ecb   ; apunta a los dias de la fecha de hoy (32 bits)
 	call bio_dias_hasta_el_mes		;8ece   ; bio_dias_hasta_el_mes: suma los dias de los meses anteriores (tabla p05:959E)
 	ret			;8ed1
 bio_divide_4:		; suma (ano - 1) / 4
@@ -2013,7 +2013,7 @@ ano_menos_uno:		; HL = HL - 1 y C si no llega a DE
 	ld a,h			;8ee6
 	and 080h		;8ee7
 	jr nz,L_8EEF		;8ee9
-	rst 20h			;8eeb
+	rst 20h			;8eeb   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	jr c,L_8EEF		;8eec
 	ret			;8eee
 L_8EEF:
@@ -2075,7 +2075,7 @@ L_8F45:
 	ret			;8f49
 bio_es_bisiesto:		; mira si el ano es bisiesto (4, 100 y 400): 0xE041
 	xor a			;8f4a
-	ld (0e041h),a		;8f4b
+	ld (0e041h),a		;8f4b   ; guarda el ano es bisiesto
 	ld e,(hl)			;8f4e
 	inc hl			;8f4f
 	ld d,(hl)			;8f50
@@ -2103,47 +2103,47 @@ bio_es_bisiesto:		; mira si el ano es bisiesto (4, 100 y 400): 0xE041
 	jr nz,L_8F7E		;8f75
 L_8F77:
 	ld a,001h		;8f77
-	ld (0e041h),a		;8f79
+	ld (0e041h),a		;8f79   ; guarda el ano es bisiesto
 	scf			;8f7c
 	ret			;8f7d
 L_8F7E:
 	xor a			;8f7e
-	ld (0e041h),a		;8f7f
+	ld (0e041h),a		;8f7f   ; guarda el ano es bisiesto
 	ret			;8f82
 bio_dias_vividos:		; los dias vividos: la fecha de hoy menos la de nacimiento
-	ld hl,0e01ch		;8f83
-	ld de,0e020h		;8f86
+	ld hl,0e01ch		;8f83   ; apunta a los dias de la fecha de hoy (32 bits)
+	ld de,0e020h		;8f86   ; apunta a los dias vividos (32 bits)
 	ld bc,00004h		;8f89
 	ldir		;8f8c
-	ld hl,0e020h		;8f8e
-	ld de,0e018h		;8f91
+	ld hl,0e020h		;8f8e   ; apunta a los dias vividos (32 bits)
+	ld de,0e018h		;8f91   ; apunta a los dias de la fecha de nacimiento (32 bits)
 	call resta_32		;8f94   ; resta_32: resta los 32 bits de HL de los de DE
 	ret			;8f97
 bio_tres_restos:		; los dias modulo 23, 28 y 33 (0xE02D, 0xE02F, 0xE031)
-	ld hl,(0e020h)		;8f98
+	ld hl,(0e020h)		;8f98   ; lee los dias vividos (32 bits) y el byte siguiente (16 bits)
 	ld de,(0e022h)		;8f9b
-	ld ix,0e02dh		;8f9f
+	ld ix,0e02dh		;8f9f   ; apunta a el angulo del fisico (23 dias)
 	ld bc,00017h		;8fa3
 	call bio_resto		;8fa6   ; bio_resto: el resto de dividir por BC
-	ld hl,(0e020h)		;8fa9
+	ld hl,(0e020h)		;8fa9   ; lee los dias vividos (32 bits) y el byte siguiente (16 bits)
 	ld de,(0e022h)		;8fac
-	ld ix,0e02fh		;8fb0
+	ld ix,0e02fh		;8fb0   ; apunta a el angulo de la sensibilidad (28 dias)
 	ld bc,0001ch		;8fb4
 	call bio_resto		;8fb7   ; bio_resto: el resto de dividir por BC
-	ld hl,(0e020h)		;8fba
+	ld hl,(0e020h)		;8fba   ; lee los dias vividos (32 bits) y el byte siguiente (16 bits)
 	ld de,(0e022h)		;8fbd
-	ld ix,0e031h		;8fc1
+	ld ix,0e031h		;8fc1   ; apunta a el angulo del intelecto (33 dias)
 	ld bc,00021h		;8fc5
 	call bio_resto		;8fc8   ; bio_resto: el resto de dividir por BC
 	ret			;8fcb
 bio_tres_angulos:		; pasa cada resto a grados (x 360 / ciclo)
-	ld ix,0e02dh		;8fcc
+	ld ix,0e02dh		;8fcc   ; apunta a el angulo del fisico (23 dias)
 	ld bc,00017h		;8fd0
 	call bio_angulo		;8fd3   ; bio_angulo: el angulo del ciclo: resto x 360 / BC
-	ld ix,0e02fh		;8fd6
+	ld ix,0e02fh		;8fd6   ; apunta a el angulo de la sensibilidad (28 dias)
 	ld bc,0001ch		;8fda
 	call bio_angulo		;8fdd   ; bio_angulo: el angulo del ciclo: resto x 360 / BC
-	ld ix,0e031h		;8fe0
+	ld ix,0e031h		;8fe0   ; apunta a el angulo del intelecto (33 dias)
 	ld bc,00021h		;8fe4
 	call bio_angulo		;8fe7   ; bio_angulo: el angulo del ciclo: resto x 360 / BC
 	ret			;8fea
@@ -2174,7 +2174,7 @@ L_9012:
 	ret			;9019
 bio_retrasa:		; resta a los tres angulos la tabla de p05:9043
 	ld b,003h		;901a
-	ld ix,0e02dh		;901c
+	ld ix,0e02dh		;901c   ; apunta a el angulo del fisico (23 dias)
 	ld iy,09043h		;9020
 L_9024:
 	ld l,(ix+000h)		;9024
@@ -2205,22 +2205,22 @@ DATA_resto_9043:
 
 
 bio_guarda_angulos:		; copia los tres angulos a 0xE033
-	ld hl,0e02dh		;9049
-	ld de,0e033h		;904c
+	ld hl,0e02dh		;9049   ; apunta a el angulo del fisico (23 dias)
+	ld de,0e033h		;904c   ; apunta a los tres angulos de hoy (copia)
 	ld bc,00006h		;904f
 	ldir		;9052
 	ret			;9054
 bio_angulos_validos:		; deja los tres angulos entre 0 y 359 y calcula sus alturas
-	ld hl,(0e02dh)		;9055
+	ld hl,(0e02dh)		;9055   ; lee el angulo del fisico (23 dias) y el byte siguiente (16 bits)
 	call angulo_0_359		;9058   ; angulo_0_359: suma o resta 360 hasta que HL este entre 0 y 359
-	ld (0e02dh),hl		;905b
+	ld (0e02dh),hl		;905b   ; guarda el angulo del fisico (23 dias) y el byte siguiente (16 bits)
 	call bio_alturas		;905e   ; bio_alturas: las alturas de los tres ciclos (sin desplazar)
 	ld (0e039h),a		;9061
-	ld hl,(0e02fh)		;9064
+	ld hl,(0e02fh)		;9064   ; lee el angulo de la sensibilidad (28 dias) y el byte siguiente (16 bits)
 	call angulo_0_359		;9067   ; angulo_0_359: suma o resta 360 hasta que HL este entre 0 y 359
 	call bio_alturas		;906a   ; bio_alturas: las alturas de los tres ciclos (sin desplazar)
 	ld (0e03bh),a		;906d
-	ld hl,(0e031h)		;9070
+	ld hl,(0e031h)		;9070   ; lee el angulo del intelecto (33 dias) y el byte siguiente (16 bits)
 	call angulo_0_359		;9073   ; angulo_0_359: suma o resta 360 hasta que HL este entre 0 y 359
 	call bio_alturas		;9076   ; bio_alturas: las alturas de los tres ciclos (sin desplazar)
 	ld (0e03dh),a		;9079
@@ -2278,17 +2278,17 @@ L_90B0:
 bio_avanza_grafica:		; un paso de la grafica: alturas, puntos y dia siguiente
 	call bio_alturas_mas		;90b8   ; bio_alturas_mas: las alturas de los tres ciclos (desplazamientos 4, 3, 2)
 	call bio_pinta_tres		;90bb   ; bio_pinta_tres: pinta un punto de cada ciclo con su color
-	ld hl,0e03fh		;90be
+	ld hl,0e03fh		;90be   ; apunta a la columna de la grafica
 	inc (hl)			;90c1
 	ret			;90c2
 bio_pinta_tres:		; pinta un punto de cada ciclo con su color
-	ld hl,(0e05ah)		;90c3
+	ld hl,(0e05ah)		;90c3   ; lee la altura del fisico y el byte siguiente (16 bits)
 	ld bc,001f0h		;90c6
 	call bio_pinta_punto		;90c9   ; bio_pinta_punto: pinta el punto de un ciclo
-	ld hl,(0e05ch)		;90cc
+	ld hl,(0e05ch)		;90cc   ; lee la altura de la sensibilidad y el byte siguiente (16 bits)
 	ld bc,00180h		;90cf
 	call bio_pinta_punto		;90d2   ; bio_pinta_punto: pinta el punto de un ciclo
-	ld hl,(0e05eh)		;90d5
+	ld hl,(0e05eh)		;90d5   ; lee la altura del intelecto y el byte siguiente (16 bits)
 	ld bc,001c0h		;90d8
 	call bio_pinta_punto		;90db   ; bio_pinta_punto: pinta el punto de un ciclo
 	ret			;90de
@@ -2326,27 +2326,27 @@ bio_posicion:		; la posicion en la pantalla del punto (0xE08C)
 	ld c,008h		;9107
 	call divide_8		;9109   ; divide_8: L / C: cociente en L y resto en H
 	ld a,h			;910c
-	ld (0e088h),hl		;910d
+	ld (0e088h),hl		;910d   ; guarda resultado de 32 bits (parte alta) y el byte siguiente (16 bits)
 	ld b,000h		;9110
 	ld c,l			;9112
 	ld de,00100h		;9113
 	call multiplica		;9116   ; multiplica: HL = DE x BC
 	ld a,(0e089h)		;9119
 	call hl_mas_a		;911c   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
-	ld (0e08ch),hl		;911f
+	ld (0e08ch),hl		;911f   ; guarda la posicion del punto en la VRAM y el byte siguiente (16 bits)
 	pop de			;9122
 	ld l,d			;9123
 	ld c,008h		;9124
 	call divide_8		;9126   ; divide_8: L / C: cociente en L y resto en H
-	ld (0e088h),hl		;9129
+	ld (0e088h),hl		;9129   ; guarda resultado de 32 bits (parte alta) y el byte siguiente (16 bits)
 	ld b,000h		;912c
 	ld c,l			;912e
 	ld de,00008h		;912f
 	call multiplica		;9132   ; multiplica: HL = DE x BC
 	ex de,hl			;9135
-	ld hl,(0e08ch)		;9136
+	ld hl,(0e08ch)		;9136   ; lee la posicion del punto en la VRAM y el byte siguiente (16 bits)
 	add hl,de			;9139
-	ld (0e08ch),hl		;913a
+	ld (0e08ch),hl		;913a   ; guarda la posicion del punto en la VRAM y el byte siguiente (16 bits)
 	ld a,(0e089h)		;913d
 	ld b,a			;9140
 	ld a,007h		;9141
@@ -2363,7 +2363,7 @@ L_9149:
 	ret			;914e
 bio_pon_color:		; pone el color del punto si la casilla esta libre (0xF0)
 	ld b,a			;914f
-	ld hl,(0e08ch)		;9150
+	ld hl,(0e08ch)		;9150   ; lee la posicion del punto en la VRAM y el byte siguiente (16 bits)
 	call 0004ah		;9153   ; BIOS RDVRM - Reads the content of VRAM
 	cp 0f0h		;9156
 	jr z,L_915C		;9158
@@ -2371,14 +2371,14 @@ bio_pon_color:		; pone el color del punto si la casilla esta libre (0xF0)
 	ret nz			;915b
 L_915C:
 	ld a,c			;915c
-	ld hl,(0e08ch)		;915d
+	ld hl,(0e08ch)		;915d   ; lee la posicion del punto en la VRAM y el byte siguiente (16 bits)
 	call 0004dh		;9160   ; BIOS WRTVRM - Writes data in VRAM
 	ld de,02000h		;9163
-	ld hl,(0e08ch)		;9166
+	ld hl,(0e08ch)		;9166   ; lee la posicion del punto en la VRAM y el byte siguiente (16 bits)
 	add hl,de			;9169
 	call 0004ah		;916a   ; BIOS RDVRM - Reads the content of VRAM
 	or b			;916d
-	ld hl,(0e08ch)		;916e
+	ld hl,(0e08ch)		;916e   ; lee la posicion del punto en la VRAM y el byte siguiente (16 bits)
 	ld de,02000h		;9171
 	add hl,de			;9174
 	call 0004dh		;9175   ; BIOS WRTVRM - Writes data in VRAM
@@ -2389,37 +2389,37 @@ bio_dia_mas:		; pasa al dia siguiente: los tres angulos suben
 	call bio_sube_intelecto		;917f   ; bio_sube_intelecto: sube el angulo del intelecto
 	ret			;9182
 bio_sube_sensibilidad:		; sube el angulo de la sensibilidad
-	ld a,(0e03fh)		;9183
+	ld a,(0e03fh)		;9183   ; lee la columna de la grafica
 	ld hl,0e06ch		;9186
 	ld c,006h		;9189
 	call sube_con_tope		;918b   ; sube_con_tope: sube (HL); si llega a C vuelve a 0
 	ret nc			;918e
-	ld hl,(0e02fh)		;918f
+	ld hl,(0e02fh)		;918f   ; lee el angulo de la sensibilidad (28 dias) y el byte siguiente (16 bits)
 	inc hl			;9192
-	ld (0e02fh),hl		;9193
+	ld (0e02fh),hl		;9193   ; guarda el angulo de la sensibilidad (28 dias) y el byte siguiente (16 bits)
 	ret			;9196
 bio_sube_fisico:		; sube el angulo del fisico
-	ld a,(0e03fh)		;9197
+	ld a,(0e03fh)		;9197   ; lee la columna de la grafica
 	ld hl,0e06bh		;919a
 	ld c,004h		;919d
 	call sube_con_tope		;919f   ; sube_con_tope: sube (HL); si llega a C vuelve a 0
 	ret nc			;91a2
-	ld a,(0e03fh)		;91a3
+	ld a,(0e03fh)		;91a3   ; lee la columna de la grafica
 	ld hl,0e06dh		;91a6
 	ld c,014h		;91a9
 	call sube_con_tope		;91ab   ; sube_con_tope: sube (HL); si llega a C vuelve a 0
 	ret nc			;91ae
-	ld hl,(0e02dh)		;91af
+	ld hl,(0e02dh)		;91af   ; lee el angulo del fisico (23 dias) y el byte siguiente (16 bits)
 	dec hl			;91b2
-	ld (0e02dh),hl		;91b3
+	ld (0e02dh),hl		;91b3   ; guarda el angulo del fisico (23 dias) y el byte siguiente (16 bits)
 	ret			;91b6
 bio_sube_intelecto:		; sube el angulo del intelecto
 	ld a,(0e06bh)		;91b7
 	and a			;91ba
 	ret z			;91bb
-	ld hl,(0e031h)		;91bc
+	ld hl,(0e031h)		;91bc   ; lee el angulo del intelecto (33 dias) y el byte siguiente (16 bits)
 	inc hl			;91bf
-	ld (0e031h),hl		;91c0
+	ld (0e031h),hl		;91c0   ; guarda el angulo del intelecto (33 dias) y el byte siguiente (16 bits)
 	ret			;91c3
 bio_dia_menos:		; pasa al dia anterior: los tres angulos bajan
 	call bio_baja_sensibilidad		;91c4   ; bio_baja_sensibilidad: baja el angulo de la sensibilidad
@@ -2427,17 +2427,17 @@ bio_dia_menos:		; pasa al dia anterior: los tres angulos bajan
 	call bio_baja_intelecto		;91ca   ; bio_baja_intelecto: baja el angulo del intelecto
 	ret			;91cd
 bio_baja_sensibilidad:		; baja el angulo de la sensibilidad
-	ld a,(0e03fh)		;91ce
+	ld a,(0e03fh)		;91ce   ; lee la columna de la grafica
 	ld hl,0e06ch		;91d1
 	ld c,006h		;91d4
 	call baja_con_tope		;91d6   ; baja_con_tope: baja (HL); si llega a -C vuelve a 0
 	ret nc			;91d9
-	ld hl,(0e02fh)		;91da
+	ld hl,(0e02fh)		;91da   ; lee el angulo de la sensibilidad (28 dias) y el byte siguiente (16 bits)
 	dec hl			;91dd
-	ld (0e02fh),hl		;91de
+	ld (0e02fh),hl		;91de   ; guarda el angulo de la sensibilidad (28 dias) y el byte siguiente (16 bits)
 	ret			;91e1
 bio_baja_fisico:		; baja el angulo del fisico
-	ld a,(0e03fh)		;91e2
+	ld a,(0e03fh)		;91e2   ; lee la columna de la grafica
 	ld hl,0e06bh		;91e5
 	ld c,004h		;91e8
 	call baja_con_tope		;91ea   ; baja_con_tope: baja (HL); si llega a -C vuelve a 0
@@ -2446,17 +2446,17 @@ bio_baja_fisico:		; baja el angulo del fisico
 	ld c,014h		;91f1
 	call baja_con_tope		;91f3   ; baja_con_tope: baja (HL); si llega a -C vuelve a 0
 	ret nc			;91f6
-	ld hl,(0e02dh)		;91f7
+	ld hl,(0e02dh)		;91f7   ; lee el angulo del fisico (23 dias) y el byte siguiente (16 bits)
 	inc hl			;91fa
-	ld (0e02dh),hl		;91fb
+	ld (0e02dh),hl		;91fb   ; guarda el angulo del fisico (23 dias) y el byte siguiente (16 bits)
 	ret			;91fe
 bio_baja_intelecto:		; baja el angulo del intelecto
 	ld a,(0e06bh)		;91ff
 	and a			;9202
 	ret z			;9203
-	ld hl,(0e031h)		;9204
+	ld hl,(0e031h)		;9204   ; lee el angulo del intelecto (33 dias) y el byte siguiente (16 bits)
 	dec hl			;9207
-	ld (0e031h),hl		;9208
+	ld (0e031h),hl		;9208   ; guarda el angulo del intelecto (33 dias) y el byte siguiente (16 bits)
 	ret			;920b
 or_en_color:		; OR de A en el color de B casillas (VRAM + 0x2000)
 	ld de,02000h		;920c
@@ -2496,59 +2496,59 @@ L_9228:
 bio_avanza_grafica_msx2:		; un paso de la grafica en MSX2
 	call bio_alturas_mas		;923e   ; bio_alturas_mas: las alturas de los tres ciclos (desplazamientos 4, 3, 2)
 	call bio_pinta_tres_msx2		;9241   ; bio_pinta_tres_msx2: pinta un punto de cada ciclo en MSX2 (comando del VDP)
-	ld hl,0e03fh		;9244
+	ld hl,0e03fh		;9244   ; apunta a la columna de la grafica
 	inc (hl)			;9247
 	ret			;9248
 bio_pinta_tres_msx2:		; pinta un punto de cada ciclo en MSX2 (comando del VDP)
-	ld hl,(0e05ah)		;9249
+	ld hl,(0e05ah)		;9249   ; lee la altura del fisico y el byte siguiente (16 bits)
 	ld bc,0010ch		;924c
 	call vdp_punto_b		;924f   ; vdp_punto_b: pinta un punto (p05:8365)
-	ld hl,(0e05ch)		;9252
+	ld hl,(0e05ch)		;9252   ; lee la altura de la sensibilidad y el byte siguiente (16 bits)
 	ld bc,0010dh		;9255
 	call vdp_punto_b		;9258   ; vdp_punto_b: pinta un punto (p05:8365)
-	ld hl,(0e05eh)		;925b
+	ld hl,(0e05eh)		;925b   ; lee la altura del intelecto y el byte siguiente (16 bits)
 	ld bc,0010eh		;925e
 	call vdp_punto_b		;9261   ; vdp_punto_b: pinta un punto (p05:8365)
 	ret			;9264
 bio_alturas_mas:		; las alturas de los tres ciclos (desplazamientos 4, 3, 2)
-	ld hl,0e02dh		;9265
-	ld de,0e05ah		;9268
+	ld hl,0e02dh		;9265   ; apunta a el angulo del fisico (23 dias)
+	ld de,0e05ah		;9268   ; apunta a la altura del fisico
 	ld a,004h		;926b
 	call bio_altura		;926d   ; bio_altura: la altura de un ciclo: el seno del angulo
-	ld hl,0e02fh		;9270
-	ld de,0e05ch		;9273
+	ld hl,0e02fh		;9270   ; apunta a el angulo de la sensibilidad (28 dias)
+	ld de,0e05ch		;9273   ; apunta a la altura de la sensibilidad
 	ld a,003h		;9276
 	call bio_altura		;9278   ; bio_altura: la altura de un ciclo: el seno del angulo
-	ld hl,0e031h		;927b
-	ld de,0e05eh		;927e
+	ld hl,0e031h		;927b   ; apunta a el angulo del intelecto (33 dias)
+	ld de,0e05eh		;927e   ; apunta a la altura del intelecto
 	ld a,002h		;9281
 	call bio_altura		;9283   ; bio_altura: la altura de un ciclo: el seno del angulo
 	ret			;9286
 bio_alturas_menos:		; las alturas de los tres ciclos (desplazamientos -4, -3, -2)
-	ld hl,0e02dh		;9287
-	ld de,0e05ah		;928a
+	ld hl,0e02dh		;9287   ; apunta a el angulo del fisico (23 dias)
+	ld de,0e05ah		;928a   ; apunta a la altura del fisico
 	ld a,0fch		;928d
 	call bio_altura		;928f   ; bio_altura: la altura de un ciclo: el seno del angulo
-	ld hl,0e02fh		;9292
-	ld de,0e05ch		;9295
+	ld hl,0e02fh		;9292   ; apunta a el angulo de la sensibilidad (28 dias)
+	ld de,0e05ch		;9295   ; apunta a la altura de la sensibilidad
 	ld a,0fdh		;9298
 	call bio_altura		;929a   ; bio_altura: la altura de un ciclo: el seno del angulo
-	ld hl,0e031h		;929d
-	ld de,0e05eh		;92a0
+	ld hl,0e031h		;929d   ; apunta a el angulo del intelecto (33 dias)
+	ld de,0e05eh		;92a0   ; apunta a la altura del intelecto
 	ld a,0feh		;92a3
 	call bio_altura		;92a5   ; bio_altura: la altura de un ciclo: el seno del angulo
 	ret			;92a8
 bio_alturas:		; las alturas de los tres ciclos (sin desplazar)
-	ld hl,0e02dh		;92a9
-	ld de,0e05ah		;92ac
+	ld hl,0e02dh		;92a9   ; apunta a el angulo del fisico (23 dias)
+	ld de,0e05ah		;92ac   ; apunta a la altura del fisico
 	xor a			;92af
 	call bio_altura		;92b0   ; bio_altura: la altura de un ciclo: el seno del angulo
-	ld hl,0e02fh		;92b3
-	ld de,0e05ch		;92b6
+	ld hl,0e02fh		;92b3   ; apunta a el angulo de la sensibilidad (28 dias)
+	ld de,0e05ch		;92b6   ; apunta a la altura de la sensibilidad
 	xor a			;92b9
 	call bio_altura		;92ba   ; bio_altura: la altura de un ciclo: el seno del angulo
-	ld hl,0e031h		;92bd
-	ld de,0e05eh		;92c0
+	ld hl,0e031h		;92bd   ; apunta a el angulo del intelecto (33 dias)
+	ld de,0e05eh		;92c0   ; apunta a la altura del intelecto
 	xor a			;92c3
 	call bio_altura		;92c4   ; bio_altura: la altura de un ciclo: el seno del angulo
 	ret			;92c7
@@ -2614,7 +2614,7 @@ bio_seno:		; la altura del angulo (p05:932F) y la columna (0xE03F)
 	ex de,hl			;9311
 	call seno		;9312   ; seno: el seno del angulo HL: el cuadrante (90, 180, 270) y la tabla
 	ld e,a			;9315
-	ld a,(0e03fh)		;9316
+	ld a,(0e03fh)		;9316   ; lee la columna de la grafica
 	ld d,a			;9319
 	ex de,hl			;931a
 	ret			;931b
@@ -2633,13 +2633,13 @@ L_9320:
 	ret			;932e
 seno:		; el seno del angulo HL: el cuadrante (90, 180, 270) y la tabla
 	ld de,0010eh		;932f
-	rst 20h			;9332
+	rst 20h			;9332   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	jr nc,L_9374		;9333
 	ld de,000b4h		;9335
-	rst 20h			;9338
+	rst 20h			;9338   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	jr nc,L_9363		;9339
 	ld de,0005ah		;933b
-	rst 20h			;933e
+	rst 20h			;933e   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	jr nc,L_934F		;933f
 	ld a,l			;9341
 	add a,a			;9342
@@ -2691,7 +2691,7 @@ bio_dias_del_mes_b:		; los dias del mes (tabla p05:959E), con febrero segun el b
 	ld a,000h		;9389
 	jr nc,L_9392		;938b
 	ld a,001h		;938d
-	ld (0e041h),a		;938f
+	ld (0e041h),a		;938f   ; guarda el ano es bisiesto
 L_9392:
 	ld hl,0959eh		;9392
 	dec a			;9395
@@ -2865,7 +2865,7 @@ L_9460:
 	exx			;9460
 	djnz L_9451		;9461
 	exx			;9463
-	ld (0e088h),de		;9464
+	ld (0e088h),de		;9464   ; guarda resultado de 32 bits (parte alta) y el byte siguiente (16 bits)
 	pop de			;9468
 	exx			;9469
 	ld b,010h		;946a
@@ -2884,7 +2884,7 @@ L_947B:
 	exx			;947b
 	djnz L_946C		;947c
 	exx			;947e
-	ld (0e08ch),de		;947f
+	ld (0e08ch),de		;947f   ; guarda la posicion del punto en la VRAM y el byte siguiente (16 bits)
 	ret			;9483
 L_9484:
 	call signo_de_division		;9484   ; signo_de_division: el signo del resultado (B y D)
@@ -2999,7 +2999,7 @@ DATA_resto_94E8:
 
 
 bio_estado_fecha:		; el estado de pedir una fecha (MSX1)
-	ld a,(0e005h)		;95b7
+	ld a,(0e005h)		;95b7   ; lee la fecha que se pide (2 = la de hoy)
 	call despacha		;95ba   ; despacha: salta a la palabra A de la tabla pegada detras del `call`
 
 ; ----------------------------------------------------------------------
@@ -3035,7 +3035,7 @@ L_95DC:
 	jp L_9915		;95e8
 L_95EB:
 	ld b,010h		;95eb
-	ld hl,0e090h		;95ed
+	ld hl,0e090h		;95ed   ; apunta a las cifras de las dos fechas
 L_95F0:
 	ld a,0f4h		;95f0
 	ld (hl),a			;95f2
@@ -3060,18 +3060,18 @@ bio_vuelca:		; vuelca la copia de la tabla de nombres y las cifras
 	call bio_cifras_a_nombres		;9613   ; bio_cifras_a_nombres: las cifras de las dos fechas (0xE090...) a la copia de nombres
 	ret			;9616
 bio_si_mes_o_dia:		; si el cursor esta en el mes (8) o el dia (0x10), su texto
-	ld a,(0e07ah)		;9617
+	ld a,(0e07ah)		;9617   ; lee la cifra en la que esta el cursor
 	cp 008h		;961a
 	jr z,L_9624		;961c
 bio_si_dia:		; si el cursor esta en el dia (0x10), su texto
-	ld a,(0e07ah)		;961e
+	ld a,(0e07ah)		;961e   ; lee la cifra en la que esta el cursor
 	cp 010h		;9621
 	ret nz			;9623
 L_9624:
 	call bio_texto_9e3e		;9624   ; bio_texto_9e3e: pinta el texto de p05:9E3E
 	ret			;9627
 bio_cifras_a_nombres:		; las cifras de las dos fechas (0xE090...) a la copia de nombres
-	ld de,0e090h		;9628
+	ld de,0e090h		;9628   ; apunta a las cifras de las dos fechas
 	ld hl,0e34fh		;962b
 	ld b,004h		;962e
 	call cifras_a_letras		;9630   ; cifras_a_letras: B cifras de DE a letras (+0x10) en HL
@@ -3083,7 +3083,7 @@ bio_cifras_a_nombres:		; las cifras de las dos fechas (0xE090...) a la copia de 
 	ld hl,0e35bh		;9641
 	ld b,002h		;9644
 	call cifras_a_letras		;9646   ; cifras_a_letras: B cifras de DE a letras (+0x10) en HL
-	ld de,0e098h		;9649
+	ld de,0e098h		;9649   ; apunta a las cifras de la fecha de hoy
 	ld hl,0e3afh		;964c
 	ld b,004h		;964f
 	call cifras_a_letras		;9651   ; cifras_a_letras: B cifras de DE a letras (+0x10) en HL
@@ -3134,7 +3134,7 @@ bio_espera_tecla:		; vuelca, anima el cursor y espera una tecla (0xE058)
 	call 0009ch		;9693   ; BIOS CHSNS - Tests the status of the keyboard buffer
 	jr z,bio_espera_tecla		;9696
 	call 0009fh		;9698   ; BIOS CHGET - One character input (waiting)
-	ld (0e058h),a		;969b
+	ld (0e058h),a		;969b   ; guarda la tecla pulsada
 	ret			;969e
 L_969F:
 	ld a,0f4h		;969f
@@ -3152,7 +3152,7 @@ L_96A8:
 bio_cursor:		; pinta el cursor parpadeando en su cifra (tabla p05:96D2)
 	call bio_cursor_al_final		;96ad   ; bio_cursor_al_final: Z si el cursor esta en la ultima cifra
 	jr z,L_96D1		;96b0
-	ld hl,0e07ah		;96b2
+	ld hl,0e07ah		;96b2   ; apunta a la cifra en la que esta el cursor
 	ld a,(hl)			;96b5
 	ld c,a			;96b6
 	add a,a			;96b7
@@ -3163,7 +3163,7 @@ bio_cursor:		; pinta el cursor parpadeando en su cifra (tabla p05:96D2)
 	ld d,(hl)			;96c0
 	ld b,004h		;96c1
 	call bio_cifra_del_cursor		;96c3   ; bio_cifra_del_cursor: B = la cifra que hay bajo el cursor
-	ld a,(0e00dh)		;96c6
+	ld a,(0e00dh)		;96c6   ; lee el parpadeo del cursor
 	bit 2,a		;96c9
 	jr nz,L_96CF		;96cb
 	ld b,00fh		;96cd
@@ -3188,8 +3188,8 @@ DATA_resto_96D2:
 
 
 bio_cifra_del_cursor:		; B = la cifra que hay bajo el cursor
-	ld hl,0e090h		;96f2
-	ld a,(0e07ah)		;96f5
+	ld hl,0e090h		;96f2   ; apunta a las cifras de las dos fechas
+	ld a,(0e07ah)		;96f5   ; lee la cifra en la que esta el cursor
 	call hl_mas_a		;96f8   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld b,(hl)			;96fb
 	ld a,b			;96fc
@@ -3197,7 +3197,7 @@ bio_cifra_del_cursor:		; B = la cifra que hay bajo el cursor
 	ld b,a			;96ff
 	ret			;9700
 bio_estado_fecha_msx2:		; el estado de pedir una fecha (MSX2)
-	ld a,(0e005h)		;9701
+	ld a,(0e005h)		;9701   ; lee la fecha que se pide (2 = la de hoy)
 	call despacha		;9704   ; despacha: salta a la palabra A de la tabla pegada detras del `call`
 
 ; ----------------------------------------------------------------------
@@ -3221,7 +3221,7 @@ DATA_saltos_9707:
 
 L_9717:
 	ld b,010h		;9717
-	ld hl,0e090h		;9719
+	ld hl,0e090h		;9719   ; apunta a las cifras de las dos fechas
 L_971C:
 	ld a,0d4h		;971c
 	ld (hl),a			;971e
@@ -3261,11 +3261,11 @@ L_9765:
 	scf			;976b
 	ret			;976c
 bio_si_mes_o_dia_msx2:		; si el cursor esta en el mes o el dia, su texto (MSX2)
-	ld a,(0e07ah)		;976d
+	ld a,(0e07ah)		;976d   ; lee la cifra en la que esta el cursor
 	cp 008h		;9770
 	jr z,L_977A		;9772
 bio_si_dia_msx2:		; si el cursor esta en el dia, su texto (MSX2)
-	ld a,(0e07ah)		;9774
+	ld a,(0e07ah)		;9774   ; lee la cifra en la que esta el cursor
 	cp 010h		;9777
 	ret nz			;9779
 L_977A:
@@ -3298,8 +3298,8 @@ L_9793:
 	ret			;9793
 bio_guarda_fecha:		; copia la fecha tecleada (0xE098...) a 0xE062
 	ld b,004h		;9794
-	ld de,0e098h		;9796
-	ld hl,0e062h		;9799
+	ld de,0e098h		;9796   ; apunta a las cifras de la fecha de hoy
+	ld hl,0e062h		;9799   ; apunta a la fecha que se ve (cifras)
 	call copia_b		;979c   ; copia_b: copia B bytes de DE a HL
 	ld b,002h		;979f
 	ld de,0e09ch		;97a1
@@ -3319,12 +3319,12 @@ copia_b:		; copia B bytes de DE a HL
 	ret			;97bc
 bio_cursor_al_mes:		; el cursor y su tope al mes (8)
 	ld a,008h		;97bd
-	ld (0e078h),a		;97bf
-	ld (0e07ah),a		;97c2
+	ld (0e078h),a		;97bf   ; guarda la ultima cifra a la que llega el cursor
+	ld (0e07ah),a		;97c2   ; guarda la cifra en la que esta el cursor
 	ret			;97c5
 bio_campo:		; B = el campo del cursor: ano (4), mes (6), dia (8)...
 	ld b,000h		;97c6
-	ld a,(0e07ah)		;97c8
+	ld a,(0e07ah)		;97c8   ; lee la cifra en la que esta el cursor
 	cp 004h		;97cb
 	ret z			;97cd
 	inc b			;97ce
@@ -3349,7 +3349,7 @@ L_97E4:
 	jp c,L_9915		;97e7
 	jp L_9905		;97ea
 bio_comprueba_fecha:		; comprueba la fecha: ano, mes y dia
-	ld a,(0e005h)		;97ed
+	ld a,(0e005h)		;97ed   ; lee la fecha que se pide (2 = la de hoy)
 	cp 002h		;97f0
 	jr nz,L_9800		;97f2
 	call bio_comprueba_ano		;97f4   ; bio_comprueba_ano: comprueba el ano de nacimiento (0xE010)
@@ -3367,51 +3367,51 @@ L_9800:
 	ret			;980b
 bio_comprueba_ano:		; comprueba el ano de nacimiento (0xE010)
 	ld a,000h		;980c
-	ld (0e07bh),a		;980e
-	ld ix,0e090h		;9811
-	ld hl,0e010h		;9815   ; apunta a la lista de la SRAM
+	ld (0e07bh),a		;980e   ; guarda la cifra del campo que esta mal
+	ld ix,0e090h		;9811   ; apunta a las cifras de las dos fechas
+	ld hl,0e010h		;9815   ; apunta a el ano de nacimiento
 	call bio_lee_ano		;9818   ; bio_lee_ano: pasa las 4 cifras del ano a binario
 	ret			;981b
 bio_comprueba_ano_2:		; comprueba el ano de hoy (0xE012)
 	ld a,008h		;981c
-	ld (0e07bh),a		;981e
-	ld ix,0e098h		;9821
-	ld hl,0e012h		;9825
+	ld (0e07bh),a		;981e   ; guarda la cifra del campo que esta mal
+	ld ix,0e098h		;9821   ; apunta a las cifras de la fecha de hoy
+	ld hl,0e012h		;9825   ; apunta a el ano de hoy
 	call bio_lee_ano		;9828   ; bio_lee_ano: pasa las 4 cifras del ano a binario
 	ret			;982b
 bio_comprueba_mes:		; comprueba el mes de nacimiento
 	ld a,004h		;982c
-	ld (0e07bh),a		;982e
+	ld (0e07bh),a		;982e   ; guarda la cifra del campo que esta mal
 	ld hl,0e094h		;9831
-	ld de,0e014h		;9834
+	ld de,0e014h		;9834   ; apunta a el mes de nacimiento
 	call bio_lee_mes		;9837   ; bio_lee_mes: pasa las 2 cifras del mes a binario y lo comprueba (1-12)
 	ret			;983a
 bio_comprueba_mes_2:		; comprueba el mes de hoy
 	ld a,00ch		;983b
-	ld (0e07bh),a		;983d
+	ld (0e07bh),a		;983d   ; guarda la cifra del campo que esta mal
 	ld hl,0e09ch		;9840
-	ld de,0e015h		;9843
+	ld de,0e015h		;9843   ; apunta a el mes de hoy
 	call bio_lee_mes		;9846   ; bio_lee_mes: pasa las 2 cifras del mes a binario y lo comprueba (1-12)
 	ret			;9849
 bio_comprueba_dia:		; comprueba el dia de nacimiento
 	ld a,006h		;984a
-	ld (0e07bh),a		;984c
+	ld (0e07bh),a		;984c   ; guarda la cifra del campo que esta mal
 	ld hl,0e096h		;984f
-	ld de,0e016h		;9852
+	ld de,0e016h		;9852   ; apunta a el dia de nacimiento
 	call bio_lee_dia		;9855   ; bio_lee_dia: pasa las 2 cifras del dia a binario y lo comprueba
 	ret			;9858
 bio_comprueba_dia_2:		; comprueba el dia de hoy
 	ld a,00eh		;9859
-	ld (0e07bh),a		;985b
+	ld (0e07bh),a		;985b   ; guarda la cifra del campo que esta mal
 	ld hl,0e09eh		;985e
-	ld de,0e017h		;9861
+	ld de,0e017h		;9861   ; apunta a el dia de hoy
 	call bio_lee_dia		;9864   ; bio_lee_dia: pasa las 2 cifras del dia a binario y lo comprueba
 	ret			;9867
 bio_lee_ano:		; pasa las 4 cifras del ano a binario
 	push hl			;9868
 	call cuatro_cifras		;9869   ; cuatro_cifras: las 4 cifras de IX a binario (x1000, x100, x10)
 	pop hl			;986c
-	ld de,(0e088h)		;986d
+	ld de,(0e088h)		;986d   ; lee resultado de 32 bits (parte alta) y el byte siguiente (16 bits)
 	ld (hl),e			;9871
 	inc hl			;9872
 	ld (hl),d			;9873
@@ -3432,16 +3432,16 @@ bio_lee_dia:		; pasa las 2 cifras del dia a binario y lo comprueba
 bio_ano_valido:		; comprueba el ano (y que hoy no sea antes del nacimiento)
 	call bio_es_bisiesto		;988c   ; bio_es_bisiesto: mira si el ano es bisiesto (4, 100 y 400): 0xE041
 	xor a			;988f
-	ld a,(0e005h)		;9890
+	ld a,(0e005h)		;9890   ; lee la fecha que se pide (2 = la de hoy)
 	cp 002h		;9893
 	jr z,L_989A		;9895
 	call bio_hoy_despues		;9897   ; bio_hoy_despues: C si el ano de hoy es menor que el de nacimiento
 L_989A:
 	ret			;989a
 bio_hoy_despues:		; C si el ano de hoy es menor que el de nacimiento
-	ld de,(0e010h)		;989b   ; lee la lista de la SRAM y el byte siguiente (16 bits)
-	ld hl,(0e012h)		;989f
-	rst 20h			;98a2
+	ld de,(0e010h)		;989b   ; lee el ano de nacimiento y el byte siguiente (16 bits)
+	ld hl,(0e012h)		;989f   ; lee el ano de hoy y el byte siguiente (16 bits)
+	rst 20h			;98a2   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	jr c,L_98DD		;98a3
 	ret			;98a5
 bio_mes_valido:		; C si el mes no esta entre 1 y 12
@@ -3468,7 +3468,7 @@ bio_dia_valido:		; C si el dia no cabe en el mes (tabla p05:9978, febrero con el
 	cp b			;98c6
 	ret nc			;98c7
 L_98C8:
-	ld a,(0e041h)		;98c8
+	ld a,(0e041h)		;98c8   ; lee el ano es bisiesto
 	and a			;98cb
 	jr z,L_98D5		;98cc
 	ld a,01dh		;98ce
@@ -3484,18 +3484,18 @@ L_98D9:
 	call bio_cursor_al_error		;98d9   ; bio_cursor_al_error: lleva el cursor al campo que esta mal (0xE07B)
 	ret			;98dc
 L_98DD:
-	ld a,(0e07bh)		;98dd
-	ld hl,0e07ah		;98e0
+	ld a,(0e07bh)		;98dd   ; lee la cifra del campo que esta mal
+	ld hl,0e07ah		;98e0   ; apunta a la cifra en la que esta el cursor
 	ld (hl),a			;98e3
 	ret			;98e4
 L_98E5:
-	ld a,(0e07bh)		;98e5
-	ld hl,0e07ah		;98e8
+	ld a,(0e07bh)		;98e5   ; lee la cifra del campo que esta mal
+	ld hl,0e07ah		;98e8   ; apunta a la cifra en la que esta el cursor
 	ld (hl),a			;98eb
 	ret			;98ec
 bio_cursor_al_error:		; lleva el cursor al campo que esta mal (0xE07B)
-	ld a,(0e07bh)		;98ed
-	ld hl,0e07ah		;98f0
+	ld a,(0e07bh)		;98ed   ; lee la cifra del campo que esta mal
+	ld hl,0e07ah		;98f0   ; apunta a la cifra en la que esta el cursor
 	ld (hl),a			;98f3
 	ret			;98f4
 L_98F5:
@@ -3515,7 +3515,7 @@ L_98FE:
 	ret			;9904
 L_9905:
 	call bio_borra_estado		;9905   ; bio_borra_estado: pone a cero 0xE006 y 0xE004
-	ld hl,0e005h		;9908
+	ld hl,0e005h		;9908   ; apunta a la fecha que se pide (2 = la de hoy)
 	inc (hl)			;990b
 	ret			;990c
 L_990D:
@@ -3529,7 +3529,7 @@ L_9915:
 	ret			;9919
 L_991A:
 	call bio_borra_estado		;991a   ; bio_borra_estado: pone a cero 0xE006 y 0xE004
-	ld hl,0e005h		;991d
+	ld hl,0e005h		;991d   ; apunta a la fecha que se pide (2 = la de hoy)
 	ld a,001h		;9920
 	ld (hl),a			;9922
 	ret			;9923
@@ -3542,7 +3542,7 @@ nada:		; `ret`
 L_992C:
 	ld a,b			;992c
 	ld b,000h		;992d
-	ld de,0e062h		;992f
+	ld de,0e062h		;992f   ; apunta a la fecha que se ve (cifras)
 	call de_mas_a		;9932   ; de_mas_a: DE = DE + A (gemela de p01:7256)
 	ld hl,0e084h		;9935
 	ldir		;9938
@@ -3571,7 +3571,7 @@ cuatro_cifras:		; las 4 cifras de IX a binario (x1000, x100, x10)
 	add hl,de			;9964
 	ld a,(ix+003h)		;9965
 	call hl_mas_a		;9968   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
-	ld (0e088h),hl		;996b
+	ld (0e088h),hl		;996b   ; guarda resultado de 32 bits (parte alta) y el byte siguiente (16 bits)
 	ret			;996e
 dos_cifras:		; las 2 cifras de HL a binario (x10)
 	push de			;996f
@@ -3624,7 +3624,7 @@ bio_espera_tecla_msx2:		; anima el cursor y espera una tecla (MSX2)
 	call 0009ch		;99a0   ; BIOS CHSNS - Tests the status of the keyboard buffer
 	jr z,bio_espera_tecla_msx2		;99a3
 	call 0009fh		;99a5   ; BIOS CHGET - One character input (waiting)
-	ld (0e058h),a		;99a8
+	ld (0e058h),a		;99a8   ; guarda la tecla pulsada
 	ret			;99ab
 bio_tecla:		; B = la orden de la tecla A: RETURN, flechas o cifra
 	ld b,000h		;99ac
@@ -3661,16 +3661,16 @@ bio_parpadeo:		; cada 16 cuadros cambia el parpadeo (0xE00D)
 	ld (hl),a			;99dc
 	and 00fh		;99dd
 	ret nz			;99df
-	ld hl,0e00dh		;99e0
+	ld hl,0e00dh		;99e0   ; apunta a el parpadeo del cursor
 	inc (hl)			;99e3
 	ret			;99e4
 L_99E5:
 	call bio_mete_cifra		;99e5   ; bio_mete_cifra: mete la cifra tecleada en su sitio
 	jr L_9A18		;99e8
 L_99EA:
-	ld a,(0e078h)		;99ea
+	ld a,(0e078h)		;99ea   ; lee la ultima cifra a la que llega el cursor
 	ld b,a			;99ed
-	ld hl,0e07ah		;99ee
+	ld hl,0e07ah		;99ee   ; apunta a la cifra en la que esta el cursor
 	ld a,(hl)			;99f1
 	cp b			;99f2
 	jr z,L_99F6		;99f3
@@ -3680,7 +3680,7 @@ L_99F6:
 L_99F8:
 	call bio_primer_campo		;99f8   ; bio_primer_campo: B = la primera cifra: 0 o 8 segun 0xE005
 	ld a,b			;99fb
-	ld hl,0e07ah		;99fc
+	ld hl,0e07ah		;99fc   ; apunta a la cifra en la que esta el cursor
 	ld b,(hl)			;99ff
 	cp b			;9a00
 	jr z,L_9A08		;9a01
@@ -3692,7 +3692,7 @@ L_9A08:
 	jr L_9A18		;9a08
 L_9A0A:
 	call bio_ultimo_campo		;9a0a   ; bio_ultimo_campo: B = la ultima cifra: 8 o 16 segun 0xE005
-	ld a,(0e078h)		;9a0d
+	ld a,(0e078h)		;9a0d   ; lee la ultima cifra a la que llega el cursor
 	cp b			;9a10
 	jr z,L_9A16		;9a11
 	jp L_9A18		;9a13
@@ -3708,22 +3708,22 @@ L_9A1B:
 bio_mete_cifra:		; mete la cifra tecleada en su sitio
 	call bio_estado_5		;9a1d   ; bio_estado_5: compara 0xE005 con 5
 	jr nc,L_9A28		;9a20
-	ld a,(0e07ah)		;9a22
+	ld a,(0e07ah)		;9a22   ; lee la cifra en la que esta el cursor
 	cp 008h		;9a25
 	ret z			;9a27
 L_9A28:
-	ld a,(0e07ah)		;9a28
-	ld hl,0e090h		;9a2b
+	ld a,(0e07ah)		;9a28   ; lee la cifra en la que esta el cursor
+	ld hl,0e090h		;9a2b   ; apunta a las cifras de las dos fechas
 	call hl_mas_a		;9a2e   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
-	ld a,(0e058h)		;9a31
+	ld a,(0e058h)		;9a31   ; lee la tecla pulsada
 	sub 030h		;9a34
 	ld (hl),a			;9a36
 	call bio_cursor_derecha		;9a37   ; bio_cursor_derecha: el cursor una cifra a la derecha
 	ret			;9a3a
 bio_cursor_derecha:		; el cursor una cifra a la derecha
-	ld hl,0e078h		;9a3b
+	ld hl,0e078h		;9a3b   ; apunta a la ultima cifra a la que llega el cursor
 	ld b,(hl)			;9a3e
-	ld a,(0e07ah)		;9a3f
+	ld a,(0e07ah)		;9a3f   ; lee la cifra en la que esta el cursor
 	cp b			;9a42
 	jr c,L_9A4C		;9a43
 	call bio_ultimo_campo		;9a45   ; bio_ultimo_campo: B = la ultima cifra: 8 o 16 segun 0xE005
@@ -3732,12 +3732,12 @@ bio_cursor_derecha:		; el cursor una cifra a la derecha
 	ret nc			;9a4a
 	inc (hl)			;9a4b
 L_9A4C:
-	ld hl,0e07ah		;9a4c
+	ld hl,0e07ah		;9a4c   ; apunta a la cifra en la que esta el cursor
 	inc (hl)			;9a4f
 	ret			;9a50
 bio_primer_campo:		; B = la primera cifra: 0 o 8 segun 0xE005
 	ld b,000h		;9a51
-	ld a,(0e005h)		;9a53
+	ld a,(0e005h)		;9a53   ; lee la fecha que se pide (2 = la de hoy)
 	cp 002h		;9a56
 	jr z,L_9A5C		;9a58
 	ld b,008h		;9a5a
@@ -3745,20 +3745,20 @@ L_9A5C:
 	ret			;9a5c
 bio_ultimo_campo:		; B = la ultima cifra: 8 o 16 segun 0xE005
 	ld b,008h		;9a5d
-	ld a,(0e005h)		;9a5f
+	ld a,(0e005h)		;9a5f   ; lee la fecha que se pide (2 = la de hoy)
 	cp 002h		;9a62
 	jr z,L_9A68		;9a64
 	ld b,010h		;9a66
 L_9A68:
 	ret			;9a68
 bio_estado_5:		; compara 0xE005 con 5
-	ld a,(0e005h)		;9a69
+	ld a,(0e005h)		;9a69   ; lee la fecha que se pide (2 = la de hoy)
 	cp 005h		;9a6c
 	ret			;9a6e
 bio_cursor_msx2:		; pinta el cursor parpadeando (MSX2, tabla p05:9AA3)
 	call bio_cursor_al_final		;9a6f   ; bio_cursor_al_final: Z si el cursor esta en la ultima cifra
 	jr z,L_9AA2		;9a72
-	ld hl,0e07ah		;9a74
+	ld hl,0e07ah		;9a74   ; apunta a la cifra en la que esta el cursor
 	ld a,(hl)			;9a77
 	ld c,a			;9a78
 	add a,a			;9a79
@@ -3770,7 +3770,7 @@ bio_cursor_msx2:		; pinta el cursor parpadeando (MSX2, tabla p05:9AA3)
 	ld a,c			;9a83
 	call bio_cifra		;9a84   ; bio_cifra: A = la cifra A de 0xE090
 	ld c,a			;9a87
-	ld a,(0e00dh)		;9a88
+	ld a,(0e00dh)		;9a88   ; lee el parpadeo del cursor
 	bit 6,a		;9a8b
 	jr nz,L_9A96		;9a8d
 	ex de,hl			;9a8f
@@ -3803,7 +3803,7 @@ DATA_resto_9AA3:
 
 bio_cursor_al_final:		; Z si el cursor esta en la ultima cifra
 	call bio_ultimo_campo		;9ac3   ; bio_ultimo_campo: B = la ultima cifra: 8 o 16 segun 0xE005
-	ld hl,0e07ah		;9ac6
+	ld hl,0e07ah		;9ac6   ; apunta a la cifra en la que esta el cursor
 	ld a,(hl)			;9ac9
 	cp b			;9aca
 	ret			;9acb
@@ -3852,7 +3852,7 @@ bio_pinta_cifras:		; pinta B cifras de 0xE090 con LMMM
 	djnz bio_pinta_cifras		;9b1a
 	ret			;9b1c
 bio_cifra:		; A = la cifra A de 0xE090
-	ld hl,0e090h		;9b1d
+	ld hl,0e090h		;9b1d   ; apunta a las cifras de las dos fechas
 	call hl_mas_a		;9b20   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;9b23
 	ret			;9b24
@@ -3922,13 +3922,13 @@ L_9B8B:
 	scf			;9b8b
 	ret			;9b8c
 bio_dia_sube:		; sube el dia mostrado (0xE054)
-	ld hl,0e054h		;9b8d
+	ld hl,0e054h		;9b8d   ; apunta a el dia que se ve (respecto de hoy)
 	ld a,(hl)			;9b90
 	inc a			;9b91
 	ld (hl),a			;9b92
 	ret			;9b93
 bio_dia_siguiente:		; dia siguiente: columna, alturas y angulos
-	ld hl,0e03fh		;9b94
+	ld hl,0e03fh		;9b94   ; apunta a la columna de la grafica
 	inc (hl)			;9b97
 	call bio_alturas_mas		;9b98   ; bio_alturas_mas: las alturas de los tres ciclos (desplazamientos 4, 3, 2)
 	call bio_dia_mas		;9b9b   ; bio_dia_mas: pasa al dia siguiente: los tres angulos suben
@@ -3950,13 +3950,13 @@ L_9BB2:
 	call rellena_cada_4		;9bba   ; rellena_cada_4: pone A en B bytes de HL, de 4 en 4
 	ret			;9bbd
 bio_dia_baja:		; baja el dia mostrado (0xE054)
-	ld hl,0e054h		;9bbe
+	ld hl,0e054h		;9bbe   ; apunta a el dia que se ve (respecto de hoy)
 	ld a,(hl)			;9bc1
 	dec a			;9bc2
 	ld (hl),a			;9bc3
 	ret			;9bc4
 bio_dia_anterior:		; dia anterior: columna, alturas y angulos
-	ld hl,0e03fh		;9bc5
+	ld hl,0e03fh		;9bc5   ; apunta a la columna de la grafica
 	dec (hl)			;9bc8
 	call bio_alturas_menos		;9bc9   ; bio_alturas_menos: las alturas de los tres ciclos (desplazamientos -4, -3, -2)
 	call bio_dia_menos		;9bcc   ; bio_dia_menos: pasa al dia anterior: los tres angulos bajan
@@ -3971,7 +3971,7 @@ L_9BD2:
 	ret			;9bd9
 bio_dia_en_cifras:		; pasa el dia mostrado (0xE054, con signo) a dos cifras
 	ld hl,0e04ch		;9bda
-	ld a,(0e054h)		;9bdd
+	ld a,(0e054h)		;9bdd   ; lee el dia que se ve (respecto de hoy)
 	bit 7,a		;9be0
 	jr z,L_9BE6		;9be2
 	neg		;9be4
@@ -4071,7 +4071,7 @@ L_9C69:
 bio_pinta_signo:		; pinta el signo del dia ('<' o ';')
 	ld de,0b048h		;9c6d
 	call bio_borra_casilla_b		;9c70   ; bio_borra_casilla_b: borra la casilla de 8x8 de DE
-	ld a,(0e054h)		;9c73
+	ld a,(0e054h)		;9c73   ; lee el dia que se ve (respecto de hoy)
 	cp 020h		;9c76
 	jr z,L_9C83		;9c78
 	ld b,03ch		;9c7a
@@ -4119,7 +4119,7 @@ bio_pinta_cifras_b:		; pinta B cifras de 0xE062
 	djnz bio_pinta_cifras_b		;9cc0
 	ret			;9cc2
 bio_cifra_e062:		; A = la cifra A de 0xE062
-	ld hl,0e062h		;9cc3
+	ld hl,0e062h		;9cc3   ; apunta a la fecha que se ve (cifras)
 	call hl_mas_a		;9cc6   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;9cc9
 	ret			;9cca
@@ -4131,14 +4131,14 @@ bio_recalcula:		; vuelve a los angulos de hoy y recalcula las alturas
 	call bio_angulos_validos		;9cd7   ; bio_angulos_validos: deja los tres angulos entre 0 y 359 y calcula sus alturas
 	ret			;9cda
 bio_angulos_de_hoy:		; copia los angulos guardados (0xE033) a 0xE02D
-	ld hl,0e033h		;9cdb
-	ld de,0e02dh		;9cde
+	ld hl,0e033h		;9cdb   ; apunta a los tres angulos de hoy (copia)
+	ld de,0e02dh		;9cde   ; apunta a el angulo del fisico (23 dias)
 	ld bc,00006h		;9ce1
 	ldir		;9ce4
 	ret			;9ce6
 bio_adelanta:		; suma a los tres angulos la tabla de p05:9043
 	ld b,003h		;9ce7
-	ld ix,0e02dh		;9ce9
+	ld ix,0e02dh		;9ce9   ; apunta a el angulo del fisico (23 dias)
 	ld iy,09043h		;9ced
 L_9CF1:
 	ld l,(ix+000h)		;9cf1
@@ -4156,7 +4156,7 @@ L_9CF1:
 	ret			;9d0e
 bio_columna_inicial:		; la columna de la grafica a 0x3C
 	ld hl,0003ch		;9d0f
-	ld (0e03fh),hl		;9d12
+	ld (0e03fh),hl		;9d12   ; guarda la columna de la grafica y el byte siguiente (16 bits)
 	ret			;9d15
 bio_estado_grafica_msx2:		; el estado de la grafica en MSX2
 	call bio_tecla_grafica		;9d16   ; bio_tecla_grafica: la tecla de la grafica: 0, 0x80 o 0x10
@@ -4198,7 +4198,7 @@ cifras_a_nombres:		; B cifras de 0xE062 a letras (+0x10) en DE
 	ret			;9d54
 bio_pinta_niveles:		; pinta los niveles de los tres ciclos
 	call bio_niveles		;9d55   ; bio_niveles: clasifica los tres ciclos (0xE05A, 0xE05C, 0xE05E) (gemela de p06:A3B1)
-	call L_9D5C		;9d58   ; bio_pinta_niveles: pinta los niveles de los tres ciclos
+	call L_9D5C		;9d58
 	ret			;9d5b
 L_9D5C:
 	ld a,(0e075h)		;9d5c
@@ -4220,13 +4220,13 @@ bio_texto_nivel:		; el texto del nivel A (tabla de p05:9DC2)
 	ex de,hl			;9d87
 	ret			;9d88
 bio_niveles:		; clasifica los tres ciclos (0xE05A, 0xE05C, 0xE05E) (gemela de p06:A3B1)
-	ld a,(0e05ah)		;9d89
+	ld a,(0e05ah)		;9d89   ; lee la altura del fisico
 	ld hl,0e075h		;9d8c
 	call bio_nivel		;9d8f   ; bio_nivel: B = el nivel de A (umbrales 0xA0, 0x90, 0x80...)
-	ld a,(0e05ch)		;9d92
+	ld a,(0e05ch)		;9d92   ; lee la altura de la sensibilidad
 	ld hl,0e074h		;9d95
 	call bio_nivel		;9d98   ; bio_nivel: B = el nivel de A (umbrales 0xA0, 0x90, 0x80...)
-	ld a,(0e05eh)		;9d9b
+	ld a,(0e05eh)		;9d9b   ; lee la altura del intelecto
 	ld hl,0e073h		;9d9e
 	call bio_nivel		;9da1   ; bio_nivel: B = el nivel de A (umbrales 0xA0, 0x90, 0x80...)
 	ret			;9da4
@@ -4293,7 +4293,7 @@ bio_textos_9f0a:		; pinta los textos de p05:9F0A y p05:9F29
 	call pinta_texto_bio		;9dfa   ; pinta_texto_bio: pinta un texto [direccion][letras]; 0x80 acaba, 0x81 otra direccion
 	ret			;9dfd
 bio_pinta_marcas:		; pinta las marcas de los tres ciclos (p06:A33D)
-	ld ix,0e05ah		;9dfe
+	ld ix,0e05ah		;9dfe   ; apunta a la altura del fisico
 	ld h,(ix+000h)		;9e02
 	ld d,(ix+002h)		;9e05
 	ld b,(ix+004h)		;9e08

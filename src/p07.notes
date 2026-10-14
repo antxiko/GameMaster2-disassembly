@@ -164,9 +164,17 @@ L 0x9F2F canal_volumen el volumen del canal segun la envolvente de (ix+0x0F)
 L 0x9FB9 canal_avanza avanza el puntero de la pista (ix+0x02)
 L 0x9FFB th_9ffb HL = 0xE2F6 y sigue en p08
 C 0x8008 sonido_cuadro: el motor de sonido: un cuadro de los cinco canales
+C 0x800B apunta a el cuadro esta en marcha
 C 0x8014 th_lee_mandos: lee los dos mandos y el teclado (0xE405-0xE408)
 C 0x8017 th_sale_con_teclas: si se pulsan a la vez las teclas de salida (SNSMAT 6 y 3), acaba el juego
+C 0x801C guarda el cuadro esta en marcha
+C 0x803C guarda el gancho H.KEYI
+C 0x8042 guarda la direccion del gancho H.KEYI y el byte siguiente (16 bits)
+C 0x8045 apunta a los canales del motor de sonido (0x2C bytes cada uno)
+C 0x8054 guarda el cuadro esta en marcha
 C 0x8057 th_inicia: silencio, sonido 1, borra la VRAM y pone los 8 registros del VDP
+C 0x805B guarda el cuadro esta en marcha
+C 0x806A guarda el gancho H.KEYI
 C 0x8091 despacha: salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
 C 0x80AC pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x80AF th_borra_pantalla: borra los sprites y la tabla de nombres
@@ -176,17 +184,25 @@ C 0x80B8 th_campo_hockey: descomprime p07:951D en 0x0300
 C 0x80BB th_campo_colores: descomprime p07:9535
 C 0x80BE th_menu_juego: GAME SELECT: TENNIS / HOCKEY / END
 C 0x80C3 th_elige_juego: mueve la eleccion de juego (0xE412) con el mando
+C 0x80C6 lee el mando del jugador 1
+C 0x80CC lee el juego: 1 tenis, 2 hockey
 C 0x80D5 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x80DD pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x80F7 th_borra_pantalla: borra los sprites y la tabla de nombres
+C 0x80FB guarda la opcion elegida del GAME MODIFY
 C 0x80FE th_menu_modify: GAME MODIFY: LENGTH / SPEED / TYPE / BAR
 C 0x8103 th_cambia_opcion: cambia la opcion elegida del GAME MODIFY (0xE460)
+C 0x8106 lee el mando del jugador 1
 C 0x810E pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x8111 th_aplica_opciones: copia LENGTH, SPEED, TYPE y BAR (0xE461...) a 0xE413...
+C 0x811E lee los canales del motor de sonido (0x2C bytes cada uno)
+C 0x8123 lee el juego: 1 tenis, 2 hockey
 C 0x812D pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x8136 despacha: salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
 C 0x8141 th_borra_pantalla: borra los sprites y la tabla de nombres
 C 0x8144 th_marcador_set: pinta el SET y el 1ST/2ND/3RD (tenis: 0xE412 = 1)
+C 0x8149 guarda el tiempo del hockey (BCD)
+C 0x8154 lee el juego: 1 tenis, 2 hockey
 C 0x815D th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
 C 0x8169 hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x8182 th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
@@ -197,18 +213,24 @@ C 0x81C6 th_cuadro: un cuadro del partido: jugadores, pelota, marcador y sprites
 C 0x81DA pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x81E4 th_esconde_sprites: pone 0xE0 en la tabla de sprites (0x3B00)
 C 0x81EB th_tanto: suma el tanto al jugador que toca
+C 0x8214 lee el juego: 1 tenis, 2 hockey
+C 0x8239 lee el juego: 1 tenis, 2 hockey
 C 0x8250 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x8253 th_borra_pantalla: borra los sprites y la tabla de nombres
 C 0x8259 th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
 C 0x825F th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
+C 0x8265 apunta a los tantos del jugador 1
 C 0x8268 th_pinta_bcd: pinta el byte BCD de DE en dos cifras grandes
+C 0x826E apunta a los tantos del jugador 2
 C 0x8271 th_pinta_bcd: pinta el byte BCD de DE en dos cifras grandes
 C 0x82B1 th_texto_saque: pinta el texto del saque segun 0xE41D
+C 0x82B4 lee los canales del motor de sonido (0x2C bytes cada uno)
 C 0x82BC th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
 C 0x82DC pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x82DF th_pantalla_campo: borra y pinta el campo (p07:83F5 en 0x38E8)
 C 0x82E2 th_pinta_campo: pinta las piezas del campo de la tabla de p07:83C6
 C 0x82EF th_texto_saque: pinta el texto del saque segun 0xE41D
+C 0x82F2 lee los canales del motor de sonido (0x2C bytes cada uno)
 C 0x82FA th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
 C 0x830A pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x8311 th_borra_pantalla: borra los sprites y la tabla de nombres
@@ -216,30 +238,41 @@ C 0x8333 th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras 
 C 0x8346 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x8349 th_pantalla_campo: borra y pinta el campo (p07:83F5 en 0x38E8)
 C 0x834C th_pinta_campo: pinta las piezas del campo de la tabla de p07:83C6
+C 0x8356 lee los canales del motor de sonido (0x2C bytes cada uno)
 C 0x835D pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x8374 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x8377 th_borra_pantalla: borra los sprites y la tabla de nombres
 C 0x837D th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
+C 0x8388 lee los canales del motor de sonido (0x2C bytes cada uno)
 C 0x838F pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x83BA de_mas_a: DE = DE + A (gemela de p01:7256)
 C 0x83BD th_cifra_baja: pinta la cifra baja del BCD de DE
 C 0x83D2 th_borra_pantalla: borra los sprites y la tabla de nombres
 C 0x83E9 de_mas_a: DE = DE + A (gemela de p01:7256)
 C 0x83EF hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0x8495 apunta a la copia de la tabla de sprites
 C 0x84A2 th_vuelca_sprites: vuelca a la tabla de sprites la copia de 0xE500
 C 0x84A5 th_cabecera: la cabecera del marcador: tenis (p07:84C6) o hockey (p07:8506)
 C 0x84A8 th_tanteo: pinta los dos tanteos (0xE410 y 0xE411)
 C 0x84AB th_tiempo: en hockey, pinta el tiempo (0xE419)
+C 0x84B4 lee el juego: 1 tenis, 2 hockey
 C 0x84C3 th_copia_a_vram: LDIRVM de DE a HL
+C 0x8554 apunta a los tantos del jugador 1
 C 0x8557 th_pinta_bcd: pinta el byte BCD de DE en dos cifras grandes
+C 0x855D apunta a los tantos del jugador 2
+C 0x8562 lee el juego: 1 tenis, 2 hockey
+C 0x856A apunta a el tiempo del hockey (BCD)
+C 0x856F lee el juego: 1 tenis, 2 hockey
 C 0x857A th_cifra_baja: pinta la cifra baja del BCD de DE
 C 0x8583 th_cifra_baja: pinta la cifra baja del BCD de DE
 C 0x858E th_cifra: pinta la cifra A con las dos letras de p07:85AD
 C 0x859A palabra_de_tabla: DE = la palabra A de la tabla de DE
 C 0x85D5 th_borra_sprites: pone 0xE0 en la copia de sprites (0xE500) y la vuelca
+C 0x85E7 el puerto de escritura del VDP (VDP.DW)
 C 0x85F8 th_copia_a_vram: LDIRVM de DE a HL
 C 0x861A th_descomprime: descomprime DE a la VRAM HL: n & 0x7F repeticiones o copias, 0 acaba
 C 0x8647 th_vram_escribe: SETWRT en HL y C = el puerto de datos del VDP
+C 0x8672 el puerto de escritura del VDP (VDP.DW)
 C 0x86B7 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x86E4 th_lee_puerto: lee el puerto de mandos E (R#15 del PSG y R#14)
 C 0x86E7 th_teclas_1: las teclas del jugador 1 (SNSMAT 7 y 8)
@@ -252,7 +285,9 @@ C 0x8837 th_rellena_tercios: FILVRM en los tres tercios
 C 0x8841 th_rellena_tercios: FILVRM en los tres tercios
 C 0x8851 th_rellena_tercios: FILVRM en los tres tercios
 C 0x898C th_borra_sprites: pone 0xE0 en la copia de sprites (0xE500) y la vuelca
+C 0x8992 apunta a la copia de la tabla de sprites
 C 0x8998 th_copia_a_vram: LDIRVM de DE a HL
+C 0x899B lee el juego: 1 tenis, 2 hockey
 C 0x89B8 th_copia_a_vram: LDIRVM de DE a HL
 C 0x89BB th_jugador_1: prepara al jugador 1 (0xE421)
 C 0x89BE th_jugador_2: prepara al jugador 2 (0xE431)
@@ -263,6 +298,7 @@ C 0x89CA th_sprite_pelota: el sprite de la pelota a la copia de 0xE500
 C 0x89CD th_sprite_disco: el sprite del disco del hockey
 C 0x89D0 th_vuelca_sprites: vuelca a la tabla de sprites la copia de 0xE500
 C 0x89D3 th_vuelca_sprites: vuelca a la tabla de sprites la copia de 0xE500
+C 0x89D6 lee el juego: 1 tenis, 2 hockey
 C 0x89DA th_reloj: en hockey, baja el tiempo (0xE419, BCD) cada 64 cuadros
 C 0x89DD th_mueve_jugador_1: mueve al jugador 1 segun su mando
 C 0x89E0 th_mueve_jugador_2: mueve al jugador 2 segun su mando
@@ -272,27 +308,67 @@ C 0x89E9 th_sprites_jugadores: los sprites de los dos jugadores a la copia de 0x
 C 0x89EC th_sprite_pelota: el sprite de la pelota a la copia de 0xE500
 C 0x89EF th_sprite_disco: el sprite del disco del hockey
 C 0x89F2 th_gol: mira si la pelota sale por un lado y de quien es el tanto
+C 0x89F9 apunta a el jugador 1
+C 0x89FF lee el juego: 1 tenis, 2 hockey
+C 0x8A0A lee SPEED
 C 0x8A10 hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0x8A1A lee SPEED
+C 0x8A25 lee BAR
+C 0x8A2E lee el juego: 1 tenis, 2 hockey
 C 0x8A37 hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0x8A58 apunta a el jugador 2
+C 0x8A5E lee el juego: 1 tenis, 2 hockey
+C 0x8A69 lee SPEED
 C 0x8A6F hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0x8A79 lee SPEED
+C 0x8A84 lee BAR
+C 0x8A8C lee el juego: 1 tenis, 2 hockey
 C 0x8A95 hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0x8AAF lee SPEED
+C 0x8AC4 lee SPEED
 C 0x8AE1 th_direccion_1: la direccion del mando del jugador 1
 C 0x8AEB despacha: salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
+C 0x8AF4 lee SPEED
 C 0x8AFA hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0x8B0E lee SPEED
 C 0x8B14 hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0x8B24 lee el jugador 1 y el byte siguiente (16 bits)
+C 0x8B28 guarda el jugador 1 y el byte siguiente (16 bits)
+C 0x8B36 lee el mando del jugador 1
 C 0x8B58 th_direccion_2: la direccion del mando del jugador 2
 C 0x8B62 despacha: salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
+C 0x8B6B lee SPEED
 C 0x8B71 hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0x8B85 lee SPEED
 C 0x8B8B hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0x8B9B lee el jugador 2 y el byte siguiente (16 bits)
+C 0x8B9F guarda el jugador 2 y el byte siguiente (16 bits)
+C 0x8BAD lee el mando del jugador 2
 C 0x8BE2 th_sprite_raqueta: escribe los sprites de una raqueta (C de alto)
+C 0x8BE5 lee BAR
 C 0x8BF6 th_sprite_raqueta: escribe los sprites de una raqueta (C de alto)
 C 0x8C04 th_sprite_raqueta: escribe los sprites de una raqueta (C de alto)
+C 0x8C07 lee BAR
+C 0x8C55 apunta a el disco del hockey
+C 0x8C67 lee el disco del hockey
+C 0x8C7D lee el disco del hockey
+C 0x8C82 guarda el disco del hockey
+C 0x8CC3 apunta a la posicion de la pelota
+C 0x8CDA lee el juego: 1 tenis, 2 hockey
 C 0x8CDE hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x8CF8 th_velocidad: la velocidad de la pelota segun SPEED (0xE413)
+C 0x8D00 lee el mando del jugador 1
+C 0x8D05 lee el mando del jugador 2
+C 0x8D0C lee el juego: 1 tenis, 2 hockey
 C 0x8D18 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x8D38 th_velocidades: las dos velocidades de las tablas de p07:9051 y p07:9059
+C 0x8D3C lee la posicion de la pelota y el byte siguiente (16 bits)
+C 0x8D40 guarda la posicion de la pelota y el byte siguiente (16 bits)
+C 0x8D44 lee la velocidad de la pelota y el byte siguiente (16 bits)
+C 0x8D48 guarda la velocidad de la pelota y el byte siguiente (16 bits)
 C 0x8D55 th_avanza_pelota: suma la velocidad a la posicion de la pelota (0xE440, 0xE442)
 C 0x8D58 th_choques: los choques de la pelota con las raquetas
+C 0x8D71 lee SPEED
 C 0x8D77 hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x8D90 th_choque: comprueba un choque de la pelota
 C 0x8D97 th_choque: comprueba un choque de la pelota
@@ -320,44 +396,84 @@ C 0x8F60 th_choca_raqueta: mira si la pelota toca una raqueta
 C 0x8F6B th_choca_raqueta: mira si la pelota toca una raqueta
 C 0x8F83 th_choca_borde: mira si la pelota toca el borde de la raqueta
 C 0x8F94 th_choca_borde: mira si la pelota toca el borde de la raqueta
+C 0x8F9A lee BAR
 C 0x8FB0 th_choca_borde: mira si la pelota toca el borde de la raqueta
 C 0x8FC5 th_choca_borde: mira si la pelota toca el borde de la raqueta
+C 0x8FCE lee SPEED
 C 0x8FD2 hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x9002 th_dentro_porteria: mira si la pelota entra en la porteria
 C 0x901B th_divide: desplaza HL y A: la posicion entre 8
+C 0x902C apunta a la copia de la tabla de sprites
 C 0x9044 palabra_de_tabla: DE = la palabra A de la tabla de DE
 C 0x904C palabra_de_tabla: DE = la palabra A de la tabla de DE
 C 0x9088 th_descomprime_tercios: descomprime DE en los tres tercios
 C 0x9091 th_descomprime_tercios: descomprime DE en los tres tercios
 C 0x909D th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
+C 0x90A2 guarda el juego: 1 tenis, 2 hockey
+C 0x90A6 lee el mando del jugador 1
+C 0x90AD apunta a el juego: 1 tenis, 2 hockey
 C 0x90BB pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x90CA pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
+C 0x90E5 lee el juego: 1 tenis, 2 hockey
 C 0x90ED hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x9103 th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
+C 0x9109 apunta a la copia de la tabla de sprites
+C 0x9136 lee el mando del jugador 1
+C 0x9144 apunta a la opcion elegida del GAME MODIFY
 C 0x9152 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x9161 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
+C 0x9168 lee la opcion elegida del GAME MODIFY
 C 0x916F hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x9182 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x9193 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
+C 0x91B5 lee la opcion elegida del GAME MODIFY
 C 0x91BC hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0x91C8 lee LENGTH, SPEED, TYPE y BAR
+C 0x91CB apunta a la copia de la tabla de sprites
 C 0x91D1 th_pon_palabra: escribe en HL la palabra A de la tabla y vuelca los sprites
 C 0x91DD th_pon_palabra: escribe en HL la palabra A de la tabla y vuelca los sprites
 C 0x91E9 th_pon_palabra: escribe en HL la palabra A de la tabla y vuelca los sprites
 C 0x91F7 hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x9201 th_vuelca_sprites: vuelca a la tabla de sprites la copia de 0xE500
+C 0x9230 apunta a LENGTH, SPEED, TYPE y BAR
+C 0x9234 guarda SPEED
+C 0x9240 guarda BAR
+C 0x924A guarda los tantos del jugador 1
+C 0x924D guarda los tantos del jugador 2
+C 0x925C guarda el tiempo del hockey (BCD)
+C 0x9269 lee el juego: 1 tenis, 2 hockey
 C 0x9274 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
+C 0x9277 lee el juego: 1 tenis, 2 hockey
+C 0x9282 apunta a los tantos del jugador 1
+C 0x928A apunta a los tantos del jugador 2
+C 0x92AF guarda los tantos del jugador 1
+C 0x92B2 guarda los tantos del jugador 2
 C 0x92C8 de_mas_a: DE = DE + A (gemela de p01:7256)
+C 0x92FB apunta a los tantos del jugador 1
+C 0x9303 apunta a los tantos del jugador 2
+C 0x9320 lee el tiempo del hockey (BCD)
+C 0x9326 guarda el tiempo del hockey (BCD)
 C 0x932E pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x933E th_tiempo: en hockey, pinta el tiempo (0xE419)
+C 0x9346 lee los tantos del jugador 1
+C 0x9349 apunta a los tantos del jugador 2
+C 0x935D lee el juego: 1 tenis, 2 hockey
 C 0x9377 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x9B45 pide_sonido_b: pone en sus canales las pistas del sonido A (tabla de p07:9BF5)
+C 0x9B53 apunta a el sonido pedido
 C 0x9B7D canal_libre: pone la pista en el canal si su prioridad no es menor
 C 0x9B91 canal_libre: pone la pista en el canal si su prioridad no es menor
 C 0x9BA5 canal_libre: pone la pista en el canal si su prioridad no es menor
 C 0x9BB9 canal_libre: pone la pista en el canal si su prioridad no es menor
+C 0x9BD1 apunta a el sonido pedido
+C 0x9CAD guarda el canal que se esta tocando
+C 0x9CB0 apunta a los canales del motor de sonido (0x2C bytes cada uno)
 C 0x9CB4 canal_cuadro: un cuadro del canal IX si esta activo
+C 0x9CB9 guarda el canal que se esta tocando
 C 0x9CC0 canal_cuadro: un cuadro del canal IX si esta activo
+C 0x9CC5 guarda el canal que se esta tocando
 C 0x9CCC canal_cuadro: un cuadro del canal IX si esta activo
+C 0x9CD1 guarda el canal que se esta tocando
 C 0x9CD8 canal_cuadro: un cuadro del canal IX si esta activo
 C 0x9CE3 canal_nota: baja la duracion; si acaba, lee la orden siguiente de la pista
 C 0x9D02 canal_ordenes: lee las ordenes de la pista (0xD0-0xFE) hasta una nota; 0xFF acaba
@@ -372,7 +488,9 @@ C 0x9E22 canal_frecuencia: la frecuencia de la nota (ix+0x10) con el desplazamie
 C 0x9E50 a_cero: A = 0 y Z
 C 0x9E78 canal_vibrato: el contador del vibrato (ix+0x1E) segun los bits de (ix+0x0E)
 C 0x9E7F canal_volumen_si: el volumen del canal salvo si (ix+0x0D) lleva el bit 2
+C 0x9E82 lee el canal que se esta tocando
 C 0x9EA1 canal_bucle: repeticion: guarda donde vuelve (ix+0x17)
 C 0x9F28 canal_volumen: el volumen del canal segun la envolvente de (ix+0x0F)
 C 0x9FE0 th_9ffb: HL = 0xE2F6 y sigue en p08
+C 0x9FE6 lee el canal que se esta tocando
 # --- fin de las anotaciones de anota.py ---

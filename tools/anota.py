@@ -41,6 +41,10 @@ sys.path.insert(0, AQUI)
 from paginas import ORG                                    # noqa: E402
 from anotaciones import (BANCOS, CAMBIOS_DE_BANCO, DESTINOS, FICHAS,  # noqa: E402
                          RAM, RAM16, RUTINAS, trio)
+try:
+    from anotaciones import RAM_BANCO, RAM_PAGINA_2                     # noqa: E402
+except ImportError:
+    RAM_BANCO, RAM_PAGINA_2 = {}, ()
 
 INI = "# --- ANOTACIONES AUTOMATICAS (seccion que reescribe tools/anota.py; no editar a mano) ---"
 FIN = "# --- fin de las anotaciones de anota.py ---"
@@ -204,22 +208,38 @@ def comentario(b, filas, k, fichas, ventanas=None, medido=None):
                     return {"cp": "compara con ", "sub": "le resta ", "add": "le suma ",
                             "adc": "le suma ", "sbc": "le resta ", "and": "AND con ", "or": "OR con ",
                             "xor": "XOR con "}[op] + que
+    # las constantes de la cabecera de la BIOS y la comparacion de RST 20h
+    m = re.match(r"ld [a-z]+,\(0(0004|0006|0007|002b|002d)h\)$", t)
+    if m:
+        return {"0004": "CGTABL: donde esta la fuente de la BIOS",
+                "0006": "el puerto de lectura del VDP (VDP.DR)",
+                "0007": "el puerto de escritura del VDP (VDP.DW)",
+                "002b": "el juego de caracteres y la frecuencia de la BIOS",
+                "002d": "la version del MSX (0 = MSX1)"}[m.group(1)]
+    if t == "rst 20h":
+        return "DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)"
     # cambios de banco
     m = re.match(r"ld \(0(6000|8000|a000)h\),a$", t)
     if m:
         return "el mapper: pone en %s el banco de A" % REGISTROS_MAPPER[int(m.group(1), 16)]
-    # RAM
-    m16 = re.match(r"ld (?:(hl|de|bc|ix|iy|sp),\(0([c-f][0-9a-f]{3})h\)|\(0([c-f][0-9a-f]{3})h\),(hl|de|bc|ix|iy))$", t)
+    # RAM: la comun y la de cada banco (la misma direccion es otra variable
+    # en otro programa); la de 0x8000-0x9FFF solo en los bancos que tienen la
+    # RAM en la pagina 2 (RAM_PAGINA_2)
+    ram = dict(RAM)
+    ram.update(RAM_BANCO.get(b, {}))
+    rango = r"[89c-f]" if b in RAM_PAGINA_2 else r"[c-f]"
+    m16 = re.match(r"ld (?:(hl|de|bc|ix|iy|sp),\(0(%s[0-9a-f]{3})h\)|\(0(%s[0-9a-f]{3})h\),(hl|de|bc|ix|iy))$"
+                   % (rango, rango), t)
     if m16:
         v = int(m16.group(2) or m16.group(3), 16)
         if v in RAM16:
             return ("lee " if m16.group(1) else "guarda ") + RAM16[v]
-        if v in RAM:
-            return ("lee " if m16.group(1) else "guarda ") + RAM[v][0] + " y el byte siguiente (16 bits)"
-    for x in re.findall(r"\b0([c-f][0-9a-f]{3})h\b", t):
+        if v in ram:
+            return ("lee " if m16.group(1) else "guarda ") + ram[v][0] + " y el byte siguiente (16 bits)"
+    for x in re.findall(r"\b0(%s[0-9a-f]{3})h\b" % rango, t):
         v = int(x, 16)
-        if v in RAM and v >= RAM_DESDE:
-            que = RAM[v][0]
+        if v in ram:
+            que = ram[v][0]
             if re.match(r"ld \(0%04xh\)," % v, t):
                 return "guarda %s" % que
             if re.match(r"ld [a-z]+,\(0%04xh\)$" % v, t):

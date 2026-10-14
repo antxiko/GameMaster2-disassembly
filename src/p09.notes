@@ -84,24 +84,43 @@ L 0x8F7D letra_8x8_a_pagina_0 copia la letra A de 8x8 de la pagina 1 a la 0 (HMM
 L 0x8F8F pinta_letra_8x8 copia la letra A de 8x8 de la hoja de letras a DE (LMMM) (gemela de p05:86FC)
 L 0x8FA1 vdp_lmmm copia de VRAM a VRAM con operacion logica (LMMM, 0x90 | op)
 L 0x903E siguiente_letra D += 8; al pasar de fila, E += 8
+C 0x8004 apunta a el gancho H.KEYI
+C 0x800E apunta a la cuenta atras de la interrupcion
+C 0x8016 guarda el gancho H.KEYI
 C 0x801B engancha_cuenta: pone en H.KEYI (0xFD9A) la cuenta atras de 0xE008 (p09:800E)
+C 0x801E la version del MSX (0 = MSX1)
+C 0x8021 guarda es un MSX2
+C 0x8024 el juego de caracteres y la frecuencia de la BIOS
+C 0x8029 guarda el juego de caracteres de la BIOS (0x002B)
+C 0x802F guarda es un MSX2
+C 0x8032 lee es un MSX2
+C 0x803A guarda el color del borde (BDRCLR)
+C 0x8043 la version del MSX (0 = MSX1)
+C 0x8046 guarda es un MSX2
+C 0x8049 el juego de caracteres y la frecuencia de la BIOS
+C 0x804E guarda el juego de caracteres de la BIOS (0x002B)
+C 0x8054 guarda es un MSX2
 C 0x8057 engancha_cuenta: pone en H.KEYI (0xFD9A) la cuenta atras de 0xE008 (p09:800E)
+C 0x805A lee es un MSX2
+C 0x8062 guarda SCRMOD, el modo de pantalla
 C 0x806F registros_vdp: los 8 registros del VDP de p01:72E2 y, en MSX2, R#23 y R#9
+C 0x808B guarda el color del borde (BDRCLR)
 C 0x80A8 paleta_msx2: MSX2: los 16 colores de p01:728E
 C 0x80AB pantalla_apagada: R#1 sin el bit 6 y R#8 con el bit 1
 C 0x80B8 pantalla_encendida: R#1 con el bit 6 (pantalla encendida) y R#8 sin el bit 1
 C 0x80C6 sprites_apagados: R
+C 0x80D2 lee es un MSX2
 C 0x80D8 titulo_msx1: la presentacion en MSX1: descomprime p09:9988 y pinta
 C 0x80DC pantalla_apagada: R#1 sin el bit 6 y R#8 con el bit 1
 C 0x80E2 paleta_lista: MSX2: colores de una lista [color, d, e] que acaba en 0xFF
 C 0x80F5 vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0)
 C 0x80F8 titulo_letras: dibuja tres rotulos de letras de 1 bit (p09:9B6A, 9BD2, 9C3A)
 C 0x80FB pantalla_encendida: R#1 con el bit 6 (pantalla encendida) y R#8 sin el bit 1
-C 0x80FE apunta a fila elegida de la SRAM
+C 0x80FE apunta a el paso de la animacion
 C 0x811A titulo_anima: la animacion de la presentacion (0xE001)
 C 0x8124 espera_tecla: espera una tecla (CHSNS) HL x B veces
 C 0x812F espera_tecla: espera una tecla (CHSNS) HL x B veces
-C 0x8138 guarda fila elegida de la SRAM y el byte siguiente (16 bits)
+C 0x8138 guarda el paso de la animacion y el byte siguiente (16 bits)
 C 0x813E descomprime_con_direccion: descomprime a la VRAM de la palabra de HL
 C 0x816C letras_1bit_a_4bit: pinta B letras de 1 bit en SCREEN 5 (4 bits)
 C 0x8178 letras_1bit_a_4bit: pinta B letras de 1 bit en SCREEN 5 (4 bits)
@@ -118,42 +137,47 @@ C 0x81CE rellena_tercios: FILVRM en los tres tercios de la pantalla
 C 0x81D8 descomprime_tercios: descomprime HL en los tres tercios de la pantalla
 C 0x8246 copia_tercios: LDIRVM en los tres tercios de la pantalla
 C 0x8251 rellena_tercios: FILVRM en los tres tercios de la pantalla
-C 0x825A lee fila elegida de la SRAM y el byte siguiente (16 bits)
+C 0x8254 lee es un MSX2
+C 0x825A lee el paso de la animacion y el byte siguiente (16 bits)
 C 0x8270 hl_mas_a: HL = HL + A
-C 0x8280 apunta a fila elegida de la SRAM
-C 0x828F apunta a fila elegida de la SRAM
+C 0x8280 apunta a el paso de la animacion
+C 0x828F apunta a el paso de la animacion
 C 0x82A4 vdp_hmmm: copia rapida de VRAM a VRAM (HMMM): origen HL, destino DE, tamano BC, paginas en A
 C 0x82C0 letra_8x8_en_pagina_1: copia la letra A de 8x8 dentro de la pagina 1 (HMMM)
 C 0x82C3 siguiente_letra: D += 8; al pasar de fila, E += 8
+C 0x82CA lee es un MSX2
 C 0x82D1 borra_nombres: borra la tabla de nombres y esconde los sprites (0xD0 en 0x3B00)
 C 0x82DA descomprime_tercios: descomprime HL en los tres tercios de la pantalla
 C 0x82E3 descomprime_tercios: descomprime HL en los tres tercios de la pantalla
 C 0x82EC descomprime: descomprime HL a la VRAM DE: n & 0x7F repeticiones o copias
+C 0x82EF lee el juego de caracteres de la BIOS (0x002B)
 C 0x82F3 titulo_msx1_b: la presentacion en MSX1: fuente, colores y texto
 C 0x82FF copia_filas_a_vram: copia B filas de C bytes a la VRAM, una fila de 32 de paso
 C 0x830B copia_filas_a_vram: copia B filas de C bytes a la VRAM, una fila de 32 de paso
-C 0x8471 guarda la lista de la SRAM
+C 0x8474 guarda la animacion esta en marcha
 C 0x8477 espera_tecla_animando: anima hasta que se pulsa una tecla
 C 0x8481 flecha: 0x1E arriba, 0x1F abajo
 C 0x8484 titulo_menu: el menu de la presentacion
 C 0x8487 titulo_paso: un paso de la animacion de la presentacion (0xE020)
-C 0x848C lee la lista de la SRAM
-C 0x8493 lee opcion / RC del juego
+C 0x8499 lee es un MSX2
 C 0x84A9 copia_filas_a_vram: copia B filas de C bytes a la VRAM, una fila de 32 de paso
+C 0x84B8 apunta a la cuenta atras de la interrupcion
 C 0x84C1 desengancha_cuenta: devuelve H.KEYI a `ret`
-C 0x84C4 lee la lista de la SRAM
 C 0x84C8 titulo_cuadro: un cuadro de la animacion: cada vez que cambia la cuenta (0xE008)
+C 0x84D9 lee es un MSX2
+C 0x84DE apunta a la animacion esta en marcha
 C 0x84EF sprites_encendidos: R#8 sin el bit 1: con sprites
-C 0x850D lee la lista de la SRAM
+C 0x84FA lee es un MSX2
+C 0x84FF lee la animacion esta en marcha
+C 0x8504 lee la cuenta atras de la interrupcion
 C 0x8514 hl_mas_a: HL = HL + A
 C 0x8525 hl_mas_a: HL = HL + A
 C 0x8531 de_mas_a: DE = DE + A
-C 0x85D4 apunta a la lista de la SRAM
-C 0x85DF apunta a la lista de la SRAM
-C 0x8621 lee la lista de la SRAM
+C 0x853B el puerto de escritura del VDP (VDP.DW)
+C 0x8551 guarda la animacion esta en marcha
+C 0x861A lee es un MSX2
 C 0x8628 hl_mas_a: HL = HL + A
 C 0x8637 pinta_texto: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
-C 0x863A lee la lista de la SRAM
 C 0x8641 hl_mas_a: HL = HL + A
 C 0x8648 pinta_texto: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
 C 0x8692 pantalla_apagada: R#1 sin el bit 6 y R#8 con el bit 1
@@ -170,20 +194,22 @@ C 0x86E5 letra_8x8_a_pagina_0: copia la letra A de 8x8 de la pagina 1 a la 0 (HM
 C 0x8702 paleta_lista: MSX2: colores de una lista [color, d, e] que acaba en 0xFF
 C 0x8737 descomprime_128k: descomprime HL a la VRAM DE de 128 KB: n & 0x7F repeticiones
 C 0x8740 descomprime_128k: descomprime HL a la VRAM DE de 128 KB: n & 0x7F repeticiones
+C 0x8747 el puerto de escritura del VDP (VDP.DW)
 C 0x875F siguiente_fila_128k: pasa a la fila siguiente cada 32 bytes
 C 0x876D siguiente_fila_128k: pasa a la fila siguiente cada 32 bytes
-C 0x879B lee la lista de la SRAM
 C 0x87A2 hl_mas_a: HL = HL + A
 C 0x87AB pinta_letras_8x8: pinta B letras de 8x8 desde HL (p09:8F7D)
 C 0x87B7 pinta_letras_8x8: pinta B letras de 8x8 desde HL (p09:8F7D)
-C 0x87BD lee la lista de la SRAM
 C 0x87C1 hl_mas_a: HL = HL + A
 C 0x87D0 pinta_letras_8x8: pinta B letras de 8x8 desde HL (p09:8F7D)
 C 0x87DD pinta_letras_8x8: pinta B letras de 8x8 desde HL (p09:8F7D)
 C 0x87E0 titulo_paso: un paso de la animacion de la presentacion (0xE020)
+C 0x87E5 guarda la cuenta atras de la interrupcion
 C 0x87E8 titulo_cuadro: un cuadro de la animacion: cada vez que cambia la cuenta (0xE008)
+C 0x87EB lee la cuenta atras de la interrupcion
 C 0x87F1 desengancha_cuenta: devuelve H.KEYI a `ret`
-C 0x87F4 lee la lista de la SRAM
+C 0x8846 lee el juego de caracteres de la BIOS (0x002B)
+C 0x884B lee es un MSX2
 C 0x8852 esconde_sprites: pone 0xE0 en la tabla de sprites (0x3B00)
 C 0x8855 borra_nombres: borra la tabla de nombres y esconde los sprites (0xD0 en 0x3B00)
 C 0x885E descomprime_tercios: descomprime HL en los tres tercios de la pantalla
@@ -213,21 +239,34 @@ C 0x8D6A copia_filas_a_vram_b: copia B filas de C bytes a la VRAM, una fila de 3
 C 0x8D70 pinta_texto: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
 C 0x8DF7 vram_situa_128k: pone la direccion de 17 bits de la VRAM (R#14 y la direccion)
 C 0x8DFA cuenta_otir: A y B para un OTIR de BC bytes
+C 0x8DFE el puerto de escritura del VDP (VDP.DW)
+C 0x8E0A el puerto de escritura del VDP (VDP.DW)
 C 0x8E2A lee_estado_vdp: lee el registro de estado A del VDP (R#15) y vuelve a S#0
 C 0x8E2E espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
+C 0x8E34 el puerto de lectura del VDP (VDP.DR)
 C 0x8E53 espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
+C 0x8E57 el puerto de escritura del VDP (VDP.DW)
 C 0x8E99 letra_a_coordenadas: H, L = la columna y la fila de la letra A en la hoja de letras
 C 0x8EA1 vdp_hmmm: copia rapida de VRAM a VRAM (HMMM): origen HL, destino DE, tamano BC, paginas en A
+C 0x8EB6 lee el registro 1 del VDP (copia de la BIOS)
+C 0x8EC1 lee el registro 8 del VDP (copia de la BIOS)
+C 0x8ECC lee el registro 1 del VDP (copia de la BIOS)
+C 0x8ED7 lee el registro 8 del VDP (copia de la BIOS)
 C 0x8EE2 letra_1bit_a_4bit: pasa una letra de 1 bit a 4 bits (0xE100) y la escribe
 C 0x8EE5 siguiente_letra: D += 8; al pasar de fila, E += 8
 C 0x8EEF letra_expande: expande los 8 bytes de la letra a 32 con el color C
+C 0x8EFE apunta a la letra expandida a 4 bits
 C 0x8F07 escribe_vram_otir: escribe BC bytes de HL en la VRAM DE con OTIR
+C 0x8F1D apunta a la letra expandida a 4 bits
 C 0x8F42 espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
+C 0x8F46 el puerto de escritura del VDP (VDP.DW)
 C 0x8F80 letra_a_coordenadas: H, L = la columna y la fila de la letra A en la hoja de letras
 C 0x8F88 vdp_hmmm: copia rapida de VRAM a VRAM (HMMM): origen HL, destino DE, tamano BC, paginas en A
 C 0x8F92 letra_a_coordenadas: H, L = la columna y la fila de la letra A en la hoja de letras
 C 0x8F9A vdp_lmmm: copia de VRAM a VRAM con operacion logica (LMMM, 0x90 | op)
 C 0x8FA2 espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
+C 0x8FA6 el puerto de escritura del VDP (VDP.DW)
 C 0x8FEE espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
+C 0x8FF2 el puerto de escritura del VDP (VDP.DW)
 C 0x902F lee_estado_vdp: lee el registro de estado A del VDP (R#15) y vuelve a S#0
 # --- fin de las anotaciones de anota.py ---

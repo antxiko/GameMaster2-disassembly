@@ -29,26 +29,26 @@ guarda_pantalla:		; guarda la pantalla del juego antes del menu (segun el modo d
 	ret nz			;8005
 	dec a			;8006
 	ld (hl),a			;8007
-	ld a,(0f29fh)		;8008
+	ld a,(0f29fh)		;8008   ; lee el slot de la RAM de la pagina 1
 	ld h,040h		;800b
 	call 00024h		;800d   ; BIOS ENASLT - Switches to specified slot and page definitively
-	ld a,(0f3dfh)		;8010
+	ld a,(0f3dfh)		;8010   ; lee los registros del VDP (copia de la BIOS)
 	and 00eh		;8013
 	ld l,a			;8015
-	ld a,(0f3e0h)		;8016
+	ld a,(0f3e0h)		;8016   ; lee el registro 1 del VDP (copia de la BIOS)
 	and 018h		;8019
 	ld h,a			;801b
-	ld (0f2a1h),hl		;801c
+	ld (0f2a1h),hl		;801c   ; guarda el modo de pantalla guardado y el byte siguiente (16 bits)
 	ld de,00006h		;801f
-	rst 20h			;8022
+	rst 20h			;8022   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	jp z,L_806F		;8023
 	ld de,00002h		;8026
-	rst 20h			;8029
+	rst 20h			;8029   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	jp z,L_8064		;802a
 	ld de,00004h		;802d
-	rst 20h			;8030
+	rst 20h			;8030   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	jp z,L_8064		;8031
-	ld hl,0f3dfh		;8034
+	ld hl,0f3dfh		;8034   ; apunta a los registros del VDP (copia de la BIOS)
 	ld de,06020h		;8037
 	ld bc,00008h		;803a
 	ldir		;803d
@@ -102,16 +102,16 @@ vram_alta_escribe:		; H xor 0x80 y NSTWRT: la otra mitad de los 128 KB de VRAM
 	jp 00171h		;809d   ; BIOS NSTWRT - Same function as SETWRT (with 16-bit VRAM-address)
 vram_pagina:		; H y el puerto de datos del VDP para la pagina de VRAM que se ve (0xF3E1)
 	exx			;80a0
-	ld a,(00006h)		;80a1
+	ld a,(00006h)		;80a1   ; el puerto de lectura del VDP (VDP.DR)
 	ld c,a			;80a4
 	exx			;80a5
-	ld a,(0f3e1h)		;80a6
+	ld a,(0f3e1h)		;80a6   ; lee el registro 2 del VDP (copia de la BIOS)
 	ld hl,00000h		;80a9
 	and 040h		;80ac
 	jr z,L_80B2		;80ae
 	ld h,080h		;80b0
 L_80B2:
-	ld a,(0fff6h)		;80b2
+	ld a,(0fff6h)		;80b2   ; lee el registro 14 del VDP (copia de la BIOS)
 	add a,080h		;80b5
 	ld e,000h		;80b7
 	ld d,a			;80b9
@@ -151,18 +151,18 @@ L_80E4:
 	ret z			;80e9
 	xor a			;80ea
 	ld (hl),a			;80eb
-	ld a,(0f29fh)		;80ec
+	ld a,(0f29fh)		;80ec   ; lee el slot de la RAM de la pagina 1
 	ld h,040h		;80ef
 	call 00024h		;80f1   ; BIOS ENASLT - Switches to specified slot and page definitively
-	ld hl,(0f2a1h)		;80f4
+	ld hl,(0f2a1h)		;80f4   ; lee el modo de pantalla guardado y el byte siguiente (16 bits)
 	ld de,00006h		;80f7
-	rst 20h			;80fa
+	rst 20h			;80fa   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	jp z,L_8132		;80fb
 	ld de,00002h		;80fe
-	rst 20h			;8101
+	rst 20h			;8101   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	jp z,L_8127		;8102
 	ld de,00004h		;8105
-	rst 20h			;8108
+	rst 20h			;8108   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	jp z,L_8127		;8109
 	call registros_vdp_6020		;810c   ; registros_vdp_6020: los registros del VDP de p01:6020
 	ld hl,06000h		;810f
@@ -234,13 +234,13 @@ DATA_resto_8170:
 
 
 sprites_apagados:		; R#8 con el bit 1: sin sprites
-	ld a,(0ffe7h)		;8178
+	ld a,(0ffe7h)		;8178   ; lee el registro 8 del VDP (copia de la BIOS)
 	or 002h		;817b
 	ld b,a			;817d
 	ld c,008h		;817e
 	jp 00047h		;8180   ; BIOS WRTVDP - Writes data in the VDP-register
 sprites_encendidos:		; R
-	ld a,(0ffe7h)		;8183
+	ld a,(0ffe7h)		;8183   ; lee el registro 8 del VDP (copia de la BIOS)
 	and 0fdh		;8186
 	ld b,a			;8188
 	ld c,008h		;8189
@@ -290,7 +290,7 @@ L_8306:
 L_8309:
 	di			;8309
 	ld hl,0e280h		;830a
-	ld de,0c000h		;830d   ; apunta a el codigo de p00:4A9A en RAM
+	ld de,0c000h		;830d
 	ld bc,01100h		;8310
 	ldir		;8313
 L_8315:
@@ -302,10 +302,10 @@ L_8315:
 	call lee_palabra_del_juego		;8322   ; lee_palabra_del_juego: DE = la palabra HL del cartucho del juego (RDSLT en 0xF104)
 	jp z,L_835A		;8325
 	ex de,hl			;8328
-	ld (0d132h),hl		;8329
+	ld (0d132h),hl		;8329   ; guarda la direccion INIT del juego (copia) y el byte siguiente (16 bits)
 L_832C:
 	ld a,003h		;832c
-	ld (0fcafh),a		;832e
+	ld (0fcafh),a		;832e   ; guarda SCRMOD, el modo de pantalla
 	ld hl,0f100h		;8331   ; apunta a volumen del PSG, canal A
 	ld de,0d500h		;8334
 	ld bc,00314h		;8337
@@ -318,7 +318,7 @@ L_832C:
 	call 00141h		;834a   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
 	and 004h		;834d
 	jr z,L_8364		;834f
-	ld hl,0d13ch		;8351
+	ld hl,0d13ch		;8351   ; apunta a la opcion elegida
 	ld a,(hl)			;8354
 	or a			;8355
 	jr nz,L_8364		;8356
@@ -326,7 +326,7 @@ L_832C:
 	ld (hl),a			;8359
 L_835A:
 	xor a			;835a
-	ld (0d129h),a		;835b
+	ld (0d129h),a		;835b   ; guarda el tipo de fichero elegido
 	ld (0d13dh),a		;835e
 	jp L_9929		;8361
 L_8364:
@@ -337,7 +337,7 @@ L_8364:
 	ld (0d33ah),a		;836b
 	ld (0d13bh),a		;836e
 	ld hl,0d4f0h		;8371
-	ld de,0fd9fh		;8374
+	ld de,0fd9fh		;8374   ; apunta a el gancho H.TIMI
 	ld bc,00005h		;8377
 	ldir		;837a
 	jp 0d83bh		;837c
@@ -348,7 +348,7 @@ mi_slot:		; A = el slot de la pagina 1 (RSLREG y EXPTBL): el del propio cartucho
 	and 003h		;8384
 	ld c,a			;8386
 	ld b,000h		;8387
-	ld hl,0fcc1h		;8389
+	ld hl,0fcc1h		;8389   ; apunta a EXPTBL, que slots estan expandidos
 	add hl,bc			;838c
 	or (hl)			;838d
 	ld c,a			;838e
@@ -361,7 +361,7 @@ mi_slot:		; A = el slot de la pagina 1 (RSLREG y EXPTBL): el del propio cartucho
 	or c			;8396
 	ret			;8397
 lee_palabra_del_juego:		; DE = la palabra HL del cartucho del juego (RDSLT en 0xF104) (gemela de p00:576B)
-	ld a,(0d12fh)		;8398
+	ld a,(0d12fh)		;8398   ; lee el slot del cartucho del juego (copia)
 	ld c,a			;839b
 lee_palabra_slot:		; DE = la palabra HL del slot C (RDSLT) (gemela de p00:576F)
 	call lee_byte_slot		;839c   ; lee_byte_slot: D = el byte HL del slot C (RDSLT), y avanza HL
@@ -385,7 +385,7 @@ salta_a_da00:		; copia p02:83BA a 0xDA00 (0xCD bytes) y salta alli
 	jp 0da00h		;83b7
 L_83BA:
 	ld bc,00400h		;83ba
-	ld hl,0fcc1h		;83bd
+	ld hl,0fcc1h		;83bd   ; apunta a EXPTBL, que slots estan expandidos
 L_83C0:
 	push bc			;83c0
 	push hl			;83c1
@@ -406,7 +406,7 @@ L_83D1:
 	djnz L_83C0		;83d7
 L_83D9:
 	push af			;83d9
-	ld a,(0d12eh)		;83da   ; lee el slot del juego (copia)
+	ld a,(0d12eh)		;83da   ; lee el slot del Game Master (copia)
 	ld h,040h		;83dd
 	call 00024h		;83df   ; BIOS ENASLT - Switches to specified slot and page definitively
 	pop af			;83e2
@@ -437,7 +437,7 @@ L_8400:
 	call 00024h		;8403   ; BIOS ENASLT - Switches to specified slot and page definitively
 	ld hl,(04000h)		;8406
 	ld de,04241h		;8409
-	rst 20h			;840c
+	rst 20h			;840c   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	jr nz,L_846E		;840d
 	ld hl,(04002h)		;840f
 	ld bc,00100h		;8412
@@ -451,13 +451,13 @@ L_8415:
 	jr nz,L_8415		;8421
 	ld hl,(04010h)		;8423
 	ld de,04241h		;8426
-	rst 20h			;8429
+	rst 20h			;8429   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	jr z,L_8471		;842a
 	ld de,04443h		;842c
-	rst 20h			;842f
+	rst 20h			;842f   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	jr z,L_8471		;8430
 	ld de,04645h		;8432
-	rst 20h			;8435
+	rst 20h			;8435   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	jr z,L_8471		;8436
 	ld de,00000h		;8438
 	ld hl,05000h		;843b
@@ -472,7 +472,7 @@ L_8446:
 	inc hl			;8446
 	djnz L_8440		;8447
 	push de			;8449
-	ld a,(0d12eh)		;844a   ; lee el slot del juego (copia)
+	ld a,(0d12eh)		;844a   ; lee el slot del Game Master (copia)
 	ld h,040h		;844d
 	call 00024h		;844f   ; BIOS ENASLT - Switches to specified slot and page definitively
 	pop de			;8452
@@ -483,7 +483,7 @@ L_8457:
 	ld a,l			;845d
 	or h			;845e
 	jr z,L_846E		;845f
-	rst 20h			;8461
+	rst 20h			;8461   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	jr z,L_8471		;8462
 	inc ix		;8464
 	inc ix		;8466
@@ -496,11 +496,11 @@ L_846E:
 	ret			;8470
 L_8471:
 	pop af			;8471
-	ld (0d12fh),a		;8472
+	ld (0d12fh),a		;8472   ; guarda el slot del cartucho del juego (copia)
 	scf			;8475
 	ret			;8476
 L_8477:
-	ld a,(0d12eh)		;8477   ; lee el slot del juego (copia)
+	ld a,(0d12eh)		;8477   ; lee el slot del Game Master (copia)
 	bit 7,a		;847a
 	jr nz,L_8485		;847c
 	bit 7,b		;847e
@@ -524,7 +524,7 @@ L_848D:
 	ld hl,084adh		;8499
 	call 0a3e6h		;849c   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;849f
-	ld (0d136h),a		;84a0
+	ld (0d136h),a		;84a0   ; guarda tipo y opcion del menu de disco
 	ld a,b			;84a3
 	call 0a510h		;84a4   ; despacha: salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
 
@@ -552,9 +552,9 @@ DATA_resto_84AD:
 
 ventana_menu:		; las esquinas de la ventana del menu (0x9235, 0x9237) (gemela de p00:5A3B)
 	ld hl,03a21h		;84b0
-	ld (0d16ch),hl		;84b3
+	ld (0d16ch),hl		;84b3   ; guarda la esquina de la ventana del menu y el byte siguiente (16 bits)
 	ld hl,03a2ch		;84b6
-	ld (0d16eh),hl		;84b9
+	ld (0d16eh),hl		;84b9   ; guarda la esquina de la ventana pequena y el byte siguiente (16 bits)
 	ret			;84bc
 L_84BD:
 	call hay_disco_b		;84bd   ; hay_disco_b: Z si no hay disco (H.PHYD = ret) y 0xD4F9 no lo fuerza
@@ -568,7 +568,7 @@ L_84BD:
 	call 0a7b2h		;84d3   ; menu_vertical: menu de B opciones: cursores arriba y abajo, espacio elige (gemela de p01:7690)
 	ld b,a			;84d6
 	add a,011h		;84d7
-	ld (0d136h),a		;84d9
+	ld (0d136h),a		;84d9   ; guarda tipo y opcion del menu de disco
 	ld a,b			;84dc
 	call 0a510h		;84dd   ; despacha: salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
 
@@ -628,7 +628,7 @@ texto_854c:		; pinta el texto de p02:854C
 texto_855c:		; pinta el texto de p02:855C
 	ld hl,0855ch		;8542
 L_8545:
-	ld de,(0d16eh)		;8545
+	ld de,(0d16eh)		;8545   ; lee la esquina de la ventana pequena y el byte siguiente (16 bits)
 	jp 0a520h		;8549
 
 ; ----------------------------------------------------------------------
@@ -658,7 +658,7 @@ L_856D:
 	ld hl,08594h		;8582
 	call 0a3e6h		;8585   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;8588
-	ld (0d136h),a		;8589
+	ld (0d136h),a		;8589   ; guarda tipo y opcion del menu de disco
 	ld a,b			;858c
 	call 0a510h		;858d   ; despacha: salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
 
@@ -756,30 +756,30 @@ L_861B:
 	call 0a5efh		;861b
 	xor a			;861e
 	ld (0d135h),a		;861f
-	ld (0d136h),a		;8622
+	ld (0d136h),a		;8622   ; guarda tipo y opcion del menu de disco
 	ld a,006h		;8625
 	call 00141h		;8627   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
 	and 003h		;862a
 	ret nz			;862c
-	ld (0d13ch),a		;862d
+	ld (0d13ch),a		;862d   ; guarda la opcion elegida
 	jp L_997E		;8630
 cabecera_menu_b:		; pinta la cabecera del menu con el juego puesto
 	call 0a655h		;8633   ; borra_zona_3a00: borra 0x3A00 (0x100 bytes)
 	ld hl,08668h		;8636
 	call 0a524h		;8639   ; pinta_texto_b: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
 pinta_juego_b:		; pinta el numero de juego (0xD301) en hexadecimal
-	ld hl,(0d16ch)		;863c
+	ld hl,(0d16ch)		;863c   ; lee la esquina de la ventana del menu y el byte siguiente (16 bits)
 	ld bc,000a0h		;863f
 	add hl,bc			;8642
 	ex de,hl			;8643
 pinta_numero_de_juego_b:		; pinta el numero de juego (0xD301)
-	ld a,(0d301h)		;8644
+	ld a,(0d301h)		;8644   ; lee el codigo del juego (copia)
 	inc a			;8647
 	ret z			;8648
 	ld hl,08697h		;8649
 	push de			;864c
 	call 0a520h		;864d
-	ld a,(0d301h)		;8650
+	ld a,(0d301h)		;8650   ; lee el codigo del juego (copia)
 	ld hl,0da00h		;8653
 	call byte_a_hex		;8656   ; byte_a_hex: escribe A en hexadecimal (dos letras) en HL
 	pop hl			;8659
@@ -837,7 +837,7 @@ DATA_resto_86B4:
 
 pinta_opcion_b:		; pinta la opcion elegida (0xD136, nibble alto)
 	ld hl,0870ah		;86f8
-	ld a,(0d136h)		;86fb
+	ld a,(0d136h)		;86fb   ; lee tipo y opcion del menu de disco
 	and 0f0h		;86fe
 	rrca			;8700
 	rrca			;8701
@@ -865,13 +865,13 @@ DATA_resto_870A:
 
 pinta_tipo:		; pinta el tipo elegido (0xF10B, nibble bajo) (gemela de p00:5D56)
 	call 0a56eh		;873c   ; borra_ventana: borra la ventana de 0x9237 (gemela de p01:748F)
-	ld a,(0d136h)		;873f
+	ld a,(0d136h)		;873f   ; lee tipo y opcion del menu de disco
 	and 00fh		;8742
 	ld hl,0875bh		;8744
 	ld bc,00040h		;8747
 L_874A:
 	ex de,hl			;874a
-	ld hl,(0d16ch)		;874b
+	ld hl,(0d16ch)		;874b   ; lee la esquina de la ventana del menu y el byte siguiente (16 bits)
 	add hl,bc			;874e
 	ex de,hl			;874f
 	add a,a			;8750
@@ -898,7 +898,7 @@ DATA_resto_875B:
 
 
 texto_search_b:		; pinta 'SEARCH FILE'
-	ld de,(0d16eh)		;8780
+	ld de,(0d16eh)		;8780   ; lee la esquina de la ventana pequena y el byte siguiente (16 bits)
 	ld hl,0878ah		;8784
 	jp 0a520h		;8787
 
@@ -937,7 +937,7 @@ DATA_resto_87A2:
 
 
 L_87CB:
-	ld hl,0d301h		;87cb
+	ld hl,0d301h		;87cb   ; apunta a el codigo del juego (copia)
 	ld a,(hl)			;87ce
 	ld (hl),0ffh		;87cf
 	ld (0d141h),a		;87d1
@@ -1012,13 +1012,13 @@ DATA_resto_882E:
 
 
 L_8899:
-	ld hl,0d317h		;8899
+	ld hl,0d317h		;8899   ; apunta a las opciones del MODIFY (copia)
 	ld a,(hl)			;889c
 	or a			;889d
 	jr nz,L_88A3		;889e
-	ld (0d129h),a		;88a0
+	ld (0d129h),a		;88a0   ; guarda el tipo de fichero elegido
 L_88A3:
-	ld hl,0d301h		;88a3
+	ld hl,0d301h		;88a3   ; apunta a el codigo del juego (copia)
 	ld a,(0d141h)		;88a6
 	ld (hl),a			;88a9
 	jp L_9929		;88aa
@@ -1029,16 +1029,16 @@ L_88B0:
 	jp L_87D4		;88b3
 ventana_pequena:		; las esquinas de una ventana (0x9235, 0x9237) (gemela de p00:5F0D)
 	ld hl,03921h		;88b6
-	ld (0d16ch),hl		;88b9
+	ld (0d16ch),hl		;88b9   ; guarda la esquina de la ventana del menu y el byte siguiente (16 bits)
 	ld hl,0392ch		;88bc
-	ld (0d16eh),hl		;88bf
+	ld (0d16eh),hl		;88bf   ; guarda la esquina de la ventana pequena y el byte siguiente (16 bits)
 	ret			;88c2
 L_88C3:
 	call hay_disco_b		;88c3   ; hay_disco_b: Z si no hay disco (H.PHYD = ret) y 0xD4F9 no lo fuerza
 	jp z,L_87D4		;88c6
 	call borra_sprites		;88c9   ; borra_sprites: borra la tabla de sprites (0x3880, 0x200 bytes) (gemela de p01:62D3)
 	ld a,021h		;88cc
-	ld (0d136h),a		;88ce
+	ld (0d136h),a		;88ce   ; guarda tipo y opcion del menu de disco
 	call modify_mode		;88d1   ; modify_mode: el MODIFY MODE MENU: limpia y pinta
 	call elige_fichero		;88d4   ; elige_fichero: lista los ficheros del disco y deja elegir uno
 	jp c,L_87D4		;88d7
@@ -1099,7 +1099,7 @@ L_8932:
 sram_ordenes_c_d:		; SRAM por CALSLT: las ordenes 0x0C y 0x0D (p04:8000) (gemela de p00:4373)
 	ld c,00ch		;893a
 	ld ix,04020h		;893c
-	ld iy,(0d12dh)		;8940
+	ld iy,(0d12dh)		;8940   ; lee volumen del PSG, canal C y el byte siguiente (16 bits)
 	call 0001ch		;8944   ; BIOS CALSLT - Executes inter-slot call
 	ld c,00dh		;8947
 	call 0001ch		;8949   ; BIOS CALSLT - Executes inter-slot call
@@ -1200,7 +1200,7 @@ DATA_saltos_8A20:
 
 
 sin_juego_b:		; Z si no se reconocio el juego (0xD301 = 0xFF)
-	ld a,(0d301h)		;8a26
+	ld a,(0d301h)		;8a26   ; lee el codigo del juego (copia)
 	inc a			;8a29
 	ret			;8a2a
 L_8A2B:
@@ -1230,10 +1230,10 @@ L_8A47:
 	jp z,L_8C27		;8a5f
 	ld hl,0d31bh		;8a62
 	call teclado_a_byte		;8a65   ; teclado_a_byte: pasa las teclas del bufer (0xD142) a un byte
-	ld hl,(0d314h)		;8a68
+	ld hl,(0d314h)		;8a68   ; lee la rutina propia del juego (copia) y el byte siguiente (16 bits)
 	ld a,h			;8a6b
 	or l			;8a6c
-	ld hl,0d317h		;8a6d
+	ld hl,0d317h		;8a6d   ; apunta a las opciones del MODIFY (copia)
 	jr z,L_8A74		;8a70
 	set 2,(hl)		;8a72
 L_8A74:
@@ -1282,9 +1282,9 @@ L_8AC4:
 	jp z,L_8C27		;8adc
 	ld hl,0d319h		;8adf
 	call teclado_a_byte		;8ae2   ; teclado_a_byte: pasa las teclas del bufer (0xD142) a un byte
-	ld hl,0d317h		;8ae5
+	ld hl,0d317h		;8ae5   ; apunta a las opciones del MODIFY (copia)
 	set 0,(hl)		;8ae8
-	ld de,(0d314h)		;8aea
+	ld de,(0d314h)		;8aea   ; lee la rutina propia del juego (copia) y el byte siguiente (16 bits)
 	ld a,d			;8aee
 	or e			;8aef
 	jp z,L_8C27		;8af0
@@ -1329,11 +1329,11 @@ modify_mode:		; el MODIFY MODE MENU: limpia y pinta
 	ld hl,0965dh		;8c0b
 	call ventana_b		;8c0e   ; ventana_b: abre una ventana de texto con el marco de DE
 	xor a			;8c11
-	ld (0d163h),a		;8c12
-	ld (0d165h),a		;8c15
+	ld (0d163h),a		;8c12   ; guarda cuantas letras lleva el nombre
+	ld (0d165h),a		;8c15   ; guarda la fila elegida
 	ld hl,0396ch		;8c18
-	ld (0d168h),hl		;8c1b
-	ld (0d16ah),hl		;8c1e
+	ld (0d168h),hl		;8c1b   ; guarda la posicion del cursor en la VRAM y el byte siguiente (16 bits)
+	ld (0d16ah),hl		;8c1e   ; guarda la posicion de la ventana en la VRAM y el byte siguiente (16 bits)
 	ld a,080h		;8c21
 	ld (0d164h),a		;8c23
 	ret			;8c26
@@ -1415,10 +1415,10 @@ borra_sprites:		; borra la tabla de sprites (0x3880, 0x200 bytes) (gemela de p01
 teclado_a_nibble_c:		; pasa la tecla del bufer (0xD142) a un nibble
 	xor a			;8cf7
 	ld (hl),a			;8cf8
-	ld a,(0d163h)		;8cf9
+	ld a,(0d163h)		;8cf9   ; lee cuantas letras lleva el nombre
 	or a			;8cfc
 	ret z			;8cfd
-	ld de,0d142h		;8cfe
+	ld de,0d142h		;8cfe   ; apunta a el bufer de teclas
 	cp 001h		;8d01
 	jr nz,L_8D0B		;8d03
 	ld a,(de)			;8d05
@@ -1446,10 +1446,10 @@ L_8D0B:
 teclado_a_byte:		; pasa las teclas del bufer (0xD142) a un byte
 	xor a			;8d1e
 	ld (hl),a			;8d1f
-	ld a,(0d163h)		;8d20
+	ld a,(0d163h)		;8d20   ; lee cuantas letras lleva el nombre
 	or a			;8d23
 	ret z			;8d24
-	ld de,0d142h		;8d25
+	ld de,0d142h		;8d25   ; apunta a el bufer de teclas
 	cp 001h		;8d28
 	jr nz,L_8D32		;8d2a
 	ld a,(de)			;8d2c
@@ -1479,7 +1479,7 @@ engancha_al_juego_b:		; copia p02:8D98 a 0xD814 y busca en el INIT del juego el 
 	ld bc,0004dh		;8d4a
 	ldir		;8d4d
 	push de			;8d4f
-	ld hl,(0d132h)		;8d50
+	ld hl,(0d132h)		;8d50   ; lee la direccion INIT del juego (copia) y el byte siguiente (16 bits)
 	ld bc,00100h		;8d53
 	call copia_del_juego		;8d56   ; copia_del_juego: copia BC bytes de HL del cartucho del juego (RDSLT) a DE (gemela de p01:6371)
 	pop hl			;8d59
@@ -1502,7 +1502,7 @@ L_8D5D:
 copia_del_juego:		; copia BC bytes de HL del cartucho del juego (RDSLT) a DE (gemela de p01:6371)
 	push bc			;8d74
 	push de			;8d75
-	ld a,(0d12fh)		;8d76
+	ld a,(0d12fh)		;8d76   ; lee el slot del cartucho del juego (copia)
 	call 0000ch		;8d79   ; BIOS RDSLT - Reads the value of an address in another slot
 	pop de			;8d7c
 	pop bc			;8d7d
@@ -1541,9 +1541,9 @@ L_8D98:
 	ld bc,002cah		;8d9f
 	ldir		;8da2
 	ld a,0c3h		;8da4
-	ld (0fd9ah),a		;8da6
+	ld (0fd9ah),a		;8da6   ; guarda el gancho H.KEYI
 	ld hl,0d2d8h		;8da9
-	ld (0fd9bh),hl		;8dac
+	ld (0fd9bh),hl		;8dac   ; guarda la direccion del gancho H.KEYI y el byte siguiente (16 bits)
 	pop hl			;8daf
 	dec hl			;8db0
 	dec hl			;8db1
@@ -1551,7 +1551,7 @@ L_8D98:
 	ld de,0d861h		;8db3
 	and a			;8db6
 	sbc hl,de		;8db7
-	ld de,(0d132h)		;8db9
+	ld de,(0d132h)		;8db9   ; lee la direccion INIT del juego (copia) y el byte siguiente (16 bits)
 	add hl,de			;8dbd
 	jp (hl)			;8dbe
 L_8DBF:
@@ -1559,12 +1559,12 @@ L_8DBF:
 	ld de,0d961h		;8dc2
 	ld bc,002cah		;8dc5
 	ldir		;8dc8
-	ld a,(0d12fh)		;8dca
+	ld a,(0d12fh)		;8dca   ; lee el slot del cartucho del juego (copia)
 	ld hl,04000h		;8dcd
 	call 00024h		;8dd0   ; BIOS ENASLT - Switches to specified slot and page definitively
 	call 0d861h		;8dd3
 	ld hl,(0fedch)		;8dd6
-	ld de,(0d132h)		;8dd9
+	ld de,(0d132h)		;8dd9   ; lee la direccion INIT del juego (copia) y el byte siguiente (16 bits)
 	and a			;8ddd
 	sbc hl,de		;8dde
 	ld de,0d861h		;8de0
@@ -1576,7 +1576,7 @@ L_8DE5:
 	or a			;8de9
 	ret nz			;8dea
 	call 0013eh		;8deb   ; BIOS RDVDP - Reads VDP status register
-	ld ix,(0d130h)		;8dee
+	ld ix,(0d130h)		;8dee   ; lee la direccion a la que se vuelve del congelado y el byte siguiente (16 bits)
 	ld a,007h		;8df2
 	call 00141h		;8df4   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
 	cpl			;8df7
@@ -1600,7 +1600,7 @@ L_8DE5:
 	ld ix,L_8F73		;8e12
 	jp 0d214h		;8e16
 L_8E19:
-	ld a,(0d317h)		;8e19
+	ld a,(0d317h)		;8e19   ; lee las opciones del MODIFY (copia)
 	or a			;8e1c
 	jr z,L_8E37		;8e1d
 	ld hl,(0d304h)		;8e1f
@@ -1656,7 +1656,7 @@ L_8E7E:
 	ld ix,L_8FE8		;8e85
 L_8E89:
 	push ix		;8e89
-	ld a,(0d12eh)		;8e8b   ; lee el slot del juego (copia)
+	ld a,(0d12eh)		;8e8b   ; lee el slot del Game Master (copia)
 	ld h,040h		;8e8e
 	push af			;8e90
 	call 00024h		;8e91   ; BIOS ENASLT - Switches to specified slot and page definitively
@@ -1669,7 +1669,7 @@ L_8E89:
 	inc a			;8ea1
 	ld (0a000h),a		;8ea2   ; el mapper: pone en 0xA000 el banco de A
 	call salta_a_ix		;8ea5   ; salta_a_ix: jp (ix)
-	ld a,(0d12fh)		;8ea8
+	ld a,(0d12fh)		;8ea8   ; lee el slot del cartucho del juego (copia)
 	ld h,040h		;8eab
 	push af			;8ead
 	call 00024h		;8eae   ; BIOS ENASLT - Switches to specified slot and page definitively
@@ -1733,13 +1733,13 @@ L_8EFF:
 	ret nc			;8f06
 	jp (ix)		;8f07
 L_8F09:
-	ld a,(0d12fh)		;8f09
+	ld a,(0d12fh)		;8f09   ; lee el slot del cartucho del juego (copia)
 	ld h,080h		;8f0c
 	call 00024h		;8f0e   ; BIOS ENASLT - Switches to specified slot and page definitively
-	ld iy,(0d12eh)		;8f11   ; lee el slot del juego (copia) y el byte siguiente (16 bits)
-	ld ix,(0d130h)		;8f15
+	ld iy,(0d12eh)		;8f11   ; lee el slot del Game Master (copia) y el byte siguiente (16 bits)
+	ld ix,(0d130h)		;8f15   ; lee la direccion a la que se vuelve del congelado y el byte siguiente (16 bits)
 	call 0001ch		;8f19   ; BIOS CALSLT - Executes inter-slot call
-	ld a,(0d12eh)		;8f1c   ; lee el slot del juego (copia)
+	ld a,(0d12eh)		;8f1c   ; lee el slot del Game Master (copia)
 	ld h,080h		;8f1f
 	jp 00024h		;8f21   ; BIOS ENASLT - Switches to specified slot and page definitively
 L_8F24:
@@ -1788,9 +1788,9 @@ L_8F4D:
 	ld bc,00314h		;8f62
 	ldir		;8f65
 	ld a,0c9h		;8f67
-	ld (0fd9fh),a		;8f69
+	ld (0fd9fh),a		;8f69   ; guarda el gancho H.TIMI
 	ld hl,0d170h		;8f6c
-	ld (0fd9bh),hl		;8f6f
+	ld (0fd9bh),hl		;8f6f   ; guarda la direccion del gancho H.KEYI y el byte siguiente (16 bits)
 	ret			;8f72
 L_8F73:
 	call 0013eh		;8f73   ; BIOS RDVDP - Reads VDP status register
@@ -1811,33 +1811,33 @@ silencia_psg_b:		; pone a cero los tres volumenes del PSG (y el SCC del juego si
 	call 00093h		;8f90   ; BIOS WRTPSG - Writes data to PSG-register
 	inc a			;8f93
 	call 00093h		;8f94   ; BIOS WRTPSG - Writes data to PSG-register
-	ld a,(0d4d4h)		;8f97
+	ld a,(0d4d4h)		;8f97   ; lee el juego tiene SCC (copia)
 	and a			;8f9a
 	ret z			;8f9b
 	ld e,03fh		;8f9c
-	ld a,(0d12fh)		;8f9e
+	ld a,(0d12fh)		;8f9e   ; lee el slot del cartucho del juego (copia)
 	ld hl,l9000h		;8fa1
 	call 00014h		;8fa4   ; BIOS WRSLT - Writes a value to an address in another slot
 	ld e,000h		;8fa7
-	ld a,(0d12fh)		;8fa9
+	ld a,(0d12fh)		;8fa9   ; lee el slot del cartucho del juego (copia)
 	ld hl,0988fh		;8fac
 	call 00014h		;8faf   ; BIOS WRSLT - Writes a value to an address in another slot
 	ld a,(0f0f2h)		;8fb2
 	ld e,a			;8fb5
-	ld a,(0d12fh)		;8fb6
+	ld a,(0d12fh)		;8fb6   ; lee el slot del cartucho del juego (copia)
 	ld hl,l9000h		;8fb9
 	call 00014h		;8fbc   ; BIOS WRSLT - Writes a value to an address in another slot
 	ret			;8fbf
 guarda_volumenes:		; guarda los tres volumenes del PSG en 0xF100 (gemela de p01:656C)
 	ld a,008h		;8fc0
 	call 00096h		;8fc2   ; BIOS RDPSG - Reads value from PSG-register
-	ld (0d12bh),a		;8fc5
+	ld (0d12bh),a		;8fc5   ; guarda volumen del PSG, canal A
 	ld a,009h		;8fc8
 	call 00096h		;8fca   ; BIOS RDPSG - Reads value from PSG-register
-	ld (0d12ch),a		;8fcd
+	ld (0d12ch),a		;8fcd   ; guarda volumen del PSG, canal B
 	ld a,00ah		;8fd0
 	call 00096h		;8fd2   ; BIOS RDPSG - Reads value from PSG-register
-	ld (0d12dh),a		;8fd5
+	ld (0d12dh),a		;8fd5   ; guarda volumen del PSG, canal C
 	ret			;8fd8
 L_8FD9:
 	ld (hl),000h		;8fd9
@@ -1856,8 +1856,8 @@ L_8FE8:
 	ret			;8ff4
 congela:		; congela el juego: silencio y espera la tecla (gemela de p01:65A1)
 	call silencia_psg_b		;8ff5   ; silencia_psg_b: pone a cero los tres volumenes del PSG (y el SCC del juego si 0xD4D4)
-	ld ix,(0d130h)		;8ff8
-	ld iy,(0d12eh)		;8ffc   ; lee el slot del juego (copia) y el byte siguiente (16 bits)
+	ld ix,(0d130h)		;8ff8   ; lee la direccion a la que se vuelve del congelado y el byte siguiente (16 bits)
+	ld iy,(0d12eh)		;8ffc   ; lee el slot del Game Master (copia) y el byte siguiente (16 bits)
 L_9000:
 	ld a,(0d135h)		;9000
 	or a			;9003
@@ -1887,32 +1887,32 @@ L_9028:
 	ld (0d135h),a		;902a
 	ret			;902d
 devuelve_volumenes_b:		; devuelve los tres volumenes del PSG (0xD12B-0xD12D) y el SCC
-	ld a,(0d12bh)		;902e
+	ld a,(0d12bh)		;902e   ; lee volumen del PSG, canal A
 	ld e,a			;9031
 	ld a,008h		;9032
 	call 00093h		;9034   ; BIOS WRTPSG - Writes data to PSG-register
-	ld a,(0d12ch)		;9037
+	ld a,(0d12ch)		;9037   ; lee volumen del PSG, canal B
 	ld e,a			;903a
 	ld a,009h		;903b
 	call 00093h		;903d   ; BIOS WRTPSG - Writes data to PSG-register
-	ld a,(0d12dh)		;9040
+	ld a,(0d12dh)		;9040   ; lee volumen del PSG, canal C
 	ld e,a			;9043
 	ld a,00ah		;9044
 	call 00093h		;9046   ; BIOS WRTPSG - Writes data to PSG-register
-	ld a,(0d4d4h)		;9049
+	ld a,(0d4d4h)		;9049   ; lee el juego tiene SCC (copia)
 	and a			;904c
 	ret z			;904d
 	ld e,03fh		;904e
-	ld a,(0d12fh)		;9050
+	ld a,(0d12fh)		;9050   ; lee el slot del cartucho del juego (copia)
 	ld hl,l9000h		;9053
 	call 00014h		;9056   ; BIOS WRSLT - Writes a value to an address in another slot
 	ld e,01fh		;9059
-	ld a,(0d12fh)		;905b
+	ld a,(0d12fh)		;905b   ; lee el slot del cartucho del juego (copia)
 	ld hl,0988fh		;905e
 	call 00014h		;9061   ; BIOS WRSLT - Writes a value to an address in another slot
 	ld a,(0f0f2h)		;9064
 	ld e,a			;9067
-	ld a,(0d12fh)		;9068
+	ld a,(0d12fh)		;9068   ; lee el slot del cartucho del juego (copia)
 	ld hl,l9000h		;906b
 	call 00014h		;906e   ; BIOS WRSLT - Writes a value to an address in another slot
 	ret			;9071
@@ -1941,7 +1941,7 @@ L_9089:
 	rlca			;9096
 	rlca			;9097
 	or d			;9098
-	ld hl,0d138h		;9099
+	ld hl,0d138h		;9099   ; apunta a las teclas del Game Master
 	ld c,(hl)			;909c
 	ld (hl),a			;909d
 	xor c			;909e
@@ -1949,9 +1949,9 @@ L_9089:
 	ld c,a			;90a0
 	ret			;90a1
 disco_guarda_partida_b:		; GAME DATA: graba la RAM del juego (crea, escribe, cierra)
-	ld (0d127h),sp		;90a2
+	ld (0d127h),sp		;90a2   ; guarda la pila guardada al ir al disco
 	call entra_al_disco_b		;90a6   ; entra_al_disco_b: intercambia la RAM del juego y desplaza 0xF0FF hacia arriba para el disco
-	ld hl,0c000h		;90a9   ; apunta a el codigo de p00:4A9A en RAM
+	ld hl,0c000h		;90a9
 	ld de,0d500h		;90ac
 	ld bc,00900h		;90af
 	ldir		;90b2
@@ -1960,18 +1960,18 @@ disco_guarda_partida_b:		; GAME DATA: graba la RAM del juego (crea, escribe, cie
 	call disco_graba_cabecera_pantalla		;90ba   ; disco_graba_cabecera_pantalla: graba 9 bytes: el modo (0xF3DF) y los registros del VDP
 	call bdos_cierra		;90bd   ; bdos_cierra: BDOS 0x10, cerrar fichero; si falla, el error 2
 	ld hl,0d500h		;90c0
-	ld de,0c000h		;90c3   ; apunta a el codigo de p00:4A9A en RAM
+	ld de,0c000h		;90c3
 	ld bc,00900h		;90c6
 	ldir		;90c9
 	jp sale_del_disco_b		;90cb   ; sale_del_disco_b: espera y devuelve la RAM del juego
 disco_guarda_pantalla:		; SCREEN DATA: graba la RAM y la pantalla
-	ld (0d127h),sp		;90ce
+	ld (0d127h),sp		;90ce   ; guarda la pila guardada al ir al disco
 	call entra_al_disco_b		;90d2   ; entra_al_disco_b: intercambia la RAM del juego y desplaza 0xF0FF hacia arriba para el disco
 	call bdos_crea		;90d5   ; bdos_crea: BDOS 0x16, crear fichero; si falla, el error 1
 	call fcb_prepara		;90d8   ; fcb_prepara: registro 0, tamano de registro 1 y bloque actual en el FCB de 0x9848
 	call disco_graba_c000		;90db   ; disco_graba_c000: graba 0x22 registros de 0x80 bytes desde 0xC000
 	call disco_graba_cabecera_pantalla		;90de   ; disco_graba_cabecera_pantalla: graba 9 bytes: el modo (0xF3DF) y los registros del VDP
-	ld de,0c000h		;90e1   ; apunta a el codigo de p00:4A9A en RAM
+	ld de,0c000h		;90e1
 	ld c,01ah		;90e4
 	call 0f37dh		;90e6
 	di			;90e9
@@ -1980,7 +1980,7 @@ disco_guarda_pantalla:		; SCREEN DATA: graba la RAM y la pantalla
 	push hl			;90ee
 	ld hl,00000h		;90ef
 	add hl,sp			;90f2
-	ld de,0c000h		;90f3   ; apunta a el codigo de p00:4A9A en RAM
+	ld de,0c000h		;90f3
 	ld bc,00082h		;90f6
 	ldir		;90f9
 	pop hl			;90fb
@@ -1995,10 +1995,10 @@ disco_guarda_pantalla:		; SCREEN DATA: graba la RAM y la pantalla
 	call disco_lee_c000		;9110   ; disco_lee_c000: lee 0x1100 registros a 0xC000
 	jp sale_del_disco_b		;9113   ; sale_del_disco_b: espera y devuelve la RAM del juego
 disco_guarda_vrm:		; graba un fichero .VRM (la VRAM) (gemela de p00:4BA0)
-	ld (0d127h),sp		;9116
+	ld (0d127h),sp		;9116   ; guarda la pila guardada al ir al disco
 	call entra_al_disco_b		;911a   ; entra_al_disco_b: intercambia la RAM del juego y desplaza 0xF0FF hacia arriba para el disco
-	ld hl,0d100h		;911d
-	ld (0d125h),hl		;9120
+	ld hl,0d100h		;911d   ; apunta a el nombre del fichero (FCB)
+	ld (0d125h),hl		;9120   ; guarda el puntero al FCB y el byte siguiente (16 bits)
 	call borra_fcb		;9123   ; borra_fcb: pone a cero el FCB de 0x982F
 	ld de,0d109h		;9126
 	ld hl,09140h		;9129
@@ -2024,7 +2024,7 @@ DATA_resto_9140:
 
 
 disco_guarda_ranking_b:		; graba el ranking en disco
-	ld (0d127h),sp		;9143
+	ld (0d127h),sp		;9143   ; guarda la pila guardada al ir al disco
 	call entra_al_disco_b		;9147   ; entra_al_disco_b: intercambia la RAM del juego y desplaza 0xF0FF hacia arriba para el disco
 	call bdos_crea		;914a   ; bdos_crea: BDOS 0x16, crear fichero; si falla, el error 1
 	call fcb_prepara		;914d   ; fcb_prepara: registro 0, tamano de registro 1 y bloque actual en el FCB de 0x9848
@@ -2033,7 +2033,7 @@ disco_guarda_ranking_b:		; graba el ranking en disco
 	call bdos_cierra		;9156   ; bdos_cierra: BDOS 0x10, cerrar fichero; si falla, el error 2
 	jp sale_del_disco_b		;9159   ; sale_del_disco_b: espera y devuelve la RAM del juego
 disco_guarda_bloque_b:		; graba el bloque de 0xD30C en disco
-	ld (0d127h),sp		;915c
+	ld (0d127h),sp		;915c   ; guarda la pila guardada al ir al disco
 	call entra_al_disco_b		;9160   ; entra_al_disco_b: intercambia la RAM del juego y desplaza 0xF0FF hacia arriba para el disco
 	call bdos_crea		;9163   ; bdos_crea: BDOS 0x16, crear fichero; si falla, el error 1
 	call fcb_prepara		;9166   ; fcb_prepara: registro 0, tamano de registro 1 y bloque actual en el FCB de 0x9848
@@ -2041,19 +2041,19 @@ disco_guarda_bloque_b:		; graba el bloque de 0xD30C en disco
 	call bdos_cierra		;916c   ; bdos_cierra: BDOS 0x10, cerrar fichero; si falla, el error 2
 	jp sale_del_disco_b		;916f   ; sale_del_disco_b: espera y devuelve la RAM del juego
 disco_carga_partida_b:		; carga GAME DATA del disco
-	ld (0d127h),sp		;9172
+	ld (0d127h),sp		;9172   ; guarda la pila guardada al ir al disco
 	call entra_al_disco_b		;9176   ; entra_al_disco_b: intercambia la RAM del juego y desplaza 0xF0FF hacia arriba para el disco
 	call bdos_abre		;9179   ; bdos_abre: BDOS 0x0F, abrir fichero; si falla, el error 0
 	call fcb_prepara		;917c   ; fcb_prepara: registro 0, tamano de registro 1 y bloque actual en el FCB de 0x9848
 	ld hl,01100h		;917f
 	call fcb_registro		;9182   ; fcb_registro: pone HL como registro aleatorio del FCB
 	call disco_lee_pantalla		;9185   ; disco_lee_pantalla: lee la cabecera de pantalla y, si es buena, la VRAM
-	ld de,0c000h		;9188   ; apunta a el codigo de p00:4A9A en RAM
+	ld de,0c000h		;9188
 	ld c,01ah		;918b
 	call 0f37dh		;918d
 	ld hl,00082h		;9190
 	call bdos_lee		;9193   ; bdos_lee: BDOS 0x27, leer HL registros; si falla, el error 3
-	ld hl,(0c000h)		;9196   ; lee el codigo de p00:4A9A en RAM y el byte siguiente (16 bits)
+	ld hl,(0c000h)		;9196
 	ld sp,hl			;9199
 	ld de,0c002h		;919a
 	ex de,hl			;919d
@@ -2066,7 +2066,7 @@ disco_carga_partida_b:		; carga GAME DATA del disco
 	call guarda_volumenes		;91af   ; guarda_volumenes: guarda los tres volumenes del PSG en 0xF100 (gemela de p01:656C)
 	jp sale_del_disco_b		;91b2   ; sale_del_disco_b: espera y devuelve la RAM del juego
 disco_carga_pantalla:		; carga SCREEN DATA del disco
-	ld (0d127h),sp		;91b5
+	ld (0d127h),sp		;91b5   ; guarda la pila guardada al ir al disco
 	call entra_al_disco_b		;91b9   ; entra_al_disco_b: intercambia la RAM del juego y desplaza 0xF0FF hacia arriba para el disco
 	call bdos_abre		;91bc   ; bdos_abre: BDOS 0x0F, abrir fichero; si falla, el error 0
 	call fcb_prepara		;91bf   ; fcb_prepara: registro 0, tamano de registro 1 y bloque actual en el FCB de 0x9848
@@ -2076,7 +2076,7 @@ disco_carga_pantalla:		; carga SCREEN DATA del disco
 	scf			;91cb
 	ret			;91cc
 disco_carga_ranking_b:		; carga el ranking del disco
-	ld (0d127h),sp		;91cd
+	ld (0d127h),sp		;91cd   ; guarda la pila guardada al ir al disco
 	call entra_al_disco_b		;91d1   ; entra_al_disco_b: intercambia la RAM del juego y desplaza 0xF0FF hacia arriba para el disco
 	call bdos_abre		;91d4   ; bdos_abre: BDOS 0x0F, abrir fichero; si falla, el error 0
 	call fcb_prepara		;91d7   ; fcb_prepara: registro 0, tamano de registro 1 y bloque actual en el FCB de 0x9848
@@ -2084,14 +2084,14 @@ disco_carga_ranking_b:		; carga el ranking del disco
 	call ranking_quita_1_y_2		;91dd   ; ranking_quita_1_y_2: quita las marcas 1 y 2 del ranking (gemela de p01:690B)
 	jp sale_del_disco_b		;91e0   ; sale_del_disco_b: espera y devuelve la RAM del juego
 disco_carga_bloque_b:		; carga el bloque de 0xD30C del disco
-	ld (0d127h),sp		;91e3
+	ld (0d127h),sp		;91e3   ; guarda la pila guardada al ir al disco
 	call entra_al_disco_b		;91e7   ; entra_al_disco_b: intercambia la RAM del juego y desplaza 0xF0FF hacia arriba para el disco
 	call bdos_abre		;91ea   ; bdos_abre: BDOS 0x0F, abrir fichero; si falla, el error 0
 	call fcb_prepara		;91ed   ; fcb_prepara: registro 0, tamano de registro 1 y bloque actual en el FCB de 0x9848
 	call disco_lee_d30c		;91f0   ; disco_lee_d30c: lee 3 registros a 0xD30C - 0x2000
 	jp sale_del_disco_b		;91f3   ; sale_del_disco_b: espera y devuelve la RAM del juego
 disco_graba_c000:		; graba 0x22 registros de 0x80 bytes desde 0xC000
-	ld hl,0c000h		;91f6   ; apunta a el codigo de p00:4A9A en RAM
+	ld hl,0c000h		;91f6
 	ld b,022h		;91f9
 L_91FB:
 	push hl			;91fb
@@ -2106,9 +2106,9 @@ L_91FB:
 	ret			;920b
 disco_graba_registro:		; copia 0x80 bytes a 0x8000 y los graba (BDOS 0x26) (gemela de p00:4C8E)
 	push bc			;920c
-	ld de,0c000h		;920d   ; apunta a el codigo de p00:4A9A en RAM
+	ld de,0c000h		;920d
 	ldir		;9210
-	ld de,0c000h		;9212   ; apunta a el codigo de p00:4A9A en RAM
+	ld de,0c000h		;9212
 	ld c,01ah		;9215
 	call 0f37dh		;9217
 	pop hl			;921a
@@ -2131,7 +2131,7 @@ disco_graba_d30c:		; graba 3 registros desde 0xD30C - 0x2000
 	ld hl,00003h		;923c
 	jp bdos_graba		;923f   ; bdos_graba: BDOS 0x26, grabar HL registros; si falla, el error 4
 disco_lee_c000:		; lee 0x1100 registros a 0xC000
-	ld de,0c000h		;9242   ; apunta a el codigo de p00:4A9A en RAM
+	ld de,0c000h		;9242
 	ld c,01ah		;9245
 	call 0f37dh		;9247
 	ld hl,01100h		;924a
@@ -2153,13 +2153,13 @@ disco_lee_d30c:		; lee 3 registros a 0xD30C - 0x2000
 	ld hl,00003h		;926d
 	jp bdos_lee		;9270   ; bdos_lee: BDOS 0x27, leer HL registros; si falla, el error 3
 L_9273:
-	ld de,0c000h		;9273   ; apunta a el codigo de p00:4A9A en RAM
+	ld de,0c000h		;9273
 	ld c,01ah		;9276
 	call 0f37dh		;9278
 	ld hl,01000h		;927b
 	jp bdos_graba		;927e   ; bdos_graba: BDOS 0x26, grabar HL registros; si falla, el error 4
 L_9281:
-	ld de,0c000h		;9281   ; apunta a el codigo de p00:4A9A en RAM
+	ld de,0c000h		;9281
 	ld c,01ah		;9284
 	call 0f37dh		;9286
 	ld hl,01000h		;9289
@@ -2176,13 +2176,13 @@ L_929B:
 	push de			;929b
 	call disco_lee_palabra		;929c   ; disco_lee_palabra: lee una palabra del fichero en HL
 	push hl			;929f
-	ld de,0c000h		;92a0   ; apunta a el codigo de p00:4A9A en RAM
+	ld de,0c000h		;92a0
 	ld c,01ah		;92a3
 	call 0f37dh		;92a5
 	pop hl			;92a8
 	call bdos_lee		;92a9   ; bdos_lee: BDOS 0x27, leer HL registros; si falla, el error 3
 	pop de			;92ac
-	ld hl,0c000h		;92ad   ; apunta a el codigo de p00:4A9A en RAM
+	ld hl,0c000h		;92ad
 	push de			;92b0
 	call 0a4cfh		;92b1   ; descomprime: descomprime HL a la VRAM DE: n & 0x7F repeticiones o copias (gemela de p01:733A)
 	pop de			;92b4
@@ -2194,7 +2194,7 @@ L_929B:
 	jr nz,L_929B		;92bd
 	ret			;92bf
 disco_lee_cabecera_pantalla:		; lee 9 bytes: el modo y los 8 registros del VDP
-	ld de,0c000h		;92c0   ; apunta a el codigo de p00:4A9A en RAM
+	ld de,0c000h		;92c0
 	ld c,01ah		;92c3
 	call 0f37dh		;92c5
 	ld hl,00009h		;92c8
@@ -2203,7 +2203,7 @@ disco_lee_cabecera_pantalla:		; lee 9 bytes: el modo y los 8 registros del VDP
 	ld e,008h		;92d1
 	ld c,000h		;92d3
 	call pon_registros_vdp		;92d5   ; pon_registros_vdp: escribe E registros del VDP desde HL, empezando por C
-	ld a,(0c000h)		;92d8   ; lee el codigo de p00:4A9A en RAM
+	ld a,(0c000h)		;92d8
 	ld (0d4d2h),a		;92db
 	and a			;92de
 	ret z			;92df
@@ -2220,14 +2220,14 @@ pon_registros_vdp:		; escribe E registros del VDP desde HL, empezando por C (gem
 	jr nz,pon_registros_vdp		;92ec
 	ret			;92ee
 disco_graba_cabecera_pantalla:		; graba 9 bytes: el modo (0xF3DF) y los registros del VDP
-	ld de,0c000h		;92ef   ; apunta a el codigo de p00:4A9A en RAM
+	ld de,0c000h		;92ef
 	ld c,01ah		;92f2
 	call 0f37dh		;92f4
 	xor a			;92f7
-	ld de,0c000h		;92f8   ; apunta a el codigo de p00:4A9A en RAM
+	ld de,0c000h		;92f8
 	ld (de),a			;92fb
 	inc de			;92fc
-	ld hl,0f3dfh		;92fd
+	ld hl,0f3dfh		;92fd   ; apunta a los registros del VDP (copia de la BIOS)
 	ld bc,00008h		;9300
 	ldir		;9303
 	ld hl,00009h		;9305
@@ -2239,10 +2239,10 @@ L_930E:
 	ld bc,00080h		;9312
 	call 00059h		;9315   ; BIOS LDIRMV - Block transfers to memory from VRAM
 	call 0a829h		;9318   ; comprime: comprime 0x8802 en 0x8002 (lo contrario de p01:733A) (gemela de p01:7707)
-	ld de,0c000h		;931b   ; apunta a el codigo de p00:4A9A en RAM
+	ld de,0c000h		;931b
 	ld c,01ah		;931e
 	call 0f37dh		;9320
-	ld hl,(0c000h)		;9323   ; lee el codigo de p00:4A9A en RAM y el byte siguiente (16 bits)
+	ld hl,(0c000h)		;9323
 	inc hl			;9326
 	inc hl			;9327
 	call bdos_graba		;9328   ; bdos_graba: BDOS 0x26, grabar HL registros; si falla, el error 4
@@ -2296,9 +2296,9 @@ disco_graba_100_de_vram:		; lee 0x100 bytes de la VRAM y los graba (gemela de p0
 disco_graba_bc_de_vram:		; lee BC bytes de la VRAM y los graba (gemela de p00:4F87)
 	push hl			;9381
 	push bc			;9382
-	ld de,0c000h		;9383   ; apunta a el codigo de p00:4A9A en RAM
+	ld de,0c000h		;9383
 	call 00059h		;9386   ; BIOS LDIRMV - Block transfers to memory from VRAM
-	ld de,0c000h		;9389   ; apunta a el codigo de p00:4A9A en RAM
+	ld de,0c000h		;9389
 	ld c,01ah		;938c
 	call 0f37dh		;938e
 	pop hl			;9391
@@ -2332,15 +2332,15 @@ L_93B5:
 	jr nz,L_93B5		;93bd
 	di			;93bf
 	ld hl,0e280h		;93c0
-	ld de,0e000h		;93c3   ; apunta a opcion / RC del juego
+	ld de,0e000h		;93c3
 	ld bc,01100h		;93c6
 	ldir		;93c9
 	call intercambia_e000_c000		;93cb   ; intercambia_e000_c000: intercambia 0x1100 bytes de 0xE000 y 0xC000
 	ei			;93ce
 	ret			;93cf
 intercambia_e000_c000:		; intercambia 0x1100 bytes de 0xE000 y 0xC000
-	ld hl,0e000h		;93d0   ; apunta a opcion / RC del juego
-	ld de,0c000h		;93d3   ; apunta a el codigo de p00:4A9A en RAM
+	ld hl,0e000h		;93d0
+	ld de,0c000h		;93d3
 	ld bc,01100h		;93d6
 L_93D9:
 	push bc			;93d9
@@ -2360,11 +2360,11 @@ L_93D9:
 L_93E8:
 	xor a			;93e8
 	call 0a65fh		;93e9   ; menu: menu de B opciones con el cursor A: devuelve la elegida (gemela de p01:750E)
-	ld a,(0d163h)		;93ec
+	ld a,(0d163h)		;93ec   ; lee cuantas letras lleva el nombre
 	or a			;93ef
 	ret z			;93f0
-	ld hl,0d100h		;93f1
-	ld (0d125h),hl		;93f4
+	ld hl,0d100h		;93f1   ; apunta a el nombre del fichero (FCB)
+	ld (0d125h),hl		;93f4   ; guarda el puntero al FCB y el byte siguiente (16 bits)
 	ld d,h			;93f7
 	ld e,l			;93f8
 	ld (hl),020h		;93f9
@@ -2377,13 +2377,13 @@ L_93E8:
 	inc de			;9404
 	ld bc,0001bh		;9405
 	ldir		;9408
-	ld de,0d100h		;940a
+	ld de,0d100h		;940a   ; apunta a el nombre del fichero (FCB)
 	ld (de),a			;940d
 	inc de			;940e
-	ld a,(0d163h)		;940f
+	ld a,(0d163h)		;940f   ; lee cuantas letras lleva el nombre
 	ld c,a			;9412
 	ld b,000h		;9413
-	ld hl,0d142h		;9415
+	ld hl,0d142h		;9415   ; apunta a el bufer de teclas
 	ldir		;9418
 	call nombre_de_fichero		;941a   ; nombre_de_fichero: pone en el FCB (0x982C) el nombre: tipo y numero de juego
 	ld a,0ffh		;941d
@@ -2392,11 +2392,11 @@ L_93E8:
 nombre_de_fichero:		; pone en el FCB (0x982C) el nombre: tipo y numero de juego (gemela de p00:507D)
 	ld de,0d109h		;9421
 	ld hl,09439h		;9424
-	ld a,(0d136h)		;9427
+	ld a,(0d136h)		;9427   ; lee tipo y opcion del menu de disco
 	and 00fh		;942a
 	call 0a3e6h		;942c   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ldi		;942f
-	ld a,(0d301h)		;9431
+	ld a,(0d301h)		;9431   ; lee el codigo del juego (copia)
 	ex de,hl			;9434
 	call byte_a_hex		;9435   ; byte_a_hex: escribe A en hexadecimal (dos letras) en HL
 	ret			;9438
@@ -2447,7 +2447,7 @@ L_9469:
 	xor a			;9469
 	ret			;946a
 L_946B:
-	ld (0d125h),de		;946b
+	ld (0d125h),de		;946b   ; guarda el puntero al FCB y el byte siguiente (16 bits)
 	xor a			;946f
 	ld (de),a			;9470
 	inc de			;9471
@@ -2461,9 +2461,9 @@ L_947A:
 	djnz L_947A		;947c
 	ret			;947e
 L_947F:
-	ld (0d125h),hl		;947f
+	ld (0d125h),hl		;947f   ; guarda el puntero al FCB y el byte siguiente (16 bits)
 fcb_prepara:		; registro 0, tamano de registro 1 y bloque actual en el FCB de 0x9848 (gemela de p00:50D6)
-	ld hl,(0d125h)		;9482
+	ld hl,(0d125h)		;9482   ; lee el puntero al FCB y el byte siguiente (16 bits)
 	ld bc,0000ch		;9485
 	add hl,bc			;9488
 	ld (hl),b			;9489
@@ -2484,7 +2484,7 @@ L_949A:
 	djnz L_949A		;949c
 	ret			;949e
 L_949F:
-	ld hl,(0d125h)		;949f
+	ld hl,(0d125h)		;949f   ; lee el puntero al FCB y el byte siguiente (16 bits)
 	ld bc,00010h		;94a2
 	add hl,bc			;94a5
 	ld a,(hl)			;94a6
@@ -2493,10 +2493,10 @@ L_949F:
 	ld l,a			;94a9
 	ret			;94aa
 L_94AB:
-	ld (0d125h),de		;94ab
+	ld (0d125h),de		;94ab   ; guarda el puntero al FCB y el byte siguiente (16 bits)
 	jr L_94B5		;94af
 fcb_registro:		; pone HL como registro aleatorio del FCB (gemela de p00:5105)
-	ld de,(0d125h)		;94b1
+	ld de,(0d125h)		;94b1   ; lee el puntero al FCB y el byte siguiente (16 bits)
 L_94B5:
 	ex de,hl			;94b5
 	ld bc,00021h		;94b6
@@ -2506,7 +2506,7 @@ L_94B5:
 	ld (hl),d			;94bc
 	ret			;94bd
 bdos_abre:		; BDOS 0x0F, abrir fichero; si falla, el error 0 (gemela de p00:5112)
-	ld de,(0d125h)		;94be
+	ld de,(0d125h)		;94be   ; lee el puntero al FCB y el byte siguiente (16 bits)
 	ld c,00fh		;94c2
 	call 0f37dh		;94c4
 	ld c,000h		;94c7
@@ -2514,7 +2514,7 @@ bdos_abre:		; BDOS 0x0F, abrir fichero; si falla, el error 0 (gemela de p00:5112
 	jp z,L_9541		;94ca
 	ret			;94cd
 bdos_crea:		; BDOS 0x16, crear fichero; si falla, el error 1 (gemela de p00:5122)
-	ld de,(0d125h)		;94ce
+	ld de,(0d125h)		;94ce   ; lee el puntero al FCB y el byte siguiente (16 bits)
 	ld c,016h		;94d2
 	call 0f37dh		;94d4
 	ld c,001h		;94d7
@@ -2522,7 +2522,7 @@ bdos_crea:		; BDOS 0x16, crear fichero; si falla, el error 1 (gemela de p00:5122
 	jp z,L_9541		;94da
 	ret			;94dd
 bdos_cierra:		; BDOS 0x10, cerrar fichero; si falla, el error 2 (gemela de p00:5132)
-	ld de,(0d125h)		;94de
+	ld de,(0d125h)		;94de   ; lee el puntero al FCB y el byte siguiente (16 bits)
 	ld c,010h		;94e2
 	call 0f37dh		;94e4
 	ld c,002h		;94e7
@@ -2530,7 +2530,7 @@ bdos_cierra:		; BDOS 0x10, cerrar fichero; si falla, el error 2 (gemela de p00:5
 	jp z,L_9541		;94ea
 	ret			;94ed
 bdos_lee:		; BDOS 0x27, leer HL registros; si falla, el error 3 (gemela de p00:5142)
-	ld de,(0d125h)		;94ee
+	ld de,(0d125h)		;94ee   ; lee el puntero al FCB y el byte siguiente (16 bits)
 	ld c,027h		;94f2
 	call 0f37dh		;94f4
 	ld c,003h		;94f7
@@ -2538,7 +2538,7 @@ bdos_lee:		; BDOS 0x27, leer HL registros; si falla, el error 3 (gemela de p00:5
 	jp nz,L_9541		;94fa
 	ret			;94fd
 bdos_graba:		; BDOS 0x26, grabar HL registros; si falla, el error 4 (gemela de p00:5152)
-	ld de,(0d125h)		;94fe
+	ld de,(0d125h)		;94fe   ; lee el puntero al FCB y el byte siguiente (16 bits)
 	ld c,026h		;9502
 	call 0f37dh		;9504
 	ld c,004h		;9507
@@ -2589,7 +2589,7 @@ L_9541:
 	call pinta_tipo		;954b   ; pinta_tipo: pinta el tipo elegido (0xF10B, nibble bajo)
 	call pinta_juego_b		;954e   ; pinta_juego_b: pinta el numero de juego (0xD301) en hexadecimal
 	ld hl,0956fh		;9551
-	ld de,(0d16eh)		;9554
+	ld de,(0d16eh)		;9554   ; lee la esquina de la ventana pequena y el byte siguiente (16 bits)
 	push de			;9558
 	call 0a520h		;9559
 	pop hl			;955c
@@ -2599,7 +2599,7 @@ L_9541:
 	pop bc			;9562
 	call error_de_disco		;9563   ; error_de_disco: pinta el mensaje del error C (tabla de p00:5209)
 	call 0a644h		;9566
-	ld sp,(0d127h)		;9569
+	ld sp,(0d127h)		;9569   ; lee la pila guardada al ir al disco y el byte siguiente (16 bits)
 	scf			;956d
 	ret			;956e
 
@@ -2674,7 +2674,7 @@ ventana_b:		; abre una ventana de texto con el marco de DE
 	ex de,hl			;9627
 	ldir		;9628
 	ld hl,0d343h		;962a
-	ld a,(0d12eh)		;962d   ; lee el slot del juego (copia)
+	ld a,(0d12eh)		;962d   ; lee el slot del Game Master (copia)
 	ld (hl),a			;9630
 	inc hl			;9631
 	pop de			;9632
@@ -2715,16 +2715,16 @@ DATA_resto_9637:
 
 pide_nombre_fichero:		; lee el nombre del fichero letra a letra (gemela de p00:5393)
 	xor a			;9733
-	ld (0d163h),a		;9734
-	ld (0d165h),a		;9737
+	ld (0d163h),a		;9734   ; guarda cuantas letras lleva el nombre
+	ld (0d165h),a		;9737   ; guarda la fila elegida
 	ld hl,03a6ch		;973a
-	ld (0d168h),hl		;973d
-	ld (0d16ah),hl		;9740
+	ld (0d168h),hl		;973d   ; guarda la posicion del cursor en la VRAM y el byte siguiente (16 bits)
+	ld (0d16ah),hl		;9740   ; guarda la posicion de la ventana en la VRAM y el byte siguiente (16 bits)
 	ld a,080h		;9743
 	ld (0d164h),a		;9745
 elige_fichero:		; lista los ficheros del disco y deja elegir uno (gemela de p00:53A8)
 	call 0a74fh		;9748   ; cursor_apaga_b: quita el cursor
-	ld (0d127h),sp		;974b
+	ld (0d127h),sp		;974b   ; guarda la pila guardada al ir al disco
 	call borra_lista_ficheros		;974f   ; borra_lista_ficheros: pone a cero la lista de ficheros (0x9103) y el FCB
 	call busca_ficheros		;9752   ; busca_ficheros: busca los ficheros del disco (BDOS 0x11 y 0x12)
 	jp z,L_97EA		;9755
@@ -2734,8 +2734,8 @@ L_975E:
 	call pinta_ficheros		;975e   ; pinta_ficheros: pinta la lista de ficheros
 	call 00156h		;9761   ; BIOS KILBUF - Clears keyboard buffer
 L_9764:
-	ld hl,0d163h		;9764
-	ld de,0d165h		;9767
+	ld hl,0d163h		;9764   ; apunta a cuantas letras lleva el nombre
+	ld de,0d165h		;9767   ; apunta a la fila elegida
 	call 0009fh		;976a   ; BIOS CHGET - One character input (waiting)
 	cp 01eh		;976d
 	jr z,L_97DA		;976f
@@ -2743,7 +2743,7 @@ L_9764:
 	jr z,L_97A2		;9773
 	cp 020h		;9775
 	jr nz,L_9764		;9777
-	ld a,(0d163h)		;9779
+	ld a,(0d163h)		;9779   ; lee cuantas letras lleva el nombre
 	ld hl,0d34eh		;977c
 	cp (hl)			;977f
 	ccf			;9780
@@ -2752,10 +2752,10 @@ L_9764:
 	push hl			;9785
 	call fcb_comodin		;9786   ; fcb_comodin: FCB con '?' en el nombre para buscar ficheros
 	pop hl			;9789
-	ld de,0d100h		;978a
-	ld (0d125h),de		;978d
+	ld de,0d100h		;978a   ; apunta a el nombre del fichero (FCB)
+	ld (0d125h),de		;978d   ; guarda el puntero al FCB y el byte siguiente (16 bits)
 	inc de			;9791
-	ld a,(0d129h)		;9792
+	ld a,(0d129h)		;9792   ; lee el tipo de fichero elegido
 	cp 001h		;9795
 	ld bc,00008h		;9797
 	jr nz,L_979E		;979a
@@ -2786,16 +2786,16 @@ L_97BC:
 	call 0a788h		;97bc   ; cursor_borra_b: borra el cursor
 	add hl,bc			;97bf
 	push hl			;97c0
-	ld de,(0d16ah)		;97c1
+	ld de,(0d16ah)		;97c1   ; lee la posicion de la ventana en la VRAM y el byte siguiente (16 bits)
 	and a			;97c5
 	sbc hl,de		;97c6
 	ld a,(0d164h)		;97c8
 	ld d,000h		;97cb
 	ld e,a			;97cd
-	rst 20h			;97ce
+	rst 20h			;97ce   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	pop hl			;97cf
 	jr nc,L_97D5		;97d0
-	ld (0d168h),hl		;97d2
+	ld (0d168h),hl		;97d2   ; guarda la posicion del cursor en la VRAM y el byte siguiente (16 bits)
 L_97D5:
 	call 0a778h		;97d5   ; cursor_pinta_b: pinta el cursor (':' o el de MSX2)
 	jr L_975E		;97d8
@@ -2814,10 +2814,10 @@ L_97E5:
 	jr L_97BC		;97e8
 L_97EA:
 	ld hl,0980eh		;97ea
-	ld de,(0d16ah)		;97ed
+	ld de,(0d16ah)		;97ed   ; lee la posicion de la ventana en la VRAM y el byte siguiente (16 bits)
 	call 0a520h		;97f1
 	ld de,09816h		;97f4
-	ld hl,(0d16ah)		;97f7
+	ld hl,(0d16ah)		;97f7   ; lee la posicion de la ventana en la VRAM y el byte siguiente (16 bits)
 	ld bc,00040h		;97fa
 	add hl,bc			;97fd
 	ex de,hl			;97fe
@@ -2847,9 +2847,9 @@ DATA_resto_980E:
 
 
 pinta_ficheros:		; pinta la lista de ficheros
-	ld a,(0d165h)		;9825
+	ld a,(0d165h)		;9825   ; lee la fila elegida
 	call fila_de_fichero		;9828   ; fila_de_fichero: HL = la fila A de la lista de ficheros
-	ld de,(0d16ah)		;982b
+	ld de,(0d16ah)		;982b   ; lee la posicion de la ventana en la VRAM y el byte siguiente (16 bits)
 	inc de			;982f
 	inc de			;9830
 	ex de,hl			;9831
@@ -2872,7 +2872,7 @@ L_9841:
 L_984A:
 	inc de			;984a
 	djnz L_9841		;984b
-	ld a,(0d129h)		;984d
+	ld a,(0d129h)		;984d   ; lee el tipo de fichero elegido
 	cp 001h		;9850
 	jr nz,L_9868		;9852
 	ld a,(de)			;9854
@@ -2903,7 +2903,7 @@ borra_lista_ficheros:		; pone a cero la lista de ficheros (0x9103) y el FCB (gem
 	ld bc,00107h		;9879
 	ldir		;987c
 fcb_comodin:		; FCB con '?' en el nombre para buscar ficheros (gemela de p00:54E0)
-	ld hl,0d100h		;987e
+	ld hl,0d100h		;987e   ; apunta a el nombre del fichero (FCB)
 	ld de,0d101h		;9881
 	ld (hl),000h		;9884
 	ld bc,00024h		;9886
@@ -2921,7 +2921,7 @@ busca_ficheros:		; busca los ficheros del disco (BDOS 0x11 y 0x12) (gemela de p0
 	ld de,0d351h		;98a2
 	ld c,01ah		;98a5
 	call 0f37dh		;98a7
-	ld de,0d100h		;98aa
+	ld de,0d100h		;98aa   ; apunta a el nombre del fichero (FCB)
 	ld c,011h		;98ad
 	call 0f37dh		;98af
 	inc a			;98b2
@@ -2935,7 +2935,7 @@ L_98B5:
 	ld a,(hl)			;98be
 	cp 014h		;98bf
 	jr z,L_98CE		;98c1
-	ld de,0d100h		;98c3
+	ld de,0d100h		;98c3   ; apunta a el nombre del fichero (FCB)
 	ld c,012h		;98c6
 	call 0f37dh		;98c8
 	inc a			;98cb
@@ -2983,7 +2983,7 @@ L_9900:
 fila_de_fichero:		; HL = la fila A de la lista de ficheros (gemela de p00:5565)
 	ld l,a			;9903
 	ld h,000h		;9904
-	ld a,(0d129h)		;9906
+	ld a,(0d129h)		;9906   ; lee el tipo de fichero elegido
 	cp 001h		;9909
 	jr z,L_9912		;990b
 	add hl,hl			;990d
@@ -3039,11 +3039,11 @@ DATA_saltos_994C:
 
 
 pon_opcion_b:		; copia 0xD13C a 0xE000
-	ld a,(0d13ch)		;9952
-	ld (0e000h),a		;9955   ; guarda opcion / RC del juego
+	ld a,(0d13ch)		;9952   ; lee la opcion elegida
+	ld (0e000h),a		;9955
 	ret			;9958
 L_9959:
-	ld a,(0d13ch)		;9959
+	ld a,(0d13ch)		;9959   ; lee la opcion elegida
 	inc a			;995c
 	jr nz,$-34		;995d
 	ld bc,00107h		;995f
@@ -3051,7 +3051,7 @@ L_9959:
 	call 0a47fh		;9965   ; borra_nombres: borra la tabla de nombres y esconde los sprites (0xD0 en 0x3B00) (gemela de p01:72EA)
 L_9968:
 	di			;9968
-	ld hl,0fd9ah		;9969
+	ld hl,0fd9ah		;9969   ; apunta a el gancho H.KEYI
 	ld a,0c9h		;996c
 	ld b,00ah		;996e
 L_9970:
@@ -3065,7 +3065,7 @@ L_9970:
 L_997E:
 	jp 040efh		;997e
 L_9981:
-	ld a,(0d13ch)		;9981
+	ld a,(0d13ch)		;9981   ; lee la opcion elegida
 	inc a			;9984
 	jp nz,L_993B		;9985
 	ld a,002h		;9988
@@ -3073,17 +3073,17 @@ L_9981:
 L_998C:
 	ld a,001h		;998c
 L_998E:
-	ld (0d129h),a		;998e
+	ld (0d129h),a		;998e   ; guarda el tipo de fichero elegido
 	ld bc,00107h		;9991
 	call 00047h		;9994   ; BIOS WRTVDP - Writes data in the VDP-register
 	call 0a47fh		;9997   ; borra_nombres: borra la tabla de nombres y esconde los sprites (0xD0 en 0x3B00) (gemela de p01:72EA)
 	call 04095h		;999a   ; p09_8191: pasarela: 1-9-10, p09:8191 y vuelve a 2-3
-	ld a,(0d129h)		;999d
+	ld a,(0d129h)		;999d   ; lee el tipo de fichero elegido
 	cp 002h		;99a0
 	jp z,L_89FB		;99a2
 	jp L_87CB		;99a5
 L_99A8:
-	ld a,(0002dh)		;99a8
+	ld a,(0002dh)		;99a8   ; la version del MSX (0 = MSX1)
 	and a			;99ab
 	jr nz,L_99B8		;99ac
 	ld hl,00000h		;99ae
@@ -3134,7 +3134,7 @@ L_99E9:
 	jr nz,pinta_16_colores		;99f7
 	ret			;99f9
 L_99FA:
-	ld a,(0d317h)		;99fa
+	ld a,(0d317h)		;99fa   ; lee las opciones del MODIFY (copia)
 	ld b,a			;99fd
 	bit 0,b		;99fe
 	call nz,truco_vidas		;9a00   ; truco_vidas: las vidas: la rutina del juego de la tabla de p01:6CA6 (gemela de p01:67F3)
@@ -3147,7 +3147,7 @@ L_99FA:
 	ld d,a			;9a10
 	call hay_ranking		;9a11   ; hay_ranking: Z si el juego no tiene ranking (0xF290, 0xF286) (gemela de p01:68E1)
 	jr z,L_9A26		;9a14
-	ld a,(0d301h)		;9a16
+	ld a,(0d301h)		;9a16   ; lee el codigo del juego (copia)
 	cp 015h		;9a19
 	jr z,L_9A26		;9a1b
 	ld hl,0d33ah		;9a1d
@@ -3157,7 +3157,7 @@ L_99FA:
 	ld d,b			;9a25
 L_9A26:
 	ei			;9a26
-	ld hl,0d317h		;9a27
+	ld hl,0d317h		;9a27   ; apunta a las opciones del MODIFY (copia)
 	ld (hl),d			;9a2a
 	bit 7,d		;9a2b
 	ret z			;9a2d
@@ -3218,7 +3218,7 @@ busca_en_tabla_y_salta:		; busca 0xF281 en la tabla [codigo, direccion] de HL y 
 	ld a,(hl)			;9a91
 	inc a			;9a92
 	ret z			;9a93
-	ld a,(0d301h)		;9a94
+	ld a,(0d301h)		;9a94   ; lee el codigo del juego (copia)
 	cp (hl)			;9a97
 	inc hl			;9a98
 	jr z,L_9A9F		;9a99
@@ -3235,7 +3235,7 @@ busca_en_tabla:		; busca 0xF281 en la tabla [codigo, direccion] de HL (gemela de
 	ld a,(hl)			;9aa4
 	inc a			;9aa5
 	jr z,L_9AB2		;9aa6
-	ld a,(0d301h)		;9aa8
+	ld a,(0d301h)		;9aa8   ; lee el codigo del juego (copia)
 	cp (hl)			;9aab
 	ret z			;9aac
 	inc hl			;9aad
@@ -3256,7 +3256,7 @@ menu_ranking_b:		; la pantalla del RANKING con el juego puesto
 	ld hl,03acch		;9ac7
 	call menu_ocho_b		;9aca   ; menu_ocho_b: menu de 8 opciones (p03:A65F)
 	jr z,L_9AE8		;9acd
-	ld hl,0d142h		;9acf
+	ld hl,0d142h		;9acf   ; apunta a el bufer de teclas
 	ld de,0d322h		;9ad2
 	ld bc,00008h		;9ad5
 	ldir		;9ad8
@@ -3278,7 +3278,7 @@ L_9AE8:
 	pop hl			;9afe
 	call menu_ocho_b		;9aff   ; menu_ocho_b: menu de 8 opciones (p03:A65F)
 	jr z,L_9B1D		;9b02
-	ld hl,0d142h		;9b04
+	ld hl,0d142h		;9b04   ; apunta a el bufer de teclas
 	ld de,0d32ah		;9b07
 	ld bc,00008h		;9b0a
 	ldir		;9b0d
@@ -3335,7 +3335,7 @@ hay_ranking:		; Z si el juego no tiene ranking (0xF290, 0xF286) (gemela de p01:6
 	ld a,h			;9b54
 	or l			;9b55
 	ret z			;9b56
-	ld a,(0d301h)		;9b57
+	ld a,(0d301h)		;9b57   ; lee el codigo del juego (copia)
 	ld c,a			;9b5a
 	sub 003h		;9b5b
 	cp 002h		;9b5d
@@ -3586,12 +3586,12 @@ ranking_nombre:		; pide el nombre para el ranking (gemela de p01:6AA0)
 	call 0a53bh		;9d11
 	call 0a74fh		;9d14   ; cursor_apaga_b: quita el cursor
 	xor a			;9d17
-	ld (0d163h),a		;9d18
-	ld (0d165h),a		;9d1b
+	ld (0d163h),a		;9d18   ; guarda cuantas letras lleva el nombre
+	ld (0d165h),a		;9d1b   ; guarda la fila elegida
 	ld hl,03a29h		;9d1e
-	ld (0d16ah),hl		;9d21
+	ld (0d16ah),hl		;9d21   ; guarda la posicion de la ventana en la VRAM y el byte siguiente (16 bits)
 	inc hl			;9d24
-	ld (0d168h),hl		;9d25
+	ld (0d168h),hl		;9d25   ; guarda la posicion del cursor en la VRAM y el byte siguiente (16 bits)
 	ld a,0c0h		;9d28
 	ld (0d164h),a		;9d2a
 	call 0a778h		;9d2d   ; cursor_pinta_b: pinta el cursor (':' o el de MSX2)
@@ -3599,8 +3599,8 @@ L_9D30:
 	call ranking_pinta_fila		;9d30   ; ranking_pinta_fila: pinta una fila del ranking
 	call 00156h		;9d33   ; BIOS KILBUF - Clears keyboard buffer
 L_9D36:
-	ld hl,0d163h		;9d36
-	ld de,0d165h		;9d39
+	ld hl,0d163h		;9d36   ; apunta a cuantas letras lleva el nombre
+	ld de,0d165h		;9d39   ; apunta a la fila elegida
 	call 0009fh		;9d3c   ; BIOS CHGET - One character input (waiting)
 	cp 01eh		;9d3f
 	jr z,L_9D86		;9d41
@@ -3636,16 +3636,16 @@ L_9D6B:
 	call 0a788h		;9d6b   ; cursor_borra_b: borra el cursor
 	add hl,bc			;9d6e
 	push hl			;9d6f
-	ld de,(0d16ah)		;9d70
+	ld de,(0d16ah)		;9d70   ; lee la posicion de la ventana en la VRAM y el byte siguiente (16 bits)
 	and a			;9d74
 	sbc hl,de		;9d75
 	ld a,(0d164h)		;9d77
 	ld d,000h		;9d7a
 	ld e,a			;9d7c
-	rst 20h			;9d7d
+	rst 20h			;9d7d   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	pop hl			;9d7e
 	jr nc,L_9D84		;9d7f
-	ld (0d168h),hl		;9d81
+	ld (0d168h),hl		;9d81   ; guarda la posicion del cursor en la VRAM y el byte siguiente (16 bits)
 L_9D84:
 	jr L_9D30		;9d84
 L_9D86:
@@ -3667,17 +3667,17 @@ L_9D91:
 L_9D9A:
 	jr L_9D6B		;9d9a
 ranking_pinta_fila:		; pinta una fila del ranking
-	ld a,(0d165h)		;9d9c
+	ld a,(0d165h)		;9d9c   ; lee la fila elegida
 	call fila_de_ranking		;9d9f   ; fila_de_ranking: HL = la fila A del ranking (0x9257, 9 bytes) (gemela de p01:6C38)
 	push hl			;9da2
 	pop ix		;9da3
-	ld a,(0d165h)		;9da5
+	ld a,(0d165h)		;9da5   ; lee la fila elegida
 	call puntos_de_ranking		;9da8   ; puntos_de_ranking: HL = los puntos de la fila A (0x9239, 3 bytes) (gemela de p01:6C46)
 	push hl			;9dab
 	pop iy		;9dac
-	ld hl,(0d16ah)		;9dae
+	ld hl,(0d16ah)		;9dae   ; lee la posicion de la ventana en la VRAM y el byte siguiente (16 bits)
 	inc hl			;9db1
-	ld a,(0d165h)		;9db2
+	ld a,(0d165h)		;9db2   ; lee la fila elegida
 	add a,031h		;9db5
 	ld c,a			;9db7
 	ld b,005h		;9db8
@@ -3733,7 +3733,7 @@ L_9DE0:
 	inc hl			;9e12
 	ld de,0da00h		;9e13
 	ld bc,00600h		;9e16
-	ld a,(0d301h)		;9e19
+	ld a,(0d301h)		;9e19   ; lee el codigo del juego (copia)
 	cp 029h		;9e1c
 	jr nz,L_9E23		;9e1e
 	inc de			;9e20

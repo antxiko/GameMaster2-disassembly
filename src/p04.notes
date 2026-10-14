@@ -66,6 +66,7 @@ C 0x80F9 sram_abierto: comprueba que el fichero esta abierto (ix+0x18)
 C 0x8101 el mapper: pone en 0xA000 el banco de A
 C 0x8104 sram_tamano: el tamano del fichero de IX
 C 0x8109 sram_bloques: los bloques del fichero
+C 0x811E DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 C 0x8148 hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x8161 hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x816B el mapper: pone en 0xA000 el banco de A
@@ -93,9 +94,11 @@ C 0x8298 sram_nombre_valido: comprueba el nombre de IX: 5 letras, sin '*' ni '?'
 C 0x82A0 sram_busca: busca el nombre de IX en el directorio
 C 0x82B9 sram_abierto: comprueba que el fichero esta abierto (ix+0x18)
 C 0x82C1 el mapper: pone en 0xA000 el banco de A
+C 0x82D4 DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 C 0x82D8 sram_siguiente_bloque: pasa al bloque siguiente del fichero
 C 0x82DD sram_copia_lee: copia de la SRAM a la RAM, bloque a bloque
 C 0x82E6 el mapper: pone en 0xA000 el banco de A
+C 0x8317 DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 C 0x8322 sram_siguiente_bloque: pasa al bloque siguiente del fichero
 C 0x8332 el mapper: pone en 0xA000 el banco de A
 C 0x8342 el mapper: pone en 0xA000 el banco de A

@@ -124,18 +124,18 @@ L_A07D:
 	ret			;a091
 L_A092:
 	pop hl			;a092
-	ld a,(0e2efh)		;a093
+	ld a,(0e2efh)		;a093   ; lee el canal que se esta tocando
 	cp 008h		;a096
-	ld a,(0e2f2h)		;a098
+	ld a,(0e2f2h)		;a098   ; lee lo que hay que mandar al PSG
 	jp nz,L_A0A8		;a09b
 	set 0,a		;a09e
 	res 1,a		;a0a0
-	ld (0e2f2h),a		;a0a2
+	ld (0e2f2h),a		;a0a2   ; guarda lo que hay que mandar al PSG
 	jp L_A07D		;a0a5
 L_A0A8:
 	set 2,a		;a0a8
 	res 3,a		;a0aa
-	ld (0e2f2h),a		;a0ac
+	ld (0e2f2h),a		;a0ac   ; guarda lo que hay que mandar al PSG
 	jp L_A07D		;a0af
 L_A0B2:
 	pop hl			;a0b2
@@ -143,22 +143,22 @@ L_A0B2:
 	ld a,(hl)			;a0b4
 	and 01fh		;a0b5
 	ld b,a			;a0b7
-	ld a,(0e2efh)		;a0b8
+	ld a,(0e2efh)		;a0b8   ; lee el canal que se esta tocando
 	cp 008h		;a0bb
 	ld a,b			;a0bd
 	jp nz,L_A0CF		;a0be
 	ld (0e2f0h),a		;a0c1
-	ld a,(0e2f2h)		;a0c4
+	ld a,(0e2f2h)		;a0c4   ; lee lo que hay que mandar al PSG
 	set 0,a		;a0c7
 	res 1,a		;a0c9
-	ld (0e2f2h),a		;a0cb
+	ld (0e2f2h),a		;a0cb   ; guarda lo que hay que mandar al PSG
 	ret			;a0ce
 L_A0CF:
 	ld (0e2f1h),a		;a0cf
-	ld a,(0e2f2h)		;a0d2
+	ld a,(0e2f2h)		;a0d2   ; lee lo que hay que mandar al PSG
 	set 2,a		;a0d5
 	res 3,a		;a0d7
-	ld (0e2f2h),a		;a0d9
+	ld (0e2f2h),a		;a0d9   ; guarda lo que hay que mandar al PSG
 	ret			;a0dc
 L_A0DD:
 	pop hl			;a0dd
@@ -166,7 +166,7 @@ L_A0DD:
 	res 3,(ix+00dh)		;a0df
 	ld a,(hl)			;a0e3
 	ld (0e2f3h),a		;a0e4
-	ld de,0e2f2h		;a0e7
+	ld de,0e2f2h		;a0e7   ; apunta a lo que hay que mandar al PSG
 	ld a,(de)			;a0ea
 	set 5,a		;a0eb
 	ld (de),a			;a0ed
@@ -177,7 +177,7 @@ L_A0F2:
 	inc hl			;a0f2
 	ld a,(hl)			;a0f3
 	ld (0e2f5h),a		;a0f4
-	ld de,0e2f2h		;a0f7
+	ld de,0e2f2h		;a0f7   ; apunta a lo que hay que mandar al PSG
 	ld a,(de)			;a0fa
 	set 6,a		;a0fb
 	ld (de),a			;a0fd
@@ -188,7 +188,7 @@ L_A102:
 	inc hl			;a102
 	ld a,(hl)			;a103
 	ld (0e2f4h),a		;a104
-	ld de,0e2f2h		;a107
+	ld de,0e2f2h		;a107   ; apunta a lo que hay que mandar al PSG
 	ld a,(de)			;a10a
 	set 7,a		;a10b
 	ld (de),a			;a10d
@@ -196,7 +196,7 @@ L_A102:
 	ret			;a112
 L_A113:
 	pop hl			;a113
-	ld de,0e2f2h		;a114
+	ld de,0e2f2h		;a114   ; apunta a lo que hay que mandar al PSG
 	ld a,(de)			;a117
 	and 01fh		;a118
 	ld (de),a			;a11a
@@ -429,7 +429,7 @@ L_A28C:
 	res 7,(ix+00eh)		;a28c
 	ret			;a290
 L_A291:
-	ld hl,0e2f6h		;a291
+	ld hl,0e2f6h		;a291   ; apunta a el estado del mezclador
 	res 0,(hl)		;a294
 	ld a,(0e259h)		;a296
 	ld b,a			;a299
@@ -456,7 +456,7 @@ sonido_al_psg:		; manda al PSG los registros de los canales
 	ld c,008h		;a2c1
 	ld hl,0e20ah		;a2c3
 	call tres_registros_psg		;a2c6   ; tres_registros_psg: escribe tres registros del PSG desde HL
-	ld hl,0e2f6h		;a2c9
+	ld hl,0e2f6h		;a2c9   ; apunta a el estado del mezclador
 	bit 2,(hl)		;a2cc
 	jp nz,L_A2E6		;a2ce
 	bit 3,(hl)		;a2d1
@@ -472,7 +472,7 @@ L_A2E6:
 	ld hl,0e2bah		;a2e6
 	call tres_registros_psg		;a2e9   ; tres_registros_psg: escribe tres registros del PSG desde HL
 L_A2EC:
-	ld hl,0e2f6h		;a2ec
+	ld hl,0e2f6h		;a2ec   ; apunta a el estado del mezclador
 	bit 0,(hl)		;a2ef
 	jp nz,L_A307		;a2f1
 	bit 1,(hl)		;a2f4
@@ -511,7 +511,7 @@ tres_registros_psg:		; escribe tres registros del PSG desde HL
 	set 3,(hl)		;a329
 	ret			;a32b
 sonido_ruido:		; el periodo del ruido (R#6) si hay que cambiarlo
-	ld hl,0e2f2h		;a32c
+	ld hl,0e2f2h		;a32c   ; apunta a lo que hay que mandar al PSG
 	bit 0,(hl)		;a32f
 	jp z,L_A342		;a331
 	res 0,(hl)		;a334
@@ -534,7 +534,7 @@ L_A342:
 	call 00093h		;a352   ; BIOS WRTPSG - Writes data to PSG-register
 	ret			;a355
 sonido_envolvente:		; la envolvente (R#11-13) si hay que cambiarla
-	ld hl,0e2f2h		;a356
+	ld hl,0e2f2h		;a356   ; apunta a lo que hay que mandar al PSG
 	bit 7,(hl)		;a359
 	ret z			;a35b
 	res 7,(hl)		;a35c
@@ -563,7 +563,7 @@ sonido_mezclador:		; el mezclador del PSG (R#7) segun los canales
 	ld hl,0a3ceh		;a388
 	call tabla_por_dos_bits		;a38b   ; tabla_por_dos_bits: HL = HL + (A and 3)
 	ld b,(hl)			;a38e
-	ld a,(0e2f6h)		;a38f
+	ld a,(0e2f6h)		;a38f   ; lee el estado del mezclador
 	bit 2,a		;a392
 	ld hl,0e239h		;a394
 	jp z,L_A39D		;a397
@@ -573,7 +573,7 @@ L_A39D:
 	ld hl,0a3d2h		;a39e
 	call tabla_por_dos_bits		;a3a1   ; tabla_por_dos_bits: HL = HL + (A and 3)
 	ld c,(hl)			;a3a4
-	ld a,(0e2f6h)		;a3a5
+	ld a,(0e2f6h)		;a3a5   ; lee el estado del mezclador
 	bit 0,a		;a3a8
 	ld hl,0e265h		;a3aa
 	jp z,L_A3B3		;a3ad

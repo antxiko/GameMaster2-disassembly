@@ -1,0 +1,50 @@
+# Puntos de entrada del banco 2 (se ejecuta en 0x8000).
+#
+# Cada uno lleva la instruccion que lo justifica. Los que ponen "pNN:XXXX"
+# vienen de OTRO banco: el trazador de una sola pagina no puede seguirlos,
+# porque en esa direccion -segun lo que haya en el registro del mapper- puede
+# estar cualquiera de seis bancos. Los que ponen "tabla" salen de una tabla
+# del despachador 0x408D, que va pegada detras de su `call` y esta declarada
+# como datos en el .nocode: el trazador tampoco puede seguirla.
+#
+# Los saltos y llamadas DENTRO del propio banco no se ponen aqui: los
+# encuentra tools/z80trace.py solo, siguiendo el flujo.
+#
+# Este fichero lo regenera `make semillas` (tools/bancos.py escribe).
+0x8000   # p01:74A6 call
+0x8080   # p01:74F7 call
+0x80E4   # p01:74C7 call
+0x8183   # p00:5ED4 call
+0x8300   # p00:4A78 jp
+0x8303   # p00:4A05 jp
+0x8306   # p00:4A19 jp
+!reubica 0x83ba 0x8487 0xda00   # p02:83B5 ldir (hl=83BA de=DA00 bc=00CD), salta p02:83B7
+0x84BD   # p02:84A4 entrada 0 de la tabla de 0x84A7 (despachador en 0x84A4)
+0x84E6   # p02:84DD entrada 1 de la tabla de 0x84E0 (despachador en 0x84DD)
+0x84F5   # p02:84DD entrada 0 de la tabla de 0x84E0 (despachador en 0x84DD)
+0x856D   # p02:84A4 entrada 1 de la tabla de 0x84A7 (despachador en 0x84A4)
+0x8596   # p02:858D entrada 0 de la tabla de 0x8590 (despachador en 0x858D)
+0x861B   # p02:84A4 entrada 2 de la tabla de 0x84A7 (despachador en 0x84A4)
+0x8800   # p02:87F3 entrada 3 de la tabla de 0x87F6 (despachador en 0x87F3)
+0x8813   # p02:87F3 entrada 2 de la tabla de 0x87F6 (despachador en 0x87F3)
+0x8826   # p02:87F3 entrada 1 de la tabla de 0x87F6 (despachador en 0x87F3)
+0x8899   # p02:87F3 entrada 4 de la tabla de 0x87F6 (despachador en 0x87F3)
+0x88C3   # p02:87F3 entrada 0 de la tabla de 0x87F6 (despachador en 0x87F3)
+0x89B4   # p02:89AD entrada 0 de la tabla de 0x89B0 (despachador en 0x89AD)
+0x89BF   # p02:89AD entrada 1 de la tabla de 0x89B0 (despachador en 0x89AD)
+0x8A2B   # p02:8A1D entrada 0 de la tabla de 0x8A20 (despachador en 0x8A1D)
+0x8AA5   # p02:8A1D entrada 1 de la tabla de 0x8A20 (despachador en 0x8A1D)
+0x8C30   # p02:8A1D entrada 2 de la tabla de 0x8A20 (despachador en 0x8A1D)
+0x8D74   # p03:A278 call
+!reubica 0x8d98 0x8de5 0xd814   # p02:8D4D ldir (hl=8D98 de=D814 bc=004D)
+!reubica 0x8de5 0x8f73 0xd170   # p02:8D95 ldir (hl=8DE5 de=D170 bc=018E)
+0x8F73   # a mano, p02:8E12: ld ix,0x8F73 + jp 0xD214
+0x8F88   # a mano, p02:8ED5 y p02:8F24: ld ix,0x8F88 + 0xD214
+0x8FC0   # a mano, p02:8ECE: ld ix,0x8FC0 + call 0xD214
+0x8FE8   # a mano, p02:8E85: ld ix,0x8FE8, y cae en el puente (p02:8E89)
+0x902E   # a mano, p02:8EF4: ld ix,0x902E + call 0xD214
+0x9959   # p02:9949 entrada 0 de la tabla de 0x994C (despachador en 0x9949)
+0x9981   # p02:9949 entrada 1 de la tabla de 0x994C (despachador en 0x9949)
+0x998C   # p02:9949 entrada 2 de la tabla de 0x994C (despachador en 0x9949)
+0x99FA   # a mano, p02:8E30: ld ix,0x99FA + jp 0xD214
+0x9B3C   # p02:9B35 entrada 0 de la tabla de 0x9B38 (despachador en 0x9B35)

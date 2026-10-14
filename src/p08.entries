@@ -1,0 +1,46 @@
+# Puntos de entrada del banco 8 (se ejecuta en 0xa000).
+#
+# Cada uno lleva la instruccion que lo justifica. Los que ponen "pNN:XXXX"
+# vienen de OTRO banco: el trazador de una sola pagina no puede seguirlos,
+# porque en esa direccion -segun lo que haya en el registro del mapper- puede
+# estar cualquiera de seis bancos. Los que ponen "tabla" salen de una tabla
+# del despachador 0x408D, que va pegada detras de su `call` y esta declarada
+# como datos en el .nocode: el trazador tampoco puede seguirla.
+#
+# Los saltos y llamadas DENTRO del propio banco no se ponen aqui: los
+# encuentra tools/z80trace.py solo, siguiendo el flujo.
+#
+# Este fichero lo regenera `make semillas` (tools/bancos.py escribe).
+0xA001   # p07:9FFE sigue de largo (el codigo cruza la frontera de banco)
+0xA029   # p07:9CFE call
+0xA07C   # p08:A03D entrada 0 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA092   # p08:A03D entrada 1 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA0B2   # p08:A03D entrada 4 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA0DD   # p08:A03D entrada 5 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA0F1   # p08:A03D entrada 6 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA101   # p08:A03D entrada 7 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA113   # p08:A03D entrada 8 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA124   # p08:A03D entrada 9 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA12B   # p08:A03D entrada 10 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA132   # p08:A03D entrada 11 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA185   # p08:A03D entrada 12 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA18F   # p08:A03D entrada 13 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA196   # p08:A03D entrada 14 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA1A1   # p08:A03D entrada 15 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA1A7   # p08:A03D entrada 16 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA1B1   # p08:A03D entrada 17 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA1CC   # p08:A03D entrada 18 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA1DB   # p08:A03D entrada 19 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA1E1   # p08:A03D entrada 20 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA1E7   # p08:A03D entrada 21 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA1ED   # p08:A03D entrada 22 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA1F7   # p08:A03D entrada 23 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA202   # p08:A03D entrada 24 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA209   # p08:A03D entrada 25 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA214   # p08:A03D entrada 26 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA21C   # p08:A03D entrada 27 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA237   # p08:A03D entrada 28 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA24E   # p08:A03D entrada 29 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA252   # p08:A03D entrada 30 de la tabla de 0xA03E (jp (hl) en 0xA03D)
+0xA291   # p07:9CDB call
+0xA3BD   # p07:86B2 call

@@ -1,0 +1,26 @@
+# Trozos del cartucho que se copian a RAM con LDIR y se ejecutan ALLI.
+#
+#   pNN  ini  fin  ejecuta_en   # el LDIR que lo copia (origen, destino y
+#                               # longitud salen de su ld hl / ld de / ld bc)
+#
+# Dentro de uno de estos trozos, un salto al rango donde se ejecuta es un salto
+# a su propio byte; tools/bancos.py y tools/z80trace.py lo traducen. Los trozos
+# copiados que son DATOS (tablas, "KONAMI", ...) no van aqui.
+p00 0x4A9A 0x4B21 0xC000   # p00:4A95 ldir (hl=4A9A de=C000 bc=0087), salta p00:4A97 jp 0xC000
+p00 0x4B56 0x4B61 0xC800   # p00:4B43 ldir (hl=4B56 de=C800 bc=000B)
+p00 0x4B61 0x4B64 0xFEDA   # p00:4B4E ldir (hl=4B61 de=FEDA bc=0003): H.STKE = jp 0xC800
+p00 0x578D 0x5813 0xE010   # p00:5788 ldir (hl=578D de=E010 bc=0086), salta p00:578A
+p00 0x5832 0x5937 0xE000   # p00:582D ldir (hl=5832 de=E000 bc=0105), salta p00:582F
+p00 0x5945 0x59CC 0xE000   # p00:5940 ldir (hl=5945 de=E000 bc=0087)
+p00 0x5A01 0x5A0C 0xE800   # p00:59EE ldir (hl=5A01 de=E800 bc=000B)
+p00 0x5A0C 0x5A0F 0xFEDA   # p00:59F9 ldir (hl=5A0C de=FEDA bc=0003): H.STKE = jp 0xE800
+p01 0x6395 0x63DA 0xF130   # p01:6333 ldir (hl=6395 de=F130 bc=0045)
+p01 0x63DA 0x6468 0xF130   # p01:651C ldir (hl=63DA de=F130 bc=008E)
+p01 0x64C6 0x64DC 0xF230   # p01:6392 ldir (hl=64C6 de=F230 bc=0016)
+p01 0x79F3 0x79F6 0xFD9F   # p01:797D ldir (hl=79F3 de=FD9F bc=0003): H.TIMI = jp 0x79F6
+p02 0x83BA 0x8487 0xDA00   # p02:83B5 ldir (hl=83BA de=DA00 bc=00CD), salta p02:83B7
+p02 0x8D98 0x8DE5 0xD814   # p02:8D4D ldir (hl=8D98 de=D814 bc=004D)
+p02 0x8DE5 0x8F73 0xD170   # p02:8D95 ldir (hl=8DE5 de=D170 bc=018E)
+p03 0xA965 0xA968 0xFD9F   # p03:A8EF ldir (hl=A965 de=FD9F bc=0003): H.TIMI = jp 0xA968
+p05 0x8030 0x8033 0xFD9F   # p05:801E ldir (hl=8030 de=FD9F bc=0003): H.TIMI = jp 0x8033
+p09 0x800E 0x8013 0xFD9A   # p09:800A ldir (hl=800E de=FD9A bc=0005): H.KEYI = ld hl,0xE008 / dec (hl) / ret

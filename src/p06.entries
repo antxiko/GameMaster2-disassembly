@@ -1,0 +1,36 @@
+# Puntos de entrada del banco 6 (se ejecuta en 0xa000).
+#
+# Cada uno lleva la instruccion que lo justifica. Los que ponen "pNN:XXXX"
+# vienen de OTRO banco: el trazador de una sola pagina no puede seguirlos,
+# porque en esa direccion -segun lo que haya en el registro del mapper- puede
+# estar cualquiera de seis bancos. Los que ponen "tabla" salen de una tabla
+# del despachador 0x408D, que va pegada detras de su `call` y esta declarada
+# como datos en el .nocode: el trazador tampoco puede seguirla.
+#
+# Los saltos y llamadas DENTRO del propio banco no se ponen aqui: los
+# encuentra tools/z80trace.py solo, siguiendo el flujo.
+#
+# Este fichero lo regenera `make semillas` (tools/bancos.py escribe).
+0xA002   # p05:9FFF sigue de largo (el codigo cruza la frontera de banco)
+0xA006   # p05:9FEC call
+0xA034   # p05:9FFC call
+0xA066   # p05:9FE8 call
+0xA092   # p05:9756 call
+0xA0D3   # p05:9C06 call
+0xA0DA   # p05:9FEF call
+0xA0F6   # p05:9FF6 call
+0xA157   # p05:9FFF call
+0xA23B   # p05:977A call
+0xA270   # p05:975F call
+0xA27E   # p05:8C0C call
+0xA29C   # p06:A289 entrada 0 de la tabla de 0xA28C (despachador en 0xA289)
+0xA2A5   # p06:A289 entrada 2 de la tabla de 0xA28C (despachador en 0xA289)
+0xA2AE   # p06:A289 entrada 4 de la tabla de 0xA28C (despachador en 0xA289)
+0xA2B7   # p06:A289 entrada 1 de la tabla de 0xA28C (despachador en 0xA289)
+0xA2D3   # p06:A289 entrada 3 de la tabla de 0xA28C (despachador en 0xA289)
+0xA2F7   # p06:A289 entrada 5 de la tabla de 0xA28C (despachador en 0xA289)
+0xA314   # p06:A289 entrada 6 de la tabla de 0xA28C (despachador en 0xA289)
+0xA31D   # p06:A289 entrada 7 de la tabla de 0xA28C (despachador en 0xA289)
+0xA336   # p05:8B87 call
+0xA33D   # p05:9E11 call
+0xA3A4   # p05:9B51 call

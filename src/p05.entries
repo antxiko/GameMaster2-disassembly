@@ -1,0 +1,57 @@
+# Puntos de entrada del banco 5 (se ejecuta en 0x8000).
+#
+# Cada uno lleva la instruccion que lo justifica. Los que ponen "pNN:XXXX"
+# vienen de OTRO banco: el trazador de una sola pagina no puede seguirlos,
+# porque en esa direccion -segun lo que haya en el registro del mapper- puede
+# estar cualquiera de seis bancos. Los que ponen "tabla" salen de una tabla
+# del despachador 0x408D, que va pegada detras de su `call` y esta declarada
+# como datos en el .nocode: el trazador tampoco puede seguirla.
+#
+# Los saltos y llamadas DENTRO del propio banco no se ponen aqui: los
+# encuentra tools/z80trace.py solo, siguiendo el flujo.
+#
+# Este fichero lo regenera `make semillas` (tools/bancos.py escribe).
+0x8000   # p00:5E28 call
+!reubica 0x8030 0x8033 0xfd9f   # p05:801E ldir (hl=8030 de=FD9F bc=0003): H.TIMI = jp 0x8033
+0x8078   # p06:A289 call
+0x839C   # p06:A137 call
+0x86B9   # p06:A432 call
+0x8B5D   # tabla p05:8B1B (MSX1), estado 0
+0x8B66   # tabla p05:8B29 (MSX2), estado 0
+0x8B6F   # tabla p05:8B1B (MSX1), estado 1
+0x8B78   # tabla p05:8B1B (MSX1), estado 2
+0x8B84   # tabla p05:8B29 (MSX2), estado 2
+0x8B8D   # tabla p05:8B1B (MSX1), estado 3
+0x8BA5   # tabla p05:8B29 (MSX2), estado 3
+0x8BBD   # tabla p05:8B1B (MSX1), estado 4
+0x8BCF   # tabla p05:8B29 (MSX2), estado 4
+0x8BDB   # tabla p05:8B1B (MSX1), estado 5
+0x8C02   # tabla p05:8B29 (MSX2), estado 5
+0x8C2B   # tabla p05:8B1B (MSX1), estado 6
+0x95CD   # p05:95BA entrada 2 de la tabla de 0x95BD (despachador en 0x95BA)
+0x95DC   # p05:95BA entrada 5 de la tabla de 0x95BD (despachador en 0x95BA)
+0x95EB   # p05:95BA entrada 0 de la tabla de 0x95BD (despachador en 0x95BA)
+0x95F9   # p05:95BA entrada 1 de la tabla de 0x95BD (despachador en 0x95BA)
+0x95FF   # p05:95BA entrada 4 de la tabla de 0x95BD (despachador en 0x95BA)
+0x9605   # p05:95BA entrada 3 de la tabla de 0x95BD (despachador en 0x95BA)
+0x960B   # p05:95BA entrada 7 de la tabla de 0x95BD (despachador en 0x95BA)
+0x9717   # p05:9704 entrada 0 de la tabla de 0x9707 (despachador en 0x9704)
+0x9729   # p05:9704 entrada 2 de la tabla de 0x9707 (despachador en 0x9704)
+0x973B   # p05:9704 entrada 5 de la tabla de 0x9707 (despachador en 0x9704)
+0x974D   # p05:9704 entrada 1 de la tabla de 0x9707 (despachador en 0x9704)
+0x9753   # p05:9704 entrada 4 de la tabla de 0x9707 (despachador en 0x9704)
+0x975F   # p05:9704 entrada 3 de la tabla de 0x9707 (despachador en 0x9704)
+0x9765   # p05:9704 entrada 7 de la tabla de 0x9707 (despachador en 0x9704)
+0x9793   # p05:9782 entrada 6 de la tabla de 0x9785 (despachador en 0x9782)
+0x980C   # p05:9782 entrada 0 de la tabla de 0x9785 (despachador en 0x9782)
+0x981C   # p05:9782 entrada 3 de la tabla de 0x9785 (despachador en 0x9782)
+0x982C   # p05:9782 entrada 1 de la tabla de 0x9785 (despachador en 0x9782)
+0x983B   # p05:9782 entrada 4 de la tabla de 0x9785 (despachador en 0x9782)
+0x984A   # p05:9782 entrada 2 de la tabla de 0x9785 (despachador en 0x9782)
+0x9859   # p05:9782 entrada 5 de la tabla de 0x9785 (despachador en 0x9782)
+0x99E5   # p05:998D entrada 4 de la tabla de 0x9990 (despachador en 0x998D)
+0x99EA   # p05:998D entrada 1 de la tabla de 0x9990 (despachador en 0x998D)
+0x99F8   # p05:998D entrada 2 de la tabla de 0x9990 (despachador en 0x998D)
+0x9A0A   # p05:998D entrada 3 de la tabla de 0x9990 (despachador en 0x998D)
+0x9A1B   # p05:998D entrada 0 de la tabla de 0x9990 (despachador en 0x998D)
+0x9C8A   # p06:A002 call

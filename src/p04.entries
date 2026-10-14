@@ -1,0 +1,27 @@
+# Puntos de entrada del banco 4 (se ejecuta en 0x8000).
+#
+# Cada uno lleva la instruccion que lo justifica. Los que ponen "pNN:XXXX"
+# vienen de OTRO banco: el trazador de una sola pagina no puede seguirlos,
+# porque en esa direccion -segun lo que haya en el registro del mapper- puede
+# estar cualquiera de seis bancos. Los que ponen "tabla" salen de una tabla
+# del despachador 0x408D, que va pegada detras de su `call` y esta declarada
+# como datos en el .nocode: el trazador tampoco puede seguirla.
+#
+# Los saltos y llamadas DENTRO del propio banco no se ponen aqui: los
+# encuentra tools/z80trace.py solo, siguiendo el flujo.
+#
+# Este fichero lo regenera `make semillas` (tools/bancos.py escribe).
+0x8000   # p00:403B call
+0x807F   # p04:8030 entrada 0 de la tabla de 0x8033 (despachador en 0x8030)
+0x80F9   # p04:8030 entrada 1 de la tabla de 0x8033 (despachador en 0x8030)
+0x8169   # p04:8030 entrada 2 de la tabla de 0x8033 (despachador en 0x8030)
+0x81AD   # p04:8030 entrada 3 de la tabla de 0x8033 (despachador en 0x8030)
+0x81BC   # p04:8030 entrada 4 de la tabla de 0x8033 (despachador en 0x8030)
+0x820F   # p04:8030 entrada 5 de la tabla de 0x8033 (despachador en 0x8030)
+0x823E   # p04:8030 entrada 6 de la tabla de 0x8033 (despachador en 0x8030)
+0x8272   # p04:8030 entrada 7 de la tabla de 0x8033 (despachador en 0x8030)
+0x82B9   # p04:8030 entrada 8 de la tabla de 0x8033 (despachador en 0x8030)
+0x8347   # p04:8030 entrada 9 de la tabla de 0x8033 (despachador en 0x8030)
+0x8472   # p04:8030 entrada 11 de la tabla de 0x8033 (despachador en 0x8030)
+0x8490   # p04:8030 entrada 10 de la tabla de 0x8033 (despachador en 0x8030)
+0x84B1   # p04:8030 entrada 12 de la tabla de 0x8033 (despachador en 0x8030)

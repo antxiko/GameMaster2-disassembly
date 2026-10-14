@@ -1,0 +1,88 @@
+# Puntos de entrada del banco 1 (se ejecuta en 0x6000).
+#
+# Cada uno lleva la instruccion que lo justifica. Los que ponen "pNN:XXXX"
+# vienen de OTRO banco: el trazador de una sola pagina no puede seguirlos,
+# porque en esa direccion -segun lo que haya en el registro del mapper- puede
+# estar cualquiera de seis bancos. Los que ponen "tabla" salen de una tabla
+# del despachador 0x408D, que va pegada detras de su `call` y esta declarada
+# como datos en el .nocode: el trazador tampoco puede seguirla.
+#
+# Los saltos y llamadas DENTRO del propio banco no se ponen aqui: los
+# encuentra tools/z80trace.py solo, siguiendo el flujo.
+#
+# Este fichero lo regenera `make semillas` (tools/bancos.py escribe).
+0x606A   # p01:605C entrada 0 de la tabla de 0x605F (despachador en 0x605C)
+0x60E4   # p01:605C entrada 1 de la tabla de 0x605F (despachador en 0x605C)
+0x623B   # p00:5F28 call
+0x626F   # p01:605C entrada 2 de la tabla de 0x605F (despachador en 0x605C)
+0x62D3   # p00:5DF4 call
+0x632A   # p00:563F call
+0x6389   # p00:5645 call
+!reubica 0x6395 0x63da 0xf130   # p01:6333 ldir (hl=6395 de=F130 bc=0045)
+!reubica 0x63da 0x6468 0xf130   # p01:651C ldir (hl=63DA de=F130 bc=008E)
+!reubica 0x64c6 0x64dc 0xf230   # p01:6392 ldir (hl=64C6 de=F230 bc=0016)
+0x64DC   # a mano, p01:64C7: ld ix,0x64DC + call CALSLT
+0x651F   # a mano, p01:640E: ld ix,0x651F + jp CALSLT
+0x656C   # p00:4C31 call
+0x665E   # p00:5E07 jp cc
+0x6669   # p00:5664 jp
+0x66B0   # p01:669B entrada 0 de la tabla de 0x669E (despachador en 0x669B)
+0x66D5   # p00:5C1E jp
+0x66E6   # p01:669B entrada 1 de la tabla de 0x669E (despachador en 0x669B)
+0x66F1   # p01:669B entrada 2 de la tabla de 0x669E (despachador en 0x669B)
+0x6756   # p09:8124 call
+0x6762   # p00:5DF1 call
+0x6789   # a mano, p01:642C: ld ix,0x6789 + jp CALSLT
+0x68D2   # p01:68CB entrada 0 de la tabla de 0x68CE (despachador en 0x68CB)
+0x6D17   # tabla 0x6CA6 (p01:67F9 ld hl,0x6CA6), juegos 25
+0x6D27   # tabla 0x6CA6 (p01:67F9 ld hl,0x6CA6), juegos 00,02,03,04,05,06,12,13,14,16,21,27
+0x6D2F   # tabla 0x6CA6 (p01:67F9 ld hl,0x6CA6), juegos 29,37
+0x6D34   # tabla 0x6CA6 (p01:67F9 ld hl,0x6CA6), juegos 28
+0x6DD8   # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 00,16
+0x6DFD   # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 01
+0x6E38   # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 10,11
+0x6E81   # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 12
+0x6E97   # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 13
+0x6EE9   # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 14
+0x6EEC   # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 15
+0x6EF3   # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 17
+0x6EFF   # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 18
+0x6F37   # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 21
+0x6F48   # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 25
+0x6F78   # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 27
+0x6FC9   # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 28
+0x6FE4   # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 29
+0x6FF7   # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 30
+0x7016   # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 32
+0x701F   # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 33
+0x7028   # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 36
+0x704E   # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 37
+0x709D   # p00:5648 call
+0x7251   # p00:5A27 call
+0x7256   # p00:442A call
+0x7275   # p00:5EE7 jp
+0x72AE   # p09:8702 call
+0x72BC   # p00:5EC9 jp cc
+0x72FC   # p09:8251 jp
+0x730D   # p09:8246 call
+0x7323   # p09:81B7 call
+0x737B   # p00:5A2F call
+0x738B   # p00:51AD call
+0x738F   # p00:5DFA call
+0x748F   # p00:5D56 call
+0x7499   # p00:5199 call
+0x749E   # p00:5A12 call
+0x74BA   # p00:51BA call
+0x74BF   # p00:5C09 call
+0x7646   # p00:44B4 call
+0x7676   # p00:5E02 call
+0x7690   # p00:5A20 call
+0x7707   # p00:4E4F call
+0x77C3   # p02:806C jp
+0x7847   # p02:812F jp
+0x7973   # p00:5E89 call
+0x79D7   # p01:79CC entrada 3 de la tabla de 0x79CF (despachador en 0x79CC)
+0x79E1   # p01:79CC entrada 0 de la tabla de 0x79CF (despachador en 0x79CC)
+0x79E7   # p01:79CC entrada 1 de la tabla de 0x79CF (despachador en 0x79CC)
+0x79ED   # p01:79CC entrada 2 de la tabla de 0x79CF (despachador en 0x79CC)
+!reubica 0x79f3 0x79f6 0xfd9f   # p01:797D ldir (hl=79F3 de=FD9F bc=0003): H.TIMI = jp 0x79F6

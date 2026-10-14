@@ -1,0 +1,63 @@
+# Semillas a mano: 'pNN 0xADDR b6000 b8000 bA000  # por que'
+#
+# Llamadas por CALSLT (0x001C): la direccion va en IX y la ranura en IY, y el
+# trazador no sigue IX. Cada `ld ix,nnnn` justo antes del CALSLT es una entrada.
+p00 0x4020 1 2 3    # a mano, p00:41A8, p00:42A1, p00:4375, p02:893C: ld ix,0x4020 + call CALSLT
+p00 0x409D 1 2 3    # a mano, p03:A5BE: ld ix,0x409D + call CALSLT
+p01 0x651F 1 2 3    # a mano, p01:640E: ld ix,0x651F + jp CALSLT
+p01 0x6789 1 2 3    # a mano, p01:642C: ld ix,0x6789 + jp CALSLT
+p01 0x64DC 1 2 3    # a mano, p01:64C7: ld ix,0x64DC + call CALSLT
+# El puente de RAM 0xD214 (p02:8E89, copiado a 0xD170 por p02:8D95): pone el
+# cartucho en las paginas 1 y 2 (ENASLT), los bancos 2-3 (p02:8E9C-8EA2) y
+# salta a IX (p02:8EB7 jp (ix)). Cada `ld ix,nnnn` + `jp 0xD214` es una entrada.
+p02 0x8F73 1 2 3    # a mano, p02:8E12: ld ix,0x8F73 + jp 0xD214
+p02 0x99FA 1 2 3    # a mano, p02:8E30: ld ix,0x99FA + jp 0xD214
+p02 0x8FE8 1 2 3    # a mano, p02:8E85: ld ix,0x8FE8, y cae en el puente (p02:8E89)
+p02 0x8FC0 1 2 3    # a mano, p02:8ECE: ld ix,0x8FC0 + call 0xD214
+p02 0x8F88 1 2 3    # a mano, p02:8ED5 y p02:8F24: ld ix,0x8F88 + 0xD214
+p02 0x902E 1 2 3    # a mano, p02:8EF4: ld ix,0x902E + call 0xD214
+
+# Las dos tablas de rutinas por juego de p01 (3 bytes: el codigo de juego de
+# 0xF281 y la direccion), terminadas en 0xFF. Las recorre p01:6827 y salta con
+# `jp (hl)` (p01:6839): el trazador no sigue ese salto.
+p01 0x6D27 1 2 3    # tabla 0x6CA6 (p01:67F9 ld hl,0x6CA6), juegos 00,02,03,04,05,06,12,13,14,16,21,27
+p01 0x6D17 1 2 3    # tabla 0x6CA6 (p01:67F9 ld hl,0x6CA6), juegos 25
+p01 0x6D34 1 2 3    # tabla 0x6CA6 (p01:67F9 ld hl,0x6CA6), juegos 28
+p01 0x6D2F 1 2 3    # tabla 0x6CA6 (p01:67F9 ld hl,0x6CA6), juegos 29,37
+p01 0x6DD8 1 2 3    # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 00,16
+p01 0x6DFD 1 2 3    # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 01
+p01 0x6E38 1 2 3    # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 10,11
+p01 0x6E81 1 2 3    # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 12
+p01 0x6E97 1 2 3    # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 13
+p01 0x6EE9 1 2 3    # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 14
+p01 0x6EEC 1 2 3    # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 15
+p01 0x6EF3 1 2 3    # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 17
+p01 0x6EFF 1 2 3    # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 18
+p01 0x6F37 1 2 3    # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 21
+p01 0x6F48 1 2 3    # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 25
+p01 0x6F78 1 2 3    # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 27
+p01 0x6FC9 1 2 3    # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 28
+p01 0x6FE4 1 2 3    # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 29
+p01 0x6FF7 1 2 3    # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 30
+p01 0x7016 1 2 3    # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 32
+p01 0x701F 1 2 3    # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 33
+p01 0x7028 1 2 3    # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 36
+p01 0x704E 1 2 3    # tabla 0x6CD7 (p01:680A ld hl,0x6CD7), juegos 37
+
+# p05: el bucle de p05:8B14 pide a p05:8B40 la rutina del estado (0xE002) y la
+# salta con `jp (hl)` (p05:8B1A). Dos tablas de 7: p05:8B1B si 0xF0F5 = 0
+# (MSX1, lo que lee p05:8020 de 0x002D) y p05:8B29 si no (MSX2).
+p05 0x8B5D 1 5 6    # tabla p05:8B1B (MSX1), estado 0
+p05 0x8B6F 1 5 6    # tabla p05:8B1B (MSX1), estado 1
+p05 0x8B78 1 5 6    # tabla p05:8B1B (MSX1), estado 2
+p05 0x8B8D 1 5 6    # tabla p05:8B1B (MSX1), estado 3
+p05 0x8BBD 1 5 6    # tabla p05:8B1B (MSX1), estado 4
+p05 0x8BDB 1 5 6    # tabla p05:8B1B (MSX1), estado 5
+p05 0x8C2B 1 5 6    # tabla p05:8B1B (MSX1), estado 6
+p05 0x8B66 1 5 6    # tabla p05:8B29 (MSX2), estado 0
+p05 0x8B6F 1 5 6    # tabla p05:8B29 (MSX2), estado 1
+p05 0x8B84 1 5 6    # tabla p05:8B29 (MSX2), estado 2
+p05 0x8BA5 1 5 6    # tabla p05:8B29 (MSX2), estado 3
+p05 0x8BCF 1 5 6    # tabla p05:8B29 (MSX2), estado 4
+p05 0x8C02 1 5 6    # tabla p05:8B29 (MSX2), estado 5
+p05 0x8C2B 1 5 6    # tabla p05:8B29 (MSX2), estado 6

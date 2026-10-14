@@ -1,0 +1,40 @@
+# Puntos de entrada del banco 7 (se ejecuta en 0x8000).
+#
+# Cada uno lleva la instruccion que lo justifica. Los que ponen "pNN:XXXX"
+# vienen de OTRO banco: el trazador de una sola pagina no puede seguirlos,
+# porque en esa direccion -segun lo que haya en el registro del mapper- puede
+# estar cualquiera de seis bancos. Los que ponen "tabla" salen de una tabla
+# del despachador 0x408D, que va pegada detras de su `call` y esta declarada
+# como datos en el .nocode: el trazador tampoco puede seguirla.
+#
+# Los saltos y llamadas DENTRO del propio banco no se ponen aqui: los
+# encuentra tools/z80trace.py solo, siguiendo el flujo.
+#
+# Este fichero lo regenera `make semillas` (tools/bancos.py escribe).
+0x8000   # p00:5E5B call
+0x8004   # p07:8042 gancho H.KEYI
+0x80A4   # p07:8091 entrada 0 de la tabla de 0x8094 (despachador en 0x8091)
+0x80F1   # p07:8091 entrada 1 de la tabla de 0x8094 (despachador en 0x8091)
+0x8133   # p07:8091 entrada 2 de la tabla de 0x8094 (despachador en 0x8091)
+0x8141   # p07:8136 entrada 0 de la tabla de 0x8139 (despachador en 0x8136)
+0x819A   # p07:8136 entrada 1 de la tabla de 0x8139 (despachador en 0x8136)
+0x81A2   # p07:8136 entrada 2 de la tabla de 0x8139 (despachador en 0x8136)
+0x81B2   # p07:8136 entrada 3 de la tabla de 0x8139 (despachador en 0x8136)
+0x81C6   # p07:8091 entrada 3 de la tabla de 0x8094 (despachador en 0x8091)
+0x81E4   # p07:8091 entrada 4 de la tabla de 0x8094 (despachador en 0x8091)
+0x8239   # p07:8091 entrada 5 de la tabla de 0x8094 (despachador en 0x8091)
+0x8339   # p07:8091 entrada 6 de la tabla de 0x8094 (despachador en 0x8091)
+0x8367   # p07:8091 entrada 7 de la tabla de 0x8094 (despachador en 0x8091)
+0x8AF4   # p07:8AEB entrada 0 de la tabla de 0x8AEE (despachador en 0x8AEB)
+0x8B0E   # p07:8AEB entrada 1 de la tabla de 0x8AEE (despachador en 0x8AEB)
+0x8B2B   # p07:8B62 entrada 2 de la tabla de 0x8B65 (despachador en 0x8B62)
+0x8B6B   # p07:8B62 entrada 0 de la tabla de 0x8B65 (despachador en 0x8B62)
+0x8B85   # p07:8B62 entrada 1 de la tabla de 0x8B65 (despachador en 0x8B62)
+0x8E6A   # p07:8E47 entrada 0 de la tabla de 0x8E4A (despachador en 0x8E47)
+0x8E7D   # p07:8E47 entrada 1 de la tabla de 0x8E4A (despachador en 0x8E47)
+0x8EAC   # p07:8E47 entrada 4 de la tabla de 0x8E4A (despachador en 0x8E47)
+0x8EBF   # p07:8E47 entrada 5 de la tabla de 0x8E4A (despachador en 0x8E47)
+0x8EEE   # p07:8E47 entrada 8 de la tabla de 0x8E4A (despachador en 0x8E47)
+0x8F01   # p07:8E47 entrada 9 de la tabla de 0x8E4A (despachador en 0x8E47)
+0x8F30   # p07:8E47 entrada 12 de la tabla de 0x8E4A (despachador en 0x8E47)
+0x8F43   # p07:8E47 entrada 13 de la tabla de 0x8E4A (despachador en 0x8E47)

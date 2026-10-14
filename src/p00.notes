@@ -8,6 +8,11 @@ C 0x51B7 el mensaje del error
 C 0x51BA espera la tecla
 C 0x51BD vuelve a la pila de antes del disco
 C 0x51C1 C: error
+C 0x51D2 el error C...
+C 0x51DA HL = el mensaje
+C 0x51DF se pinta en DE
+C 0x51E3 una fila mas abajo (0x40)...
+C 0x51EE borra el teclado
 # --- fin de los comentarios copiados ---
 
 # --- A MANO: comentarios escritos leyendo el codigo ---
@@ -338,17 +343,17 @@ C 0x589A busca el byte bajo de 0xFD9B...
 C 0x589B ...en el INIT copiado del juego
 C 0x589D no esta: no es un juego de Konami
 C 0x589F se acabaron los bytes
-C 0x58A2 ¿le sigue 0xFD?
+C 0x58A2 le sigue 0xFD?
 C 0x58A7 la segunda cabecera del juego (0x4010):
 C 0x58AA 'AB'...
 C 0x58B0 ...'CD'...
 C 0x58B6 ...o 'EF': trae su numero de RC
 C 0x58BC si no, el RC de 0x4011 y 0x4013...
-C 0x58C3 ...¿coincide?
+C 0x58C3 ...coincide?
 C 0x58C6 si no hay cabecera: suma los 256 bytes de 0x5000
 C 0x58E5 recorre la tabla de juegos (p00:44BE): la suma...
 C 0x58EB ...0 acaba la tabla
-C 0x58EF ¿es la del juego?
+C 0x58EF es la del juego?
 C 0x58F0 si: la ficha
 C 0x58F2 la entrada siguiente, de 4 bytes
 C 0x5910 la direccion de la ficha del juego
@@ -591,17 +596,26 @@ C 0x4035 el mapper: pone en 0xA000 el banco de A
 C 0x4041 el mapper: pone en 0x8000 el banco de A
 C 0x4045 el mapper: pone en 0xA000 el banco de A
 C 0x404F bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
+C 0x4052 titulo_empieza_b: mira MSX1/MSX2 y el juego de caracteres, engancha la cuenta y pinta
 C 0x4055 bancos_2_3: pone los bancos 2 y 3 en 0x8000 y 0xA000
 C 0x4058 bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
+C 0x405B titulo_empieza: engancha la cuenta, mira MSX1/MSX2 y el juego de caracteres, y pinta
 C 0x405E bancos_2_3: pone los bancos 2 y 3 en 0x8000 y 0xA000
 C 0x4061 bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
+C 0x4064 titulo_si_msx1: en MSX1, la presentacion de MSX1
 C 0x4069 bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
+C 0x406C titulo_espera: anima la presentacion hasta que se pulsa una tecla
 C 0x4071 bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
+C 0x4074 nada_9133: `ret`
 C 0x4079 bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
+C 0x407C nada_9134: `ret`
 C 0x4081 bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
+C 0x4084 titulo_dibuja: dibuja la presentacion (p09:9DE3 y p10:A1E3)
 C 0x4089 bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
+C 0x408C titulo_menu_bucle: el bucle del menu de la presentacion: espera, flechas y espacio
 C 0x4090 bancos_2_3: pone los bancos 2 y 3 en 0x8000 y 0xA000
 C 0x4095 bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
+C 0x4098 titulo_graficos: los patrones, los colores y la fuente de la presentacion
 C 0x409D bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
 C 0x40AE bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
 C 0x40B7 lee hay menu en pantalla
@@ -879,7 +893,6 @@ C 0x51A2 pinta_juego: pinta 'GAME' y el numero de juego (0xF281) en hexadecimal
 C 0x51A8 lee la esquina de la ventana pequena y el byte siguiente (16 bits)
 C 0x51AD pinta_texto_en: pinta el texto de HL en la VRAM DE
 C 0x51D7 hl_mas_a: HL = HL + A
-C 0x51DF pinta_texto_en: pinta el texto de HL en la VRAM DE
 C 0x51EB pinta_texto_en: pinta el texto de HL en la VRAM DE
 C 0x5273 lee hay disco
 C 0x5394 guarda cuantas letras lleva el nombre
@@ -1119,6 +1132,7 @@ C 0x5E0A despacha: salta a la palabra A de la tabla pegada detras del `call`
 C 0x5E17 lee el slot del Game Master
 C 0x5E21 el mapper: pone en 0x8000 el banco de A
 C 0x5E25 el mapper: pone en 0xA000 el banco de A
+C 0x5E28 bio_arranca: el biorritmo: guarda la pila, borra 0xE000, engancha H.TIMI y sigue en el bucle de p05:8B14
 C 0x5E2D guarda el gancho H.TIMI
 C 0x5E32 el mapper: pone en 0x8000 el banco de A
 C 0x5E36 el mapper: pone en 0xA000 el banco de A
@@ -1128,14 +1142,17 @@ C 0x5E44 p09_8191_desde_menu: 1-9-10 con el cartucho en la pagina 2, p09:8191 y 
 C 0x5E4A lee el slot del Game Master
 C 0x5E54 el mapper: pone en 0x8000 el banco de A
 C 0x5E58 el mapper: pone en 0xA000 el banco de A
+C 0x5E5B th_arranca: Tennis and Hockey: engancha H.KEYI (p07:8004) y prepara la pantalla
 C 0x5E6B el mapper: pone en 0x8000 el banco de A
 C 0x5E6F el mapper: pone en 0xA000 el banco de A
 C 0x5E72 borra_nombres: borra la tabla de nombres y esconde los sprites (0xD0 en 0x3B00)
 C 0x5E75 lee el slot de la RAM de la pagina 2
 C 0x5E7D bancos_9_10: el cartucho en la pagina 2 y los bancos 9-10
+C 0x5E80 titulo_graficos: los patrones, los colores y la fuente de la presentacion
 C 0x5E83 bancos_2_3_y_ram: los bancos 2-3 y devuelve la RAM (0xF2A0) a la pagina 2
 C 0x5E89 menu_principal: el menu del Game Master: engancha H.TIMI y pinta
 C 0x5E8C bancos_9_10: el cartucho en la pagina 2 y los bancos 9-10
+C 0x5E8F titulo_graficos: los patrones, los colores y la fuente de la presentacion
 C 0x5E92 bancos_2_3_y_ram: los bancos 2-3 y devuelve la RAM (0xF2A0) a la pagina 2
 C 0x5E98 apunta a las opciones del MODIFY
 C 0x5EA2 apunta a el codigo del juego
@@ -1143,6 +1160,7 @@ C 0x5EAC pregunta_vuelve: pregunta y vuelve al menu
 C 0x5EAF borra_nombres: borra la tabla de nombres y esconde los sprites (0xD0 en 0x3B00)
 C 0x5EB2 p09_8191_desde_menu: 1-9-10 con el cartucho en la pagina 2, p09:8191 y vuelta
 C 0x5EB8 bancos_9_10: el cartucho en la pagina 2 y los bancos 9-10
+C 0x5EBB titulo_graficos: los patrones, los colores y la fuente de la presentacion
 C 0x5EBE bancos_2_3_y_ram: los bancos 2-3 y devuelve la RAM (0xF2A0) a la pagina 2
 C 0x5EC2 borra_vram: borra la VRAM: 16 KB en MSX1, 64 KB en MSX2 (BIGFIL)
 C 0x5EC5 la version del MSX (0 = MSX1)

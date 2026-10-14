@@ -24,7 +24,11 @@ def main(argv):
     for ln in open(argv[1], encoding="utf-8"):
         m = re.match(r"^p(\d\d)\s+(0x[0-9A-Fa-f]{4})\s+(.+)$", ln.rstrip("\n"))
         if m:
-            nuevas[int(m.group(1))][int(m.group(2), 16)] = m.group(3).strip()
+            # los listados de la serie van en ASCII: fuera los signos de
+            # apertura y cualquier otra cosa de mas de 7 bits
+            txt = m.group(3).replace("¿", "").replace("¡", "")
+            nuevas[int(m.group(1))][int(m.group(2), 16)] = "".join(
+                c for c in txt if ord(c) < 128).strip()
     total = 0
     for b, cs in sorted(nuevas.items()):
         ruta = os.path.join(RAIZ, "src", "p%02d.notes" % b)

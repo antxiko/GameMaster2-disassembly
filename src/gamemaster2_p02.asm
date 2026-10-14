@@ -77,7 +77,7 @@ L_806F:
 	ld a,(0f103h)		;8078   ; lee el slot del Game Master
 	ld h,040h		;807b
 	call 00024h		;807d   ; BIOS ENASLT - Switches to specified slot and page definitively
-L_8080:
+rellena_vram_128k:		; pone a 0 BC bytes de la VRAM HL (128 KB)
 	call vram_pagina		;8080   ; vram_pagina: H y el puerto de datos del VDP para la pagina de VRAM que se ve (0xF3E1)
 	call 00171h		;8083   ; BIOS NSTWRT - Same function as SETWRT (with 16-bit VRAM-address)
 L_8086:
@@ -144,7 +144,7 @@ vram_alta_lee:		; H xor 0x80 y NSETRD
 	xor 080h		;80de
 	ld h,a			;80e0
 	jp 0016eh		;80e1   ; BIOS NSETRD - Same function as SETRD (with 16-bit VRAM-address)
-L_80E4:
+devuelve_pantalla:		; devuelve la pantalla del juego guardada (segun el modo de 0xF2A1)
 	ld hl,0f11ah		;80e4   ; 0xF11A: hay pantalla guardada
 	ld a,(hl)			;80e7
 	or a			;80e8
@@ -446,7 +446,7 @@ L_8415:
 	cpir		;8417   ; ...en el INIT copiado del juego
 	jr nz,L_846E		;8419   ; no esta: no es un juego de Konami
 	jp po,0dab4h		;841b   ; se acabaron los bytes
-	ld a,0fdh		;841e   ; ¿le sigue 0xFD?
+	ld a,0fdh		;841e   ; le sigue 0xFD?
 	cp (hl)			;8420
 	jr nz,L_8415		;8421
 	ld hl,(04010h)		;8423   ; la segunda cabecera del juego (0x4010):
@@ -483,7 +483,7 @@ L_8457:
 	ld a,l			;845d   ; ...0 acaba la tabla
 	or h			;845e
 	jr z,L_846E		;845f
-	rst 20h			;8461   ; ¿es la del juego?
+	rst 20h			;8461   ; es la del juego?
 	jr z,L_8471		;8462   ; si: la ficha
 	inc ix		;8464   ; la entrada siguiente, de 4 bytes
 	inc ix		;8466
@@ -629,7 +629,7 @@ texto_855c:		; pinta el texto de p02:855C
 	ld hl,0855ch		;8542
 L_8545:
 	ld de,(0d16eh)		;8545   ; lee la esquina de la ventana pequena y el byte siguiente (16 bits)
-	jp 0a520h		;8549
+	jp 0a520h		;8549   ; pinta_texto_b_en: pinta el texto de HL en la VRAM DE
 
 ; ----------------------------------------------------------------------
 ; DATOS resto_854C: lo apuntan con el banco puesto p02:853D (0x854C), p02:8542
@@ -778,7 +778,7 @@ pinta_numero_de_juego_b:		; pinta el numero de juego (0xD301)
 	ret z			;8648
 	ld hl,08697h		;8649
 	push de			;864c
-	call 0a520h		;864d
+	call 0a520h		;864d   ; pinta_texto_b_en: pinta el texto de HL en la VRAM DE
 	ld a,(0d301h)		;8650   ; lee el codigo del juego (copia)
 	ld hl,0da00h		;8653
 	call byte_a_hex		;8656   ; byte_a_hex: escribe A en hexadecimal (dos letras) en HL
@@ -880,7 +880,7 @@ L_874A:
 	inc hl			;8755
 	ld h,(hl)			;8756
 	ld l,a			;8757
-	jp 0a520h		;8758
+	jp 0a520h		;8758   ; pinta_texto_b_en: pinta el texto de HL en la VRAM DE
 
 ; ----------------------------------------------------------------------
 ; DATOS resto_875B: lo apuntan con el banco puesto p02:8744 (0x875B); el
@@ -900,7 +900,7 @@ DATA_resto_875B:
 texto_search_b:		; pinta 'SEARCH FILE'
 	ld de,(0d16eh)		;8780   ; lee la esquina de la ventana pequena y el byte siguiente (16 bits)
 	ld hl,0878ah		;8784
-	jp 0a520h		;8787
+	jp 0a520h		;8787   ; pinta_texto_b_en: pinta el texto de HL en la VRAM DE
 
 ; ----------------------------------------------------------------------
 ; DATOS resto_878A: lo apuntan con el banco puesto p02:8784 (0x878A); el
@@ -1271,24 +1271,24 @@ L_8ABB:
 	call busca_en_tabla		;8abe   ; busca_en_tabla: busca 0xF281 en la tabla [codigo, direccion] de HL (gemela de p01:683A)
 	jp nz,L_89FB		;8ac1
 L_8AC4:
-	call borra_sprites		;8ac4   ; borra_sprites: borra la tabla de sprites (0x3880, 0x200 bytes) (gemela de p01:62D3)
-	ld hl,08af8h		;8ac7
+	call borra_sprites		;8ac4   ; MODIFY PLAYER NUMBER: borra los sprites
+	ld hl,08af8h		;8ac7   ; el texto de p02:8AF8
 	call 0a524h		;8aca   ; pinta_texto_b: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
-	ld hl,03975h		;8acd
-	call menu_dos_b		;8ad0   ; menu_dos_b: menu de 2 opciones (p03:A65F)
-	jp z,L_8C27		;8ad3
-	ld hl,0d318h		;8ad6
+	ld hl,03975h		;8acd   ; en 0x3975...
+	call menu_dos_b		;8ad0   ; ...un numero de 2 cifras
+	jp z,L_8C27		;8ad3   ; sin numero, sale
+	ld hl,0d318h		;8ad6   ; la decena a 0xD318
 	call teclado_a_nibble_c		;8ad9   ; teclado_a_nibble_c: pasa la tecla del bufer (0xD142) a un nibble
 	jp z,L_8C27		;8adc
-	ld hl,0d319h		;8adf
+	ld hl,0d319h		;8adf   ; el numero entero a 0xD319
 	call teclado_a_byte		;8ae2   ; teclado_a_byte: pasa las teclas del bufer (0xD142) a un byte
-	ld hl,0d317h		;8ae5   ; apunta a las opciones del MODIFY (copia)
-	set 0,(hl)		;8ae8
-	ld de,(0d314h)		;8aea   ; lee la rutina propia del juego (copia) y el byte siguiente (16 bits)
+	ld hl,0d317h		;8ae5   ; las opciones del MODIFY...
+	set 0,(hl)		;8ae8   ; ...bit 0: hay numero de jugadores
+	ld de,(0d314h)		;8aea   ; si el juego tiene rutina propia...
 	ld a,d			;8aee
 	or e			;8aef
 	jp z,L_8C27		;8af0
-	set 2,(hl)		;8af3
+	set 2,(hl)		;8af3   ; ...bit 2: se usa
 	jp L_8C27		;8af5
 
 ; ----------------------------------------------------------------------
@@ -1489,7 +1489,7 @@ L_8D5D:
 	cpir		;8d5f   ; ...en los 0x100 bytes copiados del INIT del juego
 	ret nz			;8d61   ; no esta
 	ret po			;8d62   ; se acabaron los bytes
-	ld a,0fdh		;8d63   ; ¿le sigue 0xFD?
+	ld a,0fdh		;8d63   ; le sigue 0xFD?
 	cp (hl)			;8d65
 	jr nz,L_8D5D		;8d66
 	dec hl			;8d68   ; si: apunta al operando del `ld (0xFD9B),hl`
@@ -1500,16 +1500,16 @@ L_8D5D:
 	xor a			;8d72   ; A = 0: hecho
 	ret			;8d73
 copia_del_juego:		; copia BC bytes de HL del cartucho del juego (RDSLT) a DE (gemela de p01:6371)
-	push bc			;8d74
+	push bc			;8d74   ; guarda BC y DE
 	push de			;8d75
-	ld a,(0d12fh)		;8d76   ; lee el slot del cartucho del juego (copia)
-	call 0000ch		;8d79   ; BIOS RDSLT - Reads the value of an address in another slot
+	ld a,(0d12fh)		;8d76   ; un byte del cartucho del juego...
+	call 0000ch		;8d79   ; BIOS RDSLT - Reads the value of an address in another slot | ...por RDSLT
 	pop de			;8d7c
 	pop bc			;8d7d
-	ld (de),a			;8d7e
+	ld (de),a			;8d7e   ; a DE
 	inc hl			;8d7f
 	inc de			;8d80
-	dec bc			;8d81
+	dec bc			;8d81   ; BC bytes
 	ld a,b			;8d82
 	or c			;8d83
 	jr nz,copia_del_juego		;8d84
@@ -1555,21 +1555,21 @@ L_8D98:
 	add hl,de			;8dbd
 	jp (hl)			;8dbe   ; sigue en el INIT del juego, justo detras de su `ld (0xFD9B),hl`
 L_8DBF:
-	ld hl,0fd00h		;8dbf
+	ld hl,0fd00h		;8dbf   ; guarda 0xFD00-0xFFC9 de la RAM del juego en 0xD961
 	ld de,0d961h		;8dc2
 	ld bc,002cah		;8dc5
 	ldir		;8dc8
-	ld a,(0d12fh)		;8dca   ; lee el slot del cartucho del juego (copia)
+	ld a,(0d12fh)		;8dca   ; el cartucho del juego en la pagina 1
 	ld hl,04000h		;8dcd
 	call 00024h		;8dd0   ; BIOS ENASLT - Switches to specified slot and page definitively
-	call 0d861h		;8dd3
-	ld hl,(0fedch)		;8dd6
-	ld de,(0d132h)		;8dd9   ; lee la direccion INIT del juego (copia) y el byte siguiente (16 bits)
+	call 0d861h		;8dd3   ; llama a 0xD861, la copia del INIT del juego en RAM
+	ld hl,(0fedch)		;8dd6   ; la direccion a la que volveria H.STKE...
+	ld de,(0d132h)		;8dd9   ; ...menos el INIT del juego...
 	and a			;8ddd
 	sbc hl,de		;8dde
-	ld de,0d861h		;8de0
+	ld de,0d861h		;8de0   ; ...mas la copia en RAM
 	add hl,de			;8de3
-	jp (hl)			;8de4
+	jp (hl)			;8de4   ; sigue en la copia
 L_8DE5:
 	di			;8de5   ; sin interrupciones
 	ld a,(0d13bh)		;8de6   ; 0xD13B: el menu esta abierto
@@ -1609,7 +1609,7 @@ L_8E19:
 	cp (hl)			;8e26   ; sin cambios, nada
 	jr z,L_8E37		;8e27
 	ld (hl),a			;8e29   ; cambio: la apunta
-	ld a,(0d312h)		;8e2a   ; ¿es la que se espera (0xD312)?
+	ld a,(0d312h)		;8e2a   ; es la que se espera (0xD312)?
 	cp (hl)			;8e2d
 	jr nz,L_8E37		;8e2e
 	ld ix,099fah		;8e30   ; si: el ranking (p02:99FA) por el puente de RAM
@@ -1655,27 +1655,27 @@ L_8E7E:
 	jr z,L_8EB9		;8e83
 	ld ix,L_8FE8		;8e85
 L_8E89:
-	push ix		;8e89
-	ld a,(0d12eh)		;8e8b   ; lee el slot del Game Master (copia)
+	push ix		;8e89   ; guarda IX
+	ld a,(0d12eh)		;8e8b   ; el Game Master...
 	ld h,040h		;8e8e
 	push af			;8e90
-	call 00024h		;8e91   ; BIOS ENASLT - Switches to specified slot and page definitively
+	call 00024h		;8e91   ; BIOS ENASLT - Switches to specified slot and page definitively | ...en la pagina 1...
 	pop af			;8e94
 	ld h,080h		;8e95
-	call 00024h		;8e97   ; BIOS ENASLT - Switches to specified slot and page definitively
+	call 00024h		;8e97   ; BIOS ENASLT - Switches to specified slot and page definitively | ...y en la 2
 	pop ix		;8e9a
-	ld a,002h		;8e9c
+	ld a,002h		;8e9c   ; los bancos 2 y 3
 	ld (08000h),a		;8e9e   ; el mapper: pone en 0x8000 el banco de A
 	inc a			;8ea1
 	ld (0a000h),a		;8ea2   ; el mapper: pone en 0xA000 el banco de A
-	call salta_a_ix		;8ea5   ; salta_a_ix: jp (ix)
-	ld a,(0d12fh)		;8ea8   ; lee el slot del cartucho del juego (copia)
+	call salta_a_ix		;8ea5   ; llama a IX
+	ld a,(0d12fh)		;8ea8   ; y devuelve el cartucho del juego...
 	ld h,040h		;8eab
 	push af			;8ead
-	call 00024h		;8eae   ; BIOS ENASLT - Switches to specified slot and page definitively
+	call 00024h		;8eae   ; BIOS ENASLT - Switches to specified slot and page definitively | ...a la pagina 1...
 	pop af			;8eb1
 	ld h,080h		;8eb2
-	jp 00024h		;8eb4   ; BIOS ENASLT - Switches to specified slot and page definitively
+	jp 00024h		;8eb4   ; BIOS ENASLT - Switches to specified slot and page definitively | ...y a la 2
 salta_a_ix:		; jp (ix)
 	jp (ix)		;8eb7
 L_8EB9:
@@ -1777,19 +1777,19 @@ L_8F45:
 	lddr		;8f4a
 	ret			;8f4c
 L_8F4D:
-	ld hl,00000h		;8f4d
+	ld hl,00000h		;8f4d   ; copia la pila del juego (128 bytes)...
 	add hl,sp			;8f50
-	ld de,0df80h		;8f51
+	ld de,0df80h		;8f51   ; ...a 0xDF80
 	ld bc,00080h		;8f54
 	ldir		;8f57
-	ld sp,0df80h		;8f59
-	ld hl,0d500h		;8f5c
+	ld sp,0df80h		;8f59   ; y la usa
+	ld hl,0d500h		;8f5c   ; devuelve las variables del Game Master (0xD500 -> 0xF100)
 	ld de,0f100h		;8f5f   ; apunta a volumen del PSG, canal A
 	ld bc,00314h		;8f62
 	ldir		;8f65
-	ld a,0c9h		;8f67
+	ld a,0c9h		;8f67   ; desengancha H.TIMI
 	ld (0fd9fh),a		;8f69   ; guarda el gancho H.TIMI
-	ld hl,0d170h		;8f6c
+	ld hl,0d170h		;8f6c   ; y H.KEYI salta a 0xD170 (p02:8DE5, en RAM)
 	ld (0fd9bh),hl		;8f6f   ; guarda la direccion del gancho H.KEYI y el byte siguiente (16 bits)
 	ret			;8f72
 L_8F73:
@@ -2591,7 +2591,7 @@ L_9541:
 	ld hl,0956fh		;9551   ; el texto de p02:956F
 	ld de,(0d16eh)		;9554   ; lee la esquina de la ventana pequena y el byte siguiente (16 bits)
 	push de			;9558
-	call 0a520h		;9559
+	call 0a520h		;9559   ; pinta_texto_b_en: pinta el texto de HL en la VRAM DE
 	pop hl			;955c
 	ld bc,00040h		;955d   ; una fila mas abajo (0x40)
 	add hl,bc			;9560
@@ -2617,23 +2617,23 @@ DATA_resto_956F:
 
 
 error_de_disco:		; pinta el mensaje del error C (tabla de p00:5209) (gemela de p00:51D2)
-	ld a,c			;957e
+	ld a,c			;957e   ; el error C...
 	add a,a			;957f
-	ld hl,095b5h		;9580
+	ld hl,095b5h		;9580   ; ...su mensaje, en la tabla de p02:95B5
 	call 0a3e6h		;9583   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
-	ld a,(hl)			;9586
+	ld a,(hl)			;9586   ; HL = el mensaje
 	inc hl			;9587
 	ld h,(hl)			;9588
 	ld l,a			;9589
 	push de			;958a
-	call 0a520h		;958b
+	call 0a520h		;958b   ; se pinta en DE
 	pop hl			;958e
-	ld bc,00040h		;958f
+	ld bc,00040h		;958f   ; una fila mas abajo (0x40)...
 	add hl,bc			;9592
-	ld de,095a6h		;9593
+	ld de,095a6h		;9593   ; ...el texto de p02:95A6 (RETURN KEY / RETRY)
 	ex de,hl			;9596
-	call 0a520h		;9597
-	call 00156h		;959a   ; BIOS KILBUF - Clears keyboard buffer
+	call 0a520h		;9597   ; pinta_texto_b_en: pinta el texto de HL en la VRAM DE
+	call 00156h		;959a   ; BIOS KILBUF - Clears keyboard buffer | borra el teclado
 L_959D:
 	ld a,007h		;959d
 	call 00141h		;959f   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
@@ -2815,13 +2815,13 @@ L_97E5:
 L_97EA:
 	ld hl,0980eh		;97ea
 	ld de,(0d16ah)		;97ed   ; lee la posicion de la ventana en la VRAM y el byte siguiente (16 bits)
-	call 0a520h		;97f1
+	call 0a520h		;97f1   ; pinta_texto_b_en: pinta el texto de HL en la VRAM DE
 	ld de,09816h		;97f4
 	ld hl,(0d16ah)		;97f7   ; lee la posicion de la ventana en la VRAM y el byte siguiente (16 bits)
 	ld bc,00040h		;97fa
 	add hl,bc			;97fd
 	ex de,hl			;97fe
-	call 0a520h		;97ff
+	call 0a520h		;97ff   ; pinta_texto_b_en: pinta el texto de HL en la VRAM DE
 	call 00156h		;9802   ; BIOS KILBUF - Clears keyboard buffer
 L_9805:
 	call 0009fh		;9805   ; BIOS CHGET - One character input (waiting)
@@ -3375,21 +3375,21 @@ L_9B88:
 	djnz L_9B82		;9b8d
 	ret			;9b8f
 pinta_ranking_b:		; pinta la cabecera y las filas del ranking
-	ld hl,03a2ch		;9b90
+	ld hl,03a2ch		;9b90   ; la ventana del ranking (2 x 18) en 0x3A2C...
 	ld bc,00212h		;9b93
-	xor a			;9b96
+	xor a			;9b96   ; ...en blanco
 	call 0a53bh		;9b97
-	ld hl,09bech		;9b9a
+	ld hl,09bech		;9b9a   ; la cabecera de p02:9BEC
 	call 0a524h		;9b9d   ; pinta_texto_b: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
-	ld hl,0d322h		;9ba0
-	ld de,03a36h		;9ba3
+	ld hl,0d322h		;9ba0   ; el nombre del jugador 1 (0xD322)...
+	ld de,03a36h		;9ba3   ; ...en 0x3A36
 	ld bc,00008h		;9ba6
 	call 0005ch		;9ba9   ; BIOS LDIRVM - Block transfers to VRAM from memory
 	call hay_ranking		;9bac   ; hay_ranking: Z si el juego no tiene ranking (0xF290, 0xF286) (gemela de p01:68E1)
-	ret z			;9baf
-	ld hl,09bf9h		;9bb0
+	ret z			;9baf   ; sin ranking, ya esta
+	ld hl,09bf9h		;9bb0   ; el texto de p02:9BF9
 	call 0a524h		;9bb3   ; pinta_texto_b: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
-	ld hl,0d32ah		;9bb6
+	ld hl,0d32ah		;9bb6   ; y el nombre del jugador 2 (0xD32A) en 0x3A56
 	ld de,03a56h		;9bb9
 	ld bc,00008h		;9bbc
 	jp 0005ch		;9bbf   ; BIOS LDIRVM - Block transfers to VRAM from memory
@@ -3682,20 +3682,20 @@ ranking_pinta_fila:		; pinta una fila del ranking
 	ld c,a			;9db7
 	ld b,005h		;9db8
 L_9DBA:
-	push bc			;9dba
+	push bc			;9dba   ; guarda la fila y el nombre
 	push hl			;9dbb
 	push hl			;9dbc
 	push bc			;9dbd
-	xor a			;9dbe
+	xor a			;9dbe   ; borra la fila (0x15 casillas)
 	ld bc,00015h		;9dbf
 	call 00056h		;9dc2   ; BIOS FILVRM - Fills VRAM with value
-	call 0a778h		;9dc5   ; cursor_pinta_b: pinta el cursor (':' o el de MSX2)
+	call 0a778h		;9dc5   ; el cursor
 	pop bc			;9dc8
 	pop hl			;9dc9
-	ld a,c			;9dca
-	cp 03ah		;9dcb
+	ld a,c			;9dca   ; la marca de la fila...
+	cp 03ah		;9dcb   ; ...':' es la del cursor...
 	jr z,L_9DD5		;9dcd
-	inc hl			;9dcf
+	inc hl			;9dcf   ; ...si no, se pinta
 	call 0004dh		;9dd0   ; BIOS WRTVRM - Writes data in VRAM
 	jr L_9DE0		;9dd3
 L_9DD5:

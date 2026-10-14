@@ -53,42 +53,42 @@ sram:		; pasarela a la SRAM: el cartucho en 0x8000, banco 4 en 0x8000 y la SRAM 
 	ret			;404e
 p09_8043:		; pasarela: 1-9-10, p09:8043 y vuelve a 2-3
 	call bancos_1_9_10		;404f   ; bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
-	call 08043h		;4052
+	call 08043h		;4052   ; titulo_empieza_b: mira MSX1/MSX2 y el juego de caracteres, engancha la cuenta y pinta
 	jp bancos_2_3		;4055   ; bancos_2_3: pone los bancos 2 y 3 en 0x8000 y 0xA000
 p09_801b:		; pasarela: 1-9-10, p09:801B y vuelve a 2-3
 	call bancos_1_9_10		;4058   ; bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
-	call 0801bh		;405b
+	call 0801bh		;405b   ; titulo_empieza: engancha la cuenta, mira MSX1/MSX2 y el juego de caracteres, y pinta
 	jp bancos_2_3		;405e   ; bancos_2_3: pone los bancos 2 y 3 en 0x8000 y 0xA000
 p09_80d2:		; pasarela: 1-9-10, p09:80D2 y vuelve a 2-3
 	call bancos_1_9_10		;4061   ; bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
-	call 080d2h		;4064
+	call 080d2h		;4064   ; titulo_si_msx1: en MSX1, la presentacion de MSX1
 	jr bancos_2_3		;4067
 p09_8117:		; pasarela: 1-9-10, p09:8117 y vuelve a 2-3
 	call bancos_1_9_10		;4069   ; bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
-	call 08117h		;406c
+	call 08117h		;406c   ; titulo_espera: anima la presentacion hasta que se pulsa una tecla
 	jr bancos_2_3		;406f
 p09_8133:		; pasarela: 1-9-10, p09:8133 y vuelve a 2-3
 	call bancos_1_9_10		;4071   ; bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
-	call 08133h		;4074
+	call 08133h		;4074   ; nada_9133: `ret`
 	jr bancos_2_3		;4077
 p09_8134:		; pasarela: 1-9-10, p09:8134 y vuelve a 2-3
 	call bancos_1_9_10		;4079   ; bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
-	call 08134h		;407c
+	call 08134h		;407c   ; nada_9134: `ret`
 	jr bancos_2_3		;407f
 p09_82ca:		; pasarela: 1-9-10, p09:82CA y vuelve a 2-3
 	call bancos_1_9_10		;4081   ; bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
-	call 082cah		;4084
+	call 082cah		;4084   ; titulo_dibuja: dibuja la presentacion (p09:9DE3 y p10:A1E3)
 	jr bancos_2_3		;4087
 p09_846d:		; pasarela: 1-9-10, p09:846D y vuelve a 2-3 guardando AF
 	call bancos_1_9_10		;4089   ; bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
-	call 0846dh		;408c
+	call 0846dh		;408c   ; titulo_menu_bucle: el bucle del menu de la presentacion: espera, flechas y espacio
 	push af			;408f
 	call bancos_2_3		;4090   ; bancos_2_3: pone los bancos 2 y 3 en 0x8000 y 0xA000
 	pop af			;4093
 	ret			;4094
 p09_8191:		; pasarela: 1-9-10, p09:8191 y vuelve a 2-3
 	call bancos_1_9_10		;4095   ; bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
-	call 08191h		;4098
+	call 08191h		;4098   ; titulo_graficos: los patrones, los colores y la fuente de la presentacion
 	jr bancos_2_3		;409b
 p09_8191_b:		; pasarela: 1-9-10 y p09:8191 (la llaman por CALSLT, p03:A5BE)
 	call bancos_1_9_10		;409d   ; bancos_1_9_10: pone los bancos 1, 9 y 10 en 0x6000, 0x8000 y 0xA000
@@ -1778,23 +1778,23 @@ DATA_resto_51C3:
 
 
 error_de_disco:		; pinta el mensaje del error C (tabla de p00:5209)
-	ld a,c			;51d2
+	ld a,c			;51d2   ; el error C...
 	add a,a			;51d3
 	ld hl,05209h		;51d4
 	call 07251h		;51d7   ; hl_mas_a: HL = HL + A
-	ld a,(hl)			;51da
+	ld a,(hl)			;51da   ; HL = el mensaje
 	inc hl			;51db
 	ld h,(hl)			;51dc
 	ld l,a			;51dd
 	push de			;51de
-	call 0738bh		;51df   ; pinta_texto_en: pinta el texto de HL en la VRAM DE
+	call 0738bh		;51df   ; se pinta en DE
 	pop hl			;51e2
-	ld bc,00040h		;51e3
+	ld bc,00040h		;51e3   ; una fila mas abajo (0x40)...
 	add hl,bc			;51e6
 	ld de,051fah		;51e7
 	ex de,hl			;51ea
 	call 0738bh		;51eb   ; pinta_texto_en: pinta el texto de HL en la VRAM DE
-	call 00156h		;51ee   ; BIOS KILBUF - Clears keyboard buffer
+	call 00156h		;51ee   ; BIOS KILBUF - Clears keyboard buffer | borra el teclado
 L_51F1:
 	ld a,007h		;51f1
 	call 00141h		;51f3   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
@@ -2607,7 +2607,7 @@ L_589A:
 	cpir		;589b   ; ...en el INIT copiado del juego
 	jr nz,L_58FC		;589d   ; no esta: no es un juego de Konami
 	jp po,0e0cah		;589f   ; se acabaron los bytes
-	ld a,0fdh		;58a2   ; ¿le sigue 0xFD?
+	ld a,0fdh		;58a2   ; le sigue 0xFD?
 	cp (hl)			;58a4
 	jr nz,L_589A		;58a5
 	ld hl,(04010h)		;58a7   ; la segunda cabecera del juego (0x4010):
@@ -2623,7 +2623,7 @@ L_589A:
 	ld hl,(04011h)		;58bc   ; si no, el RC de 0x4011 y 0x4013...
 	ld a,(04013h)		;58bf
 	ld h,a			;58c2
-	rst 20h			;58c3   ; ...¿coincide?
+	rst 20h			;58c3   ; ...coincide?
 	jr z,L_5907		;58c4
 	ld de,00000h		;58c6   ; si no hay cabecera: suma los 256 bytes de 0x5000
 	ld hl,05000h		;58c9
@@ -2649,7 +2649,7 @@ L_58E5:
 	ld a,l			;58eb   ; ...0 acaba la tabla
 	or h			;58ec
 	jr z,L_58FC		;58ed
-	rst 20h			;58ef   ; ¿es la del juego?
+	rst 20h			;58ef   ; es la del juego?
 	jr z,L_5910		;58f0   ; si: la ficha
 	inc ix		;58f2   ; la entrada siguiente, de 4 bytes
 	inc ix		;58f4
@@ -3378,7 +3378,7 @@ L_5E17:
 	ld (08000h),a		;5e21   ; el mapper: pone en 0x8000 el banco de A
 	inc a			;5e24
 	ld (0a000h),a		;5e25   ; el mapper: pone en 0xA000 el banco de A
-	call 08000h		;5e28
+	call 08000h		;5e28   ; bio_arranca: el biorritmo: guarda la pila, borra 0xE000, engancha H.TIMI y sigue en el bucle de p05:8B14
 	ld a,0c9h		;5e2b
 	ld (0fd9fh),a		;5e2d   ; guarda el gancho H.TIMI
 	ld a,002h		;5e30
@@ -3399,7 +3399,7 @@ L_5E4A:
 	ld (08000h),a		;5e54   ; el mapper: pone en 0x8000 el banco de A
 	inc a			;5e57
 	ld (0a000h),a		;5e58   ; el mapper: pone en 0xA000 el banco de A
-	call 08000h		;5e5b
+	call 08000h		;5e5b   ; th_arranca: Tennis and Hockey: engancha H.KEYI (p07:8004) y prepara la pantalla
 	ld a,0e0h		;5e5e
 	ld hl,03b00h		;5e60
 	ld bc,00080h		;5e63
@@ -3413,13 +3413,13 @@ L_5E4A:
 	ld h,080h		;5e78
 	call 00024h		;5e7a   ; BIOS ENASLT - Switches to specified slot and page definitively
 	call 0672dh		;5e7d   ; bancos_9_10: el cartucho en la pagina 2 y los bancos 9-10
-	call 08191h		;5e80
+	call 08191h		;5e80   ; titulo_graficos: los patrones, los colores y la fuente de la presentacion
 	call 0673fh		;5e83   ; bancos_2_3_y_ram: los bancos 2-3 y devuelve la RAM (0xF2A0) a la pagina 2
 	jp L_5DEE		;5e86
 L_5E89:
 	call 07973h		;5e89   ; menu_principal: el menu del Game Master: engancha H.TIMI y pinta
 	call 0672dh		;5e8c   ; bancos_9_10: el cartucho en la pagina 2 y los bancos 9-10
-	call 08191h		;5e8f
+	call 08191h		;5e8f   ; titulo_graficos: los patrones, los colores y la fuente de la presentacion
 	call 0673fh		;5e92   ; bancos_2_3_y_ram: los bancos 2-3 y devuelve la RAM (0xF2A0) a la pagina 2
 	jp L_5DEE		;5e95
 L_5E98:
@@ -3441,7 +3441,7 @@ L_5EAF:
 	jp L_5DEE		;5eb5
 p09_8191_desde_menu:		; 1-9-10 con el cartucho en la pagina 2, p09:8191 y vuelta
 	call 0672dh		;5eb8   ; bancos_9_10: el cartucho en la pagina 2 y los bancos 9-10
-	call 08191h		;5ebb
+	call 08191h		;5ebb   ; titulo_graficos: los patrones, los colores y la fuente de la presentacion
 	call 0673fh		;5ebe   ; bancos_2_3_y_ram: los bancos 2-3 y devuelve la RAM (0xF2A0) a la pagina 2
 	ret			;5ec1
 pantalla_del_menu:		; borra la VRAM y pone el modo del menu (MSX1 o MSX2)

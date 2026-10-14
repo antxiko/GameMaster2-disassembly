@@ -30,10 +30,25 @@ C 0x8262 los tantos del jugador 1...
 C 0x826B ...y los del 2, en cifras grandes
 C 0x8274 0xE41E y 0xE403 a cero
 C 0x827B y vuelve al menu
+C 0x82CC B = quien gano: 1...
+C 0x82CF ...2...
+C 0x82D2 0xE2F7: se acabo el partido
+C 0x82D8 lo apaga
+C 0x82DA la musica 0x10
+C 0x82DF el campo...
+C 0x82E2 ...y sus piezas
+C 0x82E5 0xE41E y 0xE403 a cero
+C 0x82EC y vuelve al menu
 C 0x831B quien saca (0xE41D): 0...
 C 0x831F ...el texto de p07:881C
 C 0x8324 1: el de p07:8808
 C 0x832A 2: el de p07:8812
+C 0x83AF la direccion de VRAM de la cifra
+C 0x83B6 el set C...
+C 0x83B7 ...en la tabla de juegos por set (0xE580)
+C 0x83BD pinta su cifra
+C 0x83C2 el set siguiente
+C 0x83C3 los B sets
 C 0x85C1 la posicion en pixeles: L / 8...
 C 0x85C6 ...pasando los bits bajos de H...
 C 0x85CE ...L = la columna
@@ -191,47 +206,47 @@ C 0x8E10 arriba: la tabla de p07:8E24
 C 0x8E16 abajo: la de p07:8E34
 C 0x8E80 la columna de la pelota mas 11...
 C 0x8E86 ...y su altura mas 8: el centro
-C 0x8E8A ¿toca una raqueta?
+C 0x8E8A toca una raqueta?
 C 0x8E8E si: rebota
 C 0x8E91 tres pixeles arriba...
 C 0x8E95 ...y tres a la izquierda
-C 0x8E9A ¿toca?
+C 0x8E9A toca?
 C 0x8E9E si: rebota de otra manera
 C 0x8EA1 tres a la derecha
-C 0x8EA5 ¿toca?
+C 0x8EA5 toca?
 C 0x8EA8 si: rebota de la tercera
 C 0x8EC2 la columna de la pelota mas 8...
 C 0x8EC8 ...y su altura mas 5: el borde de arriba
-C 0x8ECC ¿toca una raqueta?
+C 0x8ECC toca una raqueta?
 C 0x8ED0 si: rebota en horizontal
 C 0x8ED3 tres pixeles abajo...
 C 0x8ED7 ...y tres a la izquierda
-C 0x8EDC ¿toca?
+C 0x8EDC toca?
 C 0x8EE0 si: rebota en vertical
 C 0x8EE3 tres arriba
-C 0x8EE7 ¿toca?
+C 0x8EE7 toca?
 C 0x8EEA si: rebota en diagonal
 C 0x8F04 la columna de la pelota mas 5...
 C 0x8F0A ...y su altura mas 8: el borde de la izquierda
-C 0x8F0E ¿toca una raqueta?
+C 0x8F0E toca una raqueta?
 C 0x8F12 si: rebota en vertical
 C 0x8F15 tres pixeles abajo...
 C 0x8F19 ...y tres a la derecha
-C 0x8F1E ¿toca?
+C 0x8F1E toca?
 C 0x8F22 si: rebota en horizontal
 C 0x8F25 tres a la izquierda
-C 0x8F29 ¿toca?
+C 0x8F29 toca?
 C 0x8F2C si: rebota en diagonal
 C 0x8F46 la columna de la pelota mas 8...
 C 0x8F4C ...y su altura mas 11: el borde de abajo
-C 0x8F50 ¿toca una raqueta?
+C 0x8F50 toca una raqueta?
 C 0x8F54 si: rebota en horizontal
 C 0x8F57 tres pixeles arriba...
 C 0x8F5B ...y tres a la derecha
-C 0x8F60 ¿toca?
+C 0x8F60 toca?
 C 0x8F64 si: rebota en vertical
 C 0x8F67 tres abajo
-C 0x8F6B ¿toca?
+C 0x8F6B toca?
 C 0x8F6E si: rebota en diagonal
 C 0x8F72 en que fase del choque va (A')
 C 0x8F75 la 1: las raquetas; la 2: los bordes y la barra
@@ -247,10 +262,10 @@ C 0x8FA0 ...NZ: no rebota en los bordes
 C 0x8FA2 la raqueta del jugador 1
 C 0x8FA8 su altura
 C 0x8FAC y su columna
-C 0x8FB0 ¿la toca?
+C 0x8FB0 la toca?
 C 0x8FB5 si: sale
 C 0x8FB8 la raqueta del jugador 2
-C 0x8FC5 ¿la toca?
+C 0x8FC5 la toca?
 C 0x8FCA el largo de la raqueta...
 C 0x8FCB ...segun LENGTH (tabla p07:9024)
 C 0x8FD7 la parte de arriba de la raqueta...
@@ -271,6 +286,24 @@ C 0x9019 toca: B + 1
 C 0x9079 HL = A x 2...
 C 0x907D ...en la tabla de DE
 C 0x907E DE = la palabra
+C 0x90D0 borra las tres flechas del menu GAME SELECT
+C 0x90E5 el juego elegido...
+C 0x90E9 ...su posicion (tabla de p07:90FA)...
+C 0x90F4 ...con la flecha (0x8D)
+C 0x9139 C = el mando
+C 0x913A izquierda o derecha: cambia el valor
+C 0x913E arriba o abajo: cambia de opcion
+C 0x9147 arriba
+C 0x914A ya en la primera, nada
+C 0x914F la anterior
+C 0x9150 con el sonido 2
+C 0x9167 C = el mando
+C 0x9168 la opcion elegida...
+C 0x916B ...su valor (tabla de p07:9204)
+C 0x9176 bit 2: izquierda
+C 0x917A ya en 0, nada
+C 0x917F baja uno
+C 0x9180 con el sonido 3
 C 0x9199 borra las cuatro marcas del menu GAME MODIFY
 C 0x91B8 la posicion de la opcion elegida (tabla de p07:920C)...
 C 0x91C3 ...pinta la flecha (0x8D)
@@ -311,6 +344,13 @@ C 0x92E9 un set mas
 C 0x9309 el tanto en BCD, con tope 99
 C 0x930D uno mas
 C 0x9311 y cambia el que saca
+C 0x931A cada 64 cuadros (0xE402)
+C 0x9320 el tiempo...
+C 0x9323 ...baja un segundo (BCD)
+C 0x932A a los 10...
+C 0x932C ...el sonido 0x14, el aviso
+C 0x9333 a 0...
+C 0x9336 ...el canal 2 del sonido a 0x1F
 C 0x9B3C sin interrupciones, guardando todos los registros
 C 0x9B45 pide el sonido
 C 0x9B50 y las vuelve a abrir
@@ -337,10 +377,13 @@ C 0x9D1C la duracion: la parte baja de la nota...
 C 0x9D20 ...por el tempo (ix+0x14)
 C 0x9D2A la duracion del canal (ix+0x04)
 C 0x9D2D la nota: la parte alta
+C 0x9D2E la parte alta: la nota
 C 0x9D34 la pista avanza
 C 0x9D37 bit 7: silencio
 C 0x9D3C 0x0C y mas: no es una nota
 C 0x9D41 la frecuencia de la nota en la tabla de p07:9D6F
+C 0x9D44 E = la nota
+C 0x9D48 HL = la frecuencia base
 C 0x9D4B la octava (ix+0x16)...
 C 0x9D52 ...divide la frecuencia
 C 0x9D7B el modo del canal (ix+0x0D)
@@ -349,11 +392,13 @@ C 0x9D83 1: ...
 C 0x9D88 el byte de la orden
 C 0x9D89 bit 6...
 C 0x9D90 ...o bit 5 del estado
-C 0x9D97 la parte alta: la octava
+C 0x9D97 la parte alta del byte
 C 0x9D99 la baja con lo que quede: la parte alta de la frecuencia
+C 0x9D9A la baja
 C 0x9D9C el byte siguiente...
 C 0x9D9E ...la parte baja de la frecuencia
 C 0x9DA4 la octava
+C 0x9DA5 a los 4 bits bajos
 C 0x9DB3 la parte alta del byte...
 C 0x9DB9 ...la octava
 C 0x9DBA la baja...
@@ -368,6 +413,14 @@ C 0x9E10 el contador de la repeticion
 C 0x9E16 donde empieza...
 C 0x9E17 ...a (ix+0x17)
 C 0x9E1D y la enciende
+C 0x9E25 sin vibrato aun
+C 0x9E29 la envolvente empieza...
+C 0x9E31 ...los contadores a cero
+C 0x9E3E fase sostenida
+C 0x9E42 el volumen maximo
+C 0x9E45 bit 7: con atenuacion...
+C 0x9E4C ...resta (ix+0x15)
+C 0x9E50 sin bajar de 0
 C 0x9E53 el volumen del canal (ix+0x0C)
 C 0x9E56 bit 2 del modo: sin envolvente
 C 0x9E5B bit 1 de (ix+0x0F): el volumen fijo
@@ -492,6 +545,7 @@ F 0x9FFE 2
 # --- fin de los bloques de bloques.py ---
 
 # --- ANOTACIONES AUTOMATICAS (seccion que reescribe tools/anota.py; no editar a mano) ---
+L 0x8000 th_arranca Tennis and Hockey: engancha H.KEYI (p07:8004) y prepara la pantalla
 L 0x8024 hl_mas_a HL = HL + A (gemela de p01:7251)
 L 0x8029 de_mas_a DE = DE + A (gemela de p01:7256)
 L 0x802E despacha salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
@@ -642,8 +696,6 @@ C 0x82B1 th_texto_saque: pinta el texto del saque segun 0xE41D
 C 0x82B4 lee los canales del motor de sonido (0x2C bytes cada uno)
 C 0x82BC th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
 C 0x82DC pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
-C 0x82DF th_pantalla_campo: borra y pinta el campo (p07:83F5 en 0x38E8)
-C 0x82E2 th_pinta_campo: pinta las piezas del campo de la tabla de p07:83C6
 C 0x82EF th_texto_saque: pinta el texto del saque segun 0xE41D
 C 0x82F2 lee los canales del motor de sonido (0x2C bytes cada uno)
 C 0x82FA th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
@@ -661,7 +713,6 @@ C 0x837D th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras 
 C 0x8388 lee los canales del motor de sonido (0x2C bytes cada uno)
 C 0x838F pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x83BA de_mas_a: DE = DE + A (gemela de p01:7256)
-C 0x83BD th_cifra_baja: pinta la cifra baja del BCD de DE
 C 0x83D2 th_borra_pantalla: borra los sprites y la tabla de nombres
 C 0x83E9 de_mas_a: DE = DE + A (gemela de p01:7256)
 C 0x83EF hl_mas_a: HL = HL + A (gemela de p01:7251)
@@ -688,6 +739,7 @@ C 0x85F8 th_copia_a_vram: LDIRVM de DE a HL
 C 0x861A th_descomprime: descomprime DE a la VRAM HL: n & 0x7F repeticiones o copias, 0 acaba
 C 0x8647 th_vram_escribe: SETWRT en HL y C = el puerto de datos del VDP
 C 0x8672 el puerto de escritura del VDP (VDP.DW)
+C 0x86B2 pon_mezclador: escribe A en R#7 del PSG y en 0xE2EE
 C 0x86B7 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x86E4 th_lee_puerto: lee el puerto de mandos E (R#15 del PSG y R#14)
 C 0x86E7 th_teclas_1: las teclas del jugador 1 (SNSMAT 7 y 8)
@@ -833,7 +885,6 @@ C 0x90A6 lee el mando del jugador 1
 C 0x90AD apunta a el juego: 1 tenis, 2 hockey
 C 0x90BB pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x90CA pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
-C 0x90E5 lee el juego: 1 tenis, 2 hockey
 C 0x90ED hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x9103 th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
 C 0x9109 apunta a la copia de la tabla de sprites
@@ -841,7 +892,6 @@ C 0x9136 lee el mando del jugador 1
 C 0x9144 apunta a la opcion elegida del GAME MODIFY
 C 0x9152 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x9161 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
-C 0x9168 lee la opcion elegida del GAME MODIFY
 C 0x916F hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x9182 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x9193 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
@@ -870,7 +920,6 @@ C 0x92B2 guarda los tantos del jugador 2
 C 0x92C8 de_mas_a: DE = DE + A (gemela de p01:7256)
 C 0x92FB apunta a los tantos del jugador 1
 C 0x9303 apunta a los tantos del jugador 2
-C 0x9320 lee el tiempo del hockey (BCD)
 C 0x9326 guarda el tiempo del hockey (BCD)
 C 0x932E pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x933E th_tiempo: en hockey, pinta el tiempo (0xE419)
@@ -885,6 +934,7 @@ C 0x9B91 canal_libre: pone la pista en el canal si su prioridad no es menor
 C 0x9BA5 canal_libre: pone la pista en el canal si su prioridad no es menor
 C 0x9BB9 canal_libre: pone la pista en el canal si su prioridad no es menor
 C 0x9BD1 apunta a el sonido pedido
+C 0x9CA8 pon_mezclador: escribe A en R#7 del PSG y en 0xE2EE
 C 0x9CAD guarda el canal que se esta tocando
 C 0x9CB0 apunta a los canales del motor de sonido (0x2C bytes cada uno)
 C 0x9CB4 canal_cuadro: un cuadro del canal IX si esta activo
@@ -894,14 +944,15 @@ C 0x9CC5 guarda el canal que se esta tocando
 C 0x9CCC canal_cuadro: un cuadro del canal IX si esta activo
 C 0x9CD1 guarda el canal que se esta tocando
 C 0x9CD8 canal_cuadro: un cuadro del canal IX si esta activo
+C 0x9CDB sonido_mezcla: decide que canales van al PSG segun sus prioridades
 C 0x9CE3 canal_nota: baja la duracion; si acaba, lee la orden siguiente de la pista
+C 0x9CFE canal_orden: una orden de la pista (0xE0-0xFF) por la tabla de p08:A03E, o una nota
 C 0x9D02 canal_ordenes: lee las ordenes de la pista (0xD0-0xFE) hasta una nota; 0xFF acaba
 C 0x9D09 canal_duracion: la duracion de la nota: la parte baja por el tempo (ix+0x14)
 C 0x9D66 canal_empieza_nota: empieza la nota: frecuencia y envolvente a cero
 C 0x9DDB canal_empieza_nota: empieza la nota: frecuencia y envolvente a cero
 C 0x9DE3 canal_avanza: avanza el puntero de la pista (ix+0x02)
 C 0x9E22 canal_frecuencia: la frecuencia de la nota (ix+0x10) con el desplazamiento (ix+0x26) a (ix+0x0A)
-C 0x9E50 a_cero: A = 0 y Z
 C 0x9E78 canal_vibrato: el contador del vibrato (ix+0x1E) segun los bits de (ix+0x0E)
 C 0x9E7F canal_volumen_si: el volumen del canal salvo si (ix+0x0D) lleva el bit 2
 C 0x9E82 lee el canal que se esta tocando

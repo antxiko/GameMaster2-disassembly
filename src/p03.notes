@@ -5,8 +5,8 @@ C 0xA22E ...entra en HL
 C 0xA230 si cabe el divisor, se resta...
 C 0xA234 ...y el bit del cociente es 1
 C 0xA28D recorre la tabla de RC: 0xFF acaba
-C 0xA293 ¿la parte baja?
-C 0xA296 ¿y la alta?
+C 0xA293 la parte baja?
+C 0xA296 y la alta?
 C 0xA298 es este juego
 C 0xA2CB B = el codigo del juego: los de 3 y 4...
 C 0xA2D2 ...y los de 0x10 y 0x11...
@@ -16,7 +16,7 @@ C 0xA35A bit a 1: se salta
 C 0xA35D DE = el destino de IX
 C 0xA363 copia 2 bytes
 C 0xA3C4 ...0 acaba la tabla
-C 0xA3C7 ¿es la del juego?
+C 0xA3C7 es la del juego?
 C 0xA3C8 si: la ficha
 C 0xA3CA la entrada siguiente, de 4 bytes
 C 0xA3F2 B = el numero de color
@@ -31,6 +31,14 @@ C 0xA443 el numero de color
 C 0xA445 0xFF acaba la lista
 C 0xA448 D y E: el color
 C 0xA44C a la paleta
+C 0xA457 un registro del VDP de la lista...
+C 0xA459 ...al registro C
+C 0xA45D el siguiente
+C 0xA45F los B registros
+C 0xA465 en MSX1, ya esta
+C 0xA466 R#23 = 0: sin desplazamiento vertical
+C 0xA46C R#9...
+C 0xA46F ...sin el bit 7: 192 lineas
 C 0xA4A4 A tercios: copia BC bytes de HL a la VRAM DE
 C 0xA4AC el tercio siguiente esta 0x800 mas alla
 C 0xA4B4 los A tercios
@@ -61,9 +69,9 @@ C 0xA55D la cifra alta...
 C 0xA563 ...por 10 (x2, x8 y suma)
 C 0xA569 la cifra baja
 C 0xA56C mas las decenas
-C 0xA6CF ¿es una cifra?
+C 0xA6CF es una cifra?
 C 0xA6D6 si: tal cual
-C 0xA6EC ¿es una minuscula (a-z)?
+C 0xA6EC es una minuscula (a-z)?
 C 0xA6F1 no: no vale
 C 0xA6F4 a mayuscula
 C 0xA7E3 C = -1: arriba
@@ -75,8 +83,8 @@ C 0xA82F 0x81: empieza un trozo de copias (bit 7 a 1, uno)
 C 0xA834 el byte
 C 0xA835 donde va la cuenta de este trozo
 C 0xA83B lo copia
-C 0xA83E ¿se acabo la pantalla?
-C 0xA844 ¿el siguiente es igual?
+C 0xA83E se acabo la pantalla?
+C 0xA844 el siguiente es igual?
 C 0xA846 si: empieza una repeticion
 C 0xA848 no: un trozo de copias que lleva 1
 C 0xA865 retrocede un byte
@@ -186,7 +194,7 @@ C 0xA347 la direccion de la variable a 0xD30A...
 C 0xA34E ...y un byte a 0xD313
 C 0xA370 el RC del juego...
 C 0xA373 ...en orden
-C 0xA376 ¿RC-751...
+C 0xA376 RC-751...
 C 0xA37C ...o RC-752?
 C 0xA382 por debajo del RC-758...
 C 0xA386 ...ya esta
@@ -225,10 +233,10 @@ C 0xA6E1 guarda la tecla
 C 0xA6E2 0xD167 = 0xFF: el menu no admite letras
 C 0xA84D el byte
 C 0xA84F se copia
-C 0xA852 ¿se acabo la pantalla?
-C 0xA858 ¿el siguiente es igual?
+C 0xA852 se acabo la pantalla?
+C 0xA858 el siguiente es igual?
 C 0xA859 no: copias
-C 0xA85B ¿y el otro?
+C 0xA85B y el otro?
 C 0xA861 tres iguales: repeticion
 C 0xA878 la cuenta de la repeticion
 C 0xA87B con tope 0x7B
@@ -270,6 +278,7 @@ L 0xA122 pon_valor escribe 0xF29C en la variable del juego (0xF28A) (gemela de p
 L 0xA21E divide_a_menos_1 DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit) (gemela de p01:706C)
 L 0xA223 divide DE / BC: cociente en DE y resto en HL (gemela de p05:9430)
 L 0xA23D borra_pantalla_b borra la tabla de nombres y esconde los sprites (gemela de p01:708B)
+L 0xA24F prepara_ficha la ficha del juego, su cabecera y, para el juego 0x36, 4 en 0xD312
 L 0xA263 lee_cabecera_juego lee la cabecera de 0x4028 del juego y sus opciones (gemela de p01:70AA)
 L 0xA2DE busca_ficha_b copia la ficha por defecto (p00:45D0) a 0xD300 y busca la del juego
 L 0xA2E2 busca_ficha copia la ficha por defecto (p00:45D0) y busca la del juego por su suma (gemela de p01:7136)
@@ -290,12 +299,15 @@ L 0xA4CB descomprime_con_direccion descomprime a la VRAM de la palabra de HL (ge
 L 0xA4CF descomprime descomprime HL a la VRAM DE: n & 0x7F repeticiones o copias (gemela de p01:733A)
 L 0xA4FF vram_escribe_en SETWRT (o NSTWRT en MSX2) en HL (gemela de p01:736A)
 L 0xA510 despacha salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
+L 0xA520 pinta_texto_b_en pinta el texto de HL en la VRAM DE
 L 0xA524 pinta_texto_b pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
 L 0xA54B binario_a_bcd HL a BCD en DE (gemela de p01:746C)
 L 0xA55C bcd_a_binario A en BCD a binario (gemela de p01:747D)
 L 0xA56E borra_ventana borra la ventana de 0x9237 (gemela de p01:748F)
 L 0xA5DC lee_vram_tercios LDIRMV de los tres tercios (0x2000 de paso) (gemela de p01:7834)
 L 0xA62A copia_vram_tercios LDIRVM de los tres tercios (0x2000 de paso) (gemela de p01:788E)
+L 0xA63C guarda_pantalla_si si 0xD13D, guarda la pantalla (p03:A578)
+L 0xA644 devuelve_pantalla_si si 0xD13D, devuelve la pantalla (p03:A5EF)
 L 0xA655 borra_zona_3a00 borra 0x3A00 (0x100 bytes)
 L 0xA65F menu menu de B opciones con el cursor A: devuelve la elegida (gemela de p01:750E)
 L 0xA731 borra_teclado borra el bufer de teclas del menu (0x920B) (gemela de p01:75E2)
@@ -362,7 +374,6 @@ C 0xA3F3 el puerto de escritura del VDP (VDP.DW)
 C 0xA40A la version del MSX (0 = MSX1)
 C 0xA41B pon_color: MSX2: el color B de la paleta con D y E (R
 C 0xA461 la version del MSX (0 = MSX1)
-C 0xA46C lee el registro 9 del VDP (copia de la BIOS)
 C 0xA4BD descomprime: descomprime HL a la VRAM DE: n & 0x7F repeticiones o copias (gemela de p01:733A)
 C 0xA4D0 vram_escribe_en: SETWRT (o NSTWRT en MSX2) en HL (gemela de p01:736A)
 C 0xA4D4 el puerto de escritura del VDP (VDP.DW)

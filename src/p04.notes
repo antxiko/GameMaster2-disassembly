@@ -5,6 +5,22 @@ C 0x866F A x 2: cada destino es una palabra
 # --- fin de los comentarios copiados ---
 
 # --- A MANO: comentarios escritos leyendo el codigo ---
+C 0x807F crear: la mitad 0x10 de la SRAM
+C 0x8084 el nombre tiene que valer
+C 0x808A y no existir
+C 0x8090 una entrada libre del directorio (ix+0x07)
+C 0x8093 si no hay, error (lleno)
+C 0x8096 y un bloque libre (ix+0x08)
+C 0x809B el fichero aun no esta abierto
+C 0x809F la entrada x 8...
+C 0x80A7 ...en el directorio
+C 0x80AC el nombre (5 letras)...
+C 0x80AF ...a la entrada
+C 0x80B4 el primer bloque
+C 0x80B8 en la tabla de bloques (0xB200 + bloque)...
+C 0x80BE ...ocupado y ultimo (0xFF)
+C 0x80C1 el tamano a cero
+C 0x80C5 A = 0: creado
 C 0x80D1 la entrada del directorio
 C 0x80D2 0x10: libre
 C 0x80D6 la siguiente (8 bytes)
@@ -29,6 +45,28 @@ C 0x8139 x 2: H = los bloques de 128 bytes
 C 0x813A si pasa de 0x7FFF, error
 C 0x813D B = cuantos bloques
 C 0x813F el primer bloque (ix+0x08)
+C 0x8169 abrir: la mitad 0x10 de la SRAM
+C 0x816E el nombre tiene que valer
+C 0x8174 y existir
+C 0x817A su entrada...
+C 0x817D ...a (ix+0x07)
+C 0x8180 x 8, mas 5: el primer bloque...
+C 0x8189 ...a (ix+0x08)
+C 0x818E el tamano (2 bytes)...
+C 0x818F ...a (ix+0x05)
+C 0x8197 (ix+0x0B) = 0xFFFF: aun no se ha escrito
+C 0x819F el puntero a 0
+C 0x81A7 abierto
+C 0x81AB A = 0: bien
+C 0x81CA la mitad 0x10 de la SRAM
+C 0x81CF desde la entrada (ix+0x12)...
+C 0x81D3 ...hasta la 0x40
+C 0x81D8 la entrada x 8...
+C 0x81DD ...en el directorio
+C 0x81E2 HL = el nombre buscado
+C 0x81E5 0x10: libre, se salta
+C 0x81EA coincide?
+C 0x81ED si: Z
 C 0x81F3 la entrada (ix+0x12)...
 C 0x81F8 ...x 8...
 C 0x81FB ...en el directorio de 0xB000
@@ -47,9 +85,47 @@ C 0x8265 el byte 5: el primer bloque del fichero
 C 0x826A libera toda su cadena
 C 0x826D si falla, error
 C 0x8270 A = 0: borrado
+C 0x8272 renombrar: la mitad 0x10 de la SRAM
+C 0x8277 el nombre viejo tiene que valer
+C 0x827D y existir
+C 0x8283 su entrada (ix+0x12)
+C 0x8289 el nombre nuevo (ix+5)...
+C 0x828E ...pasa al sitio del viejo (ix+0)
+C 0x8298 el nuevo tambien tiene que valer
+C 0x82A0 y no existir
+C 0x82A4 si existe: error
+C 0x82A7 la entrada x 8...
+C 0x82AA ...en el directorio
+C 0x82AF el nombre nuevo...
+C 0x82B2 ...5 letras, a la entrada
+C 0x82B7 A = 0: renombrado
+C 0x82B9 leer: el fichero tiene que estar abierto
+C 0x82BF la mitad 0x10
+C 0x82C4 modo lectura (ix+0x11 = 0)
+C 0x82C8 el puntero del fichero...
+C 0x82CE ...contra su tamano
+C 0x82D5 al final: error
+C 0x82D8 situa el bloque
+C 0x82DD y copia
 C 0x82EB DE = el destino en la RAM (ix+0x0D)
 C 0x82F1 HL = la posicion en la SRAM (ix+0x15)
 C 0x82F7 BC = cuantos bytes (ix+0x0F)
+C 0x830A el puntero del fichero...
+C 0x8311 ...contra su tamano
+C 0x8319 llego al final: se acabo
+C 0x831B se acabo el bloque de 128 bytes?
+C 0x831E no: sigue
+C 0x8322 si: el siguiente de la cadena
+C 0x8327 si no hay, error
+C 0x8328 su posicion en la SRAM
+C 0x8347 escribir: el fichero tiene que estar abierto
+C 0x834D la mitad 0x10
+C 0x8352 modo escritura (ix+0x11 = 1)
+C 0x8356 situa el bloque
+C 0x8359 sin sitio: error
+C 0x835C el bloque actual es el anterior
+C 0x8362 y copia
+C 0x8368 A = 0: bien
 C 0x8372 HL = el origen en la RAM (ix+0x0D)
 C 0x8378 DE = la posicion en la SRAM (ix+0x15)
 C 0x837E BC = cuantos bytes (ix+0x0F)
@@ -58,7 +134,7 @@ C 0x8386 BC a 0: se acabo
 C 0x838A el puntero del fichero (ix+0x09)...
 C 0x8390 ...sube...
 C 0x8391 ...y el tamano (ix+0x0B) con el
-C 0x839E ¿se lleno el bloque de 128 bytes?
+C 0x839E se lleno el bloque de 128 bytes?
 C 0x83A1 no: sigue
 C 0x83A5 lleno: guarda su CRC
 C 0x83A8 y pasa al bloque siguiente
@@ -94,6 +170,12 @@ C 0x8468 y es el actual
 C 0x846C el nuevo es el ultimo de la cadena (0xFF)
 C 0x846E los B bloques
 C 0x8470 A = 0: bien
+C 0x8472 cargar entero: la mitad 0x10
+C 0x8477 abre el fichero
+C 0x847B si falla, el error
+C 0x847C cuantos bytes: su tamano entero
+C 0x8488 los lee
+C 0x848C y lo cierra
 C 0x84EC la marca de la SRAM formateada: 0xFFFA...
 C 0x84F2 ...y 0xFF en 0xB202-0xB205
 C 0x8508 compara la marca de 0xB200 con la de p04:8513
@@ -114,6 +196,12 @@ C 0x8543 pone la mitad en 0xA000
 C 0x854D en la ventana de 0xB000
 C 0x8552 128 bytes
 C 0x8554 el CRC empieza en 0
+C 0x8557 un byte del bloque...
+C 0x855A ...por el CRC
+C 0x855E el siguiente
+C 0x8560 los 128
+C 0x8562 donde va el CRC de este bloque: 0xB280 + 2 x bloque
+C 0x856C vuelve a la mitad 0x10 de la SRAM
 C 0x8578 un bit: el bajo del byte...
 C 0x857C ...entra por arriba en HL al desplazarlo
 C 0x8580 el bit que sale de HL...
@@ -126,6 +214,12 @@ C 0x85AA ni los codigos de control (0x01-0x1F)
 C 0x85B1 las 5 letras
 C 0x85B6 la primera letra...
 C 0x85B8 ...no puede ser 0 ni un espacio
+C 0x85E4 compara con un nombre
+C 0x85E6 coincide?
+C 0x85EA si: hecho
+C 0x85ED con un '*' vale el resto
+C 0x85F4 B nombres
+C 0x85F6 ninguno: NZ
 C 0x8651 desplaza el nombre una letra
 C 0x8655 las B letras
 C 0x8657 la que sale: 0...
@@ -145,6 +239,7 @@ F 0x867A 16
 # --- fin de los bloques de bloques.py ---
 
 # --- ANOTACIONES AUTOMATICAS (seccion que reescribe tools/anota.py; no editar a mano) ---
+L 0x8000 sram_puerta la entrada de la SRAM: IX = el bloque de DE, la orden en C (0x0A guarda B en ix+0x17)
 L 0x801E sram_orden la orden C: comprueba la SRAM y salta a la de la tabla
 L 0x807F sram_crea crea un fichero en la SRAM
 L 0x80C7 sram_entrada_libre busca en el directorio (0xB000) una entrada libre (0x10)
@@ -192,10 +287,6 @@ C 0x8016 el mapper: pone en 0xA000 el banco de A
 C 0x8024 sram_formateada: compara la marca de 0xB200 con p04:8513: la SRAM esta formateada
 C 0x8030 despacha: salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
 C 0x8081 el mapper: pone en 0xA000 el banco de A
-C 0x8084 sram_nombre_valido: comprueba el nombre de IX: 5 letras, sin '*' ni '?'
-C 0x808A sram_busca: busca el nombre de IX en el directorio
-C 0x8090 sram_entrada_libre: busca en el directorio (0xB000) una entrada libre (0x10)
-C 0x8096 sram_bloque_libre: busca en la tabla de 0xB206 un bloque libre
 C 0x80BB hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x80F9 sram_abierto: comprueba que el fichero esta abierto (ix+0x18)
 C 0x8101 el mapper: pone en 0xA000 el banco de A
@@ -205,15 +296,12 @@ C 0x811E DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 C 0x8148 hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x8161 hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x816B el mapper: pone en 0xA000 el banco de A
-C 0x816E sram_nombre_valido: comprueba el nombre de IX: 5 letras, sin '*' ni '?'
-C 0x8174 sram_busca: busca el nombre de IX en el directorio
 C 0x81AF el mapper: pone en 0xA000 el banco de A
 C 0x81B2 sram_busca: busca el nombre de IX en el directorio
 C 0x81B8 sram_entrada: HL = la entrada (ix+0x12) del directorio (0xB000, 8 bytes)
 C 0x81BC sram_busca_sigue: sigue buscando desde la entrada (ix+0x12)
 C 0x81C2 sram_entrada: HL = la entrada (ix+0x12) del directorio (0xB000, 8 bytes)
 C 0x81CC el mapper: pone en 0xA000 el banco de A
-C 0x81EA sram_compara_nombre: compara el nombre de la entrada con el de IX (con comodines)
 C 0x8211 el mapper: pone en 0xA000 el banco de A
 C 0x8232 hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x8240 el mapper: pone en 0xA000 el banco de A
@@ -221,25 +309,14 @@ C 0x8243 sram_busca: busca el nombre de IX en el directorio
 C 0x8249 sram_borra: borra el fichero: marca la entrada y libera sus bloques
 C 0x8250 sram_busca: busca el nombre de IX en el directorio
 C 0x8274 el mapper: pone en 0xA000 el banco de A
-C 0x8277 sram_nombre_valido: comprueba el nombre de IX: 5 letras, sin '*' ni '?'
-C 0x827D sram_busca: busca el nombre de IX en el directorio
 C 0x8290 hl_mas_a: HL = HL + A (gemela de p01:7251)
-C 0x8298 sram_nombre_valido: comprueba el nombre de IX: 5 letras, sin '*' ni '?'
-C 0x82A0 sram_busca: busca el nombre de IX en el directorio
-C 0x82B9 sram_abierto: comprueba que el fichero esta abierto (ix+0x18)
 C 0x82C1 el mapper: pone en 0xA000 el banco de A
 C 0x82D4 DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
-C 0x82D8 sram_siguiente_bloque: pasa al bloque siguiente del fichero
-C 0x82DD sram_copia_lee: copia de la SRAM a la RAM, bloque a bloque
 C 0x82E6 el mapper: pone en 0xA000 el banco de A
 C 0x8317 DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
-C 0x8322 sram_siguiente_bloque: pasa al bloque siguiente del fichero
 C 0x8332 el mapper: pone en 0xA000 el banco de A
 C 0x8342 el mapper: pone en 0xA000 el banco de A
-C 0x8347 sram_abierto: comprueba que el fichero esta abierto (ix+0x18)
 C 0x834F el mapper: pone en 0xA000 el banco de A
-C 0x8356 sram_siguiente_bloque: pasa al bloque siguiente del fichero
-C 0x8362 sram_copia_escribe: copia de la RAM a la SRAM, bloque a bloque
 C 0x836D el mapper: pone en 0xA000 el banco de A
 C 0x83D4 el mapper: pone en 0xA000 el banco de A
 C 0x83DB el mapper: pone en 0xA000 el banco de A
@@ -250,9 +327,6 @@ C 0x8419 el mapper: pone en 0xA000 el banco de A
 C 0x843B hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x8461 sram_tamano: el tamano del fichero de IX
 C 0x8474 el mapper: pone en 0xA000 el banco de A
-C 0x8477 sram_abre: abre el fichero de IX
-C 0x8488 sram_lee: lee del fichero a la RAM
-C 0x848C sram_cierra: cierra el fichero de IX
 C 0x8492 el mapper: pone en 0xA000 el banco de A
 C 0x8495 sram_crea: crea un fichero en la SRAM
 C 0x84A5 sram_abre: abre el fichero de IX
@@ -269,14 +343,11 @@ C 0x84FD el mapper: pone en 0xA000 el banco de A
 C 0x8526 crc16_byte: pasa el byte A por el CRC-16 de HL (polinomio 0xA001, reflejado)
 C 0x852C crc16_byte: pasa el byte A por el CRC-16 de HL (polinomio 0xA001, reflejado)
 C 0x8544 el mapper: pone en 0xA000 el banco de A
-C 0x855A crc16_byte: pasa el byte A por el CRC-16 de HL (polinomio 0xA001, reflejado)
 C 0x8569 de_mas_a: DE = DE + A (gemela de p01:7256)
 C 0x856E el mapper: pone en 0xA000 el banco de A
 C 0x85C0 letra_valida: lee la letra: Z si es 0 o espacio
 C 0x85D3 letra_valida: lee la letra: Z si es 0 o espacio
 C 0x85DE sram_copia_nombre: copia el nombre de IX+0x19 (5 letras) a DE
-C 0x85E6 sram_coincide: compara los nombres letra a letra; '*' y '?' valen por cualquiera
-C 0x85ED tiene_asterisco: busca un '*' en el nombre
 C 0x8605 de_mas_a: DE = DE + A (gemela de p01:7256)
 C 0x8615 hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x8621 letra_igual: compara dos letras (espacio y 0 valen lo mismo)

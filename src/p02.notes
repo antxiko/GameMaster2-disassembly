@@ -18,7 +18,7 @@ C 0x83D7 los 4 slots primarios
 C 0x83EE un subslot
 C 0x83EF B = el subslot
 C 0x845D ...0 acaba la tabla
-C 0x8461 ¿es la del juego?
+C 0x8461 es la del juego?
 C 0x8462 si: la ficha
 C 0x8464 la entrada siguiente, de 4 bytes
 C 0x8D0B con dos teclas en el bufer, un numero de dos cifras
@@ -250,12 +250,23 @@ C 0x8415 busca el byte bajo de 0xFD9B...
 C 0x8417 ...en el INIT copiado del juego
 C 0x8419 no esta: no es un juego de Konami
 C 0x841B se acabaron los bytes
-C 0x841E ¿le sigue 0xFD?
+C 0x841E le sigue 0xFD?
 C 0x8423 la segunda cabecera del juego (0x4010):
 C 0x8426 'AB'...
 C 0x842C ...'CD'...
 C 0x8432 ...o 'EF': trae su numero de RC
 C 0x8438 si no hay cabecera: suma los 256 bytes de 0x5000
+C 0x8AC4 MODIFY PLAYER NUMBER: borra los sprites
+C 0x8AC7 el texto de p02:8AF8
+C 0x8ACD en 0x3975...
+C 0x8AD0 ...un numero de 2 cifras
+C 0x8AD3 sin numero, sale
+C 0x8AD6 la decena a 0xD318
+C 0x8ADF el numero entero a 0xD319
+C 0x8AE5 las opciones del MODIFY...
+C 0x8AE8 ...bit 0: hay numero de jugadores
+C 0x8AEA si el juego tiene rutina propia...
+C 0x8AF3 ...bit 2: se usa
 C 0x8C9C una fila de 32 bytes...
 C 0x8CA1 ...de p02:8CCD...
 C 0x8CA4 ...a la VRAM
@@ -267,10 +278,15 @@ C 0x8D5D busca el byte bajo de 0xFD9B...
 C 0x8D5F ...en los 0x100 bytes copiados del INIT del juego
 C 0x8D61 no esta
 C 0x8D62 se acabaron los bytes
-C 0x8D63 ¿le sigue 0xFD?
+C 0x8D63 le sigue 0xFD?
 C 0x8D68 si: apunta al operando del `ld (0xFD9B),hl`
 C 0x8D69 lo cambia por los 5 bytes de p02:8D87
 C 0x8D72 A = 0: hecho
+C 0x8D74 guarda BC y DE
+C 0x8D76 un byte del cartucho del juego...
+C 0x8D79 ...por RDSLT
+C 0x8D7E a DE
+C 0x8D81 BC bytes
 C 0x8D98 sin interrupciones
 C 0x8D99 guarda 0xFD00-0xFFC9 de la RAM del juego en 0xD961
 C 0x8DA4 H.KEYI salta a 0xD2D8: el gancho del Game Master
@@ -279,6 +295,13 @@ C 0x8DB0 ...menos los 3 bytes del `call`...
 C 0x8DB3 ...menos el inicio de este codigo en RAM (0xD861)...
 C 0x8DB9 ...mas el INIT del juego
 C 0x8DBE sigue en el INIT del juego, justo detras de su `ld (0xFD9B),hl`
+C 0x8DBF guarda 0xFD00-0xFFC9 de la RAM del juego en 0xD961
+C 0x8DCA el cartucho del juego en la pagina 1
+C 0x8DD3 llama a 0xD861, la copia del INIT del juego en RAM
+C 0x8DD6 la direccion a la que volveria H.STKE...
+C 0x8DD9 ...menos el INIT del juego...
+C 0x8DE0 ...mas la copia en RAM
+C 0x8DE4 sigue en la copia
 C 0x8DE5 sin interrupciones
 C 0x8DE6 0xD13B: el menu esta abierto
 C 0x8DEB lee el estado del VDP (la interrupcion)
@@ -298,7 +321,7 @@ C 0x8E1F la variable del juego que se mira (0xD304)
 C 0x8E23 la ultima que se vio
 C 0x8E26 sin cambios, nada
 C 0x8E29 cambio: la apunta
-C 0x8E2A ¿es la que se espera (0xD312)?
+C 0x8E2A es la que se espera (0xD312)?
 C 0x8E30 si: el ranking (p02:99FA) por el puente de RAM
 C 0x8E37 0xD332: hay puntos que mirar
 C 0x8E3E 0xD339 bit 0...
@@ -310,6 +333,15 @@ C 0x8E56 si hay segunda
 C 0x8E64 lee los puntos de las dos direcciones (0xD2B6 en RAM)...
 C 0x8E6D ...a 0xD335 y 0xD338
 C 0x8E76 y los compara con 0xD333/0xD336
+C 0x8E89 guarda IX
+C 0x8E8B el Game Master...
+C 0x8E91 ...en la pagina 1...
+C 0x8E97 ...y en la 2
+C 0x8E9C los bancos 2 y 3
+C 0x8EA5 llama a IX
+C 0x8EA8 y devuelve el cartucho del juego...
+C 0x8EAE ...a la pagina 1...
+C 0x8EB4 ...y a la 2
 C 0x8EB9 0xD13A: el volumen pedido; 0xD139: el que suena
 C 0x8EBF bit 1 de las teclas: bajar el volumen
 C 0x8EC3 ya esta a 0
@@ -328,6 +360,12 @@ C 0x8EFF lo que hay que sumar al volumen
 C 0x8F03 suma al que suena
 C 0x8F06 sin pasarse, vuelve
 C 0x8F07 si se pasa, sigue en IX
+C 0x8F4D copia la pila del juego (128 bytes)...
+C 0x8F51 ...a 0xDF80
+C 0x8F59 y la usa
+C 0x8F5C devuelve las variables del Game Master (0xD500 -> 0xF100)
+C 0x8F67 desengancha H.TIMI
+C 0x8F6C y H.KEYI salta a 0xD170 (p02:8DE5, en RAM)
 C 0x8F8A R#8 a 0: el volumen A
 C 0x8F8F R#9: el B
 C 0x8F93 R#10: el C
@@ -375,6 +413,13 @@ C 0x9563 el mensaje del error
 C 0x9566 espera la tecla
 C 0x9569 vuelve a la pila de antes del disco
 C 0x956D C: error
+C 0x957E el error C...
+C 0x9580 ...su mensaje, en la tabla de p02:95B5
+C 0x9586 HL = el mensaje
+C 0x958B se pinta en DE
+C 0x958F una fila mas abajo (0x40)...
+C 0x9593 ...el texto de p02:95A6 (RETURN KEY / RETRY)
+C 0x959A borra el teclado
 C 0x9611 DE = el marco
 C 0x9612 el puente de RAM en 0xD33E...
 C 0x9616 ...a 0xD33C...
@@ -398,6 +443,14 @@ C 0x9B15 quita la marca '2' del ranking
 C 0x9B1A y lo vuelve a pintar
 C 0x9B4B los puntos del juego
 C 0x9B51 donde guarda el juego los puntos (0xD306)
+C 0x9B90 la ventana del ranking (2 x 18) en 0x3A2C...
+C 0x9B96 ...en blanco
+C 0x9B9A la cabecera de p02:9BEC
+C 0x9BA0 el nombre del jugador 1 (0xD322)...
+C 0x9BA3 ...en 0x3A36
+C 0x9BAF sin ranking, ya esta
+C 0x9BB0 el texto de p02:9BF9
+C 0x9BB6 y el nombre del jugador 2 (0xD32A) en 0x3A56
 C 0x9CC3 guarda los registros
 C 0x9CC6 la fila x 3: los puntos
 C 0x9CCA en el ranking (0xD459)
@@ -408,6 +461,12 @@ C 0x9CE7 la fila x 9: el nombre
 C 0x9CEE en el ranking (0xD477)
 C 0x9CF5 el nombre que entra (0xD322)...
 C 0x9CF8 ...o, con la marca 2, el de 0xD32A
+C 0x9DBA guarda la fila y el nombre
+C 0x9DBE borra la fila (0x15 casillas)
+C 0x9DC5 el cursor
+C 0x9DCA la marca de la fila...
+C 0x9DCB ...':' es la del cursor...
+C 0x9DCF ...si no, se pinta
 C 0x9DE0 la columna siguiente
 C 0x9DE1 ';'
 C 0x9DE7 el nombre de la fila (IX)...
@@ -536,10 +595,12 @@ F 0x9FFF 1
 
 # --- ANOTACIONES AUTOMATICAS (seccion que reescribe tools/anota.py; no editar a mano) ---
 L 0x8000 guarda_pantalla guarda la pantalla del juego antes del menu (segun el modo de 0xF3DF/0xF3E0)
+L 0x8080 rellena_vram_128k pone a 0 BC bytes de la VRAM HL (128 KB)
 L 0x8099 vram_alta_escribe H xor 0x80 y NSTWRT: la otra mitad de los 128 KB de VRAM
 L 0x80A0 vram_pagina H y el puerto de datos del VDP para la pagina de VRAM que se ve (0xF3E1)
 L 0x80C6 lee_vram_128k lee BC bytes de la VRAM HL (128 KB) a DE
 L 0x80DD vram_alta_lee H xor 0x80 y NSETRD
+L 0x80E4 devuelve_pantalla devuelve la pantalla del juego guardada (segun el modo de 0xF2A1)
 L 0x8143 escribe_vram_128k escribe BC bytes de DE en la VRAM HL (128 KB)
 L 0x815A registros_vdp_6020 los registros del VDP de p01:6020
 L 0x815F registros_vdp_menu los 8 registros del VDP de p02:8170
@@ -735,6 +796,7 @@ C 0x852B disco_guarda_ranking_b: graba el ranking en disco
 C 0x8531 pinta_tipo: pinta el tipo elegido (0xF10B, nibble bajo)
 C 0x8534 texto_854c: pinta el texto de p02:854C
 C 0x8545 lee la esquina de la ventana pequena y el byte siguiente (16 bits)
+C 0x8549 pinta_texto_b_en: pinta el texto de HL en la VRAM DE
 C 0x856D hay_disco_b: Z si no hay disco (H.PHYD = ret) y 0xD4F9 no lo fuerza
 C 0x8573 cabecera_86de: pinta la cabecera de p02:86DE
 C 0x8576 pinta_opcion_b: pinta la opcion elegida (0xD136, nibble alto)
@@ -769,6 +831,7 @@ C 0x8633 borra_zona_3a00: borra 0x3A00 (0x100 bytes)
 C 0x8639 pinta_texto_b: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
 C 0x863C lee la esquina de la ventana del menu y el byte siguiente (16 bits)
 C 0x8644 lee el codigo del juego (copia)
+C 0x864D pinta_texto_b_en: pinta el texto de HL en la VRAM DE
 C 0x8650 lee el codigo del juego (copia)
 C 0x8656 byte_a_hex: escribe A en hexadecimal (dos letras) en HL
 C 0x869C borra_zona_3a00: borra 0x3A00 (0x100 bytes)
@@ -782,7 +845,9 @@ C 0x873C borra_ventana: borra la ventana de 0x9237 (gemela de p01:748F)
 C 0x873F lee tipo y opcion del menu de disco
 C 0x874B lee la esquina de la ventana del menu y el byte siguiente (16 bits)
 C 0x8751 hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0x8758 pinta_texto_b_en: pinta el texto de HL en la VRAM DE
 C 0x8780 lee la esquina de la ventana pequena y el byte siguiente (16 bits)
+C 0x8787 pinta_texto_b_en: pinta el texto de HL en la VRAM DE
 C 0x8796 borra_zona_3a00: borra 0x3A00 (0x100 bytes)
 C 0x879C pinta_texto_b: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
 C 0x879F pinta_juego_b: pinta el numero de juego (0xD301) en hexadecimal
@@ -849,13 +914,9 @@ C 0x8A68 lee la rutina propia del juego (copia) y el byte siguiente (16 bits)
 C 0x8A6D apunta a las opciones del MODIFY (copia)
 C 0x8AA5 sin_juego_b: Z si no se reconocio el juego (0xD301 = 0xFF)
 C 0x8ABE busca_en_tabla: busca 0xF281 en la tabla [codigo, direccion] de HL (gemela de p01:683A)
-C 0x8AC4 borra_sprites: borra la tabla de sprites (0x3880, 0x200 bytes) (gemela de p01:62D3)
 C 0x8ACA pinta_texto_b: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
-C 0x8AD0 menu_dos_b: menu de 2 opciones (p03:A65F)
 C 0x8AD9 teclado_a_nibble_c: pasa la tecla del bufer (0xD142) a un nibble
 C 0x8AE2 teclado_a_byte: pasa las teclas del bufer (0xD142) a un byte
-C 0x8AE5 apunta a las opciones del MODIFY (copia)
-C 0x8AEA lee la rutina propia del juego (copia) y el byte siguiente (16 bits)
 C 0x8BFC borra_sprites: borra la tabla de sprites (0x3880, 0x200 bytes) (gemela de p01:62D3)
 C 0x8BFF ventana_pequena: las esquinas de una ventana (0x9235, 0x9237)
 C 0x8C02 pinta_opcion_b: pinta la opcion elegida (0xD136, nibble alto)
@@ -876,17 +937,11 @@ C 0x8D20 lee cuantas letras lleva el nombre
 C 0x8D25 apunta a el bufer de teclas
 C 0x8D50 lee la direccion INIT del juego (copia) y el byte siguiente (16 bits)
 C 0x8D56 copia_del_juego: copia BC bytes de HL del cartucho del juego (RDSLT) a DE (gemela de p01:6371)
-C 0x8D76 lee el slot del cartucho del juego (copia)
 C 0x8DA6 guarda el gancho H.KEYI
 C 0x8DAC guarda la direccion del gancho H.KEYI y el byte siguiente (16 bits)
-C 0x8DCA lee el slot del cartucho del juego (copia)
-C 0x8DD9 lee la direccion INIT del juego (copia) y el byte siguiente (16 bits)
 C 0x8E19 lee las opciones del MODIFY (copia)
-C 0x8E8B lee el slot del Game Master (copia)
 C 0x8E9E el mapper: pone en 0x8000 el banco de A
 C 0x8EA2 el mapper: pone en 0xA000 el banco de A
-C 0x8EA5 salta_a_ix: jp (ix)
-C 0x8EA8 lee el slot del cartucho del juego (copia)
 C 0x8F09 lee el slot del cartucho del juego (copia)
 C 0x8F11 IY para CALSLT: en IYh el slot del cartucho del juego (copia)
 C 0x8F15 lee la direccion a la que se vuelve del congelado y el byte siguiente (16 bits)
@@ -1051,7 +1106,9 @@ C 0x9548 pinta_opcion_b: pinta la opcion elegida (0xD136, nibble alto)
 C 0x954B pinta_tipo: pinta el tipo elegido (0xF10B, nibble bajo)
 C 0x954E pinta_juego_b: pinta el numero de juego (0xD301) en hexadecimal
 C 0x9554 lee la esquina de la ventana pequena y el byte siguiente (16 bits)
+C 0x9559 pinta_texto_b_en: pinta el texto de HL en la VRAM DE
 C 0x9583 hl_mas_a: HL = HL + A (gemela de p01:7251)
+C 0x9597 pinta_texto_b_en: pinta el texto de HL en la VRAM DE
 C 0x9734 guarda cuantas letras lleva el nombre
 C 0x9737 guarda la fila elegida
 C 0x973D guarda la posicion del cursor en la VRAM y el byte siguiente (16 bits)
@@ -1072,7 +1129,9 @@ C 0x97CE DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 C 0x97D2 guarda la posicion del cursor en la VRAM y el byte siguiente (16 bits)
 C 0x97D5 cursor_pinta_b: pinta el cursor (':' o el de MSX2)
 C 0x97ED lee la posicion de la ventana en la VRAM y el byte siguiente (16 bits)
+C 0x97F1 pinta_texto_b_en: pinta el texto de HL en la VRAM DE
 C 0x97F7 lee la posicion de la ventana en la VRAM y el byte siguiente (16 bits)
+C 0x97FF pinta_texto_b_en: pinta el texto de HL en la VRAM DE
 C 0x9825 lee la fila elegida
 C 0x9828 fila_de_fichero: HL = la fila A de la lista de ficheros
 C 0x982B lee la posicion de la ventana en la VRAM y el byte siguiente (16 bits)
@@ -1173,7 +1232,6 @@ C 0x9DA5 lee la fila elegida
 C 0x9DA8 puntos_de_ranking: HL = los puntos de la fila A (0x9239, 3 bytes) (gemela de p01:6C46)
 C 0x9DAE lee la posicion de la ventana en la VRAM y el byte siguiente (16 bits)
 C 0x9DB2 lee la fila elegida
-C 0x9DC5 cursor_pinta_b: pinta el cursor (':' o el de MSX2)
 C 0x9DF9 byte_a_hex: escribe A en hexadecimal (dos letras) en HL
 C 0x9E00 byte_a_hex: escribe A en hexadecimal (dos letras) en HL
 C 0x9E07 byte_a_hex: escribe A en hexadecimal (dos letras) en HL

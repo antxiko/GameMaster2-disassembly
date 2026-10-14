@@ -1,9 +1,40 @@
 # Notas del banco 09
 # --- COMENTARIOS COPIADOS DE LAS GEMELAS (tools/gemelas.py; no editar a mano) ---
 C 0x8E5E sin interrupciones
+C 0x8EEB guarda los registros
+C 0x8EF3 D y E: la posicion en pixeles...
+C 0x8EF6 .../ 2: la direccion en la VRAM (2 pixeles por byte)
+C 0x8F01 8 lineas
 # --- fin de los comentarios copiados ---
 
 # --- A MANO: comentarios escritos leyendo el codigo ---
+C 0x809B un registro del VDP: el numero...
+C 0x809E ...y el valor
+C 0x80A1 al VDP
+C 0x80A6 los B registros
+C 0x80A8 la paleta del MSX2
+C 0x80AB con la pantalla apagada...
+C 0x80AE ...borra los 64 KB de la VRAM (BC = 0)
+C 0x80B8 la vuelve a encender
+C 0x80BB los atributos de los sprites del MSX2 (0xF600)...
+C 0x80C1 ...a 0xE0: escondidos
+C 0x80C6 sin sprites
+C 0x8135 el paso de la animacion a 0
+C 0x813B descomprime p09:9988 donde dice su primera palabra
+C 0x8141 borra 0x0B00 (0x3F0 bytes)
+C 0x814B en 0x3907...
+C 0x814E ...las letras desde la 0x60...
+C 0x8150 ...6 filas...
+C 0x8152 ...de 11
+C 0x819B 32 bytes de 0x3F en 0x2400 (los patrones, por tercios)
+C 0x81A6 32 de 0xFC en 0x2420
+C 0x81B1 descomprime p09:81FC en 0x0400 (los colores)
+C 0x81BA copia p09:820D (0x30 bytes) a 0x2440
+C 0x81C6 y sus colores, 0xF0
+C 0x8258 en MSX2, otra animacion
+C 0x825A el paso de la animacion
+C 0x825E 0xEB...
+C 0x8260 ...+ 0x15 por cada fila
 C 0x8261 la fila por 21 (0x15)
 C 0x8265 x 8: la posicion en la tabla de patrones...
 C 0x826B ...desde 0x0B00
@@ -21,6 +52,16 @@ C 0x82AE 0xFF acaba
 C 0x82B1 0xFE: salta...
 C 0x82B5 ...las columnas que dice el byte siguiente...
 C 0x82B9 ...y una fila (8 pixeles) mas abajo
+C 0x82CD en MSX2, otra presentacion (p09:8692)
+C 0x82D1 borra la pantalla
+C 0x82D4 los patrones de p09:9DE3 en 0x2300 (los tres tercios)
+C 0x82DD los colores de p10:A1E3 en 0x0300 (R#3 = 0x7F: los colores en 0x0000)
+C 0x82E6 los patrones de los sprites de p10:A32E en 0x1800
+C 0x82EF sin el juego de caracteres japones...
+C 0x82F3 ...la version occidental
+C 0x82F6 el dibujo de p09:8337 (12 x 10) en 0x38C2
+C 0x8302 el de p09:83AF (12 x 14) en 0x38CF
+C 0x830E y los atributos de 7 sprites (p09:831B) en 0x3B00
 C 0x8457 una fila de C bytes
 C 0x845D a la VRAM
 C 0x8461 la fila siguiente de la pantalla (32 bytes mas alla)
@@ -28,6 +69,27 @@ C 0x8468 el origen avanza C bytes
 C 0x846A las B filas
 C 0x848C la opcion elegida es la 2...
 C 0x8493 ...o hay tecla pulsada (0xE000)
+C 0x84DD en MSX1, nada
+C 0x84E1 la animacion...
+C 0x84E2 ...queda en marcha
+C 0x84E5 la primera vez, C = 0
+C 0x84E9 las demas, C = 3
+C 0x84FE en MSX1, nada
+C 0x8503 parada, nada
+C 0x8504 la cuenta de la interrupcion...
+C 0x8507 ...ha cambiado desde la ultima vez (0xE022)?
+C 0x850B no: nada
+C 0x850C la apunta
+C 0x850D la opcion elegida (0xE010)...
+C 0x8511 ...su tabla de sprites (p09:8568)
+C 0x851A C = el primer byte
+C 0x851D el paso de la animacion (0xE021)...
+C 0x8521 ...sube
+C 0x8522 el desplazamiento de ese paso (p09:8560)
+C 0x8529 0xFF: se acabo
+C 0x852D x 6
+C 0x8534 los atributos de los sprites del MSX2 (0xF600)
+C 0x853F 3 sprites
 C 0x8541 un color: rojo y azul...
 C 0x8545 ...y verde
 C 0x8549 los mismos para otro color
@@ -37,6 +99,12 @@ C 0x85D9 ...de tres (0-2)...
 C 0x85DC ...vuelve a la primera
 C 0x85DF la opcion anterior...
 C 0x85E4 ...de la primera pasa a la ultima (2)
+C 0x861E en MSX2, el menu de p09:879B
+C 0x8621 la opcion elegida...
+C 0x8625 ...su flecha (p09:868C)...
+C 0x862B ...en 0x396A
+C 0x8634 el texto de p09:864C
+C 0x863A y el de la opcion (tabla de p09:8669)
 C 0x86E3 una letra
 C 0x86E5 a la pantalla
 C 0x86E8 8 pixeles a la derecha
@@ -50,6 +118,34 @@ C 0x8789 la posicion en la pantalla...
 C 0x878A ...sube 0x37C bytes...
 C 0x878F ...y al llegar a una nueva linea...
 C 0x8793 ...salta 0x380
+C 0x879B la opcion elegida...
+C 0x879F ...su rotulo (p09:8840)...
+C 0x87A5 ...en (0x58, 0x50): 2 letras
+C 0x87AE el texto de p09:8818 en (0x50, 0x90): 5 letras
+C 0x87BA la tabla de p09:87F8 segun la opcion
+C 0x87C8 E = la columna, B = cuantas letras
+C 0x87CE en la fila 0x90
+C 0x8849 con el juego de caracteres japones, nada
+C 0x884E en MSX2, otra (p09:8B20)
+C 0x8858 los patrones de p09:9048 en 0x2008 (tercios)
+C 0x8861 los colores de p09:953A en 0x0008
+C 0x886A los patrones de los sprites de p09:9D2D en 0x1800
+C 0x8873 la tabla de nombres de p09:8900 (0x220 bytes)
+C 0x887F los atributos de los sprites de p09:88C0
+C 0x888B el texto de p09:88A0
+C 0x8891 espera el espacio
+C 0x8B51 las letras de p09:8BCD en (0x08, 0x60): 4 x 8
+C 0x8B5D las de p09:8BED en (0x28, 0x00): 8 x 32
+C 0x8B69 las de p09:8CED en (0x68, 0x60): 4 x 8
+C 0x8B75 las de p09:8D0D en (0x88, 0x50): 1 x 12
+C 0x8B81 y las de p09:8D19 en (0xA0, 0x48): 1 x 14
+C 0x8D2A el patron de p09:8DE6 en 0x3080
+C 0x8D36 su color 0xF0
+C 0x8D41 los colores de 0x0080 a 0xF0
+C 0x8D4C los patrones de p10:B460 en 0x2080
+C 0x8D55 el dibujo de p09:8D99 (3 x 25) en 0x3844
+C 0x8D61 y el de p09:8DE4 en 0x38BC
+C 0x8D6D y el texto de p09:8D74
 C 0x8D83 una fila de C bytes
 C 0x8D89 a la VRAM
 C 0x8D8D la fila siguiente de la pantalla (32 bytes mas alla)
@@ -111,7 +207,10 @@ C 0x8F75 ARG a 0
 C 0x8F77 CMD = 0xC0: HMMV
 C 0x8FA1 guarda la operacion y las paginas
 C 0x8FA2 espera al VDP
+C 0x8FA5 guarda NX y NY
 C 0x8FAB R#17 = 32 (SX) con incremento
+C 0x8FAD sin interrupciones
+C 0x8FB4 C = el puerto de registros indirectos
 C 0x8FB6 SX = H
 C 0x8FBB SY = L...
 C 0x8FBE ...con la pagina de origen (bits 6-7 de A)
@@ -125,9 +224,12 @@ C 0x8FE2 la operacion logica (bits 0-3 de A)...
 C 0x8FE7 ...con CMD = 0x90: LMMM
 C 0x8FED guarda la pagina
 C 0x8FEE espera al VDP
+C 0x8FF1 guarda NX y NY
 C 0x8FF7 R#17 = 36 (DX) con incremento
+C 0x8FF9 sin interrupciones
 C 0x9002 DX = D
 C 0x9007 DY = E, en la pagina A
+C 0x9009 la pagina
 C 0x900D NX = B (de la pila)
 C 0x9012 NY = C
 C 0x9016 CLR = el primer byte de HL
@@ -180,14 +282,23 @@ F 0x9048 16
 # --- ANOTACIONES AUTOMATICAS (seccion que reescribe tools/anota.py; no editar a mano) ---
 L 0x8000 engancha_cuenta pone en H.KEYI (0xFD9A) la cuenta atras de 0xE008 (p09:800E)
 L 0x8013 desengancha_cuenta devuelve H.KEYI a `ret`
+L 0x801B titulo_empieza engancha la cuenta, mira MSX1/MSX2 y el juego de caracteres, y pinta
+L 0x8043 titulo_empieza_b mira MSX1/MSX2 y el juego de caracteres, engancha la cuenta y pinta
+L 0x80D2 titulo_si_msx1 en MSX1, la presentacion de MSX1
+L 0x8117 titulo_espera anima la presentacion hasta que se pulsa una tecla
+L 0x8133 nada_9133 `ret`
+L 0x8134 nada_9134 `ret`
 L 0x8135 titulo_msx1 la presentacion en MSX1: descomprime p09:9988 y pinta
 L 0x8163 titulo_letras dibuja tres rotulos de letras de 1 bit (p09:9B6A, 9BD2, 9C3A)
+L 0x8191 titulo_graficos los patrones, los colores y la fuente de la presentacion
 L 0x819B titulo_colores los colores y los patrones del rotulo en MSX1
 L 0x81D2 titulo_patrones descomprime p09:81DB en los tres tercios
 L 0x823D fuente_a_vram la fuente de p00:483F a la VRAM 0x2180 y su color 0xF0
 L 0x8254 titulo_anima la animacion de la presentacion (0xE001)
 L 0x82AA pinta_lista_de_letras pinta una lista de letras [n, letras]; 0xFF acaba, 0xFE salta
+L 0x82CA titulo_dibuja dibuja la presentacion (p09:9DE3 y p10:A1E3)
 L 0x8457 copia_filas_a_vram copia B filas de C bytes a la VRAM, una fila de 32 de paso
+L 0x846D titulo_menu_bucle el bucle del menu de la presentacion: espera, flechas y espacio
 L 0x84C8 espera_tecla_animando anima hasta que se pulsa una tecla
 L 0x84D9 titulo_paso un paso de la animacion de la presentacion (0xE020)
 L 0x84FA titulo_cuadro un cuadro de la animacion: cada vez que cambia la cuenta (0xE008)
@@ -201,6 +312,7 @@ L 0x86F8 titulo_paleta el color 7 del fondo (R#7) y la paleta de p09:8706
 L 0x8731 titulo_dibujos descomprime p09:8C00 y p09:8800 en la VRAM 0xA580 y 0xA390
 L 0x8744 descomprime_128k descomprime HL a la VRAM DE de 128 KB: n & 0x7F repeticiones
 L 0x8775 siguiente_fila_128k pasa a la fila siguiente cada 32 bytes
+L 0x8846 titulo_rotulo el rotulo de la presentacion en MSX1 (p09:9048)
 L 0x8894 esconde_sprites pone 0xE0 en la tabla de sprites (0x3B00)
 L 0x8B32 espera_espacio espera la barra espaciadora
 L 0x8B3D dibujo_del_banco_11 pone el banco 11 en 0xA000, descomprime p11:A000 y vuelve al 10
@@ -249,10 +361,6 @@ C 0x805A lee es un MSX2
 C 0x8062 guarda SCRMOD, el modo de pantalla
 C 0x806F registros_vdp: los 8 registros del VDP de p01:72E2 y, en MSX2, R#23 y R#9
 C 0x808B guarda el color del borde (BDRCLR)
-C 0x80A8 paleta_msx2: MSX2: los 16 colores de p01:728E
-C 0x80AB pantalla_apagada: R#1 sin el bit 6 y R#8 con el bit 1
-C 0x80B8 pantalla_encendida: R#1 con el bit 6 (pantalla encendida) y R#8 sin el bit 1
-C 0x80C6 sprites_apagados: R
 C 0x80D2 lee es un MSX2
 C 0x80D8 titulo_msx1: la presentacion en MSX1: descomprime p09:9988 y pinta
 C 0x80DC pantalla_apagada: R#1 sin el bit 6 y R#8 con el bit 1
@@ -282,7 +390,6 @@ C 0x81D8 descomprime_tercios: descomprime HL en los tres tercios de la pantalla
 C 0x8246 copia_tercios: LDIRVM en los tres tercios de la pantalla
 C 0x8251 rellena_tercios: FILVRM en los tres tercios de la pantalla
 C 0x8254 lee es un MSX2
-C 0x825A lee el paso de la animacion y el byte siguiente (16 bits)
 C 0x8270 hl_mas_a: HL = HL + A
 C 0x8280 apunta a el paso de la animacion
 C 0x828F apunta a el paso de la animacion
@@ -290,12 +397,9 @@ C 0x82A4 vdp_hmmm: copia rapida de VRAM a VRAM (HMMM): origen HL, destino DE, ta
 C 0x82C0 letra_8x8_en_pagina_1: copia la letra A de 8x8 dentro de la pagina 1 (HMMM)
 C 0x82C3 siguiente_letra: D += 8; al pasar de fila, E += 8
 C 0x82CA lee es un MSX2
-C 0x82D1 borra_nombres: borra la tabla de nombres y esconde los sprites (0xD0 en 0x3B00)
 C 0x82DA descomprime_tercios: descomprime HL en los tres tercios de la pantalla
 C 0x82E3 descomprime_tercios: descomprime HL en los tres tercios de la pantalla
 C 0x82EC descomprime: descomprime HL a la VRAM DE: n & 0x7F repeticiones o copias
-C 0x82EF lee el juego de caracteres de la BIOS (0x002B)
-C 0x82F3 titulo_msx1_b: la presentacion en MSX1: fuente, colores y texto
 C 0x82FF copia_filas_a_vram: copia B filas de C bytes a la VRAM, una fila de 32 de paso
 C 0x830B copia_filas_a_vram: copia B filas de C bytes a la VRAM, una fila de 32 de paso
 C 0x8474 guarda la animacion esta en marcha
@@ -313,7 +417,6 @@ C 0x84DE apunta a la animacion esta en marcha
 C 0x84EF sprites_encendidos: R#8 sin el bit 1: con sprites
 C 0x84FA lee es un MSX2
 C 0x84FF lee la animacion esta en marcha
-C 0x8504 lee la cuenta atras de la interrupcion
 C 0x8514 hl_mas_a: HL = HL + A
 C 0x8525 hl_mas_a: HL = HL + A
 C 0x8531 de_mas_a: DE = DE + A
@@ -359,7 +462,6 @@ C 0x885E descomprime_tercios: descomprime HL en los tres tercios de la pantalla
 C 0x8867 descomprime_tercios: descomprime HL en los tres tercios de la pantalla
 C 0x8870 descomprime: descomprime HL a la VRAM DE: n & 0x7F repeticiones o copias
 C 0x888E pinta_texto: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
-C 0x8891 espera_espacio: espera la barra espaciadora
 C 0x8B20 pantalla_apagada: R#1 sin el bit 6 y R#8 con el bit 1
 C 0x8B23 borra_vram_32k: BIGFIL de 0x8000 bytes desde 0
 C 0x8B26 titulo_paleta_b: el color 4 del fondo y la paleta de p09:8B9C

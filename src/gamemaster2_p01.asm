@@ -128,24 +128,24 @@ L_60FA:
 	call busca_en_tabla		;60fd   ; busca_en_tabla: busca 0xF281 en la tabla [codigo, direccion] de HL
 	jp nz,L_603A		;6100
 L_6103:
-	call borra_sprites		;6103   ; borra_sprites: borra la tabla de sprites (0x3880, 0x200 bytes)
+	call borra_sprites		;6103   ; MODIFY PLAYER NUMBER: borra los sprites
 	ld hl,06137h		;6106
 	call pinta_texto		;6109   ; pinta_texto: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
-	ld hl,03975h		;610c
-	call menu_dos		;610f   ; menu_dos: menu de 2 opciones (p01:750E)
-	jp z,L_6266		;6112
+	ld hl,03975h		;610c   ; en 0x3975...
+	call menu_dos		;610f   ; ...un numero de 2 cifras
+	jp z,L_6266		;6112   ; sin numero, sale
 	ld hl,0f299h		;6115
 	call teclado_a_nibble		;6118   ; teclado_a_nibble: pasa la tecla del bufer (0x920B) a un nibble
 	jp z,L_6266		;611b
 	ld hl,0f29ah		;611e
 	call teclado_a_nibble_b		;6121   ; teclado_a_nibble_b: pasa las teclas del bufer (0x920B) a un byte
-	ld hl,0f298h		;6124   ; apunta a las opciones del MODIFY
-	set 0,(hl)		;6127
-	ld de,(0f294h)		;6129   ; lee la rutina propia del juego y el byte siguiente (16 bits)
+	ld hl,0f298h		;6124   ; las opciones del MODIFY...
+	set 0,(hl)		;6127   ; ...bit 0: hay numero de jugadores
+	ld de,(0f294h)		;6129   ; si el juego tiene rutina propia...
 	ld a,d			;612d
 	or e			;612e
 	jp z,L_6266		;612f
-	set 2,(hl)		;6132
+	set 2,(hl)		;6132   ; ...bit 2: se usa
 	jp L_6266		;6134
 
 ; ----------------------------------------------------------------------
@@ -230,15 +230,15 @@ borra_sprites:		; borra la tabla de sprites (0x3880, 0x200 bytes)
 	xor a			;62d9
 	jp 00056h		;62da   ; BIOS FILVRM - Fills VRAM with value
 teclado_a_nibble:		; pasa la tecla del bufer (0x920B) a un nibble
-	xor a			;62dd
+	xor a			;62dd   ; sin tecla, 0
 	ld (hl),a			;62de
 	ld a,(0922ch)		;62df   ; lee cuantas letras lleva el nombre
 	or a			;62e2
-	ret z			;62e3
+	ret z			;62e3   ; sin tecla, Z
 	ld de,0920bh		;62e4   ; apunta a el bufer de teclas
-	cp 001h		;62e7
+	cp 001h		;62e7   ; con una sola tecla...
 	jr nz,L_62F1		;62e9
-	ld a,(de)			;62eb
+	ld a,(de)			;62eb   ; ...su cifra
 	and 00fh		;62ec
 	ld (hl),a			;62ee
 	or a			;62ef
@@ -261,15 +261,15 @@ L_62F1:
 	ld (hl),a			;6302   ; el numero en binario
 	ret			;6303
 teclado_a_nibble_b:		; pasa las teclas del bufer (0x920B) a un byte
-	xor a			;6304
+	xor a			;6304   ; sin teclas, 0
 	ld (hl),a			;6305
 	ld a,(0922ch)		;6306   ; lee cuantas letras lleva el nombre
 	or a			;6309
-	ret z			;630a
+	ret z			;630a   ; sin teclas, Z
 	ld de,0920bh		;630b   ; apunta a el bufer de teclas
-	cp 001h		;630e
+	cp 001h		;630e   ; con una sola tecla...
 	jr nz,L_6318		;6310
-	ld a,(de)			;6312
+	ld a,(de)			;6312   ; ...su cifra
 	and 00fh		;6313
 	ld (hl),a			;6315
 	or a			;6316
@@ -317,7 +317,7 @@ L_6356:
 	cpir		;6357   ; ...en los 0x100 bytes copiados del INIT del juego
 	ret nz			;6359   ; no esta: el juego no pone su gancho asi
 	jp po,L_636E		;635a   ; se acabaron los bytes
-	ld a,0fdh		;635d   ; ¿le sigue 0xFD? (la palabra 0xFD9B, la direccion de H.KEYI)
+	ld a,0fdh		;635d   ; le sigue 0xFD? (la palabra 0xFD9B, la direccion de H.KEYI)
 	cp (hl)			;635f
 	jr nz,L_6356		;6360
 	dec hl			;6362   ; si: apunta al operando del `ld (0xFD9B),hl`
@@ -331,16 +331,16 @@ L_636E:
 	or 0ffh		;636e
 	ret			;6370
 copia_del_juego:		; copia BC bytes de HL del cartucho del juego (RDSLT) a DE
-	push bc			;6371
+	push bc			;6371   ; guarda BC y DE
 	push de			;6372
-	ld a,(0f104h)		;6373   ; lee el slot del cartucho del juego
-	call 0000ch		;6376   ; BIOS RDSLT - Reads the value of an address in another slot
+	ld a,(0f104h)		;6373   ; un byte del cartucho del juego...
+	call 0000ch		;6376   ; BIOS RDSLT - Reads the value of an address in another slot | ...por RDSLT
 	pop de			;6379
 	pop bc			;637a
-	ld (de),a			;637b
+	ld (de),a			;637b   ; a DE
 	inc hl			;637c
 	inc de			;637d
-	dec bc			;637e
+	dec bc			;637e   ; BC bytes
 	ld a,b			;637f
 	or c			;6380
 	jr nz,copia_del_juego		;6381
@@ -374,20 +374,20 @@ L_6395:
 	ld h,080h		;639f
 	call 00024h		;63a1   ; BIOS ENASLT - Switches to specified slot and page definitively
 L_63A4:
-	ld a,0c3h		;63a4
+	ld a,0c3h		;63a4   ; H.KEYI salta a 0xF230: el gancho del Game Master
 	ld (0fd9ah),a		;63a6   ; guarda el gancho H.KEYI
 	ld hl,0f230h		;63a9
 	ld (0fd9bh),hl		;63ac   ; guarda la direccion del gancho H.KEYI y el byte siguiente (16 bits)
-	pop hl			;63af
-	dec hl			;63b0
+	pop hl			;63af   ; la direccion de vuelta...
+	dec hl			;63b0   ; ...menos los 3 bytes del `call`...
 	dec hl			;63b1
 	dec hl			;63b2
-	ld de,0f175h		;63b3
+	ld de,0f175h		;63b3   ; ...menos el inicio de este codigo en RAM (0xF175)...
 	and a			;63b6
 	sbc hl,de		;63b7
-	ld de,(0f107h)		;63b9   ; lee la direccion INIT del juego y el byte siguiente (16 bits)
+	ld de,(0f107h)		;63b9   ; ...mas el INIT del juego
 	add hl,de			;63bd
-	jp (hl)			;63be
+	jp (hl)			;63be   ; sigue en el INIT del juego, justo detras de su `ld (0xFD9B),hl`
 L_63BF:
 	ld a,(0f104h)		;63bf   ; lee el slot del cartucho del juego
 	ld hl,04000h		;63c2
@@ -433,18 +433,18 @@ L_63DA:
 	jp 0001ch		;6412   ; BIOS CALSLT - Executes inter-slot call
 L_6415:
 	ld a,(0f298h)		;6415   ; lee las opciones del MODIFY
-	or a			;6418
+	or a			;6418   ; sin opciones de MODIFY, nada
 	jr z,L_6433		;6419
-	ld hl,(0f284h)		;641b
+	ld hl,(0f284h)		;641b   ; la variable del juego que se mira (0xF284)
 	ld a,(hl)			;641e
-	ld hl,0f297h		;641f
-	cp (hl)			;6422
+	ld hl,0f297h		;641f   ; la ultima que se vio
+	cp (hl)			;6422   ; sin cambios, nada
 	jr z,L_6433		;6423
-	ld (hl),a			;6425
-	ld a,(0f292h)		;6426   ; lee el numero de jugadores del juego
+	ld (hl),a			;6425   ; cambio: la apunta
+	ld a,(0f292h)		;6426   ; es el numero de jugadores del juego?
 	cp (hl)			;6429
 	jr nz,L_6433		;642a
-	ld ix,06789h		;642c
+	ld ix,06789h		;642c   ; si: las opciones (p01:6789) por CALSLT
 	jp 0001ch		;6430   ; BIOS CALSLT - Executes inter-slot call
 L_6433:
 	ld a,(0f109h)		;6433
@@ -744,26 +744,26 @@ L_6645:
 L_665E:
 	call pon_opcion		;665e   ; pon_opcion: copia 0xF111 a 0xE000
 	call bancos_9_10		;6661   ; bancos_9_10: el cartucho en la pagina 2 y los bancos 9-10
-	call 0801bh		;6664
+	call 0801bh		;6664   ; titulo_empieza: engancha la cuenta, mira MSX1/MSX2 y el juego de caracteres, y pinta
 	jr L_6681		;6667
 L_6669:
 	call pon_opcion		;6669   ; pon_opcion: copia 0xF111 a 0xE000
 	call bancos_9_10		;666c   ; bancos_9_10: el cartucho en la pagina 2 y los bancos 9-10
-	call 08043h		;666f
-	call 080d2h		;6672
-	call 08117h		;6675
-	call 08846h		;6678
-	call 08133h		;667b
-	call 08134h		;667e
+	call 08043h		;666f   ; titulo_empieza_b: mira MSX1/MSX2 y el juego de caracteres, engancha la cuenta y pinta
+	call 080d2h		;6672   ; titulo_si_msx1: en MSX1, la presentacion de MSX1
+	call 08117h		;6675   ; titulo_espera: anima la presentacion hasta que se pulsa una tecla
+	call 08846h		;6678   ; titulo_rotulo: el rotulo de la presentacion en MSX1 (p09:9048)
+	call 08133h		;667b   ; nada_9133: `ret`
+	call 08134h		;667e   ; nada_9134: `ret`
 L_6681:
-	call 082cah		;6681
-	call 0846dh		;6684
+	call 082cah		;6681   ; titulo_dibuja: dibuja la presentacion (p09:9DE3 y p10:A1E3)
+	call 0846dh		;6684   ; titulo_menu_bucle: el bucle del menu de la presentacion: espera, flechas y espacio
 	push af			;6687
 	call bancos_2_3_y_ram		;6688   ; bancos_2_3_y_ram: los bancos 2-3 y devuelve la RAM (0xF2A0) a la pagina 2
 	call 05ec2h		;668b   ; pantalla_del_menu: borra la VRAM y pone el modo del menu (MSX1 o MSX2)
 	call bancos_9_10		;668e   ; bancos_9_10: el cartucho en la pagina 2 y los bancos 9-10
 	call borra_nombres		;6691   ; borra_nombres: borra la tabla de nombres y esconde los sprites (0xD0 en 0x3B00)
-	call 08191h		;6694
+	call 08191h		;6694   ; titulo_graficos: los patrones, los colores y la fuente de la presentacion
 	call bancos_2_3_y_ram		;6697   ; bancos_2_3_y_ram: los bancos 2-3 y devuelve la RAM (0xF2A0) a la pagina 2
 	pop af			;669a
 	call despacha		;669b   ; despacha: salta a la palabra A de la tabla pegada detras del `call`
@@ -1149,21 +1149,21 @@ L_691E:
 	djnz L_6918		;6923
 	ret			;6925
 pinta_ranking:		; pinta la cabecera y las filas del ranking
-	ld hl,03a2ch		;6926
+	ld hl,03a2ch		;6926   ; la ventana del ranking (2 x 18) en 0x3A2C...
 	ld bc,00212h		;6929
-	xor a			;692c
+	xor a			;692c   ; ...en blanco
 	call rellena_ventana		;692d   ; rellena_ventana: rellena una ventana de B filas por C columnas con A
-	ld hl,06982h		;6930
+	ld hl,06982h		;6930   ; la cabecera de p01:6982
 	call pinta_texto		;6933   ; pinta_texto: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
-	ld hl,092b7h		;6936   ; apunta a el nombre que se mete en el ranking
-	ld de,03a36h		;6939
+	ld hl,092b7h		;6936   ; el nombre del jugador 1 (0x92B7)...
+	ld de,03a36h		;6939   ; ...en 0x3A36
 	ld bc,00008h		;693c
 	call copia_a_vram		;693f   ; copia_a_vram: copia BC bytes de HL a la VRAM DE (letra a letra si es de texto)
 	call hay_ranking		;6942   ; hay_ranking: Z si el juego no tiene ranking (0xF290, 0xF286)
-	ret z			;6945
-	ld hl,0698fh		;6946
+	ret z			;6945   ; sin ranking, ya esta
+	ld hl,0698fh		;6946   ; el texto de p01:698F
 	call pinta_texto		;6949   ; pinta_texto: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
-	ld hl,092bfh		;694c
+	ld hl,092bfh		;694c   ; y el nombre del jugador 2 (0x92BF) en 0x3A56
 	ld de,03a56h		;694f
 	ld bc,00008h		;6952
 	jp copia_a_vram		;6955   ; copia_a_vram: copia BC bytes de HL a la VRAM DE (letra a letra si es de texto)
@@ -1684,7 +1684,7 @@ truco_6d41:		; calcula el valor que se escribe en el juego (p01:706C)
 	ld (hl),a			;6d50
 	push hl			;6d51
 	push af			;6d52
-	call busca_juego_6dc9		;6d53   ; ¿el juego tiene mas que poner? (tabla de p01:6DC9)
+	call busca_juego_6dc9		;6d53   ; el juego tiene mas que poner? (tabla de p01:6DC9)
 	pop af			;6d56
 	pop hl			;6d57
 	dec c			;6d58   ; C = el tipo: 0 nada mas...
@@ -1759,7 +1759,7 @@ L_6DB8:
 	ld c,(hl)			;6dbe   ; C = el valor
 	ret z			;6dbf
 	inc hl			;6dc0
-	cp e			;6dc1   ; ¿coincide con la del juego (DE)?
+	cp e			;6dc1   ; coincide con la del juego (DE)?
 	jr nz,L_6DB8		;6dc2
 	ld a,b			;6dc4
 	cp d			;6dc5
@@ -1905,20 +1905,20 @@ L_6E97:
 	jr c,L_6EA8		;6ea4
 	ld a,008h		;6ea6
 L_6EA8:
-	ld hl,06eceh		;6ea8
+	ld hl,06eceh		;6ea8   ; el juego de codigo 0x14 (tabla p01:6CD7): un valor de la tabla de p01:6ECE...
 	call hl_mas_a		;6eab   ; hl_mas_a: HL = HL + A
 	ld a,(hl)			;6eae
-	ld (0e05dh),a		;6eaf
-	ld a,08ah		;6eb2
+	ld (0e05dh),a		;6eaf   ; ...a 0xE05D de la RAM del juego
+	ld a,08ah		;6eb2   ; 0x8A a 0xE056
 	ld (0e056h),a		;6eb4
 	ld a,b			;6eb7   ; la fase pedida
 	ld c,009h		;6eb8   ; entre 9
 	call divide_a_menos_1		;6eba   ; divide_a_menos_1: DE = (A - 1) / C y HL = el resto (division de 16 bits, bit a bit)
 	ld a,l			;6ebd   ; el resto x 2...
 	add a,a			;6ebe
-	ld hl,06ed7h		;6ebf
+	ld hl,06ed7h		;6ebf   ; en la tabla de p01:6ED7...
 	call hl_mas_a		;6ec2   ; hl_mas_a: HL = HL + A
-	ld de,0e054h		;6ec5
+	ld de,0e054h		;6ec5   ; ...dos bytes a 0xE054 del juego
 	ld bc,00002h		;6ec8
 	ldir		;6ecb
 	ret			;6ecd
@@ -2109,9 +2109,9 @@ L_701F:
 	ld (hl),a			;7026
 	ret			;7027
 L_7028:
-	ld a,(0f29bh)		;7028   ; lee la fase que se pide
+	ld a,(0f29bh)		;7028   ; el juego de codigo 0x36 (tabla p01:6CD7): la fase pedida - 1...
 	dec a			;702b
-	ld (0e206h),a		;702c
+	ld (0e206h),a		;702c   ; ...a 0xE206 de la RAM del juego
 	call pon_valor		;702f   ; pon_valor: escribe 0xF29C en la variable del juego (0xF28A)
 	ld a,(0f29bh)		;7032   ; la fase pedida
 	ld c,003h		;7035   ; entre 3
@@ -2124,7 +2124,7 @@ L_7028:
 	rrca			;7040
 	add a,l			;7041   ; ...y el resto a la baja...
 	ld (0e207h),a		;7042
-	ld a,009h		;7045
+	ld a,009h		;7045   ; 9 en la variable del juego (0xF284)
 	ld hl,(0f284h)		;7047
 	ld (hl),a			;704a
 	jp borra_pantalla_b		;704b   ; y borra la pantalla
@@ -2211,9 +2211,9 @@ L_70D4:
 	inc hl			;70d5
 	cp 0ffh		;70d6
 	jr z,L_70E9		;70d8
-	cp e			;70da   ; ¿la parte baja?
+	cp e			;70da   ; la parte baja?
 	jr nz,L_70E1		;70db
-	ld a,(hl)			;70dd   ; ¿y la alta?
+	ld a,(hl)			;70dd   ; y la alta?
 	cp d			;70de
 	jr z,L_70E4		;70df   ; es este juego
 L_70E1:
@@ -2305,7 +2305,7 @@ L_717A:
 	inc de			;7184
 	inc de			;7185
 	ld bc,(0f280h)		;7186   ; el RC
-	ld a,c			;718a   ; ¿RC-748...
+	ld a,c			;718a   ; RC-748...
 	cp 007h		;718b
 	jr nz,L_719C		;718d
 	ld a,b			;718f
@@ -2405,7 +2405,7 @@ L_7219:
 	ld a,l			;721f   ; ...0 acaba la tabla
 	or h			;7220
 	ret z			;7221
-	rst 20h			;7222   ; ¿es la del juego?
+	rst 20h			;7222   ; es la del juego?
 	jr z,L_722F		;7223   ; si: la ficha
 	inc ix		;7225   ; la entrada siguiente, de 4 bytes
 	inc ix		;7227
@@ -2420,7 +2420,7 @@ L_722F:
 	ld d,(hl)			;7237   ; su RC, al reves...
 	inc hl			;7238
 	ld e,(hl)			;7239
-	ld hl,00744h		;723a   ; ...¿llega al RC-744?
+	ld hl,00744h		;723a   ; ...llega al RC-744?
 	ex de,hl			;723d
 	rst 20h			;723e   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	pop hl			;723f
@@ -2517,20 +2517,20 @@ registros_vdp:		; los 8 registros del VDP de p01:72E2 y, en MSX2, R#23 y R#9
 	ld hl,072e2h		;72bc
 	ld bc,00800h		;72bf
 L_72C2:
-	push bc			;72c2
+	push bc			;72c2   ; un registro del VDP de la lista...
 	ld b,(hl)			;72c3
-	call 00047h		;72c4   ; BIOS WRTVDP - Writes data in the VDP-register
+	call 00047h		;72c4   ; BIOS WRTVDP - Writes data in the VDP-register | ...al registro C
 	pop bc			;72c7
-	inc hl			;72c8
+	inc hl			;72c8   ; el siguiente
 	inc c			;72c9
-	djnz L_72C2		;72ca
+	djnz L_72C2		;72ca   ; los B registros
 	ld a,(0002dh)		;72cc   ; la version del MSX (0 = MSX1)
 	and a			;72cf
-	ret z			;72d0
-	ld bc,00017h		;72d1
+	ret z			;72d0   ; en MSX1, ya esta
+	ld bc,00017h		;72d1   ; R#23 = 0: sin desplazamiento vertical
 	call 00047h		;72d4   ; BIOS WRTVDP - Writes data in the VDP-register
-	ld a,(0ffe8h)		;72d7   ; lee el registro 9 del VDP (copia de la BIOS)
-	and 07fh		;72da
+	ld a,(0ffe8h)		;72d7   ; R#9...
+	and 07fh		;72da   ; ...sin el bit 7: 192 lineas
 	ld b,a			;72dc
 	ld c,009h		;72dd
 	jp 00047h		;72df   ; BIOS WRTVDP - Writes data in the VDP-register
@@ -2893,7 +2893,7 @@ p02_80e4:		; p02:80E4 con el cartucho en la pagina 2 y vuelta a la RAM
 	call cartucho_en_8000		;74bf   ; cartucho_en_8000: pone el cartucho (0xF103) en la pagina 2
 	ld a,002h		;74c2
 	ld (08000h),a		;74c4   ; el mapper: pone en 0x8000 el banco de A
-	call 080e4h		;74c7
+	call 080e4h		;74c7   ; devuelve_pantalla: devuelve la pantalla del juego guardada (segun el modo de 0xF2A1)
 	jr L_74A9		;74ca
 L_74CC:
 	ld a,(09236h)		;74cc
@@ -2919,7 +2919,7 @@ L_74D9:
 	jp 00056h		;74f1   ; BIOS FILVRM - Fills VRAM with value
 L_74F4:
 	call cartucho_en_8000		;74f4   ; cartucho_en_8000: pone el cartucho (0xF103) en la pagina 2
-	call 08080h		;74f7
+	call 08080h		;74f7   ; rellena_vram_128k: pone a 0 BC bytes de la VRAM HL (128 KB)
 	jp L_74A9		;74fa
 cartucho_en_8000:		; pone el cartucho (0xF103) en la pagina 2
 	push hl			;74fd
@@ -2991,7 +2991,7 @@ L_7563:
 	ld (hl),a			;757b
 	jr L_75A8		;757c
 L_757E:
-	ld c,a			;757e   ; ¿es una cifra?
+	ld c,a			;757e   ; es una cifra?
 	sub 030h		;757f
 	cp 00ah		;7581
 	jr nc,L_7588		;7583
@@ -3011,7 +3011,7 @@ L_7590:
 	ex af,af'			;7598
 	jr L_75A8		;7599
 L_759B:
-	ld a,c			;759b   ; ¿es una minuscula (a-z)?
+	ld a,c			;759b   ; es una minuscula (a-z)?
 	sub 061h		;759c
 	cp 01ah		;759e
 	jp nc,L_7526		;75a0   ; no: no vale
@@ -3238,9 +3238,9 @@ L_770D:
 	ld (de),a			;7719   ; lo copia
 	inc hl			;771a
 	inc de			;771b
-	call fin_de_8882		;771c   ; ¿se acabo la pantalla?
+	call fin_de_8882		;771c   ; se acabo la pantalla?
 	jp z,L_77AF		;771f
-	ld a,c			;7722   ; ¿el siguiente es igual?
+	ld a,c			;7722   ; el siguiente es igual?
 	cp (hl)			;7723
 	jr z,L_7763		;7724   ; si: empieza una repeticion
 	ld a,001h		;7726   ; no: un trozo de copias que lleva 1
@@ -3251,11 +3251,11 @@ L_772B:
 	ld a,c			;772d   ; se copia
 	ld (de),a			;772e
 	inc de			;772f
-	call fin_de_8882		;7730   ; ¿se acabo la pantalla?
+	call fin_de_8882		;7730   ; se acabo la pantalla?
 	jp z,L_77A6		;7733
-	cp (hl)			;7736   ; ¿el siguiente es igual?
+	cp (hl)			;7736   ; el siguiente es igual?
 	jr nz,L_7756		;7737   ; no: copias
-	inc hl			;7739   ; ¿y el otro?
+	inc hl			;7739   ; y el otro?
 	call fin_de_8882		;773a   ; fin_de_8882: compara HL con 0x8882
 	jr z,L_779B		;773d
 	cp (hl)			;773f   ; tres iguales: repeticion
@@ -3490,17 +3490,17 @@ posicion_grafica:		; la posicion en modo grafico de la letra
 	jr z,L_78F7		;78f3
 	set 7,h		;78f5   ; ...en la mitad alta de la VRAM
 L_78F7:
-	ld a,(0fff6h)		;78f7   ; la direccion a la VRAM
+	ld a,(0fff6h)		;78f7   ; R#14: la pagina de 16 KB de la VRAM...
 	ld e,000h		;78fa
 	ld d,a			;78fc
-	srl d		;78fd
+	srl d		;78fd   ; .../2: en la direccion
 	rr e		;78ff
-	ld a,h			;7901
+	ld a,h			;7901   ; si cruza la mitad de 32 KB...
 	add hl,de			;7902
 	xor h			;7903
 	and 080h		;7904
 	ex de,hl			;7906
-	call nz,de_otra_mitad		;7907   ; de_otra_mitad: D xor 0x80
+	call nz,de_otra_mitad		;7907   ; ...cambia de mitad
 	pop hl			;790a
 	pop af			;790b
 	ret			;790c

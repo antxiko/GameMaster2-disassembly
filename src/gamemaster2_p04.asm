@@ -14,7 +14,7 @@
 ; ======================================================================
 
 
-L_8000:
+sram_puerta:		; la entrada de la SRAM: IX = el bloque de DE, la orden en C (0x0A guarda B en ix+0x17)
 	push de			;8000
 	pop ix		;8001
 	ld a,010h		;8003
@@ -120,40 +120,40 @@ L_807B:
 	or a			;807d
 	ret			;807e
 sram_crea:		; crea un fichero en la SRAM
-	ld a,010h		;807f
+	ld a,010h		;807f   ; crear: la mitad 0x10 de la SRAM
 	ld (0a000h),a		;8081   ; el mapper: pone en 0xA000 el banco de A
-	call sram_nombre_valido		;8084   ; sram_nombre_valido: comprueba el nombre de IX: 5 letras, sin '*' ni '?'
+	call sram_nombre_valido		;8084   ; el nombre tiene que valer
 	jp nz,L_8057		;8087
-	call sram_busca		;808a   ; sram_busca: busca el nombre de IX en el directorio
+	call sram_busca		;808a   ; y no existir
 	jp z,L_8053		;808d
-	call sram_entrada_libre		;8090   ; sram_entrada_libre: busca en el directorio (0xB000) una entrada libre (0x10)
-	jp nz,L_8063		;8093
-	call sram_bloque_libre		;8096   ; sram_bloque_libre: busca en la tabla de 0xB206 un bloque libre
+	call sram_entrada_libre		;8090   ; una entrada libre del directorio (ix+0x07)
+	jp nz,L_8063		;8093   ; si no hay, error (lleno)
+	call sram_bloque_libre		;8096   ; y un bloque libre (ix+0x08)
 	jr nz,L_8063		;8099
-	ld (ix+018h),000h		;809b
-	ld l,(ix+007h)		;809f
+	ld (ix+018h),000h		;809b   ; el fichero aun no esta abierto
+	ld l,(ix+007h)		;809f   ; la entrada x 8...
 	ld h,000h		;80a2
 	add hl,hl			;80a4
 	add hl,hl			;80a5
 	add hl,hl			;80a6
-	ld de,0b000h		;80a7
+	ld de,0b000h		;80a7   ; ...en el directorio
 	add hl,de			;80aa
 	ex de,hl			;80ab
-	push ix		;80ac
+	push ix		;80ac   ; el nombre (5 letras)...
 	pop hl			;80ae
-	ld bc,00005h		;80af
+	ld bc,00005h		;80af   ; ...a la entrada
 	ldir		;80b2
-	ld a,(ix+008h)		;80b4
+	ld a,(ix+008h)		;80b4   ; el primer bloque
 	ld (de),a			;80b7
-	ld hl,0b200h		;80b8
+	ld hl,0b200h		;80b8   ; en la tabla de bloques (0xB200 + bloque)...
 	call hl_mas_a		;80bb   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
-	ld (hl),0ffh		;80be
+	ld (hl),0ffh		;80be   ; ...ocupado y ultimo (0xFF)
 	inc de			;80c0
-	xor a			;80c1
+	xor a			;80c1   ; el tamano a cero
 	ld (de),a			;80c2
 	inc de			;80c3
 	ld (de),a			;80c4
-	xor a			;80c5
+	xor a			;80c5   ; A = 0: creado
 	ret			;80c6
 sram_entrada_libre:		; busca en el directorio (0xB000) una entrada libre (0x10)
 	ld hl,0b000h		;80c7
@@ -256,34 +256,34 @@ L_815E:
 	djnz L_8158		;8164
 	jp L_807B		;8166
 sram_abre:		; abre el fichero de IX
-	ld a,010h		;8169
+	ld a,010h		;8169   ; abrir: la mitad 0x10 de la SRAM
 	ld (0a000h),a		;816b   ; el mapper: pone en 0xA000 el banco de A
-	call sram_nombre_valido		;816e   ; sram_nombre_valido: comprueba el nombre de IX: 5 letras, sin '*' ni '?'
+	call sram_nombre_valido		;816e   ; el nombre tiene que valer
 	jp nz,L_8057		;8171
-	call sram_busca		;8174   ; sram_busca: busca el nombre de IX en el directorio
+	call sram_busca		;8174   ; y existir
 	jp nz,L_805B		;8177
-	ld l,(ix+012h)		;817a
-	ld (ix+007h),l		;817d
-	ld h,000h		;8180
+	ld l,(ix+012h)		;817a   ; su entrada...
+	ld (ix+007h),l		;817d   ; ...a (ix+0x07)
+	ld h,000h		;8180   ; x 8, mas 5: el primer bloque...
 	add hl,hl			;8182
 	add hl,hl			;8183
 	add hl,hl			;8184
 	ld de,0b005h		;8185
 	add hl,de			;8188
-	ld a,(hl)			;8189
+	ld a,(hl)			;8189   ; ...a (ix+0x08)
 	ld (ix+008h),a		;818a
 	inc hl			;818d
-	ld e,(hl)			;818e
-	ld (ix+005h),e		;818f
+	ld e,(hl)			;818e   ; el tamano (2 bytes)...
+	ld (ix+005h),e		;818f   ; ...a (ix+0x05)
 	inc hl			;8192
 	ld d,(hl)			;8193
 	ld (ix+006h),d		;8194
-	ld (ix+00bh),0ffh		;8197
+	ld (ix+00bh),0ffh		;8197   ; (ix+0x0B) = 0xFFFF: aun no se ha escrito
 	ld (ix+00ch),0ffh		;819b
-	ld (ix+009h),000h		;819f
+	ld (ix+009h),000h		;819f   ; el puntero a 0
 	ld (ix+00ah),000h		;81a3
-	ld (ix+018h),001h		;81a7
-	xor a			;81ab
+	ld (ix+018h),001h		;81a7   ; abierto
+	xor a			;81ab   ; A = 0: bien
 	ret			;81ac
 L_81AD:
 	ld a,010h		;81ad
@@ -300,26 +300,26 @@ L_81BC:
 sram_busca:		; busca el nombre de IX en el directorio
 	ld (ix+012h),000h		;81c6
 sram_busca_sigue:		; sigue buscando desde la entrada (ix+0x12)
-	ld a,010h		;81ca
+	ld a,010h		;81ca   ; la mitad 0x10 de la SRAM
 	ld (0a000h),a		;81cc   ; el mapper: pone en 0xA000 el banco de A
-	ld l,(ix+012h)		;81cf
+	ld l,(ix+012h)		;81cf   ; desde la entrada (ix+0x12)...
 	ld a,l			;81d2
-	cp 040h		;81d3
+	cp 040h		;81d3   ; ...hasta la 0x40
 	jp nc,L_805B		;81d5
-	ld h,000h		;81d8
+	ld h,000h		;81d8   ; la entrada x 8...
 	add hl,hl			;81da
 	add hl,hl			;81db
 	add hl,hl			;81dc
-	ld de,0b000h		;81dd
+	ld de,0b000h		;81dd   ; ...en el directorio
 	add hl,de			;81e0
 	ex de,hl			;81e1
-	push ix		;81e2
+	push ix		;81e2   ; HL = el nombre buscado
 	pop hl			;81e4
-	ld a,(de)			;81e5
+	ld a,(de)			;81e5   ; 0x10: libre, se salta
 	cp 010h		;81e6
 	jr z,L_81EE		;81e8
-	call sram_compara_nombre		;81ea   ; sram_compara_nombre: compara el nombre de la entrada con el de IX (con comodines)
-	ret z			;81ed
+	call sram_compara_nombre		;81ea   ; coincide?
+	ret z			;81ed   ; si: Z
 L_81EE:
 	inc (ix+012h)		;81ee
 	jr sram_busca_sigue		;81f1
@@ -396,57 +396,57 @@ sram_borra:		; borra el fichero: marca la entrada y libera sus bloques
 	xor a			;8270   ; A = 0: borrado
 	ret			;8271
 L_8272:
-	ld a,010h		;8272
+	ld a,010h		;8272   ; renombrar: la mitad 0x10 de la SRAM
 	ld (0a000h),a		;8274   ; el mapper: pone en 0xA000 el banco de A
-	call sram_nombre_valido		;8277   ; sram_nombre_valido: comprueba el nombre de IX: 5 letras, sin '*' ni '?'
+	call sram_nombre_valido		;8277   ; el nombre viejo tiene que valer
 	jp nz,L_8057		;827a
-	call sram_busca		;827d   ; sram_busca: busca el nombre de IX en el directorio
+	call sram_busca		;827d   ; y existir
 	jp nz,L_805B		;8280
-	ld l,(ix+012h)		;8283
+	ld l,(ix+012h)		;8283   ; su entrada (ix+0x12)
 	ld h,000h		;8286
 	push hl			;8288
-	push ix		;8289
+	push ix		;8289   ; el nombre nuevo (ix+5)...
 	pop hl			;828b
 	ld e,l			;828c
 	ld d,h			;828d
-	ld a,005h		;828e
+	ld a,005h		;828e   ; ...pasa al sitio del viejo (ix+0)
 	call hl_mas_a		;8290   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld bc,00005h		;8293
 	ldir		;8296
-	call sram_nombre_valido		;8298   ; sram_nombre_valido: comprueba el nombre de IX: 5 letras, sin '*' ni '?'
+	call sram_nombre_valido		;8298   ; el nuevo tambien tiene que valer
 	pop hl			;829b
 	jp nz,L_8057		;829c
 	push hl			;829f
-	call sram_busca		;82a0   ; sram_busca: busca el nombre de IX en el directorio
+	call sram_busca		;82a0   ; y no existir
 	pop hl			;82a3
-	jp z,L_8053		;82a4
-	add hl,hl			;82a7
+	jp z,L_8053		;82a4   ; si existe: error
+	add hl,hl			;82a7   ; la entrada x 8...
 	add hl,hl			;82a8
 	add hl,hl			;82a9
-	ld de,0b000h		;82aa
+	ld de,0b000h		;82aa   ; ...en el directorio
 	add hl,de			;82ad
 	ex de,hl			;82ae
-	push ix		;82af
+	push ix		;82af   ; el nombre nuevo...
 	pop hl			;82b1
-	ld bc,00005h		;82b2
+	ld bc,00005h		;82b2   ; ...5 letras, a la entrada
 	ldir		;82b5
-	xor a			;82b7
+	xor a			;82b7   ; A = 0: renombrado
 	ret			;82b8
 sram_lee:		; lee del fichero a la RAM
-	call sram_abierto		;82b9   ; sram_abierto: comprueba que el fichero esta abierto (ix+0x18)
+	call sram_abierto		;82b9   ; leer: el fichero tiene que estar abierto
 	jp nz,L_805F		;82bc
-	ld a,010h		;82bf
+	ld a,010h		;82bf   ; la mitad 0x10
 	ld (0a000h),a		;82c1   ; el mapper: pone en 0xA000 el banco de A
-	ld (ix+011h),000h		;82c4
-	ld l,(ix+009h)		;82c8
+	ld (ix+011h),000h		;82c4   ; modo lectura (ix+0x11 = 0)
+	ld l,(ix+009h)		;82c8   ; el puntero del fichero...
 	ld h,(ix+00ah)		;82cb
-	ld e,(ix+005h)		;82ce
+	ld e,(ix+005h)		;82ce   ; ...contra su tamano
 	ld d,(ix+006h)		;82d1
 	rst 20h			;82d4   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
-	jp nc,L_806F		;82d5
-	call sram_siguiente_bloque		;82d8   ; sram_siguiente_bloque: pasa al bloque siguiente del fichero
+	jp nc,L_806F		;82d5   ; al final: error
+	call sram_siguiente_bloque		;82d8   ; situa el bloque
 	jr nz,L_82E3		;82db
-	call sram_copia_lee		;82dd   ; sram_copia_lee: copia de la SRAM a la RAM, bloque a bloque
+	call sram_copia_lee		;82dd   ; y copia
 	jr nz,L_82E3		;82e0
 	ret			;82e2
 L_82E3:
@@ -469,24 +469,24 @@ L_82FD:
 	jr nz,L_830A		;8305
 	inc (ix+00ah)		;8307
 L_830A:
-	exx			;830a
+	exx			;830a   ; el puntero del fichero...
 	ld l,(ix+009h)		;830b
 	ld h,(ix+00ah)		;830e
-	ld e,(ix+005h)		;8311
+	ld e,(ix+005h)		;8311   ; ...contra su tamano
 	ld d,(ix+006h)		;8314
 	rst 20h			;8317   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	exx			;8318
-	jr nc,L_8330		;8319
-	ld a,l			;831b
+	jr nc,L_8330		;8319   ; llego al final: se acabo
+	ld a,l			;831b   ; se acabo el bloque de 128 bytes?
 	and 07fh		;831c
-	jr nz,L_82FD		;831e
+	jr nz,L_82FD		;831e   ; no: sigue
 	push de			;8320
 	push bc			;8321
-	call sram_siguiente_bloque		;8322   ; sram_siguiente_bloque: pasa al bloque siguiente del fichero
+	call sram_siguiente_bloque		;8322   ; si: el siguiente de la cadena
 	pop bc			;8325
 	pop de			;8326
-	ret nz			;8327
-	ld l,(ix+015h)		;8328
+	ret nz			;8327   ; si no hay, error
+	ld l,(ix+015h)		;8328   ; su posicion en la SRAM
 	ld h,(ix+016h)		;832b
 	jr L_82FD		;832e
 L_8330:
@@ -503,18 +503,18 @@ L_8340:
 	xor a			;8345
 	ret			;8346
 sram_escribe:		; escribe en el fichero desde la RAM
-	call sram_abierto		;8347   ; sram_abierto: comprueba que el fichero esta abierto (ix+0x18)
+	call sram_abierto		;8347   ; escribir: el fichero tiene que estar abierto
 	jp nz,L_805F		;834a
-	ld a,010h		;834d
+	ld a,010h		;834d   ; la mitad 0x10
 	ld (0a000h),a		;834f   ; el mapper: pone en 0xA000 el banco de A
-	ld (ix+011h),001h		;8352
-	call sram_siguiente_bloque		;8356   ; sram_siguiente_bloque: pasa al bloque siguiente del fichero
-	jp nz,L_836A		;8359
-	ld a,(ix+013h)		;835c
+	ld (ix+011h),001h		;8352   ; modo escritura (ix+0x11 = 1)
+	call sram_siguiente_bloque		;8356   ; situa el bloque
+	jp nz,L_836A		;8359   ; sin sitio: error
+	ld a,(ix+013h)		;835c   ; el bloque actual es el anterior
 	ld (ix+014h),a		;835f
-	call sram_copia_escribe		;8362   ; sram_copia_escribe: copia de la RAM a la SRAM, bloque a bloque
+	call sram_copia_escribe		;8362   ; y copia
 	jp nz,L_836A		;8365
-	xor a			;8368
+	xor a			;8368   ; A = 0: bien
 	ret			;8369
 L_836A:
 	push af			;836a
@@ -541,7 +541,7 @@ L_8384:
 	ld (ix+00ah),b		;8397
 	ld (ix+00ch),b		;839a
 	exx			;839d
-	ld a,e			;839e   ; ¿se lleno el bloque de 128 bytes?
+	ld a,e			;839e   ; se lleno el bloque de 128 bytes?
 	and 07fh		;839f
 	jr nz,L_8384		;83a1   ; no: sigue
 	push hl			;83a3
@@ -658,18 +658,18 @@ L_8467:
 	xor a			;8470   ; A = 0: bien
 	ret			;8471
 L_8472:
-	ld a,010h		;8472
+	ld a,010h		;8472   ; cargar entero: la mitad 0x10
 	ld (0a000h),a		;8474   ; el mapper: pone en 0xA000 el banco de A
-	call sram_abre		;8477   ; sram_abre: abre el fichero de IX
+	call sram_abre		;8477   ; abre el fichero
 	or a			;847a
-	ret nz			;847b
-	ld a,(ix+005h)		;847c
+	ret nz			;847b   ; si falla, el error
+	ld a,(ix+005h)		;847c   ; cuantos bytes: su tamano entero
 	ld (ix+00fh),a		;847f
 	ld a,(ix+006h)		;8482
 	ld (ix+010h),a		;8485
-	call sram_lee		;8488   ; sram_lee: lee del fichero a la RAM
+	call sram_lee		;8488   ; los lee
 	ret nz			;848b
-	call sram_cierra		;848c   ; sram_cierra: cierra el fichero de IX
+	call sram_cierra		;848c   ; y lo cierra
 	ret			;848f
 L_8490:
 	ld a,010h		;8490
@@ -796,19 +796,19 @@ L_8542:
 	ld b,080h		;8552   ; 128 bytes
 	ld hl,00000h		;8554   ; el CRC empieza en 0
 L_8557:
-	push bc			;8557
+	push bc			;8557   ; un byte del bloque...
 	push de			;8558
 	ld a,(de)			;8559
-	call crc16_byte		;855a   ; crc16_byte: pasa el byte A por el CRC-16 de HL (polinomio 0xA001, reflejado)
+	call crc16_byte		;855a   ; ...por el CRC
 	pop de			;855d
-	inc de			;855e
+	inc de			;855e   ; el siguiente
 	pop bc			;855f
-	djnz L_8557		;8560
-	ld a,(ix+013h)		;8562
+	djnz L_8557		;8560   ; los 128
+	ld a,(ix+013h)		;8562   ; donde va el CRC de este bloque: 0xB280 + 2 x bloque
 	add a,a			;8565
 	ld de,0b280h		;8566
 	call de_mas_a		;8569   ; de_mas_a: DE = DE + A (gemela de p01:7256)
-	ld a,010h		;856c
+	ld a,010h		;856c   ; vuelve a la mitad 0x10 de la SRAM
 	ld (0a000h),a		;856e   ; el mapper: pone en 0xA000 el banco de A
 	ret			;8571
 crc16_byte:		; pasa el byte A por el CRC-16 de HL (polinomio 0xA001, reflejado)
@@ -891,18 +891,18 @@ sram_compara_nombre:		; compara el nombre de la entrada con el de IX (con comodi
 	pop de			;85e1
 	ld b,005h		;85e2
 L_85E4:
-	push bc			;85e4
+	push bc			;85e4   ; compara con un nombre
 	push de			;85e5
-	call sram_coincide		;85e6   ; sram_coincide: compara los nombres letra a letra; '*' y '?' valen por cualquiera
+	call sram_coincide		;85e6   ; coincide?
 	pop de			;85e9
-	jr z,L_85FD		;85ea
+	jr z,L_85FD		;85ea   ; si: hecho
 	push de			;85ec
-	call tiene_asterisco		;85ed   ; tiene_asterisco: busca un '*' en el nombre
+	call tiene_asterisco		;85ed   ; con un '*' vale el resto
 	pop de			;85f0
 	jr c,L_85F9		;85f1
 	pop bc			;85f3
-	djnz L_85E4		;85f4
-	or 0ffh		;85f6
+	djnz L_85E4		;85f4   ; B nombres
+	or 0ffh		;85f6   ; ninguno: NZ
 	ret			;85f8
 L_85F9:
 	pop bc			;85f9

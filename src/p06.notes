@@ -4,10 +4,40 @@
 C 0xA010 un rectangulo de color 1 en (0x58, 0x18) de 0x60 x 0xD0
 C 0xA01D su marco de color 0x0F
 C 0xA028 y otro marco por fuera
+C 0xA066 la sombra: un rectangulo de color 0x99 en (0x16, 0x1E)...
+C 0xA069 ...de 0x1C x 0x8C
+C 0xA073 la caja de color 0x55, 4 pixeles mas arriba y a la izquierda
+C 0xA080 su marco de color 0x0F
+C 0xA08B y el texto de p06:A15E
+C 0xA092 la sombra en (0x2E, 0x2E)
+C 0xA09F la caja de color 0x55
+C 0xA0AC su marco
+C 0xA0B7 y el texto de p06:A17C
 C 0xA0DB la casilla empieza una fila y una columna antes
 C 0xA0E2 de 0x0A x 0x0C
 C 0xA0E5 color 0x55
 C 0xA0ED y su marco de color 0x0F
+C 0xA0F6 la sombra en (0x16, 0x1C), de 0x3C x 0xCE
+C 0xA103 la caja de color 0x55
+C 0xA110 su marco
+C 0xA11B y el texto de p06:A1EB
+C 0xA23B la sombra en (0xA8, 0xB8), de 0x10 x 0x38
+C 0xA248 la caja de color 0x55
+C 0xA255 su marco
+C 0xA260 y el texto de p06:A267
+C 0xA2BD el dia
+C 0xA2BE del 0x13 en adelante, ya esta
+C 0xA2C2 el azul sube con el dia (0-7), el rojo a 7
+C 0xA2CB en el color 12
+C 0xA2D9 el dia de la grafica
+C 0xA2DA del 0x13 en adelante, ya esta
+C 0xA2DE el verde sube con el dia (0-7)...
+C 0xA2E8 ...con el rojo y el azul a 7
+C 0xA2EF en el color 13
+C 0xA2FD el dia
+C 0xA2FE del 0x13 en adelante, ya esta
+C 0xA302 el verde sube con el dia (0-7)
+C 0xA309 en el color 14
 C 0xA342 ordena las coordenadas: que B sea la mayor
 C 0xA34A y que D tambien
 C 0xA3CD B = el nivel: 0 desde 0xA8
@@ -15,6 +45,7 @@ C 0xA3D3 1 desde 0x94
 C 0xA3D8 2 desde 0x7E
 C 0xA3DD 3 desde 0x6C
 C 0xA3E2 4 por debajo
+C 0xA3E5 el texto del nivel
 # --- fin de lo escrito a mano ---
 
 # --- BLOQUES QUE LEE EL CODIGO (seccion que reescribe tools/bloques.py; no editar a mano) ---
@@ -33,22 +64,36 @@ F 0xA442 16
 # --- fin de los bloques de bloques.py ---
 
 # --- ANOTACIONES AUTOMATICAS (seccion que reescribe tools/anota.py; no editar a mano) ---
+L 0xA006 bio_cuadro los marcos, el eje y la rejilla de la grafica
 L 0xA010 bio_marco dibuja los marcos de la grafica
+L 0xA034 bio_caja_a19d una caja con su marco y el texto de p06:A19D
 L 0xA050 bio_eje dibuja el eje de la grafica
 L 0xA05B bio_rejilla dibuja la rejilla de la grafica
+L 0xA066 bio_caja_a15e una caja con sombra, su marco y el texto de p06:A15E
+L 0xA092 bio_caja_a17c una caja con sombra, su marco y el texto de p06:A17C
 L 0xA0CC bio_texto_a19d pinta el texto de p06:A19D
+L 0xA0D3 bio_texto_a1a6 pinta el texto de p06:A1A6
+L 0xA0DA nada_b `ret`
 L 0xA0DB bio_casilla pinta una casilla con el comando del VDP
+L 0xA0F6 bio_caja_a1eb una caja con sombra, su marco y el texto de p06:A1EB
 L 0xA122 bio_borra_zona borra la zona de la grafica (comando del VDP)
 L 0xA13B bio_texto_a1b2 pinta el texto de p06:A1B2
 L 0xA142 bio_texto_a1bd pinta el texto de p06:A1BD
 L 0xA149 bio_texto_a1cb pinta el texto de p06:A1CB
 L 0xA150 bio_texto_a1da pinta el texto de p06:A1DA
+L 0xA157 bio_texto_a208 pinta el texto de p06:A208
+L 0xA23B bio_caja_grande una caja con sombra y su marco
+L 0xA270 bio_borra_caja borra una caja (color 0x44)
+L 0xA27E bio_parpadea cada 16 cuadros (0xE06E) cambia el texto que parpadea
 L 0xA31E bio_avanza_dia pasa el dia (0xE061) cada 64 cuadros
 L 0xA325 bio_dia_sube sube el dia mostrado (0xE054) (gemela de p05:9B8D)
+L 0xA336 bio_marcas los tres valores y sus letras
+L 0xA33D bio_pinta_marcas_b pinta las tres marcas ordenadas por altura (H, D, B)
 L 0xA360 bio_valores los tres valores del dia (0xE05A..) a 0xE070
 L 0xA375 bio_pinta_letras pinta P, S e I (fisico, sensibilidad, intelecto) en su altura
 L 0xA392 bio_pinta_marca pinta la marca de un ciclo en su altura
 L 0xA3A0 bio_coordenada HL = 0x1200 + A
+L 0xA3A4 bio_niveles_si si 0xE06A es 0, los niveles de los tres ciclos
 L 0xA3B1 bio_niveles clasifica los tres ciclos (0xE05A, 0xE05C, 0xE05E)
 L 0xA3CD bio_nivel B = el nivel de A (umbrales 0xA8, 0x94, 0x7E...)
 L 0xA3EA bio_pinta_niveles pinta el nivel de cada ciclo
@@ -56,25 +101,46 @@ L 0xA40F bio_texto_nivel el texto del nivel A (tabla de p06:A417)
 L 0xA421 tabla_palabra DE = la palabra A de la tabla de HL
 L 0xA429 bio_pinta_texto pinta el texto del nivel en DE
 L 0xA436 bio_borra_texto borra la zona del texto (comando del VDP)
+C 0xA002 bio_pinta_fecha: pinta el ano, el mes y el dia
 C 0xA006 bio_marco: dibuja los marcos de la grafica
 C 0xA009 bio_eje: dibuja el eje de la grafica
 C 0xA00C bio_rejilla: dibuja la rejilla de la grafica
 C 0xA01A vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
+C 0xA025 vdp_rectangulo: dibuja el marco de un rectangulo con cuatro lineas
+C 0xA030 vdp_rectangulo: dibuja el marco de un rectangulo con cuatro lineas
 C 0xA03E vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
+C 0xA049 vdp_rectangulo: dibuja el marco de un rectangulo con cuatro lineas
 C 0xA04C bio_texto_a19d: pinta el texto de p06:A19D
 C 0xA057 vdp_linea: traza una linea con el comando del VDP (LINE, 0x70) de HL con el largo de la pila; el lado largo en horizontal
 C 0xA062 vdp_linea_vertical: traza una linea con el comando del VDP (LINE, 0x70) con el lado largo en vertical (ARG = 1)
 C 0xA070 vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 C 0xA07D vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
+C 0xA088 vdp_rectangulo: dibuja el marco de un rectangulo con cuatro lineas
+C 0xA08E pinta_texto_8x8: pinta un texto [x, y][letras] con letras de 8x8 y la mascara 0xFF; 0xFF acaba, 0xFE otra posicion
 C 0xA09C vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 C 0xA0A9 vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
+C 0xA0B4 vdp_rectangulo: dibuja el marco de un rectangulo con cuatro lineas
+C 0xA0BA pinta_texto_8x8: pinta un texto [x, y][letras] con letras de 8x8 y la mascara 0xFF; 0xFF acaba, 0xFE otra posicion
 C 0xA0C8 vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
+C 0xA0CF pinta_texto_8x8: pinta un texto [x, y][letras] con letras de 8x8 y la mascara 0xFF; 0xFF acaba, 0xFE otra posicion
+C 0xA0D6 pinta_texto_8x8: pinta un texto [x, y][letras] con letras de 8x8 y la mascara 0xFF; 0xFF acaba, 0xFE otra posicion
 C 0xA0E9 vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
+C 0xA0F2 vdp_rectangulo: dibuja el marco de un rectangulo con cuatro lineas
 C 0xA100 vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 C 0xA10D vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
+C 0xA118 vdp_rectangulo: dibuja el marco de un rectangulo con cuatro lineas
+C 0xA11E pinta_texto_8x8: pinta un texto [x, y][letras] con letras de 8x8 y la mascara 0xFF; 0xFF acaba, 0xFE otra posicion
 C 0xA12C vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
+C 0xA137 vdp_rectangulo: dibuja el marco de un rectangulo con cuatro lineas
+C 0xA13E pinta_texto_8x8: pinta un texto [x, y][letras] con letras de 8x8 y la mascara 0xFF; 0xFF acaba, 0xFE otra posicion
+C 0xA145 pinta_texto_8x8: pinta un texto [x, y][letras] con letras de 8x8 y la mascara 0xFF; 0xFF acaba, 0xFE otra posicion
+C 0xA14C pinta_texto_8x8: pinta un texto [x, y][letras] con letras de 8x8 y la mascara 0xFF; 0xFF acaba, 0xFE otra posicion
+C 0xA153 pinta_texto_8x8: pinta un texto [x, y][letras] con letras de 8x8 y la mascara 0xFF; 0xFF acaba, 0xFE otra posicion
+C 0xA15A pinta_texto_8x8: pinta un texto [x, y][letras] con letras de 8x8 y la mascara 0xFF; 0xFF acaba, 0xFE otra posicion
 C 0xA245 vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 C 0xA252 vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
+C 0xA25D vdp_rectangulo: dibuja el marco de un rectangulo con cuatro lineas
+C 0xA263 pinta_texto_8x8: pinta un texto [x, y][letras] con letras de 8x8 y la mascara 0xFF; 0xFF acaba, 0xFE otra posicion
 C 0xA27A vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 C 0xA289 despacha: salta a la palabra A de la tabla pegada detras del `call`
 C 0xA29C bio_borra_zona: borra la zona de la grafica (comando del VDP)

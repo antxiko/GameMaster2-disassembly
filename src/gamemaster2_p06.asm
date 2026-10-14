@@ -22,9 +22,9 @@ DATA_partida_A000:
 
 
 L_A002:
-	call 09c8ah		;a002
+	call 09c8ah		;a002   ; bio_pinta_fecha: pinta el ano, el mes y el dia
 	ret			;a005
-L_A006:
+bio_cuadro:		; los marcos, el eje y la rejilla de la grafica
 	call bio_marco		;a006   ; bio_marco: dibuja los marcos de la grafica
 	call bio_eje		;a009   ; bio_eje: dibuja el eje de la grafica
 	call bio_rejilla		;a00c   ; bio_rejilla: dibuja la rejilla de la grafica
@@ -38,13 +38,13 @@ bio_marco:		; dibuja los marcos de la grafica
 	ld hl,01858h		;a01d   ; su marco de color 0x0F
 	ld de,0d060h		;a020
 	ld c,00fh		;a023
-	call 0839ch		;a025
+	call 0839ch		;a025   ; vdp_rectangulo: dibuja el marco de un rectangulo con cuatro lineas
 	ld hl,01757h		;a028   ; y otro marco por fuera
 	ld de,0d262h		;a02b
 	ld c,00fh		;a02e
-	call 0839ch		;a030
+	call 0839ch		;a030   ; vdp_rectangulo: dibuja el marco de un rectangulo con cuatro lineas
 	ret			;a033
-L_A034:
+bio_caja_a19d:		; una caja con su marco y el texto de p06:A19D
 	ld hl,0ac44h		;a034
 	ld bc,04010h		;a037
 	ld a,055h		;a03a
@@ -53,7 +53,7 @@ L_A034:
 	ld hl,0ac44h		;a041
 	ld de,04010h		;a044
 	ld c,00fh		;a047
-	call 0839ch		;a049
+	call 0839ch		;a049   ; vdp_rectangulo: dibuja el marco de un rectangulo con cuatro lineas
 	call bio_texto_a19d		;a04c   ; bio_texto_a19d: pinta el texto de p06:A19D
 	ret			;a04f
 bio_eje:		; dibuja el eje de la grafica
@@ -68,41 +68,41 @@ bio_rejilla:		; dibuja la rejilla de la grafica
 	ld c,00fh		;a060
 	call 08365h		;a062   ; vdp_linea_vertical: traza una linea con el comando del VDP (LINE, 0x70) con el lado largo en vertical (ARG = 1)
 	ret			;a065
-L_A066:
-	ld hl,01e16h		;a066
-	ld bc,08c1ch		;a069
+bio_caja_a15e:		; una caja con sombra, su marco y el texto de p06:A15E
+	ld hl,01e16h		;a066   ; la sombra: un rectangulo de color 0x99 en (0x16, 0x1E)...
+	ld bc,08c1ch		;a069   ; ...de 0x1C x 0x8C
 	ld a,099h		;a06c
 	ld d,000h		;a06e
 	call 083c8h		;a070   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
-	ld hl,01a12h		;a073
+	ld hl,01a12h		;a073   ; la caja de color 0x55, 4 pixeles mas arriba y a la izquierda
 	ld bc,08c1ch		;a076
 	ld a,055h		;a079
 	ld d,000h		;a07b
 	call 083c8h		;a07d   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
-	ld hl,01a12h		;a080
+	ld hl,01a12h		;a080   ; su marco de color 0x0F
 	ld de,08c1ch		;a083
 	ld c,00fh		;a086
-	call 0839ch		;a088
-	ld hl,0a15eh		;a08b
-	call 086afh		;a08e
+	call 0839ch		;a088   ; vdp_rectangulo: dibuja el marco de un rectangulo con cuatro lineas
+	ld hl,0a15eh		;a08b   ; y el texto de p06:A15E
+	call 086afh		;a08e   ; pinta_texto_8x8: pinta un texto [x, y][letras] con letras de 8x8 y la mascara 0xFF; 0xFF acaba, 0xFE otra posicion
 	ret			;a091
-L_A092:
-	ld hl,02e2eh		;a092
+bio_caja_a17c:		; una caja con sombra, su marco y el texto de p06:A17C
+	ld hl,02e2eh		;a092   ; la sombra en (0x2E, 0x2E)
 	ld bc,08c1ch		;a095
 	ld a,099h		;a098
 	ld d,000h		;a09a
 	call 083c8h		;a09c   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
-	ld hl,02a2ah		;a09f
+	ld hl,02a2ah		;a09f   ; la caja de color 0x55
 	ld bc,08c1ch		;a0a2
 	ld a,055h		;a0a5
 	ld d,000h		;a0a7
 	call 083c8h		;a0a9   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
-	ld hl,02a2ah		;a0ac
+	ld hl,02a2ah		;a0ac   ; su marco
 	ld de,08c1ch		;a0af
 	ld c,00fh		;a0b2
-	call 0839ch		;a0b4
-	ld hl,0a17ch		;a0b7
-	call 086afh		;a0ba
+	call 0839ch		;a0b4   ; vdp_rectangulo: dibuja el marco de un rectangulo con cuatro lineas
+	ld hl,0a17ch		;a0b7   ; y el texto de p06:A17C
+	call 086afh		;a0ba   ; pinta_texto_8x8: pinta un texto [x, y][letras] con letras de 8x8 y la mascara 0xFF; 0xFF acaba, 0xFE otra posicion
 	ret			;a0bd
 L_A0BE:
 	ld hl,02a2ah		;a0be
@@ -113,13 +113,13 @@ L_A0BE:
 	ret			;a0cb
 bio_texto_a19d:		; pinta el texto de p06:A19D
 	ld hl,0a19dh		;a0cc
-	call 086afh		;a0cf
+	call 086afh		;a0cf   ; pinta_texto_8x8: pinta un texto [x, y][letras] con letras de 8x8 y la mascara 0xFF; 0xFF acaba, 0xFE otra posicion
 	ret			;a0d2
-L_A0D3:
+bio_texto_a1a6:		; pinta el texto de p06:A1A6
 	ld hl,0a1a6h		;a0d3
-	call 086afh		;a0d6
+	call 086afh		;a0d6   ; pinta_texto_8x8: pinta un texto [x, y][letras] con letras de 8x8 y la mascara 0xFF; 0xFF acaba, 0xFE otra posicion
 	ret			;a0d9
-L_A0DA:
+nada_b:		; `ret`
 	ret			;a0da
 bio_casilla:		; pinta una casilla con el comando del VDP
 	xor a			;a0db   ; la casilla empieza una fila y una columna antes
@@ -133,25 +133,25 @@ bio_casilla:		; pinta una casilla con el comando del VDP
 	pop hl			;a0ec
 	ld de,00a0ah		;a0ed   ; y su marco de color 0x0F
 	ld c,00fh		;a0f0
-	call 0839ch		;a0f2
+	call 0839ch		;a0f2   ; vdp_rectangulo: dibuja el marco de un rectangulo con cuatro lineas
 	ret			;a0f5
-L_A0F6:
-	ld hl,01c16h		;a0f6
+bio_caja_a1eb:		; una caja con sombra, su marco y el texto de p06:A1EB
+	ld hl,01c16h		;a0f6   ; la sombra en (0x16, 0x1C), de 0x3C x 0xCE
 	ld bc,0ce3ch		;a0f9
 	ld a,099h		;a0fc
 	ld d,000h		;a0fe
 	call 083c8h		;a100   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
-	ld hl,01812h		;a103
+	ld hl,01812h		;a103   ; la caja de color 0x55
 	ld bc,0ce3ch		;a106
 	ld a,055h		;a109
 	ld d,000h		;a10b
 	call 083c8h		;a10d   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
-	ld hl,01812h		;a110
+	ld hl,01812h		;a110   ; su marco
 	ld de,0ce3ch		;a113
 	ld c,00fh		;a116
-	call 0839ch		;a118
-	ld hl,0a1ebh		;a11b
-	call 086afh		;a11e
+	call 0839ch		;a118   ; vdp_rectangulo: dibuja el marco de un rectangulo con cuatro lineas
+	ld hl,0a1ebh		;a11b   ; y el texto de p06:A1EB
+	call 086afh		;a11e   ; pinta_texto_8x8: pinta un texto [x, y][letras] con letras de 8x8 y la mascara 0xFF; 0xFF acaba, 0xFE otra posicion
 	ret			;a121
 bio_borra_zona:		; borra la zona de la grafica (comando del VDP)
 	ld hl,04eb8h		;a122
@@ -162,27 +162,27 @@ bio_borra_zona:		; borra la zona de la grafica (comando del VDP)
 	ld hl,04eb8h		;a12f
 	ld de,0740ch		;a132
 	ld c,00fh		;a135
-	call 0839ch		;a137
+	call 0839ch		;a137   ; vdp_rectangulo: dibuja el marco de un rectangulo con cuatro lineas
 	ret			;a13a
 bio_texto_a1b2:		; pinta el texto de p06:A1B2
 	ld hl,0a1b2h		;a13b
-	call 086afh		;a13e
+	call 086afh		;a13e   ; pinta_texto_8x8: pinta un texto [x, y][letras] con letras de 8x8 y la mascara 0xFF; 0xFF acaba, 0xFE otra posicion
 	ret			;a141
 bio_texto_a1bd:		; pinta el texto de p06:A1BD
 	ld hl,0a1bdh		;a142
-	call 086afh		;a145
+	call 086afh		;a145   ; pinta_texto_8x8: pinta un texto [x, y][letras] con letras de 8x8 y la mascara 0xFF; 0xFF acaba, 0xFE otra posicion
 	ret			;a148
 bio_texto_a1cb:		; pinta el texto de p06:A1CB
 	ld hl,0a1cbh		;a149
-	call 086afh		;a14c
+	call 086afh		;a14c   ; pinta_texto_8x8: pinta un texto [x, y][letras] con letras de 8x8 y la mascara 0xFF; 0xFF acaba, 0xFE otra posicion
 	ret			;a14f
 bio_texto_a1da:		; pinta el texto de p06:A1DA
 	ld hl,0a1dah		;a150
-	call 086afh		;a153
+	call 086afh		;a153   ; pinta_texto_8x8: pinta un texto [x, y][letras] con letras de 8x8 y la mascara 0xFF; 0xFF acaba, 0xFE otra posicion
 	ret			;a156
-L_A157:
+bio_texto_a208:		; pinta el texto de p06:A208
 	ld hl,0a208h		;a157
-	call 086afh		;a15a
+	call 086afh		;a15a   ; pinta_texto_8x8: pinta un texto [x, y][letras] con letras de 8x8 y la mascara 0xFF; 0xFF acaba, 0xFE otra posicion
 	ret			;a15d
 
 ; ----------------------------------------------------------------------
@@ -213,23 +213,23 @@ DATA_resto_A15E:
 ; ======================================================================
 
 
-L_A23B:
-	ld hl,0b8a8h		;a23b
+bio_caja_grande:		; una caja con sombra y su marco
+	ld hl,0b8a8h		;a23b   ; la sombra en (0xA8, 0xB8), de 0x10 x 0x38
 	ld bc,03810h		;a23e
 	ld a,099h		;a241
 	ld d,000h		;a243
 	call 083c8h		;a245   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
-	ld hl,0b4a4h		;a248
+	ld hl,0b4a4h		;a248   ; la caja de color 0x55
 	ld bc,03810h		;a24b
 	ld a,055h		;a24e
 	ld d,000h		;a250
 	call 083c8h		;a252   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
-	ld hl,0b4a4h		;a255
+	ld hl,0b4a4h		;a255   ; su marco
 	ld de,03810h		;a258
 	ld c,00fh		;a25b
-	call 0839ch		;a25d
-	ld hl,0a267h		;a260
-	call 086afh		;a263
+	call 0839ch		;a25d   ; vdp_rectangulo: dibuja el marco de un rectangulo con cuatro lineas
+	ld hl,0a267h		;a260   ; y el texto de p06:A267
+	call 086afh		;a263   ; pinta_texto_8x8: pinta un texto [x, y][letras] con letras de 8x8 y la mascara 0xFF; 0xFF acaba, 0xFE otra posicion
 	ret			;a266
 
 ; ----------------------------------------------------------------------
@@ -245,14 +245,14 @@ DATA_resto_A267:
 ; ======================================================================
 
 
-L_A270:
+bio_borra_caja:		; borra una caja (color 0x44)
 	ld hl,0b4a4h		;a270
 	ld bc,03c14h		;a273
 	ld a,044h		;a276
 	ld d,000h		;a278
 	call 083c8h		;a27a   ; vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 	ret			;a27d
-L_A27E:
+bio_parpadea:		; cada 16 cuadros (0xE06E) cambia el texto que parpadea
 	ld hl,0e06eh		;a27e
 	inc (hl)			;a281
 	ld a,(hl)			;a282
@@ -295,46 +295,46 @@ L_A2AE:
 L_A2B7:
 	call bio_avanza_dia		;a2b7   ; bio_avanza_dia: pasa el dia (0xE061) cada 64 cuadros
 	ld hl,0e061h		;a2ba   ; apunta a el dia de la grafica
-	ld a,(hl)			;a2bd
-	cp 013h		;a2be
+	ld a,(hl)			;a2bd   ; el dia
+	cp 013h		;a2be   ; del 0x13 en adelante, ya esta
 	jr nc,L_A311		;a2c0
-	and 007h		;a2c2
+	and 007h		;a2c2   ; el azul sube con el dia (0-7), el rojo a 7
 	or 070h		;a2c4
 	ld de,07707h		;a2c6
 	and d			;a2c9
 	ld d,a			;a2ca
-	ld a,00ch		;a2cb
+	ld a,00ch		;a2cb   ; en el color 12
 	call 08299h		;a2cd   ; pon_color: MSX2: el color B de la paleta con D y E (R#16 y puerto 2)
 	jp L_A335		;a2d0
 L_A2D3:
 	call bio_avanza_dia		;a2d3   ; bio_avanza_dia: pasa el dia (0xE061) cada 64 cuadros
 	ld hl,0e061h		;a2d6   ; apunta a el dia de la grafica
-	ld a,(hl)			;a2d9
-	cp 013h		;a2da
+	ld a,(hl)			;a2d9   ; el dia de la grafica
+	cp 013h		;a2da   ; del 0x13 en adelante, ya esta
 	jr nc,L_A311		;a2dc
-	and 007h		;a2de
+	and 007h		;a2de   ; el verde sube con el dia (0-7)...
 	sla a		;a2e0
 	sla a		;a2e2
 	sla a		;a2e4
 	sla a		;a2e6
-	or 007h		;a2e8
+	or 007h		;a2e8   ; ...con el rojo y el azul a 7
 	ld de,07707h		;a2ea
 	and d			;a2ed
 	ld d,a			;a2ee
-	ld a,00dh		;a2ef
+	ld a,00dh		;a2ef   ; en el color 13
 	call 08299h		;a2f1   ; pon_color: MSX2: el color B de la paleta con D y E (R#16 y puerto 2)
 	jp L_A335		;a2f4
 L_A2F7:
 	call bio_avanza_dia		;a2f7   ; bio_avanza_dia: pasa el dia (0xE061) cada 64 cuadros
 	ld hl,0e061h		;a2fa   ; apunta a el dia de la grafica
-	ld a,(hl)			;a2fd
-	cp 013h		;a2fe
+	ld a,(hl)			;a2fd   ; el dia
+	cp 013h		;a2fe   ; del 0x13 en adelante, ya esta
 	jr nc,L_A311		;a300
-	and 007h		;a302
+	and 007h		;a302   ; el verde sube con el dia (0-7)
 	ld de,07707h		;a304
 	and e			;a307
 	ld e,a			;a308
-	ld a,00eh		;a309
+	ld a,00eh		;a309   ; en el color 14
 	call 08299h		;a30b   ; pon_color: MSX2: el color B de la paleta con D y E (R#16 y puerto 2)
 	jp L_A335		;a30e
 L_A311:
@@ -364,11 +364,11 @@ L_A32C:
 	ret			;a334
 L_A335:
 	ret			;a335
-L_A336:
+bio_marcas:		; los tres valores y sus letras
 	call bio_valores		;a336   ; bio_valores: los tres valores del dia (0xE05A..) a 0xE070
 	call bio_pinta_letras		;a339   ; bio_pinta_letras: pinta P, S e I (fisico, sensibilidad, intelecto) en su altura
 	ret			;a33c
-L_A33D:
+bio_pinta_marcas_b:		; pinta las tres marcas ordenadas por altura (H, D, B)
 	ld a,h			;a33d
 	cp d			;a33e
 	jr nc,L_A342		;a33f
@@ -433,7 +433,7 @@ bio_coordenada:		; HL = 0x1200 + A
 	ld l,a			;a3a0
 	ld h,012h		;a3a1
 	ret			;a3a3
-L_A3A4:
+bio_niveles_si:		; si 0xE06A es 0, los niveles de los tres ciclos
 	ld a,(0e06ah)		;a3a4
 	and a			;a3a7
 	jr nz,L_A3B0		;a3a8
@@ -467,7 +467,7 @@ bio_nivel:		; B = el nivel de A (umbrales 0xA8, 0x94, 0x7E...)
 	jr nc,L_A3E8		;a3e0
 	inc b			;a3e2   ; 4 por debajo
 	cp 000h		;a3e3
-	jr L_A3E8		;a3e5
+	jr L_A3E8		;a3e5   ; el texto del nivel
 L_A3E7:
 	ret			;a3e7
 L_A3E8:

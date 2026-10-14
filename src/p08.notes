@@ -16,6 +16,11 @@ C 0xA084 ...a (ix+0x0D)
 C 0xA089 el siguiente a (ix+0x13)
 C 0xA08D con modo 0...
 C 0xA090 ...el byte no se consume
+C 0xA0B2 el parametro
+C 0xA0B4 el periodo del ruido (5 bits)
+C 0xA0B8 solo en el canal del ruido (8)
+C 0xA0C1 a 0xE2F0
+C 0xA0C7 hay ruido que mandar
 C 0xA132 el parametro
 C 0xA134 conserva solo el bit 7 de (ix+0x0F)
 C 0xA13C la parte alta del parametro...
@@ -46,7 +51,7 @@ C 0xA1FA ...a (ix+0x15)
 C 0xA1FD y enciende el bit 7 del estado
 C 0xA21C el parametro: cuantas veces se repite
 C 0xA21E la cuenta (ix+0x05)
-C 0xA222 ¿ya llego?
+C 0xA222 ya llego?
 C 0xA226 no: sube la cuenta...
 C 0xA229 HL = la palabra siguiente...
 C 0xA22E ...menos uno (el bucle vuelve alli)
@@ -64,11 +69,34 @@ C 0xA2A5 el canal de 0xE22D...
 C 0xA2A9 ...y el de 0xE2B1
 C 0xA2AC si el segundo no es menor...
 C 0xA2B0 ...el bit 2 vuelve
+C 0xA2BF los registros 0 y 1, y el volumen al 8
+C 0xA2C3 el canal 1 (0xE20A)
+C 0xA2CC bit 2: el canal 4 manda en el canal A
+C 0xA2D1 bit 3: se acaba de soltar
+C 0xA2D6 el canal 1 vuelve a sonar (0xE238 = 5)
+C 0xA30E la frecuencia, parte baja...
+C 0xA30F ...al registro B
+C 0xA315 la parte alta...
+C 0xA316 ...al registro B + 1
+C 0xA31B el volumen
+C 0xA31C al registro C (8, 9 o 10)
+C 0xA31D los registros del canal siguiente
+C 0xA320 bit 3: el canal no suena
+C 0xA326 bit 2: hay envolvente...
+C 0xA329 ...se apunta
 C 0xA342 bit 1: ya esta mandado
 C 0xA345 bit 2: hay que mandar el ruido
 C 0xA348 lo apunta como mandado (bit 3)
 C 0xA34C el periodo del ruido (0xE2F1)...
 C 0xA350 ...a R#6 del PSG
+C 0xA356 bit 7: el periodo de la envolvente
+C 0xA35C apuntado
+C 0xA35E la parte baja...
+C 0xA362 ...a R#11
+C 0xA367 bit 6: la parte alta
+C 0xA36C ...a R#12
+C 0xA375 bit 5: la forma
+C 0xA37A ...a R#13
 # --- fin de lo escrito a mano ---
 
 # --- BLOQUES QUE LEE EL CODIGO (seccion que reescribe tools/bloques.py; no editar a mano) ---
@@ -83,18 +111,20 @@ F 0xAF1B 16
 # --- fin de los bloques de bloques.py ---
 
 # --- ANOTACIONES AUTOMATICAS (seccion que reescribe tools/anota.py; no editar a mano) ---
+L 0xA029 canal_orden una orden de la pista (0xE0-0xFF) por la tabla de p08:A03E, o una nota
 L 0xA229 palabra_y_retrocede HL = la palabra siguiente - 1
+L 0xA291 sonido_mezcla decide que canales van al PSG segun sus prioridades
 L 0xA2BF sonido_al_psg manda al PSG los registros de los canales
 L 0xA30E tres_registros_psg escribe tres registros del PSG desde HL
 L 0xA32C sonido_ruido el periodo del ruido (R#6) si hay que cambiarlo
 L 0xA356 sonido_envolvente la envolvente (R#11-13) si hay que cambiarla
 L 0xA384 sonido_mezclador el mezclador del PSG (R#7) segun los canales
+L 0xA3BD pon_mezclador escribe A en R#7 del PSG y en 0xE2EE
 L 0xA3C7 tabla_por_dos_bits HL = HL + (A and 3)
 C 0xA093 lee el canal que se esta tocando
 C 0xA098 lee lo que hay que mandar al PSG
 C 0xA0A2 guarda lo que hay que mandar al PSG
 C 0xA0AC guarda lo que hay que mandar al PSG
-C 0xA0B8 lee el canal que se esta tocando
 C 0xA0C4 lee lo que hay que mandar al PSG
 C 0xA0CB guarda lo que hay que mandar al PSG
 C 0xA0D2 lee lo que hay que mandar al PSG
@@ -119,7 +149,6 @@ C 0xA2EC apunta a el estado del mezclador
 C 0xA303 tres_registros_psg: escribe tres registros del PSG desde HL
 C 0xA30A tres_registros_psg: escribe tres registros del PSG desde HL
 C 0xA32C apunta a lo que hay que mandar al PSG
-C 0xA356 apunta a lo que hay que mandar al PSG
 C 0xA38B tabla_por_dos_bits: HL = HL + (A and 3)
 C 0xA38F lee el estado del mezclador
 C 0xA3A1 tabla_por_dos_bits: HL = HL + (A and 3)

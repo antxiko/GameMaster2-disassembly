@@ -350,7 +350,7 @@ borra_pantalla_b:		; borra la tabla de nombres y esconde los sprites (gemela de 
 	ld hl,03b00h		;a247
 	ld a,0d0h		;a24a
 	jp 0004dh		;a24c   ; BIOS WRTVRM - Writes data in VRAM
-L_A24F:
+prepara_ficha:		; la ficha del juego, su cabecera y, para el juego 0x36, 4 en 0xD312
 	call busca_ficha_b		;a24f   ; busca_ficha_b: copia la ficha por defecto (p00:45D0) a 0xD300 y busca la del juego
 	call lee_cabecera_juego		;a252   ; lee_cabecera_juego: lee la cabecera de 0x4028 del juego y sus opciones (gemela de p01:70AA)
 	ld a,(0d301h)		;a255   ; lee el codigo del juego (copia)
@@ -388,9 +388,9 @@ L_A28D:
 	inc hl			;a28e
 	cp 0ffh		;a28f
 	jr z,L_A2A2		;a291
-	cp e			;a293   ; ¿la parte baja?
+	cp e			;a293   ; la parte baja?
 	jr nz,L_A29A		;a294
-	ld a,(hl)			;a296   ; ¿y la alta?
+	ld a,(hl)			;a296   ; y la alta?
 	cp d			;a297
 	jr z,L_A29D		;a298   ; es este juego
 L_A29A:
@@ -513,7 +513,7 @@ rc_751_o_752_b:		; compara el RC del juego (0xD351, al reves) con 0x751 y 0x752
 	ld a,h			;a373   ; ...en orden
 	ld h,l			;a374
 	ld l,a			;a375
-	ld de,00751h		;a376   ; ¿RC-751...
+	ld de,00751h		;a376   ; RC-751...
 	rst 20h			;a379   ; DCOMPR: compara HL con DE (Z si son iguales, C si HL es menor)
 	jr z,L_A38C		;a37a
 	ld de,00752h		;a37c   ; ...o RC-752?
@@ -570,7 +570,7 @@ L_A3BE:
 	ld a,l			;a3c4   ; ...0 acaba la tabla
 	or h			;a3c5
 	ret z			;a3c6
-	rst 20h			;a3c7   ; ¿es la del juego?
+	rst 20h			;a3c7   ; es la del juego?
 	jr z,L_A3D4		;a3c8   ; si: la ficha
 	inc ix		;a3ca   ; la entrada siguiente, de 4 bytes
 	inc ix		;a3cc
@@ -670,20 +670,20 @@ registros_vdp:		; los 8 registros del VDP de p01:72E2 y, en MSX2, R
 	ld hl,0a477h		;a451
 	ld bc,00800h		;a454
 L_A457:
-	push bc			;a457
+	push bc			;a457   ; un registro del VDP de la lista...
 	ld b,(hl)			;a458
-	call 00047h		;a459   ; BIOS WRTVDP - Writes data in the VDP-register
+	call 00047h		;a459   ; BIOS WRTVDP - Writes data in the VDP-register | ...al registro C
 	pop bc			;a45c
-	inc hl			;a45d
+	inc hl			;a45d   ; el siguiente
 	inc c			;a45e
-	djnz L_A457		;a45f
+	djnz L_A457		;a45f   ; los B registros
 	ld a,(0002dh)		;a461   ; la version del MSX (0 = MSX1)
 	and a			;a464
-	ret z			;a465
-	ld bc,00017h		;a466
+	ret z			;a465   ; en MSX1, ya esta
+	ld bc,00017h		;a466   ; R#23 = 0: sin desplazamiento vertical
 	call 00047h		;a469   ; BIOS WRTVDP - Writes data in the VDP-register
-	ld a,(0ffe8h)		;a46c   ; lee el registro 9 del VDP (copia de la BIOS)
-	and 07fh		;a46f
+	ld a,(0ffe8h)		;a46c   ; R#9...
+	and 07fh		;a46f   ; ...sin el bit 7: 192 lineas
 	ld b,a			;a471
 	ld c,009h		;a472
 	jp 00047h		;a474   ; BIOS WRTVDP - Writes data in the VDP-register
@@ -826,7 +826,7 @@ L_A517:
 L_A51C:
 	ld c,000h		;a51c
 	jr L_A526		;a51e
-L_A520:
+pinta_texto_b_en:		; pinta el texto de HL en la VRAM DE
 	ld c,0ffh		;a520
 	jr L_A52A		;a522
 pinta_texto_b:		; pinta el texto de HL: [direccion de VRAM] y letras; 0xFE otra direccion, 0xFF acaba
@@ -987,12 +987,12 @@ copia_vram_tercios:		; LDIRVM de los tres tercios (0x2000 de paso) (gemela de p0
 	ex de,hl			;a637
 	add hl,bc			;a638
 	jp 0005ch		;a639   ; BIOS LDIRVM - Block transfers to VRAM from memory
-L_A63C:
+guarda_pantalla_si:		; si 0xD13D, guarda la pantalla (p03:A578)
 	ld a,(0d13dh)		;a63c
 	or a			;a63f
 	ret z			;a640
 	jp L_A578		;a641
-L_A644:
+devuelve_pantalla_si:		; si 0xD13D, devuelve la pantalla (p03:A5EF)
 	ld a,(0d13dh)		;a644
 	or a			;a647
 	ret z			;a648
@@ -1065,7 +1065,7 @@ L_A6B4:
 	ld (hl),a			;a6cc
 	jr L_A6F9		;a6cd
 L_A6CF:
-	ld c,a			;a6cf   ; ¿es una cifra?
+	ld c,a			;a6cf   ; es una cifra?
 	sub 030h		;a6d0
 	cp 00ah		;a6d2
 	jr nc,L_A6D9		;a6d4
@@ -1085,7 +1085,7 @@ L_A6E1:
 	ex af,af'			;a6e9
 	jr L_A6F9		;a6ea
 L_A6EC:
-	ld a,c			;a6ec   ; ¿es una minuscula (a-z)?
+	ld a,c			;a6ec   ; es una minuscula (a-z)?
 	sub 061h		;a6ed
 	cp 01ah		;a6ef
 	jp nc,L_A677		;a6f1   ; no: no vale
@@ -1280,9 +1280,9 @@ L_A82F:
 	ld (de),a			;a83b   ; lo copia
 	inc hl			;a83c
 	inc de			;a83d
-	call fin_de_8882		;a83e   ; ¿se acabo la pantalla?
+	call fin_de_8882		;a83e   ; se acabo la pantalla?
 	jp z,L_A8D1		;a841
-	ld a,c			;a844   ; ¿el siguiente es igual?
+	ld a,c			;a844   ; el siguiente es igual?
 	cp (hl)			;a845
 	jr z,L_A885		;a846   ; si: empieza una repeticion
 	ld a,001h		;a848   ; no: un trozo de copias que lleva 1
@@ -1293,11 +1293,11 @@ L_A84D:
 	ld a,c			;a84f   ; se copia
 	ld (de),a			;a850
 	inc de			;a851
-	call fin_de_8882		;a852   ; ¿se acabo la pantalla?
+	call fin_de_8882		;a852   ; se acabo la pantalla?
 	jp z,L_A8C8		;a855
-	cp (hl)			;a858   ; ¿el siguiente es igual?
+	cp (hl)			;a858   ; el siguiente es igual?
 	jr nz,L_A878		;a859   ; no: copias
-	inc hl			;a85b   ; ¿y el otro?
+	inc hl			;a85b   ; y el otro?
 	call fin_de_8882		;a85c   ; fin_de_8882: compara HL con 0x8882 (gemela de p01:7790)
 	jr z,L_A8BD		;a85f
 	cp (hl)			;a861   ; tres iguales: repeticion

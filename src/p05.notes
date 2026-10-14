@@ -70,6 +70,14 @@ C 0x8738 si la da, 8 pixeles mas abajo
 # --- fin de los comentarios copiados ---
 
 # --- A MANO: comentarios escritos leyendo el codigo ---
+C 0x8000 sin interrupciones
+C 0x8001 guarda la pila...
+C 0x8005 ...en 0xF0F6
+C 0x8008 borra 0xE000-0xF0F4
+C 0x8015 H.TIMI salta a p05:8033: la salida con CTRL+STOP
+C 0x8020 0 = MSX1...
+C 0x8024 ...a 0xF0F5
+C 0x802D y el bucle del biorritmo
 C 0x80D6 HL = la direccion que viene en el texto
 C 0x80DB y sigue con la letra siguiente
 C 0x80DC una letra
@@ -207,13 +215,25 @@ C 0x85E9 L = pagina x 2...
 C 0x85EB ...E = pagina x 16...
 C 0x85EF ...H = pagina x 32
 C 0x85F1 R#2: la tabla de nombres de esa pagina
+C 0x85F4 los bits que no son de la direccion
+C 0x85F6 con la pagina
+C 0x85F8 R#2
 C 0x85FA a R#2
 C 0x85FD R#10: los colores (la parte alta)
+C 0x8600 el bit de la parte baja
+C 0x8602 con la pagina
+C 0x8604 R#10
 C 0x8606 a R#10
 C 0x8609 R#4: los patrones
+C 0x860C los bits que se quedan
+C 0x860E con la pagina
+C 0x8610 R#4
 C 0x8612 a R#4
 C 0x8615 R#11: los atributos de los sprites
+C 0x8616 R#11 = la pagina
 C 0x861B R#6: los patrones de los sprites
+C 0x8620 con la pagina
+C 0x8622 R#6
 C 0x8624 a R#6
 C 0x8654 un byte de la letra (8 pixeles de 1 bit)
 C 0x8659 4 pares de pixeles
@@ -222,6 +242,13 @@ C 0x865C ...si el pixel esta encendido...
 C 0x8660 ...en la mitad de arriba; si no, el fondo
 C 0x8664 el primer pixel al byte de destino
 C 0x8668 el segundo
+C 0x867F guarda los registros
+C 0x8683 expande la letra a 4 bits en 0xE090
+C 0x8687 D y E: la posicion en pixeles...
+C 0x868A .../ 2: la direccion en la VRAM (2 pixeles por byte)
+C 0x868E en la pagina 1 (+0x8000)
+C 0x8692 los 32 bytes de 0xE090
+C 0x8695 8 lineas
 C 0x86B9 una letra
 C 0x86BB 0xFF acaba
 C 0x86BE 0xFE: otra posicion
@@ -235,6 +262,18 @@ C 0x86D3 a la copia de nombres en la VRAM
 C 0x86D7 la columna siguiente
 C 0x86DB y su dibujo de 8x8...
 C 0x86E1 ...de la hoja de letras de la pagina 1 a la 0
+C 0x8979 una letra de p05:8B0C
+C 0x897E a la hoja de letras (SCREEN 5)
+C 0x8982 la posicion siguiente
+C 0x8986 el color
+C 0x8987 las B letras
+C 0x8989 en (0x08, 0x00)...
+C 0x898C ...las letras de la BIOS desde el espacio
+C 0x8991 0x60 letras en el color 0x0F
+C 0x8997 en (0x00, 0x80)...
+C 0x899A ...las letras de p05:89B4
+C 0x899D 0x2B letras en el color 0x0F
+C 0x89A3 la pagina activa, la 0
 C 0x8CBD 0, 1, 2... 0xFF
 C 0x8CC4 dos veces
 C 0x8CC6 y 0x40 bytes de 0xE400 a cero
@@ -243,7 +282,7 @@ C 0x8F21 el mes (ix+0)
 C 0x8F25 los dias de los meses anteriores, en la tabla de p05:959E
 C 0x8F2C D y E: los dias hasta el mes
 C 0x8F2F mas el dia del mes (ix+2)
-C 0x8F37 ¿el ano es bisiesto?
+C 0x8F37 el ano es bisiesto?
 C 0x8F3B no: ya esta
 C 0x8F3D si, y el mes es marzo o despues...
 C 0x8F44 ...un dia mas (el 29 de febrero)
@@ -307,9 +346,15 @@ C 0x93AE sin acarreo, ya esta
 C 0x93B1 si no, el alto baja uno
 C 0x93B8 HL = el sustraendo, DE = el minuendo
 C 0x93B9 el byte 0
+C 0x93BA menos el byte 0 del sustraendo
+C 0x93BC el resultado, en el minuendo
+C 0x93BD el byte siguiente
 C 0x93BF el byte 1, con el acarreo
+C 0x93C1 con el acarreo
 C 0x93C5 el byte 2
+C 0x93C7 con el acarreo
 C 0x93CB el byte 3
+C 0x93CD con el acarreo
 C 0x93D3 suma con acarreo...
 C 0x93D8 ...B bytes
 C 0x93DE multiplica bit a bit: BC a cero acaba
@@ -342,6 +387,15 @@ C 0x946C un paso de la division: el bit alto de DE...
 C 0x9471 ...entra en HL
 C 0x9473 si cabe el divisor, se resta...
 C 0x9477 ...y el bit del cociente es 1
+C 0x9487 guarda el signo
+C 0x9488 BC...
+C 0x948A ...en positivo
+C 0x948F DE...
+C 0x9490 ...en positivo
+C 0x9494 la division sin signo
+C 0x9497 el signo
+C 0x9498 positivo: ya esta
+C 0x949A negativo: complemento a dos del cociente
 C 0x94A2 positivo: tal cual
 C 0x94A7 negativo: complemento a dos
 C 0x94AE el signo del divisor
@@ -369,11 +423,18 @@ C 0x9726 y sigue
 C 0x97B6 copia un byte
 C 0x97BA B bytes
 C 0x97C8 la cifra del cursor: 4...
+C 0x97CB el ano de nacimiento: B = 0
 C 0x97CE ...6...
+C 0x97CF el mes: 1
 C 0x97D2 ...8 (los campos de la primera fecha)...
+C 0x97D3 el dia: 2
 C 0x97D6 ...12...
+C 0x97D7 el ano de hoy: 3
 C 0x97DA ...14...
+C 0x97DB el mes: 4
 C 0x97DE ...16 (los de la segunda)
+C 0x97DF el dia: 5
+C 0x97E2 otra cifra: 6
 C 0x98A6 el mes 0 no vale
 C 0x98AB ni mas de 12
 C 0x98B1 el dia 0 no vale
@@ -399,6 +460,14 @@ C 0x99B4 1: flecha derecha (0x1C)
 C 0x99BA 2: flecha izquierda (0x1D)
 C 0x99C0 3: RETURN
 C 0x99C5 4: una cifra
+C 0x9A72 en la ultima cifra no hay cursor
+C 0x9A74 la cifra del cursor...
+C 0x9A7A ...su posicion en la pantalla (tabla de p05:9AA3)
+C 0x9A83 la cifra que hay alli
+C 0x9A87 C = la cifra
+C 0x9A88 el parpadeo...
+C 0x9A8B ...bit 6: encendido o apagado
+C 0x9A8F apagado: la casilla de color 0xFF
 C 0x9B25 guarda los registros
 C 0x9B2A borra la casilla de la cifra
 C 0x9B55 ninguna tecla
@@ -409,11 +478,11 @@ C 0x9BFA las decenas
 C 0x9BFE las unidades: 1...
 C 0x9C03 ...o 0
 C 0x9C48 baja uno
-C 0x9C4B ¿llego a -C?
+C 0x9C4B llego a -C?
 C 0x9C50 si no, lo guarda
 C 0x9C52 A = 0
 C 0x9C61 sube uno
-C 0x9C63 ¿llego a C?
+C 0x9C63 llego a C?
 C 0x9C66 si no, lo guarda
 C 0x9C67 A = 0
 C 0x9CF1 un angulo
@@ -506,6 +575,7 @@ F 0x9FFF 1
 # --- fin de los bloques de bloques.py ---
 
 # --- ANOTACIONES AUTOMATICAS (seccion que reescribe tools/anota.py; no editar a mano) ---
+L 0x8000 bio_arranca el biorritmo: guarda la pila, borra 0xE000, engancha H.TIMI y sigue en el bucle de p05:8B14
 L 0x8056 bio_pantalla prepara la pantalla: MSX1 (p05:873D) o MSX2 (p05:8768) segun 0xF0F5
 L 0x8062 bio_graficos los graficos: MSX1 (p05:8C73) o MSX2 (p05:8D22) segun 0xF0F5
 L 0x806E hl_mas_a HL = HL + A (gemela de p01:7251)
@@ -543,6 +613,7 @@ L 0x8305 espera_vdp espera a que el VDP acabe el comando (bit 0 de S#2)
 L 0x830F lee_estado_vdp lee el registro de estado A del VDP (R
 L 0x832F vdp_linea traza una linea con el comando del VDP (LINE, 0x70) de HL con el largo de la pila; el lado largo en horizontal
 L 0x8365 vdp_linea_vertical traza una linea con el comando del VDP (LINE, 0x70) con el lado largo en vertical (ARG = 1)
+L 0x839C vdp_rectangulo dibuja el marco de un rectangulo con cuatro lineas
 L 0x83B4 vdp_linea_vertical_guardando vdp_linea_vertical guardando HL, DE y BC
 L 0x83BE vdp_linea_guardando vdp_linea guardando HL, DE y BC
 L 0x83C8 vdp_hmmv rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
@@ -555,6 +626,7 @@ L 0x8599 vdp_lmmm copia de VRAM a VRAM con operacion logica (LMMM, desde R#32)
 L 0x8628 letras_1bit_a_4bit pinta B letras de 1 bit en SCREEN 5 (4 bits)
 L 0x864F letra_expande expande los 8 bytes de la letra a 32 con el color C (0xE090)
 L 0x867F letra_1bit_a_4bit pasa una letra de 1 bit a 4 bits (0xE100) y la escribe (gemela de p09:8EEB)
+L 0x86AF pinta_texto_8x8 pinta un texto [x, y][letras] con letras de 8x8 y la mascara 0xFF; 0xFF acaba, 0xFE otra posicion
 L 0x86FC pinta_letra_8x8 copia la letra A de 8x8 de la hoja de letras a DE (LMMM)
 L 0x870E letra_8x8_en_pagina_1 copia la letra A de 8x8 dentro de la pagina 1 (HMMM) (gemela de p09:8E96)
 L 0x8720 letra_a_coordenadas H, L = la columna y la fila de la letra A - 0x20
@@ -732,6 +804,7 @@ L 0x9C48 baja_con_tope baja (HL); si llega a -C vuelve a 0
 L 0x9C58 bio_sube_e06a sube 0xE06A con tope 4
 L 0x9C61 sube_con_tope sube (HL); si llega a C vuelve a 0
 L 0x9C6D bio_pinta_signo pinta el signo del dia ('<' o ';')
+L 0x9C8A bio_pinta_fecha pinta el ano, el mes y el dia
 L 0x9C94 bio_pinta_ano pinta las 4 cifras del ano
 L 0x9C9E bio_pinta_mes pinta las 2 cifras del mes
 L 0x9CA7 bio_pinta_dia_b pinta las 2 cifras del dia
@@ -766,7 +839,6 @@ L 0x9FEC bio_pantalla_msx2 los marcos, el eje y la rejilla (p06:A006) y los text
 L 0x9FF6 bio_actualiza_msx2 actualiza la grafica en MSX2 (p06)
 C 0x800B apunta a el contador de cuadros
 C 0x8018 apunta a el gancho H.TIMI
-C 0x8020 la version del MSX (0 = MSX1)
 C 0x8027 bio_pantalla: prepara la pantalla: MSX1 (p05:873D) o MSX2 (p05:8768) segun 0xF0F5
 C 0x802A bio_graficos: los graficos: MSX1 (p05:8C73) o MSX2 (p05:8D22) segun 0xF0F5
 C 0x804B guarda el gancho H.TIMI
@@ -843,12 +915,10 @@ C 0x85E5 guarda DPPAGE, la pagina que se ve
 C 0x8628 letra_1bit_a_4bit: pasa una letra de 1 bit a 4 bits (0xE100) y la escribe (gemela de p09:8EEB)
 C 0x862B siguiente_letra: D += 8; al pasar de fila, E += 8 (gemela de p09:903E)
 C 0x8635 letra_expande: expande los 8 bytes de la letra a 32 con el color C (0xE090)
-C 0x8639 apunta a las cifras de las dos fechas
+C 0x8639 apunta a el bufer de 0xE090 (las cifras de las fechas, o la letra expandida a 4 bits)
 C 0x8641 vdp_hmmc: copia rapida de la RAM (HL) a un rectangulo de VRAM (HMMC, 0xF0)
 C 0x8644 espera_vdp: espera a que el VDP acabe el comando (bit 0 de S#2)
-C 0x8651 apunta a las cifras de las dos fechas
-C 0x8683 letra_expande: expande los 8 bytes de la letra a 32 con el color C (0xE090)
-C 0x8692 apunta a las cifras de las dos fechas
+C 0x8651 apunta a el bufer de 0xE090 (las cifras de las fechas, o la letra expandida a 4 bits)
 C 0x869B escribe_vram_otir: escribe BC bytes de HL en la VRAM DE con OTIR (gemela de p09:8DF6)
 C 0x86E3 vdp_hmmm: copia rapida de VRAM a VRAM (HMMM): origen HL, destino DE, tamano BC, paginas en A (gemela de p09:8E52)
 C 0x86ED letra_a_coordenadas: H, L = la columna y la fila de la letra A - 0x20
@@ -868,8 +938,6 @@ C 0x87E9 th_rellena_tercios: FILVRM en los tres tercios (gemela de p07:8605)
 C 0x87F9 th_descomprime: descomprime DE a la VRAM HL: n & 0x7F repeticiones o copias, 0 acaba (gemela de p07:8647)
 C 0x8804 th_rellena_tercios: FILVRM en los tres tercios (gemela de p07:8605)
 C 0x8970 guarda ACPAGE, la pagina activa
-C 0x897E letra_1bit_a_4bit: pasa una letra de 1 bit a 4 bits (0xE100) y la escribe (gemela de p09:8EEB)
-C 0x8982 siguiente_letra: D += 8; al pasar de fila, E += 8 (gemela de p09:903E)
 C 0x898E letra_en_bios: HL = la letra A de la fuente de la BIOS (0x0004)
 C 0x8994 letras_1bit_a_4bit: pinta B letras de 1 bit en SCREEN 5 (4 bits)
 C 0x89A0 letras_1bit_a_4bit: pinta B letras de 1 bit en SCREEN 5 (4 bits)
@@ -888,6 +956,7 @@ C 0x8B78 bio_textos_grafica: los textos de la grafica y su marco
 C 0x8B7B bio_pinta_marcas: pinta las marcas de los tres ciclos (p06:A33D)
 C 0x8B7E bio_vuelca_nombres: vuelca la copia de la tabla de nombres (0xE300) a 0x3800
 C 0x8B84 bio_pantalla_msx2: los marcos, el eje y la rejilla (p06:A006) y los textos
+C 0x8B87 bio_marcas: los tres valores y sus letras
 C 0x8B8D lee el contador de cuadros
 C 0x8B94 bio_avanza_grafica: un paso de la grafica: alturas, puntos y dia siguiente
 C 0x8B97 bio_dia_mas: pasa al dia siguiente: los tres angulos suben
@@ -903,6 +972,7 @@ C 0x8BC6 bio_pinta_niveles: pinta los niveles de los tres ciclos
 C 0x8BC9 bio_vuelca_nombres: vuelca la copia de la tabla de nombres (0xE300) a 0x3800
 C 0x8BCF bio_actualiza_msx2: actualiza la grafica en MSX2 (p06)
 C 0x8BD2 bio_recalcula: vuelve a los angulos de hoy y recalcula las alturas
+C 0x8BD5 bio_niveles_si: si 0xE06A es 0, los niveles de los tres ciclos
 C 0x8BDB lee el contador de cuadros
 C 0x8BE2 bio_vuelca_nombres: vuelca la copia de la tabla de nombres (0xE300) a 0x3800
 C 0x8BE5 bio_vuelca_sprites: vuelca la copia de sprites (0xE280) a 0x3B00
@@ -913,10 +983,12 @@ C 0x8BF9 bio_teclas: las teclas recien pulsadas (0xE057)
 C 0x8BFC lee la tecla pulsada
 C 0x8C02 lee el contador de cuadros
 C 0x8C09 bio_vuelca_sprites_msx2: vuelca la copia de sprites a 0xF600 y sus colores a 0xF400
+C 0x8C0C bio_parpadea: cada 16 cuadros (0xE06E) cambia el texto que parpadea
 C 0x8C0F bio_teclas: las teclas recien pulsadas (0xE057)
 C 0x8C12 lee la tecla pulsada
 C 0x8C1D bio_estado_grafica: el estado de la grafica: teclas, dia y textos
 C 0x8C20 pausa_corta: espera 16 vueltas
+C 0x8C2B bio_arranca: el biorritmo: guarda la pila, borra 0xE000, engancha H.TIMI y sigue en el bucle de p05:8B14
 C 0x8C2F apunta a las teclas
 C 0x8C32 bio_lee_teclas: lee las teclas del biorritmo (SNSMAT 8 y 7)
 C 0x8C52 apunta a el estado del biorritmo
@@ -1180,9 +1252,6 @@ C 0x939F de_mas_a: DE = DE + A (gemela de p01:7256)
 C 0x9464 guarda resultado de 32 bits (parte alta) y el byte siguiente (16 bits)
 C 0x947F guarda la posicion del punto en la VRAM y el byte siguiente (16 bits)
 C 0x9484 signo_de_division: el signo del resultado (B y D)
-C 0x948A valor_absoluto: HL = |HL|
-C 0x9490 valor_absoluto: HL = |HL|
-C 0x9494 divide: DE / BC: cociente en DE y resto en HL
 C 0x94D4 divide: DE / BC: cociente en DE y resto en HL
 C 0x94DE divide: DE / BC: cociente en DE y resto en HL
 C 0x95B7 lee la fecha que se pide (2 = la de hoy)
@@ -1193,7 +1262,7 @@ C 0x95D6 bio_segun_campo: salta segun el campo del cursor (p05:97C6)
 C 0x95DC bio_si_dia: si el cursor esta en el dia (0x10), su texto
 C 0x95DF bio_pide_fecha: lee teclas hasta una buena y la mete en la fecha
 C 0x95E5 bio_segun_campo: salta segun el campo del cursor (p05:97C6)
-C 0x95ED apunta a las cifras de las dos fechas
+C 0x95ED apunta a el bufer de 0xE090 (las cifras de las fechas, o la letra expandida a 4 bits)
 C 0x95F9 bio_texto_9e50: pinta el texto de p05:9E50
 C 0x95FF bio_cursor_al_mes: el cursor y su tope al mes (8)
 C 0x9605 bio_texto_9e47: pinta el texto de p05:9E47
@@ -1203,7 +1272,7 @@ C 0x9613 bio_cifras_a_nombres: las cifras de las dos fechas (0xE090...) a la cop
 C 0x9617 lee la cifra en la que esta el cursor
 C 0x961E lee la cifra en la que esta el cursor
 C 0x9624 bio_texto_9e3e: pinta el texto de p05:9E3E
-C 0x9628 apunta a las cifras de las dos fechas
+C 0x9628 apunta a el bufer de 0xE090 (las cifras de las fechas, o la letra expandida a 4 bits)
 C 0x9630 cifras_a_letras: B cifras de DE a letras (+0x10) en HL
 C 0x963B cifras_a_letras: B cifras de DE a letras (+0x10) en HL
 C 0x9646 cifras_a_letras: B cifras de DE a letras (+0x10) en HL
@@ -1222,12 +1291,12 @@ C 0x96B2 apunta a la cifra en la que esta el cursor
 C 0x96BB hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x96C3 bio_cifra_del_cursor: B = la cifra que hay bajo el cursor
 C 0x96C6 lee el parpadeo del cursor
-C 0x96F2 apunta a las cifras de las dos fechas
+C 0x96F2 apunta a el bufer de 0xE090 (las cifras de las fechas, o la letra expandida a 4 bits)
 C 0x96F5 lee la cifra en la que esta el cursor
 C 0x96F8 hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x9701 lee la fecha que se pide (2 = la de hoy)
 C 0x9704 despacha: salta a la palabra A de la tabla pegada detras del `call`
-C 0x9719 apunta a las cifras de las dos fechas
+C 0x9719 apunta a el bufer de 0xE090 (las cifras de las fechas, o la letra expandida a 4 bits)
 C 0x9729 bio_si_mes_o_dia_msx2: si el cursor esta en el mes o el dia, su texto (MSX2)
 C 0x972C bio_pinta_fecha_1: pinta la fecha de nacimiento (MSX2)
 C 0x972F bio_pide_fecha_msx2: lee teclas hasta una buena (MSX2)
@@ -1238,11 +1307,14 @@ C 0x9741 bio_pide_fecha_msx2: lee teclas hasta una buena (MSX2)
 C 0x9747 bio_segun_campo: salta segun el campo del cursor (p05:97C6)
 C 0x974D bio_a066: llama a p06:A066
 C 0x9753 bio_pinta_fecha_1: pinta la fecha de nacimiento (MSX2)
+C 0x9756 bio_caja_a17c: una caja con sombra, su marco y el texto de p06:A17C
 C 0x9759 bio_cursor_al_mes: el cursor y su tope al mes (8)
+C 0x975F bio_borra_caja: borra una caja (color 0x44)
 C 0x9765 bio_pinta_fecha_2: pinta la fecha de hoy (MSX2)
 C 0x9768 bio_guarda_fecha: copia la fecha tecleada (0xE098...) a 0xE062
 C 0x976D lee la cifra en la que esta el cursor
 C 0x9774 lee la cifra en la que esta el cursor
+C 0x977A bio_caja_grande: una caja con sombra y su marco
 C 0x977E bio_campo: B = el campo del cursor: ano (4), mes (6), dia (8)...
 C 0x9782 despacha: salta a la palabra A de la tabla pegada detras del `call`
 C 0x9796 apunta a las cifras de la fecha de hoy
@@ -1261,7 +1333,7 @@ C 0x9800 bio_comprueba_ano_2: comprueba el ano de hoy (0xE012)
 C 0x9804 bio_comprueba_mes_2: comprueba el mes de hoy
 C 0x9808 bio_comprueba_dia_2: comprueba el dia de hoy
 C 0x980E guarda la cifra del campo que esta mal
-C 0x9811 apunta a las cifras de las dos fechas
+C 0x9811 apunta a el bufer de 0xE090 (las cifras de las fechas, o la letra expandida a 4 bits)
 C 0x9815 apunta a el ano de nacimiento
 C 0x9818 bio_lee_ano: pasa las 4 cifras del ano a binario
 C 0x981E guarda la cifra del campo que esta mal
@@ -1334,7 +1406,7 @@ C 0x9A0D lee la ultima cifra a la que llega el cursor
 C 0x9A1D bio_estado_5: compara 0xE005 con 5
 C 0x9A22 lee la cifra en la que esta el cursor
 C 0x9A28 lee la cifra en la que esta el cursor
-C 0x9A2B apunta a las cifras de las dos fechas
+C 0x9A2B apunta a el bufer de 0xE090 (las cifras de las fechas, o la letra expandida a 4 bits)
 C 0x9A2E hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x9A31 lee la tecla pulsada
 C 0x9A37 bio_cursor_derecha: el cursor una cifra a la derecha
@@ -1346,10 +1418,8 @@ C 0x9A53 lee la fecha que se pide (2 = la de hoy)
 C 0x9A5F lee la fecha que se pide (2 = la de hoy)
 C 0x9A69 lee la fecha que se pide (2 = la de hoy)
 C 0x9A6F bio_cursor_al_final: Z si el cursor esta en la ultima cifra
-C 0x9A74 apunta a la cifra en la que esta el cursor
 C 0x9A7D hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x9A84 bio_cifra: A = la cifra A de 0xE090
-C 0x9A88 lee el parpadeo del cursor
 C 0x9A92 bio_casilla_8x8_c: pinta una casilla de 8x8 con el color C
 C 0x9A99 bio_borra_casilla: borra la casilla de la cifra
 C 0x9A9F pinta_letra_8x8: copia la letra A de 8x8 de la hoja de letras a DE (LMMM)
@@ -1367,7 +1437,7 @@ C 0x9B03 bio_pinta_cifras: pinta B cifras de 0xE090 con LMMM
 C 0x9B08 bio_borra_casilla: borra la casilla de la cifra
 C 0x9B0B bio_cifra: A = la cifra A de 0xE090
 C 0x9B10 pinta_letra_8x8: copia la letra A de 8x8 de la hoja de letras a DE (LMMM)
-C 0x9B1D apunta a las cifras de las dos fechas
+C 0x9B1D apunta a el bufer de 0xE090 (las cifras de las fechas, o la letra expandida a 4 bits)
 C 0x9B20 hl_mas_a: HL = HL + A (gemela de p01:7251)
 C 0x9B3A vdp_hmmv: rellena un rectangulo de VRAM (HMMV, comando 0xC0) (gemela de p09:8F41)
 C 0x9B3E bio_tecla_grafica: la tecla de la grafica: 0, 0x80 o 0x10
@@ -1376,6 +1446,7 @@ C 0x9B45 bio_dia_en_cifras: pasa el dia mostrado (0xE054, con signo) a dos cifra
 C 0x9B48 bio_signo_del_dia: el signo del dia mostrado
 C 0x9B4B bio_pinta_dia: pinta el dia mostrado (0xE04C) con LMMM
 C 0x9B4E bio_pinta_signo: pinta el signo del dia ('<' o ';')
+C 0x9B51 bio_niveles_si: si 0xE06A es 0, los niveles de los tres ciclos
 C 0x9B68 bio_recalcula: vuelve a los angulos de hoy y recalcula las alturas
 C 0x9B77 bio_sube_e06a: sube 0xE06A con tope 4
 C 0x9B7C bio_dia_sube: sube el dia mostrado (0xE054)
@@ -1395,6 +1466,7 @@ C 0x9BC9 bio_alturas_menos: las alturas de los tres ciclos (desplazamientos -4, 
 C 0x9BCC bio_dia_menos: pasa al dia anterior: los tres angulos bajan
 C 0x9BDD lee el dia que se ve (respecto de hoy)
 C 0x9BEA divide_8: L / C: cociente en L y resto en H
+C 0x9C06 bio_texto_a1a6: pinta el texto de p06:A1A6
 C 0x9C0A bio_borra_casilla_b: borra la casilla de 8x8 de DE
 C 0x9C15 bio_borra_casilla_b: borra la casilla de 8x8 de DE
 C 0x9C1D pinta_letra_8x8: copia la letra A de 8x8 de la hoja de letras a DE (LMMM)
@@ -1470,6 +1542,11 @@ C 0x9FC6 or_en_color: OR de A en el color de B casillas (VRAM + 0x2000)
 C 0x9FD0 or_en_color_8: OR de A en 8 filas de color de B casillas
 C 0x9FDA or_en_color_8: OR de A en 8 filas de color de B casillas
 C 0x9FE4 or_en_color_8: OR de A en 8 filas de color de B casillas
+C 0x9FE8 bio_caja_a15e: una caja con sombra, su marco y el texto de p06:A15E
+C 0x9FEC bio_cuadro: los marcos, el eje y la rejilla de la grafica
+C 0x9FEF nada_b: `ret`
 C 0x9FF2 bio_sprites_msx2: los sprites de p05:8DAA y sus patrones
+C 0x9FF6 bio_caja_a1eb: una caja con sombra, su marco y el texto de p06:A1EB
 C 0x9FF9 bio_borra_zona: borra la zona de la grafica (comando del VDP)
+C 0x9FFC bio_caja_a19d: una caja con su marco y el texto de p06:A19D
 # --- fin de las anotaciones de anota.py ---

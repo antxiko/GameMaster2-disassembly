@@ -20,7 +20,7 @@ th_arranca:		; Tennis and Hockey: engancha H.KEYI (p07:8004) y prepara la pantal
 L_8004:
 	call 0013eh		;8004   ; BIOS RDVDP - Reads VDP status register
 	di			;8007
-	call sonido_cuadro		;8008   ; sonido_cuadro: el motor de sonido: un cuadro de los cinco canales
+	call sonido_cuadro		;8008   ; sonido_cuadro: el motor de sonido: un cuadro de sus cinco pistas (0-2 musica, 3-4 efectos; el PSG solo tiene 3 voces)
 	ld hl,0e404h		;800b   ; apunta a el cuadro esta en marcha
 	bit 0,(hl)		;800e
 	jr nz,L_801F		;8010
@@ -64,7 +64,7 @@ L_803A:
 	ld (0fd9ah),a		;803c   ; guarda el gancho H.KEYI
 	ld hl,L_8004		;803f
 	ld (0fd9bh),hl		;8042   ; guarda la direccion del gancho H.KEYI y el byte siguiente (16 bits)
-	ld hl,0e200h		;8045   ; apunta a los canales del motor de sonido (0x2C bytes cada uno)
+	ld hl,0e200h		;8045   ; apunta a las cinco pistas del motor de sonido (0x2C bytes cada una)
 	ld de,0e201h		;8048
 	ld bc,006ffh		;804b
 	ld (hl),000h		;804e
@@ -183,7 +183,7 @@ L_8103:
 	ld (0e41fh),a		;8118
 	jp L_80EC		;811b
 L_811E:
-	ld a,(0e200h)		;811e   ; lee los canales del motor de sonido (0x2C bytes cada uno)
+	ld a,(0e200h)		;811e   ; lee las cinco pistas del motor de sonido (0x2C bytes cada una)
 	and a			;8121
 	ret nz			;8122
 	ld a,(0e412h)		;8123   ; lee el juego: 1 tenis, 2 hockey
@@ -401,7 +401,7 @@ DATA_resto_827E:
 
 L_82B1:
 	call th_texto_resultado		;82b1   ; th_texto_resultado: pinta el resultado, parpadeando: DRAW, 1P WIN o 2P WIN segun 0xE41D
-	ld a,(0e200h)		;82b4   ; lee los canales del motor de sonido (0x2C bytes cada uno)
+	ld a,(0e200h)		;82b4   ; lee las cinco pistas del motor de sonido (0x2C bytes cada una)
 	and a			;82b7
 	ret nz			;82b8
 	ld de,082a0h		;82b9
@@ -433,7 +433,7 @@ L_82CC:
 	jp L_80EC		;82ec   ; y vuelve al menu
 L_82EF:
 	call th_texto_resultado		;82ef   ; th_texto_resultado: pinta el resultado, parpadeando: DRAW, 1P WIN o 2P WIN segun 0xE41D
-	ld a,(0e200h)		;82f2   ; lee los canales del motor de sonido (0x2C bytes cada uno)
+	ld a,(0e200h)		;82f2   ; lee las cinco pistas del motor de sonido (0x2C bytes cada una)
 	and a			;82f5
 	ret nz			;82f6
 	ld de,082a0h		;82f7
@@ -484,7 +484,7 @@ L_8339:
 	ld (0e403h),a		;8350
 	jp L_80EC		;8353   ; y vuelve al menu
 L_8356:
-	ld a,(0e200h)		;8356   ; lee los canales del motor de sonido (0x2C bytes cada uno)
+	ld a,(0e200h)		;8356   ; lee las cinco pistas del motor de sonido (0x2C bytes cada una)
 	and a			;8359
 	ret nz			;835a
 	ld a,00bh		;835b
@@ -509,7 +509,7 @@ L_8367:
 	ld (0e403h),a		;8382
 	jp L_80EC		;8385
 L_8388:
-	ld a,(0e200h)		;8388   ; lee los canales del motor de sonido (0x2C bytes cada uno)
+	ld a,(0e200h)		;8388   ; lee las cinco pistas del motor de sonido (0x2C bytes cada una)
 	and a			;838b
 	ret nz			;838c
 	ld a,00ch		;838d
@@ -2842,7 +2842,7 @@ pide_sonido:		; pide el sonido A al motor (con las interrupciones cerradas)
 	pop ix		;9b4e
 	ei			;9b50   ; y las vuelve a abrir
 	ret			;9b51
-pide_sonido_b:		; pone en sus canales las pistas del sonido A (tabla de p07:9BF5)
+pide_sonido_b:		; pone en sus sitios del motor las pistas del sonido A (tabla de p07:9BF5)
 	ld c,a			;9b52   ; C = el sonido
 	ld hl,0e2ddh		;9b53   ; apunta a el sonido pedido
 	ld (hl),c			;9b56
@@ -2860,12 +2860,12 @@ pide_sonido_b:		; pone en sus canales las pistas del sonido A (tabla de p07:9BF5
 	ld bc,0000ch		;9b67
 	ldir		;9b6a
 	ld ix,0e2e0h		;9b6c   ; IX = las pistas
-	ld hl,0e2deh		;9b70   ; bit 7: usa el canal 1
+	ld hl,0e2deh		;9b70   ; bit 7: usa la pista 0
 	bit 7,(hl)		;9b73
 	jp z,L_9B84		;9b75
 	inc hl			;9b78
 	ld a,(hl)			;9b79   ; la prioridad
-	ld hl,0e201h		;9b7a   ; el canal 1 (0xE201)
+	ld hl,0e201h		;9b7a   ; la pista 0 (su prioridad en 0xE201)
 	call canal_libre		;9b7d   ; se pone si puede
 	inc ix		;9b80   ; la pista siguiente
 	inc ix		;9b82
@@ -2876,7 +2876,7 @@ L_9B84:
 	inc hl			;9b8c
 	ld a,(hl)			;9b8d
 	ld hl,0e22dh		;9b8e
-	call canal_libre		;9b91   ; canal_libre: pone la pista en el canal si su prioridad no es menor
+	call canal_libre		;9b91   ; canal_libre: pone la pista en su sitio del motor si su prioridad no es menor
 	inc ix		;9b94
 	inc ix		;9b96
 L_9B98:
@@ -2886,7 +2886,7 @@ L_9B98:
 	inc hl			;9ba0
 	ld a,(hl)			;9ba1
 	ld hl,0e259h		;9ba2
-	call canal_libre		;9ba5   ; canal_libre: pone la pista en el canal si su prioridad no es menor
+	call canal_libre		;9ba5   ; canal_libre: pone la pista en su sitio del motor si su prioridad no es menor
 	inc ix		;9ba8
 	inc ix		;9baa
 L_9BAC:
@@ -2896,18 +2896,18 @@ L_9BAC:
 	inc hl			;9bb4
 	ld a,(hl)			;9bb5
 	ld hl,0e285h		;9bb6
-	call canal_libre		;9bb9   ; canal_libre: pone la pista en el canal si su prioridad no es menor
+	call canal_libre		;9bb9   ; canal_libre: pone la pista en su sitio del motor si su prioridad no es menor
 	inc ix		;9bbc
 	inc ix		;9bbe
 L_9BC0:
-	ld hl,0e2deh		;9bc0   ; bit 3: usa el canal 5
+	ld hl,0e2deh		;9bc0   ; bit 3: usa la pista 4
 	bit 3,(hl)		;9bc3
 	ret z			;9bc5
 	inc hl			;9bc6   ; la prioridad
 	ld a,(hl)			;9bc7
-	ld hl,0e2b1h		;9bc8   ; el canal 5 (0xE2B1)
-canal_libre:		; pone la pista en el canal si su prioridad no es menor
-	ld b,(hl)			;9bcb   ; la prioridad del canal
+	ld hl,0e2b1h		;9bc8   ; la pista 4 (su prioridad en 0xE2B1)
+canal_libre:		; pone la pista en su sitio del motor si su prioridad no es menor
+	ld b,(hl)			;9bcb   ; la prioridad de la pista
 	cp b			;9bcc   ; si la del sonido es menor, no entra
 	ret c			;9bcd
 	ex de,hl			;9bce
@@ -2924,7 +2924,7 @@ canal_libre:		; pone la pista en el canal si su prioridad no es menor
 	ld a,(ix+001h)		;9bdd   ; ...que trae IX
 	ld (de),a			;9be0
 	inc de			;9be1
-	ld hl,09bebh		;9be2   ; y el resto del canal desde p07:9BEB (12 bytes)
+	ld hl,09bebh		;9be2   ; y el resto de la pista desde p07:9BEB (12 bytes)
 	ld bc,0000ch		;9be5
 	ldir		;9be8
 	ret			;9bea
@@ -2953,28 +2953,28 @@ DATA_resto_9BEB:
 ; ======================================================================
 
 
-sonido_cuadro:		; el motor de sonido: un cuadro de los cinco canales
+sonido_cuadro:		; el motor de sonido: un cuadro de sus cinco pistas (0-2 musica, 3-4 efectos; el PSG solo tiene 3 voces)
 	ld a,(0e2eeh)		;9ca5
 	call 0a3bdh		;9ca8   ; pon_mezclador: escribe A en R#7 del PSG y en 0xE2EE
 	ld a,001h		;9cab
 	ld (0e2efh),a		;9cad   ; guarda el canal que se esta tocando
-	ld ix,0e200h		;9cb0   ; apunta a los canales del motor de sonido (0x2C bytes cada uno)
-	call canal_cuadro		;9cb4   ; canal_cuadro: un cuadro del canal IX si esta activo
+	ld ix,0e200h		;9cb0   ; apunta a las cinco pistas del motor de sonido (0x2C bytes cada una)
+	call canal_cuadro		;9cb4   ; canal_cuadro: un cuadro de la pista IX si esta activa
 	ld a,002h		;9cb7
 	ld (0e2efh),a		;9cb9   ; guarda el canal que se esta tocando
 	ld ix,0e22ch		;9cbc
-	call canal_cuadro		;9cc0   ; canal_cuadro: un cuadro del canal IX si esta activo
+	call canal_cuadro		;9cc0   ; canal_cuadro: un cuadro de la pista IX si esta activa
 	ld a,004h		;9cc3
 	ld (0e2efh),a		;9cc5   ; guarda el canal que se esta tocando
 	ld ix,0e258h		;9cc8
-	call canal_cuadro		;9ccc   ; canal_cuadro: un cuadro del canal IX si esta activo
+	call canal_cuadro		;9ccc   ; canal_cuadro: un cuadro de la pista IX si esta activa
 	ld a,008h		;9ccf
 	ld (0e2efh),a		;9cd1   ; guarda el canal que se esta tocando
 	ld ix,0e284h		;9cd4
-	call canal_cuadro		;9cd8   ; canal_cuadro: un cuadro del canal IX si esta activo
-	call 0a291h		;9cdb   ; sonido_mezcla: decide que canales van al PSG segun sus prioridades
+	call canal_cuadro		;9cd8   ; canal_cuadro: un cuadro de la pista IX si esta activa
+	call 0a291h		;9cdb   ; sonido_mezcla: decide que pista suena en las voces B y C del PSG: la de efectos (4, 3) si su prioridad no es menor que la de la musica (1, 2)
 	ret			;9cde
-canal_cuadro:		; un cuadro del canal IX si esta activo
+canal_cuadro:		; un cuadro de la pista IX si esta activa
 	ld a,(ix+000h)		;9cdf
 	or a			;9ce2
 	call nz,canal_nota		;9ce3   ; canal_nota: baja la duracion; si acaba, lee la orden siguiente de la pista
@@ -3188,7 +3188,7 @@ L_9E6D:
 	bit 2,(ix+00eh)		;9e74
 	call nz,canal_vibrato		;9e78   ; canal_vibrato: el contador del vibrato (ix+0x1E) segun los bits de (ix+0x0E)
 	bit 0,(ix+00fh)		;9e7b
-	call nz,canal_volumen_si		;9e7f   ; canal_volumen_si: el volumen del canal salvo si (ix+0x0D) lleva el bit 2
+	call nz,canal_volumen_si		;9e7f   ; canal_volumen_si: el volumen de la pista salvo si (ix+0x0D) lleva el bit 2
 	ld a,(0e2efh)		;9e82   ; lee el canal que se esta tocando
 	cp 004h		;9e85
 	ret nz			;9e87
@@ -3267,13 +3267,13 @@ L_9F18:
 	ld (ix+00bh),d		;9f1b
 	ld (ix+01eh),000h		;9f1e
 	ret			;9f22
-canal_volumen_si:		; el volumen del canal salvo si (ix+0x0D) lleva el bit 2
+canal_volumen_si:		; el volumen de la pista salvo si (ix+0x0D) lleva el bit 2
 	bit 2,(ix+00dh)		;9f23
 	ret nz			;9f27
-	call canal_volumen		;9f28   ; canal_volumen: el volumen del canal segun la envolvente de (ix+0x0F)
+	call canal_volumen		;9f28   ; canal_volumen: el volumen de la pista segun la envolvente de (ix+0x0F)
 	ld (ix+00ch),e		;9f2b
 	ret			;9f2e
-canal_volumen:		; el volumen del canal segun la envolvente de (ix+0x0F)
+canal_volumen:		; el volumen de la pista segun la envolvente de (ix+0x0F)
 	ld e,(ix+00ch)		;9f2f   ; el volumen
 	inc (ix+01fh)		;9f32   ; el contador de la envolvente
 	ld b,(ix+01fh)		;9f35

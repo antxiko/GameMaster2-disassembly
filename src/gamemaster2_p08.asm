@@ -428,40 +428,40 @@ L_A286:
 L_A28C:
 	res 7,(ix+00eh)		;a28c
 	ret			;a290
-sonido_mezcla:		; decide que canales van al PSG segun sus prioridades
+sonido_mezcla:		; decide que pista suena en las voces B y C del PSG: la de efectos (4, 3) si su prioridad no es menor que la de la musica (1, 2)
 	ld hl,0e2f6h		;a291   ; apunta a el estado del mezclador
-	res 0,(hl)		;a294   ; el canal 4 deja de mandar...
-	ld a,(0e259h)		;a296   ; ...salvo que su prioridad (0xE285)...
+	res 0,(hl)		;a294   ; la voz C, para la pista 2...
+	ld a,(0e259h)		;a296   ; ...salvo que la pista 3 (efectos, prioridad 0xE285)...
 	ld b,a			;a299
 	ld a,(0e285h)		;a29a
-	cp b			;a29d   ; ...no sea menor que la del canal 2 (0xE259)
+	cp b			;a29d   ; ...no la tenga menor que la pista 2 (0xE259): entonces se la queda
 	jp c,L_A2A3		;a29e
 	set 0,(hl)		;a2a1
 L_A2A3:
 	res 2,(hl)		;a2a3   ; quita el bit 2 del mezclador
-	ld a,(0e22dh)		;a2a5   ; el canal de 0xE22D...
+	ld a,(0e22dh)		;a2a5   ; la voz B: la prioridad de la pista 1 (0xE22D)...
 	ld b,a			;a2a8
-	ld a,(0e2b1h)		;a2a9   ; ...y el de 0xE2B1
-	cp b			;a2ac   ; si el segundo no es menor...
+	ld a,(0e2b1h)		;a2a9   ; ...y la de la pista 4 (efectos, 0xE2B1)
+	cp b			;a2ac   ; si la de la pista 4 no es menor...
 	jp c,L_A2B2		;a2ad
-	set 2,(hl)		;a2b0   ; ...el bit 2 vuelve
+	set 2,(hl)		;a2b0   ; ...la pista 4 se queda la voz B (bit 2)
 L_A2B2:
-	call sonido_al_psg		;a2b2   ; sonido_al_psg: manda al PSG los registros de los canales
+	call sonido_al_psg		;a2b2   ; sonido_al_psg: manda al PSG sus tres voces: A la pista 0, B la 1 o la 4, C la 2 o la 3
 	call sonido_ruido		;a2b5   ; sonido_ruido: el periodo del ruido (R#6) si hay que cambiarlo
 	call sonido_envolvente		;a2b8   ; sonido_envolvente: la envolvente (R#11-13) si hay que cambiarla
-	call sonido_mezclador		;a2bb   ; sonido_mezclador: el mezclador del PSG (R#7) segun los canales
+	call sonido_mezclador		;a2bb   ; sonido_mezclador: el mezclador del PSG (R#7) segun las pistas que suenan en cada voz
 	ret			;a2be
-sonido_al_psg:		; manda al PSG los registros de los canales
+sonido_al_psg:		; manda al PSG sus tres voces: A la pista 0, B la 1 o la 4, C la 2 o la 3
 	ld b,000h		;a2bf   ; los registros 0 y 1, y el volumen al 8
 	ld c,008h		;a2c1
-	ld hl,0e20ah		;a2c3   ; el canal 1 (0xE20A)
+	ld hl,0e20ah		;a2c3   ; la voz A (registros 0-1 y 8): siempre la pista 0 (0xE20A)
 	call tres_registros_psg		;a2c6   ; tres_registros_psg: escribe tres registros del PSG desde HL
 	ld hl,0e2f6h		;a2c9   ; apunta a el estado del mezclador
-	bit 2,(hl)		;a2cc   ; bit 2: el canal 4 manda en el canal A
+	bit 2,(hl)		;a2cc   ; bit 2: la voz B (registros 2-3 y 9) es de la pista 4
 	jp nz,L_A2E6		;a2ce
 	bit 3,(hl)		;a2d1   ; bit 3: se acaba de soltar
 	jp z,L_A2DD		;a2d3
-	res 3,(hl)		;a2d6   ; el canal 1 vuelve a sonar (0xE238 = 5)
+	res 3,(hl)		;a2d6   ; la pista 1 vuelve a sonar en la voz B (0xE238 = 5)
 	ld a,005h		;a2d8
 	ld (0e238h),a		;a2da
 L_A2DD:
@@ -472,13 +472,13 @@ L_A2E6:
 	ld hl,0e2bah		;a2e6
 	call tres_registros_psg		;a2e9   ; tres_registros_psg: escribe tres registros del PSG desde HL
 L_A2EC:
-	ld hl,0e2f6h		;a2ec   ; bit 0: el canal 4 manda
+	ld hl,0e2f6h		;a2ec   ; bit 0: la voz C (registros 4-5 y 10) es de la pista 3
 	bit 0,(hl)		;a2ef
 	jp nz,L_A307		;a2f1
 	bit 1,(hl)		;a2f4   ; bit 1: se acaba de soltar
 	jp z,L_A300		;a2f6
 	res 1,(hl)		;a2f9
-	ld a,005h		;a2fb   ; el canal 2 vuelve a sonar (0xE264 = 5)
+	ld a,005h		;a2fb   ; la pista 2 vuelve a sonar en la voz C (0xE264 = 5)
 	ld (0e264h),a		;a2fd
 L_A300:
 	ld hl,0e262h		;a300
@@ -557,7 +557,7 @@ sonido_envolvente:		; la envolvente (R#11-13) si hay que cambiarla
 	ld a,00dh		;a37e
 	call 00093h		;a380   ; BIOS WRTPSG - Writes data to PSG-register
 	ret			;a383
-sonido_mezclador:		; el mezclador del PSG (R#7) segun los canales
+sonido_mezclador:		; el mezclador del PSG (R#7) segun las pistas que suenan en cada voz
 	ld hl,0e20dh		;a384   ; el modo del canal 1 (0xE20D)...
 	ld a,(hl)			;a387
 	ld hl,0a3ceh		;a388   ; ...sus bits del mezclador (tabla de p08:A3CE)

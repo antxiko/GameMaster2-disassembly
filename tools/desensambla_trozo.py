@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Desensambla un trozo de un binario en su direccion real. Herramienta de mano.
 
-    dis.py <bin> <org_del_fichero> <ini> <fin>
+    desensambla_trozo.py <bin> <org_del_fichero> <ini> <fin>
 
 Todo en hexadecimal o decimal (0x...). El temporal va al work/ del proyecto:
 en Windows z80dasm casca si le toca el temporal del sistema.

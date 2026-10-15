@@ -84,22 +84,22 @@ C 0xA275 una nota: la parte baja
 C 0xA278 0x0F: silencio
 C 0xA27D de 6 en adelante...
 C 0xA282 la parte baja a (ix+0x16)
-C 0xA294 el canal 4 deja de mandar...
-C 0xA296 ...salvo que su prioridad (0xE285)...
-C 0xA29D ...no sea menor que la del canal 2 (0xE259)
+C 0xA294 la voz C, para la pista 2...
+C 0xA296 ...salvo que la pista 3 (efectos, prioridad 0xE285)...
+C 0xA29D ...no la tenga menor que la pista 2 (0xE259): entonces se la queda
 C 0xA2A3 quita el bit 2 del mezclador
-C 0xA2A5 el canal de 0xE22D...
-C 0xA2A9 ...y el de 0xE2B1
-C 0xA2AC si el segundo no es menor...
-C 0xA2B0 ...el bit 2 vuelve
+C 0xA2A5 la voz B: la prioridad de la pista 1 (0xE22D)...
+C 0xA2A9 ...y la de la pista 4 (efectos, 0xE2B1)
+C 0xA2AC si la de la pista 4 no es menor...
+C 0xA2B0 ...la pista 4 se queda la voz B (bit 2)
 C 0xA2BF los registros 0 y 1, y el volumen al 8
-C 0xA2C3 el canal 1 (0xE20A)
-C 0xA2CC bit 2: el canal 4 manda en el canal A
+C 0xA2C3 la voz A (registros 0-1 y 8): siempre la pista 0 (0xE20A)
+C 0xA2CC bit 2: la voz B (registros 2-3 y 9) es de la pista 4
 C 0xA2D1 bit 3: se acaba de soltar
-C 0xA2D6 el canal 1 vuelve a sonar (0xE238 = 5)
-C 0xA2EC bit 0: el canal 4 manda
+C 0xA2D6 la pista 1 vuelve a sonar en la voz B (0xE238 = 5)
+C 0xA2EC bit 0: la voz C (registros 4-5 y 10) es de la pista 3
 C 0xA2F4 bit 1: se acaba de soltar
-C 0xA2FB el canal 2 vuelve a sonar (0xE264 = 5)
+C 0xA2FB la pista 2 vuelve a sonar en la voz C (0xE264 = 5)
 C 0xA30E la frecuencia, parte baja...
 C 0xA30F ...al registro B
 C 0xA315 la parte alta...
@@ -153,12 +153,12 @@ F 0xAF1B 16
 # --- ANOTACIONES AUTOMATICAS (seccion que reescribe tools/anota.py; no editar a mano) ---
 L 0xA029 canal_orden una orden de la pista (0xE0-0xFF) por la tabla de p08:A03E, o una nota
 L 0xA229 palabra_y_retrocede HL = la palabra siguiente - 1
-L 0xA291 sonido_mezcla decide que canales van al PSG segun sus prioridades
-L 0xA2BF sonido_al_psg manda al PSG los registros de los canales
+L 0xA291 sonido_mezcla decide que pista suena en las voces B y C del PSG: la de efectos (4, 3) si su prioridad no es menor que la de la musica (1, 2)
+L 0xA2BF sonido_al_psg manda al PSG sus tres voces: A la pista 0, B la 1 o la 4, C la 2 o la 3
 L 0xA30E tres_registros_psg escribe tres registros del PSG desde HL
 L 0xA32C sonido_ruido el periodo del ruido (R#6) si hay que cambiarlo
 L 0xA356 sonido_envolvente la envolvente (R#11-13) si hay que cambiarla
-L 0xA384 sonido_mezclador el mezclador del PSG (R#7) segun los canales
+L 0xA384 sonido_mezclador el mezclador del PSG (R#7) segun las pistas que suenan en cada voz
 L 0xA3BD pon_mezclador escribe A en R#7 del PSG y en 0xE2EE
 L 0xA3C7 tabla_por_dos_bits HL = HL + (A and 3)
 C 0xA098 lee lo que hay que mandar al PSG
@@ -175,10 +175,10 @@ C 0xA114 apunta a lo que hay que mandar al PSG
 C 0xA20A palabra_y_retrocede: HL = la palabra siguiente - 1
 C 0xA24F palabra_y_retrocede: HL = la palabra siguiente - 1
 C 0xA291 apunta a el estado del mezclador
-C 0xA2B2 sonido_al_psg: manda al PSG los registros de los canales
+C 0xA2B2 sonido_al_psg: manda al PSG sus tres voces: A la pista 0, B la 1 o la 4, C la 2 o la 3
 C 0xA2B5 sonido_ruido: el periodo del ruido (R#6) si hay que cambiarlo
 C 0xA2B8 sonido_envolvente: la envolvente (R#11-13) si hay que cambiarla
-C 0xA2BB sonido_mezclador: el mezclador del PSG (R#7) segun los canales
+C 0xA2BB sonido_mezclador: el mezclador del PSG (R#7) segun las pistas que suenan en cada voz
 C 0xA2C6 tres_registros_psg: escribe tres registros del PSG desde HL
 C 0xA2C9 apunta a el estado del mezclador
 C 0xA2E0 tres_registros_psg: escribe tres registros del PSG desde HL

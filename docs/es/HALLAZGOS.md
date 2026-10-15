@@ -42,3 +42,10 @@ Del 40 se pasa a juego con el siguiente tanto, gane quien gane antes
 
 En MSX2 los colores de las curvas suben un poco cada día de la animación
 hasta quedar en amarillo, cian y magenta (`p06:A2B7`).
+
+## Una G dentro de la M
+
+El rótulo «GAME MASTER II» de las máquinas no japonesas reutiliza letras entre
+palabras (`p09:8D99`). En la columna de en medio de la M de MASTER, abajo
+(`p09:8DD5`), pone la letra 0x21, que es la esquina de la G, donde la M de GAME
+lleva la 0x26: por eso esa M sale con un trozo raro. openMSX la pinta igual.

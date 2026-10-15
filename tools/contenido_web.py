@@ -124,6 +124,11 @@ HALLAZGOS = {
          "<p>En MSX2 los colores de las tres curvas suben un poco cada d&iacute;a "
          "de la animaci&oacute;n hasta quedar en amarillo, cian y magenta "
          "(<code>p06:A2B7</code>).</p>" + COTEJADO["es"]),
+        ("Una G dentro de la M",
+         "<p>El r&oacute;tulo &laquo;GAME MASTER II&raquo; reutiliza letras entre "
+         "palabras (<code>p09:8D99</code>). Abajo, en medio de la M de MASTER "
+         "(<code>p09:8DD5</code>), pone la letra 0x21, la esquina de la G, donde "
+         "la M de GAME lleva la 0x26.</p>" + COTEJADO["es"]),
     ],
     "en": [
         ("It also gets into MSX2 cartridges",
@@ -150,6 +155,11 @@ HALLAZGOS = {
          "<p>On MSX2 the colours of the three curves rise a little each day of "
          "the animation until they end up yellow, cyan and magenta "
          "(<code>p06:A2B7</code>).</p>" + COTEJADO["en"]),
+        ("A G inside the M",
+         "<p>The &ldquo;GAME MASTER II&rdquo; title reuses characters between "
+         "words (<code>p09:8D99</code>). At the bottom of the middle of the M of "
+         "MASTER (<code>p09:8DD5</code>) it puts character 0x21, the corner of "
+         "the G, where the M of GAME has 0x26.</p>" + COTEJADO["en"]),
     ],
 }
 

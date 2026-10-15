@@ -40,3 +40,11 @@ and the set ends at 6 games with no need for a two-game lead.
 
 On MSX2 the colours of the curves rise a little each day of the animation until
 they are yellow, cyan and magenta (`p06:A2B7`).
+
+## A G inside the M
+
+The "GAME MASTER II" title on non-Japanese machines reuses characters between
+words (`p09:8D99`). In the middle column of the M of MASTER, at the bottom
+(`p09:8DD5`), it puts character 0x21, which is the corner of the G, where the M
+of GAME has 0x26: that is why that M comes out with an odd piece. openMSX draws
+it the same way.

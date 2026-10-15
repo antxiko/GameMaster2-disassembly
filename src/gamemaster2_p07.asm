@@ -226,7 +226,7 @@ th_marcador_set:		; pinta el SET y el 1ST/2ND/3RD (tenis: 0xE412 = 1)
 	dec a			;8157   ; solo el tenis
 	jr nz,$+39		;8158
 	ld de,08186h		;815a   ; el texto de p07:8186 (SET)
-	call th_pinta_texto		;815d   ; th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
+	call th_pinta_texto		;815d   ; th_pinta_texto: pinta un texto: [direccion de VRAM] y letras (ASCII - 0x20); 0xFE otra direccion, 0xFF acaba
 	ld hl,0e40ch		;8160   ; el set que se juega...
 	ld a,(hl)			;8163
 	add a,a			;8164   ; ...x 3...
@@ -253,7 +253,7 @@ DATA_resto_8176:
 
 L_817F:
 	ld de,08192h		;817f
-	call th_pinta_texto		;8182   ; th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
+	call th_pinta_texto		;8182   ; th_pinta_texto: pinta un texto: [direccion de VRAM] y letras (ASCII - 0x20); 0xFE otra direccion, 0xFF acaba
 	ret			;8185
 
 ; ----------------------------------------------------------------------
@@ -368,9 +368,9 @@ L_8239:
 	call pide_sonido		;8250   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 	call th_borra_pantalla		;8253   ; pantalla limpia
 	ld de,08294h		;8256   ; el texto de p07:8294 (GAME)...
-	call th_pinta_texto		;8259   ; th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
+	call th_pinta_texto		;8259   ; th_pinta_texto: pinta un texto: [direccion de VRAM] y letras (ASCII - 0x20); 0xFE otra direccion, 0xFF acaba
 	ld de,0827eh		;825c   ; ...y el de p07:827E
-	call th_pinta_texto		;825f   ; th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
+	call th_pinta_texto		;825f   ; th_pinta_texto: pinta un texto: [direccion de VRAM] y letras (ASCII - 0x20); 0xFE otra direccion, 0xFF acaba
 	ld hl,03971h		;8262   ; los tantos del jugador 1...
 	ld de,0e410h		;8265   ; apunta a los tantos del jugador 1
 	call th_pinta_bcd		;8268   ; th_pinta_bcd: pinta el byte BCD de DE en dos cifras grandes
@@ -405,7 +405,7 @@ L_82B1:
 	and a			;82b7
 	ret nz			;82b8
 	ld de,082a0h		;82b9
-	call th_pinta_texto		;82bc   ; th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
+	call th_pinta_texto		;82bc   ; th_pinta_texto: pinta un texto: [direccion de VRAM] y letras (ASCII - 0x20); 0xFE otra direccion, 0xFF acaba
 	jp L_80EC		;82bf
 L_82C2:
 	ld a,008h		;82c2
@@ -437,7 +437,7 @@ L_82EF:
 	and a			;82f5
 	ret nz			;82f6
 	ld de,082a0h		;82f7
-	call th_pinta_texto		;82fa   ; th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
+	call th_pinta_texto		;82fa   ; th_pinta_texto: pinta un texto: [direccion de VRAM] y letras (ASCII - 0x20); 0xFE otra direccion, 0xFF acaba
 	jp L_80EC		;82fd
 L_8300:
 	ld a,008h		;8300
@@ -466,7 +466,7 @@ L_832D:
 	ld hl,0e40dh		;832d
 	dec (hl)			;8330
 	bit 3,(hl)		;8331
-	jp z,th_pinta_texto		;8333   ; th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
+	jp z,th_pinta_texto		;8333   ; th_pinta_texto: pinta un texto: [direccion de VRAM] y letras (ASCII - 0x20); 0xFE otra direccion, 0xFF acaba
 	jp L_863D		;8336
 L_8339:
 	dec b			;8339   ; B = quien gano el partido
@@ -504,7 +504,7 @@ L_8367:
 	call pide_sonido		;8374   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 	call th_borra_pantalla		;8377   ; th_borra_pantalla: borra los sprites y la tabla de nombres
 	ld de,08399h		;837a
-	call th_pinta_texto		;837d   ; th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
+	call th_pinta_texto		;837d   ; th_pinta_texto: pinta un texto: [direccion de VRAM] y letras (ASCII - 0x20); 0xFE otra direccion, 0xFF acaba
 	ld a,05ah		;8380
 	ld (0e403h),a		;8382
 	jp L_80EC		;8385
@@ -796,7 +796,7 @@ L_8618:
 	pop bc			;8622
 	djnz L_8618		;8623
 	ret			;8625
-th_pinta_texto:		; pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
+th_pinta_texto:		; pinta un texto: [direccion de VRAM] y letras (ASCII - 0x20); 0xFE otra direccion, 0xFF acaba
 	ld c,0ffh		;8626
 L_8628:
 	ex de,hl			;8628   ; HL = la direccion de VRAM que viene en el texto
@@ -2281,7 +2281,7 @@ th_campo_colores:		; descomprime p07:9535
 	jp L_8641		;9097
 th_menu_juego:		; GAME SELECT: TENNIS / HOCKEY / END
 	ld de,0876eh		;909a
-	call th_pinta_texto		;909d   ; th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
+	call th_pinta_texto		;909d   ; th_pinta_texto: pinta un texto: [direccion de VRAM] y letras (ASCII - 0x20); 0xFE otra direccion, 0xFF acaba
 	ld a,001h		;90a0
 	ld (0e412h),a		;90a2   ; guarda el juego: 1 tenis, 2 hockey
 	ret			;90a5
@@ -2345,7 +2345,7 @@ DATA_resto_90FA:
 
 th_menu_modify:		; GAME MODIFY: LENGTH / SPEED / TYPE / BAR
 	ld de,087a5h		;9100
-	call th_pinta_texto		;9103   ; th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
+	call th_pinta_texto		;9103   ; th_pinta_texto: pinta un texto: [direccion de VRAM] y letras (ASCII - 0x20); 0xFE otra direccion, 0xFF acaba
 	ld hl,09126h		;9106
 	ld de,0e500h		;9109   ; apunta a la copia de la tabla de sprites
 	ld bc,00010h		;910c

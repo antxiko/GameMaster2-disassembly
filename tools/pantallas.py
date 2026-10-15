@@ -22,6 +22,11 @@ ROM = open(os.path.join(RAIZ, "gamemaster2.rom"), "rb").read()
 # Los repartos de bancos con que corre cada parte: 0x4000 es siempre el 0.
 # p01:672D pone el 9 en 0x8000 y el 10 en 0xA000 para la presentacion.
 PRESENTACION = {0x6000: 1, 0x8000: 9, 0xA000: 10}
+# Lo de los menus del cartucho solo: p00 y p01 seguidos en 0x4000-0x7FFF.
+MENUS = {0x6000: 1}
+# La ventana en que corre cada banco (tools/paginas.py).
+VENTANA = {0: 0x4000, 1: 0x6000, 2: 0x8000, 4: 0x8000, 5: 0x8000, 7: 0x8000,
+           9: 0x8000, 3: 0xA000, 6: 0xA000, 8: 0xA000, 10: 0xA000, 11: 0xA000}
 
 
 def rom(bancos, dir_, n=1):
@@ -29,11 +34,11 @@ def rom(bancos, dir_, n=1):
     ventana de 8 KB con su banco (un bloque puede pasar de una a otra).
     `bancos` es un reparto {ventana: banco} o un banco suelto."""
     if isinstance(bancos, int):
-        bancos = {dir_ & 0xE000: bancos}
+        bancos = {VENTANA[bancos]: bancos}
     out = bytearray()
     for d in range(dir_, dir_ + n):
         ventana = d & 0xE000
-        b = 0 if ventana == 0x4000 else bancos[ventana]
+        b = 0 if ventana == 0x4000 else bancos[ventana]   # KeyError: fuera del reparto
         out.append(ROM[b * 0x2000 + (d & 0x1FFF)])
     return bytes(out)
 
@@ -176,10 +181,157 @@ def menu_principal(v):
     v.copia(9, 0x831B, 0x3B00, 0x1C)                  # p09:830E
 
 
+def tercios_llena(v, dest, n, valor):                 # p01:72FC
+    for t in range(3):
+        v.llena(dest + 0x800 * t, n, valor)
+
+
+def tercios_copia(v, bancos, origen, dest, n):        # p01:730D
+    for t in range(3):
+        v.copia(bancos, origen, dest + 0x800 * t, n)
+
+
+def pantalla_de_menu(v):
+    """p00:5EC2 (pantalla_del_menu) en MSX1 y p09:8191 (titulo_graficos).
+
+    La VRAM entera a cero (p00:5EEA) y los registros de p01:72E2; luego los
+    dibujos de la presentacion que usan los menus: p09:81DB da a las letras
+    0x00-0x0F los colores 0x00, 0x11 ... 0xFF (las casillas de color), las
+    0x80-0x85 son trozos de marco (p09:819B) y la fuente del cartucho
+    (p00:483F) va a las letras 0x30-0x5A con tinta blanca (p09:823D)."""
+    v.llena(0x0000, 0x4000, 0)
+    v.borde = 1                                       # R#7 = 0xE1 (p01:72E2)
+    v.llena(0x3800, 0x300, 0)                         # p01:6691 (p01:72EA)
+    v.v[0x3B00] = 0xD0
+    P = PRESENTACION
+    v.descomprime_tercios(P, 0x81DB, 0x0000)          # p09:81D2
+    tercios_llena(v, 0x2400, 0x20, 0x3F)              # p09:819B
+    tercios_llena(v, 0x2420, 0x20, 0xFC)              # p09:81A6
+    v.descomprime_tercios(P, 0x81FC, 0x0400)          # p09:81B1
+    tercios_copia(v, P, 0x820D, 0x2440, 0x30)         # p09:81BA
+    tercios_llena(v, 0x0440, 0x30, 0xF0)              # p09:81C6
+    tercios_copia(v, P, 0x483F, 0x2180, 0x158)        # p09:823D
+    tercios_llena(v, 0x0180, 0x158, 0xF0)             # p09:8249
+
+
+def casillas_de_color(v):
+    """p01:6762: cuatro filas de las 16 casillas (letras 1-15 y 0, dos veces
+    cada una) arriba (0x3800) y abajo (0x3A80)."""
+    for base in (0x3800, 0x3A80):
+        d = base
+        for _ in range(4):
+            a = 1
+            for _ in range(16):
+                v.v[d] = v.v[d + 1] = a
+                d += 2
+                a = (a + 1) & 0x0F
+
+
+def menu_self(v):
+    """p00:5DEE: el SELF MODE MENU, esperando tecla (p01:767C) con el cursor
+    (la letra 0x3A, una flecha en esta fuente) en la primera opcion."""
+    pantalla_de_menu(v)
+    v.borde = 1                                       # p01:66F6: R#7 = 0x01
+    v.llena(0x3800, 0x300, 0)                         # p01:66FC
+    v.v[0x3B00] = 0xD0
+    casillas_de_color(v)                              # p00:5DF1
+    v.llena(0x3880, 0x200, 0)                         # p00:5DF4 (p01:62D3)
+    v.texto(MENUS, 0x5FCF)                            # p00:5DF7
+    lista = rom(1, 0x6030, 2)                         # p00:5DFD: las 5 posiciones
+    v.v[lista[0] | lista[1] << 8] = 0x3A              # p01:76AF -> p01:7633
+
+
+BIOS = open(os.path.join(RAIZ, "cbios_main_msx1_jp.rom"), "rb").read()
+
+
+def fuente_de_la_bios():
+    """CGTABL (la palabra de 0x0004): la fuente de la maquina. Aqui la de la
+    C-BIOS MSX1 japonesa, la de los cotejos de la serie en openMSX; en otra
+    maquina las letras cambian de dibujo."""
+    cg = BIOS[4] | BIOS[5] << 8
+    return BIOS[cg:cg + 0x800]
+
+
+def sram_utilidad(v):
+    """p01:7973: SRAM DISK UTILITY, esperando tecla en su menu (p01:7696).
+
+    Viene del menu SELF (opcion 1). Borra los nombres (p00:448D), pone la
+    fuente de la BIOS en los dibujos y tinta blanca en los colores (0x7F0
+    bytes por tercio), el texto de p00:4123 y el menu de 4 opciones de
+    p00:4175, con el cursor en la letra 0x10 (0xF2E6 = 1, p01:79B4)."""
+    menu_self(v)
+    v.llena(0x3800, 0x300, 0)                         # p01:7987
+    f = fuente_de_la_bios()
+    for t in range(3):                                # p01:7997
+        v.v[0x2000 + 0x800 * t:0x2000 + 0x800 * t + 0x7F0] = f[:0x7F0]
+    tercios_llena(v, 0x0000, 0x7F0, 0xF0)             # p01:79A3
+    v.texto(0, 0x4123)                                # p01:79B9
+    lista = rom(0, 0x4175, 2)                         # p01:79C1
+    v.v[lista[0] | lista[1] << 8] = 0x10              # p01:76AF -> p01:7633
+    tercios_copia(v, 1, 0x762B, 0x2080, 8)            # p01:7693 -> p01:760A: la flecha
+
+
+TENIS = {0x6000: 1, 0x8000: 7, 0xA000: 8}             # Tennis and Hockey: p07 y p08
+
+
+def th_tercios(v, dest, hl_, pasos=3):
+    """p07:8616: el descompresor de p07:8647 (el mismo formato que p01:733A)
+    en los tres tercios."""
+    for t in range(pasos):
+        v.descomprime(TENIS, hl_, dest + 0x800 * t)
+
+
+def th_sprites(v, copia):
+    """p07:866C: la copia de 0xE500 (32 sprites) a 0x3B00, cada Y - 1. El
+    cartucho empieza cada cuadro por una pareja distinta (0xE40B, contra el
+    parpadeo); aqui van en el orden de la copia y el cotejo los mira como
+    conjunto."""
+    for i in range(32):
+        y, x, p, c = copia[i * 4:i * 4 + 4]
+        v.v[0x3B00 + i * 4:0x3B04 + i * 4] = bytes([(y - 1) & 0xFF, x, p, c])
+
+
+def th_pantalla_base(v):
+    """El primer cuadro de Tennis and Hockey (p07:8000 -> estado 0): la VRAM a
+    cero y los registros de p07:86D5 (R#7 = 0xE0: borde negro), sprites
+    escondidos (0xE0 en 0xE500-0xE52F, p07:8495), nombres a cero, la fuente
+    (p07:8823), los dibujos de la pista (p07:9386), sus colores (p07:951D y
+    p07:9535)."""
+    v.llena(0x0000, 0x4000, 0)                        # p07:86BA
+    v.borde = 0
+    copia = bytearray(0x80)
+    copia[0:0x30] = bytes([0xE0]) * 0x30              # p07:8495
+    th_sprites(v, copia)
+    v.llena(0x3800, 0x300, 0)                         # p07:85D8
+    tercios_llena(v, 0x2000, 0x80, 0)                 # p07:883A: dibujos 0x00-0x0F vacios
+    for k in range(16):                               # p07:8844: la letra k, color k
+        tercios_llena(v, 8 * k, 8, k)
+    th_tercios(v, 0x2080, 0x885B)                     # p07:8826: la fuente desde la letra 0x10
+    tercios_llena(v, 0x0080, 0x158, 0xF0)             # p07:882F
+    th_tercios(v, 0x2300, 0x9386)                     # p07:9082
+    th_tercios(v, 0x0300, 0x951D)                     # p07:908B
+    d = rom(TENIS, 0x9535, 2)                         # p07:9094 -> p07:8641
+    v.descomprime(TENIS, 0x9537, d[0] | d[1] << 8)
+
+
+def tenis_menu(v):
+    """GAME SELECT (p07:909A) y, en el cuadro siguiente, la flecha (la letra
+    0x8D) en TENNIS (p07:90D0, posiciones de p07:90FA)."""
+    th_pantalla_base(v)
+    v.texto(TENIS, 0x876E)                            # p07:909A (p07:8626)
+    for d in (0x394D, 0x398D, 0x39CD):                # p07:90D0
+        v.v[d] = 0
+    p = rom(TENIS, 0x90FA, 2)
+    v.v[p[0] | p[1] << 8] = 0x8D
+
+
 PANTALLAS = {
     "logo_konami": logo_konami,
     "presentacion_japonesa": presentacion_japonesa,
     "menu_principal": menu_principal,
+    "menu_self": menu_self,
+    "sram_utilidad": sram_utilidad,
+    "tenis_menu": tenis_menu,
 }
 
 

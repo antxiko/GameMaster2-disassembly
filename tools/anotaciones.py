@@ -485,7 +485,7 @@ RUTINAS = {
     (7, 0x85EE): ("th_copia_a_vram", "LDIRVM de DE a HL"),
     (7, 0x8605): ("th_rellena_tercios", "FILVRM en los tres tercios"),
     (7, 0x8616): ("th_descomprime_tercios", "descomprime DE en los tres tercios"),
-    (7, 0x8626): ("th_pinta_texto", "pinta un texto: [direccion de VRAM][n][letras], letras + 0x20"),
+    (7, 0x8626): ("th_pinta_texto", "pinta un texto: [direccion de VRAM] y letras (ASCII - 0x20); 0xFE otra direccion, 0xFF acaba"),
     (7, 0x8647): ("th_descomprime", "descomprime DE a la VRAM HL: n & 0x7F repeticiones o copias, 0 acaba"),
     (7, 0x866C): ("th_vuelca_sprites", "vuelca a la tabla de sprites la copia de 0xE500"),
     (7, 0x86B0): ("th_inicia", "silencio, sonido 1, borra la VRAM y pone los 8 registros del VDP"),

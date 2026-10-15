@@ -666,7 +666,7 @@ L 0x85E2 th_vram_escribe SETWRT en HL y C = el puerto de datos del VDP
 L 0x85EE th_copia_a_vram LDIRVM de DE a HL
 L 0x8605 th_rellena_tercios FILVRM en los tres tercios
 L 0x8616 th_descomprime_tercios descomprime DE en los tres tercios
-L 0x8626 th_pinta_texto pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
+L 0x8626 th_pinta_texto pinta un texto: [direccion de VRAM] y letras (ASCII - 0x20); 0xFE otra direccion, 0xFF acaba
 L 0x8647 th_descomprime descomprime DE a la VRAM HL: n & 0x7F repeticiones o copias, 0 acaba
 L 0x866C th_vuelca_sprites vuelca a la tabla de sprites la copia de 0xE500
 L 0x86B0 th_inicia silencio, sonido 1, borra la VRAM y pone los 8 registros del VDP
@@ -772,9 +772,9 @@ C 0x8141 th_borra_pantalla: borra los sprites y la tabla de nombres
 C 0x8144 th_marcador_set: pinta el SET y el 1ST/2ND/3RD (tenis: 0xE412 = 1)
 C 0x8149 guarda el tiempo del hockey (BCD)
 C 0x8154 lee el juego: 1 tenis, 2 hockey
-C 0x815D th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
+C 0x815D th_pinta_texto: pinta un texto: [direccion de VRAM] y letras (ASCII - 0x20); 0xFE otra direccion, 0xFF acaba
 C 0x8169 hl_mas_a: HL = HL + A (gemela de p01:7251)
-C 0x8182 th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
+C 0x8182 th_pinta_texto: pinta un texto: [direccion de VRAM] y letras (ASCII - 0x20); 0xFE otra direccion, 0xFF acaba
 C 0x81A2 th_pinta_marcadores: pinta el marcador entero
 C 0x81A5 th_partido: prepara el partido: tenis (p07:95BC) o hockey (p07:987C)
 C 0x81B2 th_vuelca_sprites: vuelca a la tabla de sprites la copia de 0xE500
@@ -783,28 +783,28 @@ C 0x81DA pide_sonido: pide el sonido A al motor (con las interrupciones cerradas
 C 0x8214 lee el juego: 1 tenis, 2 hockey
 C 0x8239 lee el juego: 1 tenis, 2 hockey
 C 0x8250 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
-C 0x8259 th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
-C 0x825F th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
+C 0x8259 th_pinta_texto: pinta un texto: [direccion de VRAM] y letras (ASCII - 0x20); 0xFE otra direccion, 0xFF acaba
+C 0x825F th_pinta_texto: pinta un texto: [direccion de VRAM] y letras (ASCII - 0x20); 0xFE otra direccion, 0xFF acaba
 C 0x8265 apunta a los tantos del jugador 1
 C 0x8268 th_pinta_bcd: pinta el byte BCD de DE en dos cifras grandes
 C 0x826E apunta a los tantos del jugador 2
 C 0x8271 th_pinta_bcd: pinta el byte BCD de DE en dos cifras grandes
 C 0x82B1 th_texto_resultado: pinta el resultado, parpadeando: DRAW, 1P WIN o 2P WIN segun 0xE41D
 C 0x82B4 lee los canales del motor de sonido (0x2C bytes cada uno)
-C 0x82BC th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
+C 0x82BC th_pinta_texto: pinta un texto: [direccion de VRAM] y letras (ASCII - 0x20); 0xFE otra direccion, 0xFF acaba
 C 0x82DC pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x82EF th_texto_resultado: pinta el resultado, parpadeando: DRAW, 1P WIN o 2P WIN segun 0xE41D
 C 0x82F2 lee los canales del motor de sonido (0x2C bytes cada uno)
-C 0x82FA th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
+C 0x82FA th_pinta_texto: pinta un texto: [direccion de VRAM] y letras (ASCII - 0x20); 0xFE otra direccion, 0xFF acaba
 C 0x830A pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x8311 th_borra_pantalla: borra los sprites y la tabla de nombres
-C 0x8333 th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
+C 0x8333 th_pinta_texto: pinta un texto: [direccion de VRAM] y letras (ASCII - 0x20); 0xFE otra direccion, 0xFF acaba
 C 0x8346 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x8356 lee los canales del motor de sonido (0x2C bytes cada uno)
 C 0x835D pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x8374 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x8377 th_borra_pantalla: borra los sprites y la tabla de nombres
-C 0x837D th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
+C 0x837D th_pinta_texto: pinta un texto: [direccion de VRAM] y letras (ASCII - 0x20); 0xFE otra direccion, 0xFF acaba
 C 0x8388 lee los canales del motor de sonido (0x2C bytes cada uno)
 C 0x838F pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x83BA de_mas_a: DE = DE + A (gemela de p01:7256)
@@ -973,14 +973,14 @@ C 0x9044 palabra_de_tabla: DE = la palabra A de la tabla de DE
 C 0x904C palabra_de_tabla: DE = la palabra A de la tabla de DE
 C 0x9088 th_descomprime_tercios: descomprime DE en los tres tercios
 C 0x9091 th_descomprime_tercios: descomprime DE en los tres tercios
-C 0x909D th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
+C 0x909D th_pinta_texto: pinta un texto: [direccion de VRAM] y letras (ASCII - 0x20); 0xFE otra direccion, 0xFF acaba
 C 0x90A2 guarda el juego: 1 tenis, 2 hockey
 C 0x90A6 lee el mando del jugador 1
 C 0x90AD apunta a el juego: 1 tenis, 2 hockey
 C 0x90BB pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x90CA pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x90ED hl_mas_a: HL = HL + A (gemela de p01:7251)
-C 0x9103 th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
+C 0x9103 th_pinta_texto: pinta un texto: [direccion de VRAM] y letras (ASCII - 0x20); 0xFE otra direccion, 0xFF acaba
 C 0x9109 apunta a la copia de la tabla de sprites
 C 0x9136 lee el mando del jugador 1
 C 0x9144 apunta a la opcion elegida del GAME MODIFY

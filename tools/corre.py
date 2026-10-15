@@ -14,7 +14,10 @@ Lo que pone alrededor del Z80:
   - los slots justos: el Game Master en el slot 1, la RAM en el 3 y ningun
     cartucho mas. ENASLT en la pagina 2 cambia entre el cartucho y la RAM;
   - la BIOS de MSX1 atrapada por su direccion (las que el cartucho llama);
-    una que no este aqui REVIENTA, no se salta.
+    una que no este aqui REVIENTA, no se salta. Debajo, para LEER (la fuente
+    de CGTABL, los bytes de sistema de 0x0004-0x002D), la C-BIOS MSX1
+    japonesa (cbios_main_msx1_jp.rom, sha1 933719a9...), la de la maquina
+    C-BIOS_MSX1_JP de openMSX con que se hacen los cotejos de la serie.
 """
 import os
 import sys
@@ -23,6 +26,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from z80run import Z80, ParadaZ80  # noqa: E402
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BIOS = os.path.join(RAIZ, "cbios_main_msx1_jp.rom")
 SLOT_GM, SLOT_RAM = 0x01, 0x03
 
 
@@ -41,8 +45,8 @@ class GameMaster2(Z80):
         for v, b in ((0x4000, 0), (0x6000, 1), (0x8000, 2), (0xA000, 3)):
             self.pon_banco(v, b)
         m = self.mem
-        m[0x0006] = m[0x0007] = 0x98           # VDP.DR y VDP.DW
-        m[0x002B] = 0x00                       # japones, 60 Hz
+        m[0x0000:0x4000] = open(BIOS, "rb").read()[:0x4000]
+        assert m[0x0006] == m[0x0007] == 0x98 and m[0x002B] & 0x0F == 0
         m[0x002D] = 1 if msx2 else 0
         for s in range(4):
             m[0xFCC1 + s] = 0x00               # EXPTBL: nada expandido
@@ -109,6 +113,8 @@ class GameMaster2(Z80):
             if not self.teclas:
                 raise ParadaZ80("CHGET sin teclas (vuelve a 0x%04X)" % self._leer16(self.sp))
             self.a = self.teclas.pop(0)
+        elif pc == 0x013E:                     # RDVDP: S#0 con la marca de cuadro
+            self.a = 0x80
         elif pc == 0x0138:                     # RSLREG: BIOS 0, el GM 1, pagina 2, RAM 3
             self.a = (SLOT_RAM << 6) | ((SLOT_RAM if self.pagina2_ram else SLOT_GM) << 4) | (SLOT_GM << 2)
         elif pc == 0x000C:                     # RDSLT: no hay mas cartuchos

@@ -51,6 +51,8 @@ PUNTOS = {
     "hockey_pista": dict(para=(7, 0x81A8), teclas=SELF + [0x1F, 0x1F, 0x20], ve=VE,
                          ancla=(7, 0x909A), pulsa={2: [(8, 6)], 4: [(8, 0)], 10: [(8, 0)]},
                          sprites_conjunto=True),
+    # biorritmo (SELF, opcion 3): la tercera vez en su espera de tecla, ya volcado
+    "bio_entrada": dict(para=(5, 0x968A), vez=3, teclas=SELF + [0x1F, 0x1F, 0x1F, 0x20], ve=VE),
     "tenis_pista": dict(para=(7, 0x81A8), teclas=SELF + [0x1F, 0x1F, 0x20], ve=VE,
                         ancla=(7, 0x909A), pulsa={2: [(8, 0)], 8: [(8, 0)]},
                         sprites_conjunto=True),
@@ -75,6 +77,7 @@ def ejecuta(nombre, tope=60_000_000):
     z.teclas = list(c.get("teclas", []))
     pulsa = c.get("pulsa", {})
     llegada = [None]
+    pasadas = [0]
     inter = z.interrupcion
 
     def interrupcion():
@@ -90,7 +93,9 @@ def ejecuta(nombre, tope=60_000_000):
         if llegada[0] is None and _en(z, *ancla):
             llegada[0] = z.cuadros
         if "cuadros" not in c and llegada[0] is not None and _en(z, banco, parada):
-            raise Llegada()                  # antes de ejecutar la instruccion de la parada
+            pasadas[0] += 1
+            if pasadas[0] >= c.get("vez", 1):
+                raise Llegada()              # antes de ejecutar la instruccion de la parada
         if ve and _en(z, *ve):
             z.chsns_ve_teclas = True
         una()

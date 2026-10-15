@@ -448,6 +448,66 @@ def hockey_pista(v, length=0):
     th_sprites(v, copia)
 
 
+BIO = {0x6000: 1, 0x8000: 5, 0xA000: 6}               # el biorritmo: p05 y p06 seguidos
+
+
+def bio_texto(copia, hl_):
+    """p05:80D4 (pinta_texto_bio_b): [direccion] y letras a la copia de
+    nombres de 0xE300; 0x81 trae otra direccion y 0x80 acaba."""
+    while True:
+        d = rom(BIO, hl_, 2)
+        d = d[0] | d[1] << 8
+        hl_ += 2
+        while True:
+            c = rom(BIO, hl_)[0]
+            hl_ += 1
+            if c == 0x80:
+                return
+            if c == 0x81:
+                break
+            copia[d - 0xE300] = c
+            d += 1
+
+
+def bio_entrada(v, cursor=0x0F):
+    """El biorritmo de MSX1 pidiendo las fechas (p05:9674).
+
+    p05:873D: la VRAM a cero y los registros de p05:8758; p05:8C73: borde 0,
+    la fuente de p05:8808 desde la letra 0x10 con color 0xF4 (blanco sobre
+    azul), las cifras grandes de p05:8951 en 0x2500, los dibujos de las letras
+    0x40-0xFF vacios (0x2A00) y su color 0xF4, los sprites de p05:8DCC. La
+    copia de la tabla de nombres (0xE300, 0x300 bytes): las filas 0-9 con la
+    letra 4 (azul) y las 10-23 con una letra distinta cada casilla (de 0x40
+    a 0xFF y de 0x00 a 0xFF, p05:8CB7): un lienzo para la grafica. Encima, el
+    recuadro y los rotulos de p05:9E50, las cifras vacias (0xF4 + 0x10 = 4)
+    y el cursor en la primera cifra del ano de nacimiento (p05:96AD): el
+    cuadro blanco (0x0F) cuando el bit 2 del parpadeo (0xE00D) esta a cero;
+    con el bit a uno, la cifra que haya (4: vacia)."""
+    v.llena(0x0000, 0x4000, 0)                        # p05:873D
+    v.borde = 0                                       # p05:8C73
+    tercios_llena(v, 0x2000, 0x80, 0)                 # p05:87BA -> th_patrones
+    for k in range(16):
+        tercios_llena(v, 8 * k, 8, k)
+    for t in range(3):                                # p05:87BD
+        v.descomprime(BIO, 0x8808, 0x2080 + 0x800 * t)
+    tercios_llena(v, 0x0080, 0x780, 0xF4)             # p05:87C6
+    v.descomprime(BIO, 0x8951, 0x2500)                # p05:87F3
+    tercios_llena(v, 0x0500, 0xC0, 0xF4)              # p05:87FC
+    v.llena(0x2A00, 0xDFF, 0)                         # p05:8CA1
+    v.llena(0x0A00, 0x11FF, 0xF4)
+    v.descomprime(BIO, 0x8DCC, 0x1800)                # p05:8CD1
+    copia = bytearray(0x300)
+    copia[0x100:0x300] = bytes(range(256)) * 2        # p05:8CB7 (0xE400-0xE5FF)
+    copia[0x100:0x140] = bytes(0x40)
+    copia[0:0x140] = bytes([4]) * 0x140               # p05:8C92
+    bio_texto(copia, 0x9E50)                          # p05:9DDA
+    for d, n in ((0x4F, 4), (0x56, 2), (0x5B, 2), (0xAF, 4), (0xB6, 2), (0xBB, 2)):   # p05:9628
+        copia[d:d + n] = bytes([4]) * n
+    p = rom(BIO, 0x96D2, 2)                           # p05:96B8: la cifra 0
+    copia[(p[0] | p[1] << 8) - 0xE300] = cursor
+    v.v[0x3800:0x3B00] = copia                        # p05:8D07
+
+
 PANTALLAS = {
     "logo_konami": logo_konami,
     "presentacion_japonesa": presentacion_japonesa,
@@ -460,6 +520,7 @@ PANTALLAS = {
     "tenis_pista": tenis_pista,
     "hockey_start": hockey_start,
     "hockey_pista": hockey_pista,
+    "bio_entrada": bio_entrada,
 }
 
 

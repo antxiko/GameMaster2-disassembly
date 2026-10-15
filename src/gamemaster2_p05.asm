@@ -3161,12 +3161,12 @@ bio_cursor:		; pinta el cursor parpadeando en su cifra (tabla p05:96D2)
 	ld e,(hl)			;96be
 	inc hl			;96bf
 	ld d,(hl)			;96c0
-	ld b,004h		;96c1   ; 4 = el cursor
-	call bio_cifra_del_cursor		;96c3   ; o la cifra que hay
+	ld b,004h		;96c1   ; 4: la casilla vacia...
+	call bio_cifra_del_cursor		;96c3   ; ...o la cifra que hay
 	ld a,(0e00dh)		;96c6   ; el parpadeo...
 	bit 2,a		;96c9   ; ...bit 2
 	jr nz,L_96CF		;96cb
-	ld b,00fh		;96cd   ; apagado: la casilla vacia (0x0F)
+	ld b,00fh		;96cd   ; bit 2 a cero: el cuadro blanco (0x0F), el cursor encendido
 L_96CF:
 	ld a,b			;96cf
 	ld (de),a			;96d0

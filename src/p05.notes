@@ -512,11 +512,11 @@ C 0x9671 B cifras
 C 0x96B0 en la ultima cifra no hay cursor
 C 0x96B2 la cifra del cursor...
 C 0x96B7 ...su posicion en la copia de nombres (tabla de p05:96D2)
-C 0x96C1 4 = el cursor
-C 0x96C3 o la cifra que hay
+C 0x96C1 4: la casilla vacia...
+C 0x96C3 ...o la cifra que hay
 C 0x96C6 el parpadeo...
 C 0x96C9 ...bit 2
-C 0x96CD apagado: la casilla vacia (0x0F)
+C 0x96CD bit 2 a cero: el cuadro blanco (0x0F), el cursor encendido
 C 0x971C 16 cifras a 0xD4 (el guion)
 C 0x9722 0xE004 = 0
 C 0x9726 y sigue

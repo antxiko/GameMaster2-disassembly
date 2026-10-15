@@ -1,0 +1,103 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>El cartucho — Konami&#x27;s Game Master 2 (Konami, 1987)</title>
+<style>
+:root{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;--linea:#23262e;
+  --rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+@media (prefers-color-scheme:light){:root{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;
+  --panel:#f7f6f2;--linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}}
+:root[data-theme="dark"]{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;
+  --linea:#23262e;--rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+:root[data-theme="light"]{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;--panel:#f7f6f2;
+  --linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--tinta);padding:0 1.25rem 6rem;
+  font:15px/1.7 ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+.w{max-width:1120px;margin:0 auto}
+.n{max-width:68ch}
+h1,h2,h3,h4{font-weight:400;text-wrap:balance}
+a{color:var(--cyan)}
+img{image-rendering:pixelated;max-width:100%;height:auto;display:block}
+header.top{display:flex;flex-direction:column;align-items:center;gap:1.5rem;
+  padding:4rem 0 2rem;text-align:center}
+header.top img{width:min(100%,642px)}
+.claim{max-width:60ch;color:var(--suave);font-size:1.05rem}
+.claim b{color:var(--tinta);font-weight:400}
+.ficha{display:flex;flex-wrap:wrap;justify-content:center;gap:0 1.5rem;width:100%;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--suave);
+  border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);padding:.85rem 0}
+.ficha b{color:var(--rojo);font-weight:400}
+nav{display:flex;flex-wrap:wrap;gap:1.25rem;justify-content:center;padding:1.25rem 0;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+nav a{color:var(--suave);text-decoration:none;border-bottom:1px solid transparent}
+nav a:hover,nav a:focus{color:var(--tinta);border-bottom-color:var(--rojo)}
+nav.docs{border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);
+  margin-bottom:1rem}
+section{margin-top:4.5rem;scroll-margin-top:1rem}
+section>h2{font-size:1rem;letter-spacing:.1em;text-transform:uppercase;
+  border-left:3px solid var(--rojo);padding-left:.9rem;margin:0 0 1.5rem}
+.cifras{display:grid;gap:1px;background:var(--linea);border:1px solid var(--linea);
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.cifra{background:var(--panel);padding:1.1rem}
+.cifra b{display:block;font-size:1.7rem;color:var(--oro);font-weight:400;
+  font-variant-numeric:tabular-nums;line-height:1.2}
+.cifra span{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--suave)}
+.hall{border-top:1px solid var(--linea);padding-top:1.75rem;margin-top:2.5rem}
+.hall:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.hall h3{margin:0 0 .75rem;font-size:1.15rem;color:var(--rojo)}
+.hall h4{color:var(--oro);margin:1.5rem 0 .5rem;font-size:.95rem}
+.hall p{margin:0 0 1rem}
+pre.asm{background:var(--panel);border-left:2px solid var(--verde);margin:1.25rem 0;
+  padding:1rem 1.1rem;overflow-x:auto;font-size:13px;line-height:1.6;color:var(--tinta)}
+.par{display:grid;gap:1.25rem;grid-template-columns:1fr}
+@media(min-width:820px){.par{grid-template-columns:1fr 1fr}}
+.par figure{margin:0}
+table{border-collapse:collapse;width:100%;margin:1.25rem 0;font-size:13px;display:block;
+  overflow-x:auto}
+th,td{text-align:left;padding:.5rem .75rem;border-bottom:1px solid var(--linea)}
+th{color:var(--suave);font-weight:400;font-size:11px;letter-spacing:.07em;text-transform:uppercase}
+td.num{font-variant-numeric:tabular-nums;color:var(--oro)}
+.nivel{margin-top:2rem}
+.nivel h3{margin:0 0 .9rem;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase}
+.nivel em{color:var(--cyan);font-style:normal}
+.sep{color:var(--suave);margin:0 .6rem}
+.rejilla{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.rejilla figure{margin:0;background:var(--panel);box-shadow:0 0 0 1px var(--linea)}
+.rejilla figcaption{display:flex;justify-content:space-between;padding:.45rem .65rem;
+  font-size:11px;color:var(--suave);border-top:1px solid var(--linea)}
+.dir{font-variant-numeric:tabular-nums;color:var(--verde)}
+footer{margin-top:5rem;padding-top:1.5rem;border-top:1px solid var(--linea);
+  color:var(--suave);font-size:12px}
+
+/* Aviso de trabajo en curso: tiene que verse antes que las cifras, porque un
+   100% mal leido hace mas dano que no ponerlo. */
+.aviso{background:#3a2a10;border-left:3px solid var(--oro);margin:1.5rem auto;
+  padding:1rem 1.2rem;max-width:900px;border-radius:4px}
+.aviso p{margin:0;color:var(--tinta);font-size:15px;line-height:1.65}
+.galeria{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1.5rem;margin:1.5rem 0}
+.galeria figure{margin:0}
+.galeria img{width:100%;height:auto;image-rendering:pixelated;
+  border:1px solid var(--linea);border-radius:3px}
+.galeria figcaption{color:var(--suave);font-size:13px;margin-top:.5rem}
+audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
+</style>
+<div class="w"><nav class="top"><a href="index.html">Portada</a><a href="EMPEZAR.html">Empezar</a><a href="EL-CARTUCHO.html" style=color:var(--tinta)>El cartucho</a><a href="LAS-PANTALLAS.html">Las pantallas</a><a href="TENNIS-Y-HOCKEY.html">Tennis and Hockey</a><a href="EL-BIORRITMO.html">El biorritmo</a><a href="LA-MUSICA.html">La música</a><a href="LOS-TEXTOS.html">Los textos</a><a href="EL-CODIGO.html">El código</a><a href="HALLAZGOS.html">Hallazgos</a><a href="PREGUNTAS-ABIERTAS.html">Preguntas abiertas</a><a href="../THE-CARTRIDGE.html" style="margin-left:auto;color:var(--oro)">English</a></nav>
+<h1 id="el-cartucho">El cartucho</h1>
+<h2 id="los-bancos">Los bancos</h2>
+<p>128 KB en 16 bancos de 8 KB, con el mapper propio del Game Master 2. El banco 0 está fijo en <code>0x4000</code>; los demás se ponen escribiendo su número en <code>0x6000</code>, <code>0x8000</code> o <code>0xA000</code>. Un valor con el bit 4 en <code>0xA000</code> pone la SRAM en su lugar: dos mitades de 4 KB. Los bancos 12 a 15 están vacíos (<code>0xFF</code>).</p>
+<table><tr><th>bancos</th><th>qué hay</th></tr><tr><td>p00-p01</td><td>el menú del cartucho solo (su RAM, en <code>0xF2xx</code> y en la página 2)</td></tr><tr><td>p02-p03</td><td>la copia que corre con el juego al lado (su RAM, en <code>0xD1xx</code>-<code>0xD3xx</code>)</td></tr><tr><td>p04</td><td>el sistema de ficheros de la SRAM</td></tr><tr><td>p05-p06</td><td>el biorritmo, en MSX1 y en MSX2</td></tr><tr><td>p07-p08</td><td>Tennis and Hockey y su motor de sonido</td></tr><tr><td>p09</td><td>la presentación y la biblioteca del VDP</td></tr><tr><td>p10-p11</td><td>dibujos</td></tr></table>
+<h2 id="como-se-cuela-en-el-juego">Cómo se cuela en el juego</h2>
+<p>Al encender busca un cartucho de Konami en las otras ranuras y lee los 256 primeros bytes de su arranque buscando la dirección de un gancho de interrupción (<code>p00:5878</code>): primero la de H.TIMI (<code>9F FD</code>), donde se cuelgan los seis cartuchos de MSX2 de Konami, y luego la de H.KEYI (<code>9A FD</code>), la de los de MSX1 (<code>p00:588C</code>). El Game Master 1 solo buscaba la segunda: por eso este entra también en Vampire Killer y en Hinotori.</p>
+<p>Si al encender se mantiene pulsado el espacio o GRAPH, el cartucho no arranca.</p>
+<h2 id="la-tabla-de-juegos">La tabla de juegos</h2>
+<p>Para saber qué juego tiene al lado, lee la segunda cabecera de <code>0x4010</code> si el juego la trae (<code>AB</code>, <code>CD</code> o <code>EF</code> y su número de catálogo). Si no, suma los 256 bytes de <code>0x5000</code>-<code>0x50FF</code> y busca esa suma en la tabla de <code>p00:44BE</code>: 68 firmas que apuntan a 31 fichas para 30 juegos. Cada ficha empieza por el número de catálogo en BCD (<code>07 01</code> es RC-701) y sigue con las direcciones de las variables del juego.</p>
+<p>Son las 62 firmas del Game Master 1 más seis nuevas: cinco de Vampire Killer (RC-744) y una de Hinotori (RC-747). 35 están comprobadas sumando las ROM de verdad, y cada uno de los 30 juegos tiene al menos una.</p>
+<h2 id="los-trucos">Los trucos</h2>
+<p>MODIFY STAGE NUMBER y MODIFY PLAYER NUMBER pasan por dos tablas de entradas de tres bytes, número de catálogo y rutina: las vidas (<code>p01:6CA6</code>, 16 juegos) y la fase (<code>p01:6CD7</code>, 21 juegos). La rutina de vidas de casi todos (<code>p01:6D27</code>) escribe las vidas pedidas (<code>0xF299</code>) en la variable que dice la ficha del juego (<code>0xF288</code>); la de fase hace su cuenta para cada juego: la fase pedida entre el número de fases, en BCD, o repartida en varias variables.</p>
+<table><tr><th>RC</th><th>juego</th><th>vidas</th><th>fase</th></tr><tr><td>RC-700</td><td>Athletic Land</td><td><code>p01:6D27</code></td><td><code>p01:6DD8</code></td></tr><tr><td>RC-701</td><td>Antarctic Adventure</td><td>-</td><td><code>p01:6DFD</code></td></tr><tr><td>RC-702</td><td>Monkey Academy</td><td><code>p01:6D27</code></td><td>-</td></tr><tr><td>RC-703</td><td>Time Pilot</td><td><code>p01:6D27</code></td><td>-</td></tr><tr><td>RC-704</td><td>Frogger</td><td><code>p01:6D27</code></td><td>-</td></tr><tr><td>RC-705</td><td>Super Cobra</td><td><code>p01:6D27</code></td><td>-</td></tr><tr><td>RC-706</td><td>Konami&#x27;s Billiards</td><td><code>p01:6D27</code></td><td>-</td></tr><tr><td>RC-710</td><td>Hyper Olympic 1</td><td>-</td><td><code>p01:6E38</code></td></tr><tr><td>RC-711</td><td>Hyper Olympic 2</td><td>-</td><td><code>p01:6E38</code></td></tr><tr><td>RC-712</td><td>Circus Charlie</td><td><code>p01:6D27</code></td><td><code>p01:6E81</code></td></tr><tr><td>RC-713</td><td>Magical Tree</td><td><code>p01:6D27</code></td><td><code>p01:6E97</code></td></tr><tr><td>RC-714</td><td>Comic Bakery</td><td><code>p01:6D27</code></td><td><code>p01:6EE9</code></td></tr><tr><td>RC-715</td><td>Hyper Sports 1</td><td>-</td><td><code>p01:6EEC</code></td></tr><tr><td>RC-716</td><td>Cabbage Patch Kids</td><td><code>p01:6D27</code></td><td><code>p01:6DD8</code></td></tr><tr><td>RC-717</td><td>Hyper Sports 2</td><td>-</td><td><code>p01:6EF3</code></td></tr><tr><td>RC-718</td><td>Hyper Rally</td><td>-</td><td><code>p01:6EFF</code></td></tr><tr><td>RC-721</td><td>Sky Jaguar</td><td><code>p01:6D27</code></td><td><code>p01:6F37</code></td></tr><tr><td>RC-725</td><td>Yie Ar Kung-Fu</td><td><code>p01:6D17</code></td><td><code>p01:6F48</code></td></tr><tr><td>RC-727</td><td>King&#x27;s Valley</td><td><code>p01:6D27</code></td><td><code>p01:6F78</code></td></tr><tr><td>RC-728</td><td>Mopi Ranger</td><td><code>p01:6D34</code></td><td><code>p01:6FC9</code></td></tr><tr><td>RC-729</td><td>Pippols</td><td><code>p01:6D2F</code></td><td><code>p01:6FE4</code></td></tr><tr><td>RC-730</td><td>Road Fighter</td><td>-</td><td><code>p01:6FF7</code></td></tr><tr><td>RC-732</td><td>Konami&#x27;s Soccer / Football</td><td>-</td><td><code>p01:7016</code></td></tr><tr><td>RC-733</td><td>Hyper Sports 3</td><td>-</td><td><code>p01:701F</code></td></tr><tr><td>RC-736</td><td>Konami&#x27;s Boxing</td><td>-</td><td><code>p01:7028</code></td></tr><tr><td>RC-737</td><td>Yie Ar Kung-Fu II</td><td><code>p01:6D2F</code></td><td><code>p01:704E</code></td></tr></table>
+<h2 id="la-sram">La SRAM</h2>
+<p><em>Leído en el código, sin ejecutar.</em> El banco 4 lleva un sistema de ficheros para la SRAM: un directorio en <code>0xB000</code> (64 entradas de 8 bytes), la tabla de bloques en <code>0xB200</code>, nombres de 5 letras que admiten los comodines <code>*</code> y <code>?</code> y un CRC-16 (<code>0xA001</code>) por cada bloque de 128 bytes. Todas las órdenes pasan por una sola puerta: <code>p00:4020</code> pone la SRAM y salta a <code>p04:8000</code> con el número de orden en C (5 es el directorio; 0x0C y 0x0D, borrar y marcar como formateada). Desde el menú SELF se llega con SRAM DISK UTILITY: DIRECTORY, FILE DELETE y FORMAT.</p>
+<h2 id="el-disco">El disco</h2>
+<p>LOAD SCREEN DATA y las grabaciones de pantallas, partidas y ranking necesitan disco: sin él (<code>p00:5F1A</code> mira si el gancho H.PHYD es un <code>ret</code>), el cartucho vuelve al menú.</p>
+<footer><p><em>Konami's Game Master 2</em> (en Jap&oacute;n, <em>Konami no Shin 10-bai Cartridge</em>) lo public&oacute; Konami para MSX en 1987; su n&uacute;mero de cat&aacute;logo es RC-755 y son 128 KB. Todos los derechos siguen siendo de sus titulares. Este trabajo es de preservaci&oacute;n, estudio y documentaci&oacute;n, y la imagen del cartucho no se distribuye.</p></footer></div>

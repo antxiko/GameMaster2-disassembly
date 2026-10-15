@@ -1,0 +1,117 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Las pantallas — Konami&#x27;s Game Master 2 (Konami, 1987)</title>
+<style>
+:root{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;--linea:#23262e;
+  --rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+@media (prefers-color-scheme:light){:root{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;
+  --panel:#f7f6f2;--linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}}
+:root[data-theme="dark"]{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;
+  --linea:#23262e;--rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+:root[data-theme="light"]{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;--panel:#f7f6f2;
+  --linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--tinta);padding:0 1.25rem 6rem;
+  font:15px/1.7 ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+.w{max-width:1120px;margin:0 auto}
+.n{max-width:68ch}
+h1,h2,h3,h4{font-weight:400;text-wrap:balance}
+a{color:var(--cyan)}
+img{image-rendering:pixelated;max-width:100%;height:auto;display:block}
+header.top{display:flex;flex-direction:column;align-items:center;gap:1.5rem;
+  padding:4rem 0 2rem;text-align:center}
+header.top img{width:min(100%,642px)}
+.claim{max-width:60ch;color:var(--suave);font-size:1.05rem}
+.claim b{color:var(--tinta);font-weight:400}
+.ficha{display:flex;flex-wrap:wrap;justify-content:center;gap:0 1.5rem;width:100%;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--suave);
+  border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);padding:.85rem 0}
+.ficha b{color:var(--rojo);font-weight:400}
+nav{display:flex;flex-wrap:wrap;gap:1.25rem;justify-content:center;padding:1.25rem 0;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+nav a{color:var(--suave);text-decoration:none;border-bottom:1px solid transparent}
+nav a:hover,nav a:focus{color:var(--tinta);border-bottom-color:var(--rojo)}
+nav.docs{border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);
+  margin-bottom:1rem}
+section{margin-top:4.5rem;scroll-margin-top:1rem}
+section>h2{font-size:1rem;letter-spacing:.1em;text-transform:uppercase;
+  border-left:3px solid var(--rojo);padding-left:.9rem;margin:0 0 1.5rem}
+.cifras{display:grid;gap:1px;background:var(--linea);border:1px solid var(--linea);
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.cifra{background:var(--panel);padding:1.1rem}
+.cifra b{display:block;font-size:1.7rem;color:var(--oro);font-weight:400;
+  font-variant-numeric:tabular-nums;line-height:1.2}
+.cifra span{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--suave)}
+.hall{border-top:1px solid var(--linea);padding-top:1.75rem;margin-top:2.5rem}
+.hall:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.hall h3{margin:0 0 .75rem;font-size:1.15rem;color:var(--rojo)}
+.hall h4{color:var(--oro);margin:1.5rem 0 .5rem;font-size:.95rem}
+.hall p{margin:0 0 1rem}
+pre.asm{background:var(--panel);border-left:2px solid var(--verde);margin:1.25rem 0;
+  padding:1rem 1.1rem;overflow-x:auto;font-size:13px;line-height:1.6;color:var(--tinta)}
+.par{display:grid;gap:1.25rem;grid-template-columns:1fr}
+@media(min-width:820px){.par{grid-template-columns:1fr 1fr}}
+.par figure{margin:0}
+table{border-collapse:collapse;width:100%;margin:1.25rem 0;font-size:13px;display:block;
+  overflow-x:auto}
+th,td{text-align:left;padding:.5rem .75rem;border-bottom:1px solid var(--linea)}
+th{color:var(--suave);font-weight:400;font-size:11px;letter-spacing:.07em;text-transform:uppercase}
+td.num{font-variant-numeric:tabular-nums;color:var(--oro)}
+.nivel{margin-top:2rem}
+.nivel h3{margin:0 0 .9rem;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase}
+.nivel em{color:var(--cyan);font-style:normal}
+.sep{color:var(--suave);margin:0 .6rem}
+.rejilla{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.rejilla figure{margin:0;background:var(--panel);box-shadow:0 0 0 1px var(--linea)}
+.rejilla figcaption{display:flex;justify-content:space-between;padding:.45rem .65rem;
+  font-size:11px;color:var(--suave);border-top:1px solid var(--linea)}
+.dir{font-variant-numeric:tabular-nums;color:var(--verde)}
+footer{margin-top:5rem;padding-top:1.5rem;border-top:1px solid var(--linea);
+  color:var(--suave);font-size:12px}
+
+/* Aviso de trabajo en curso: tiene que verse antes que las cifras, porque un
+   100% mal leido hace mas dano que no ponerlo. */
+.aviso{background:#3a2a10;border-left:3px solid var(--oro);margin:1.5rem auto;
+  padding:1rem 1.2rem;max-width:900px;border-radius:4px}
+.aviso p{margin:0;color:var(--tinta);font-size:15px;line-height:1.65}
+.galeria{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1.5rem;margin:1.5rem 0}
+.galeria figure{margin:0}
+.galeria img{width:100%;height:auto;image-rendering:pixelated;
+  border:1px solid var(--linea);border-radius:3px}
+.galeria figcaption{color:var(--suave);font-size:13px;margin-top:.5rem}
+audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
+</style>
+<div class="w"><nav class="top"><a href="index.html">Portada</a><a href="EMPEZAR.html">Empezar</a><a href="EL-CARTUCHO.html">El cartucho</a><a href="LAS-PANTALLAS.html" style=color:var(--tinta)>Las pantallas</a><a href="TENNIS-Y-HOCKEY.html">Tennis and Hockey</a><a href="EL-BIORRITMO.html">El biorritmo</a><a href="LA-MUSICA.html">La música</a><a href="LOS-TEXTOS.html">Los textos</a><a href="EL-CODIGO.html">El código</a><a href="HALLAZGOS.html">Hallazgos</a><a href="PREGUNTAS-ABIERTAS.html">Preguntas abiertas</a><a href="../THE-SCREENS.html" style="margin-left:auto;color:var(--oro)">English</a></nav>
+<h1 id="las-pantallas">Las pantallas</h1>
+<p>Las 24 están dibujadas con código propio (<code>tools/pantallas.py</code> para MSX1, <code>tools/pantallas2.py</code> para MSX2) siguiendo los pasos de la rutina que las pinta, citada en cada una. Ninguna es una captura. Cada una se compara byte a byte (<code>tools/coteja.py</code>, <code>tools/coteja2.py</code>) con el cartucho ejecutado en un Z80 de Python o con la VRAM de openMSX, y todas coinciden enteras. En MSX1, las letras de la BIOS son las de la C-BIOS japonesa.</p>
+<h2 id="la-presentacion">La presentación</h2>
+<p><img src="../imagenes/logo_konami.png" alt="El logo de Konami"></p>
+<p>El logo de Konami (<code>p09:8135</code>), al acabar su animación: una línea cada cuadro, seis filas de 21 letras.</p>
+<p><img src="../imagenes/presentacion_japonesa.png" alt="El rótulo"></p>
+<p>El rótulo «Konami no Shin 10-bai Cartridge», esperando el espacio (<code>p09:8846</code>). Solo sale con una BIOS japonesa.</p>
+<p><img src="../imagenes/menu_principal.png" alt="El menú principal"></p>
+<p>El menú principal (<code>p09:82CA</code>): GAME, MODIFY y SELF. GAME y MODIFY necesitan un juego al lado.</p>
+<p><img src="../imagenes/menu_principal_internacional.png" alt="El menú en una máquina no japonesa"></p>
+<p>Con una BIOS no japonesa no hay rótulo, y el menú lleva «GAME MASTER II» y la fecha (<code>p09:8D27</code>).</p>
+<h2 id="el-cartucho-solo">El cartucho solo</h2>
+<p><img src="../imagenes/menu_self.png" alt="El menú SELF"></p>
+<p>El SELF MODE MENU (<code>p00:5DEE</code>), con las casillas de los 16 colores arriba y abajo.</p>
+<p><img src="../imagenes/sram_utilidad.png" alt="SRAM DISK UTILITY"></p>
+<p>SRAM DISK UTILITY (<code>p01:7973</code>), con la fuente de la BIOS.</p>
+<p><img src="../imagenes/sram_directorio.png" alt="DIRECTORY"> <img src="../imagenes/sram_formatear.png" alt="FORMAT"> <img src="../imagenes/sram_formateada.png" alt="FORMAT COMPLETED"> <img src="../imagenes/sram_borrar.png" alt="FILE DELETE"></p>
+<p>DIRECTORY con la SRAM sin formatear (<code>p00:417D</code>), la pregunta de FORMAT (<code>p00:4333</code>), su resultado y FILE DELETE pidiendo el nombre (<code>p00:4209</code>).</p>
+<h2 id="tennis-and-hockey">Tennis and Hockey</h2>
+<p><img src="../imagenes/tenis_menu.png" alt="GAME SELECT"> <img src="../imagenes/tenis_modify.png" alt="GAME MODIFY"></p>
+<p>GAME SELECT (<code>p07:909A</code>) y GAME MODIFY (<code>p07:9100</code>); los recuadros rojos son sprites.</p>
+<p><img src="../imagenes/tenis_set.png" alt="1ST SET START"> <img src="../imagenes/tenis_pista.png" alt="La pista de tenis"></p>
+<p>«1ST SET START» (<code>p07:8141</code>) y la pista de tenis lista para sacar (<code>p07:81A2</code>).</p>
+<p><img src="../imagenes/hockey_start.png" alt="START"> <img src="../imagenes/hockey_pista.png" alt="La pista de hockey"></p>
+<p>Lo mismo en el hockey, con el reloj en 90.</p>
+<h2 id="el-biorritmo">El biorritmo</h2>
+<p><img src="../imagenes/bio_entrada.png" alt="Las fechas"> <img src="../imagenes/bio_grafica.png" alt="La gráfica"></p>
+<p>En MSX1, pidiendo las fechas (<code>p05:9674</code>) y la gráfica con las fechas de ejemplo 1970-01-01 y 1988-01-01.</p>
+<h2 id="en-msx2">En MSX2</h2>
+<p><img src="../imagenes/logo_konami_msx2.png" alt="El logo en MSX2"> <img src="../imagenes/rotulo_msx2.png" alt="El rótulo en MSX2"> <img src="../imagenes/menu_msx2.png" alt="El menú en MSX2"> <img src="../imagenes/menu_self_msx2.png" alt="El menú SELF en MSX2"> <img src="../imagenes/bio_entrada_msx2.png" alt="Las fechas en MSX2"> <img src="../imagenes/bio_grafica_msx2.png" alt="La gráfica en MSX2"></p>
+<p>En un MSX2 con BIOS japonesa la presentación es otra: SCREEN 5, con los dibujos montados a base de comandos del VDP (<code>p09:80DC</code>, <code>p09:8B20</code>, <code>p09:8692</code>). El menú SELF es el mismo con la paleta del MSX2, y el biorritmo cambia entero (<code>p05:8D22</code>, <code>p06:A006</code>).</p>
+<footer><p><em>Konami's Game Master 2</em> (en Jap&oacute;n, <em>Konami no Shin 10-bai Cartridge</em>) lo public&oacute; Konami para MSX en 1987; su n&uacute;mero de cat&aacute;logo es RC-755 y son 128 KB. Todos los derechos siguen siendo de sus titulares. Este trabajo es de preservaci&oacute;n, estudio y documentaci&oacute;n, y la imagen del cartucho no se distribuye.</p></footer></div>

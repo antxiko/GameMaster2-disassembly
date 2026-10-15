@@ -54,6 +54,15 @@ for _en, _es in _PAREJAS:
 # sale de tools/contenido_web.py: esta maquinaria no nombra ningun cartucho.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from contenido_web import NOMBRE, ANIO, PIE_LEGAL as PIE        # noqa: E402
+import contenido_web as _cw                                       # noqa: E402
+# Si el juego trae sus propias paginas (contenido_web.NAV_EN/NAV_ES, en el mismo
+# orden), mandan esas, y la pareja de cada una sale de su posicion.
+if hasattr(_cw, "NAV_EN"):
+    NAV_EN, NAV_ES = _cw.NAV_EN, _cw.NAV_ES
+    PAREJA = {}
+    for (_en, _), (_es, _) in zip(NAV_EN[1:], NAV_ES[1:]):
+        PAREJA[_en] = _es
+        PAREJA[_es] = _en
 
 
 def enlinea(t):

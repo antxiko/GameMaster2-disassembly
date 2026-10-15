@@ -1,0 +1,101 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tennis and Hockey — Konami&#x27;s Game Master 2 (Konami, 1987)</title>
+<style>
+:root{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;--linea:#23262e;
+  --rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+@media (prefers-color-scheme:light){:root{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;
+  --panel:#f7f6f2;--linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}}
+:root[data-theme="dark"]{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;
+  --linea:#23262e;--rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+:root[data-theme="light"]{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;--panel:#f7f6f2;
+  --linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--tinta);padding:0 1.25rem 6rem;
+  font:15px/1.7 ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+.w{max-width:1120px;margin:0 auto}
+.n{max-width:68ch}
+h1,h2,h3,h4{font-weight:400;text-wrap:balance}
+a{color:var(--cyan)}
+img{image-rendering:pixelated;max-width:100%;height:auto;display:block}
+header.top{display:flex;flex-direction:column;align-items:center;gap:1.5rem;
+  padding:4rem 0 2rem;text-align:center}
+header.top img{width:min(100%,642px)}
+.claim{max-width:60ch;color:var(--suave);font-size:1.05rem}
+.claim b{color:var(--tinta);font-weight:400}
+.ficha{display:flex;flex-wrap:wrap;justify-content:center;gap:0 1.5rem;width:100%;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--suave);
+  border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);padding:.85rem 0}
+.ficha b{color:var(--rojo);font-weight:400}
+nav{display:flex;flex-wrap:wrap;gap:1.25rem;justify-content:center;padding:1.25rem 0;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+nav a{color:var(--suave);text-decoration:none;border-bottom:1px solid transparent}
+nav a:hover,nav a:focus{color:var(--tinta);border-bottom-color:var(--rojo)}
+nav.docs{border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);
+  margin-bottom:1rem}
+section{margin-top:4.5rem;scroll-margin-top:1rem}
+section>h2{font-size:1rem;letter-spacing:.1em;text-transform:uppercase;
+  border-left:3px solid var(--rojo);padding-left:.9rem;margin:0 0 1.5rem}
+.cifras{display:grid;gap:1px;background:var(--linea);border:1px solid var(--linea);
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.cifra{background:var(--panel);padding:1.1rem}
+.cifra b{display:block;font-size:1.7rem;color:var(--oro);font-weight:400;
+  font-variant-numeric:tabular-nums;line-height:1.2}
+.cifra span{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--suave)}
+.hall{border-top:1px solid var(--linea);padding-top:1.75rem;margin-top:2.5rem}
+.hall:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.hall h3{margin:0 0 .75rem;font-size:1.15rem;color:var(--rojo)}
+.hall h4{color:var(--oro);margin:1.5rem 0 .5rem;font-size:.95rem}
+.hall p{margin:0 0 1rem}
+pre.asm{background:var(--panel);border-left:2px solid var(--verde);margin:1.25rem 0;
+  padding:1rem 1.1rem;overflow-x:auto;font-size:13px;line-height:1.6;color:var(--tinta)}
+.par{display:grid;gap:1.25rem;grid-template-columns:1fr}
+@media(min-width:820px){.par{grid-template-columns:1fr 1fr}}
+.par figure{margin:0}
+table{border-collapse:collapse;width:100%;margin:1.25rem 0;font-size:13px;display:block;
+  overflow-x:auto}
+th,td{text-align:left;padding:.5rem .75rem;border-bottom:1px solid var(--linea)}
+th{color:var(--suave);font-weight:400;font-size:11px;letter-spacing:.07em;text-transform:uppercase}
+td.num{font-variant-numeric:tabular-nums;color:var(--oro)}
+.nivel{margin-top:2rem}
+.nivel h3{margin:0 0 .9rem;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase}
+.nivel em{color:var(--cyan);font-style:normal}
+.sep{color:var(--suave);margin:0 .6rem}
+.rejilla{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.rejilla figure{margin:0;background:var(--panel);box-shadow:0 0 0 1px var(--linea)}
+.rejilla figcaption{display:flex;justify-content:space-between;padding:.45rem .65rem;
+  font-size:11px;color:var(--suave);border-top:1px solid var(--linea)}
+.dir{font-variant-numeric:tabular-nums;color:var(--verde)}
+footer{margin-top:5rem;padding-top:1.5rem;border-top:1px solid var(--linea);
+  color:var(--suave);font-size:12px}
+
+/* Aviso de trabajo en curso: tiene que verse antes que las cifras, porque un
+   100% mal leido hace mas dano que no ponerlo. */
+.aviso{background:#3a2a10;border-left:3px solid var(--oro);margin:1.5rem auto;
+  padding:1rem 1.2rem;max-width:900px;border-radius:4px}
+.aviso p{margin:0;color:var(--tinta);font-size:15px;line-height:1.65}
+.galeria{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1.5rem;margin:1.5rem 0}
+.galeria figure{margin:0}
+.galeria img{width:100%;height:auto;image-rendering:pixelated;
+  border:1px solid var(--linea);border-radius:3px}
+.galeria figcaption{color:var(--suave);font-size:13px;margin-top:.5rem}
+audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
+</style>
+<div class="w"><nav class="top"><a href="index.html">Home</a><a href="GETTING-STARTED.html">Start</a><a href="THE-CARTRIDGE.html">The cartridge</a><a href="THE-SCREENS.html">The screens</a><a href="TENNIS-AND-HOCKEY.html" style=color:var(--tinta)>Tennis and Hockey</a><a href="THE-BIORHYTHM.html">The biorhythm</a><a href="THE-MUSIC.html">The music</a><a href="THE-TEXTS.html">The texts</a><a href="THE-CODE.html">The code</a><a href="FINDINGS.html">Findings</a><a href="OPEN-QUESTIONS.html">Open questions</a><a href="es/TENNIS-Y-HOCKEY.html" style="margin-left:auto;color:var(--oro)">Castellano</a></nav>
+<h1 id="tennis-and-hockey">Tennis and Hockey</h1>
+<p>A two-player Pong (banks 7 and 8): there is no computer opponent. Everything runs inside the interrupt (<code>p07:8004</code>).</p>
+<p><img src="imagenes/tenis_pista.png" alt="The tennis court"></p>
+<h2 id="the-controls">The controls</h2>
+<table><tr><th>player</th><th>side</th><th>joystick</th><th>keyboard</th></tr><tr><td>1</td><td>right</td><td>port 1</td><td>arrows, space (A), SELECT (B)</td></tr><tr><td>2</td><td>left</td><td>port 2</td><td>E S F C, SHIFT (A), CTRL (B)</td></tr></table>
+<p>CTRL and C together go back to the start (<code>p07:806E</code>).</p>
+<h2 id="game-modify">GAME MODIFY</h2>
+<table><tr><th>option</th><th>values</th><th>what it does</th></tr><tr><td>LENGTH</td><td>1-4</td><td>the length of the bat (<code>p07:8A0A</code>)</td></tr><tr><td>SPEED</td><td>1-5</td><td>the speed (<code>p07:8D4C</code>)</td></tr><tr><td>TYPE</td><td>A, B, C</td><td>with B or C each player has a second bat: B in their own half, C in the other one (<code>p07:8A25</code>)</td></tr><tr><td>BAR</td><td>N, Y</td><td>a bar that moves up and down in the middle (<code>p07:8C4D</code>)</td></tr></table>
+<h2 id="tennis">Tennis</h2>
+<p>It counts 15, 30, 40 and game, <b>with no deuce or advantage</b> (<code>p07:9277</code>). A set is 6 games with no need for a two-game lead, and the match is two sets. The serve changes every game.</p>
+<h2 id="hockey">Hockey</h2>
+<p><img src="imagenes/hockey_pista.png" alt="The hockey rink"></p>
+<p>Whoever scores more goals wins (the scoreboard goes up to 99). The clock starts at 90 and goes down by one every 64 frames (<code>p07:931A</code>); at 10 there is a warning sound and there is a break, HALF TIME (<code>p07:8367</code>). At the end the one ahead wins, or it is a DRAW.</p>
+<p>At the end of the match 1P WIN, 2P WIN or DRAW blinks (<code>p07:831B</code>).</p>
+<p><em>Read in the code.</em> The music for each moment is on <a href="THE-MUSIC.html">The music</a>.</p>
+<footer><p><em>Konami's Game Master 2</em> (in Japan, <em>Konami no Shin 10-bai Cartridge</em>) was published by Konami for the MSX in 1987; its catalogue number is RC-755 and it is 128 KB. All rights remain with their holders. This is preservation, study and documentation work, and the cartridge image is not distributed.</p></footer></div>

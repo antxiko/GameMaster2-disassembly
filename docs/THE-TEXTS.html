@@ -1,0 +1,304 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The texts — Konami&#x27;s Game Master 2 (Konami, 1987)</title>
+<style>
+:root{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;--linea:#23262e;
+  --rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+@media (prefers-color-scheme:light){:root{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;
+  --panel:#f7f6f2;--linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}}
+:root[data-theme="dark"]{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;
+  --linea:#23262e;--rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+:root[data-theme="light"]{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;--panel:#f7f6f2;
+  --linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--tinta);padding:0 1.25rem 6rem;
+  font:15px/1.7 ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+.w{max-width:1120px;margin:0 auto}
+.n{max-width:68ch}
+h1,h2,h3,h4{font-weight:400;text-wrap:balance}
+a{color:var(--cyan)}
+img{image-rendering:pixelated;max-width:100%;height:auto;display:block}
+header.top{display:flex;flex-direction:column;align-items:center;gap:1.5rem;
+  padding:4rem 0 2rem;text-align:center}
+header.top img{width:min(100%,642px)}
+.claim{max-width:60ch;color:var(--suave);font-size:1.05rem}
+.claim b{color:var(--tinta);font-weight:400}
+.ficha{display:flex;flex-wrap:wrap;justify-content:center;gap:0 1.5rem;width:100%;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--suave);
+  border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);padding:.85rem 0}
+.ficha b{color:var(--rojo);font-weight:400}
+nav{display:flex;flex-wrap:wrap;gap:1.25rem;justify-content:center;padding:1.25rem 0;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+nav a{color:var(--suave);text-decoration:none;border-bottom:1px solid transparent}
+nav a:hover,nav a:focus{color:var(--tinta);border-bottom-color:var(--rojo)}
+nav.docs{border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);
+  margin-bottom:1rem}
+section{margin-top:4.5rem;scroll-margin-top:1rem}
+section>h2{font-size:1rem;letter-spacing:.1em;text-transform:uppercase;
+  border-left:3px solid var(--rojo);padding-left:.9rem;margin:0 0 1.5rem}
+.cifras{display:grid;gap:1px;background:var(--linea);border:1px solid var(--linea);
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.cifra{background:var(--panel);padding:1.1rem}
+.cifra b{display:block;font-size:1.7rem;color:var(--oro);font-weight:400;
+  font-variant-numeric:tabular-nums;line-height:1.2}
+.cifra span{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--suave)}
+.hall{border-top:1px solid var(--linea);padding-top:1.75rem;margin-top:2.5rem}
+.hall:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.hall h3{margin:0 0 .75rem;font-size:1.15rem;color:var(--rojo)}
+.hall h4{color:var(--oro);margin:1.5rem 0 .5rem;font-size:.95rem}
+.hall p{margin:0 0 1rem}
+pre.asm{background:var(--panel);border-left:2px solid var(--verde);margin:1.25rem 0;
+  padding:1rem 1.1rem;overflow-x:auto;font-size:13px;line-height:1.6;color:var(--tinta)}
+.par{display:grid;gap:1.25rem;grid-template-columns:1fr}
+@media(min-width:820px){.par{grid-template-columns:1fr 1fr}}
+.par figure{margin:0}
+table{border-collapse:collapse;width:100%;margin:1.25rem 0;font-size:13px;display:block;
+  overflow-x:auto}
+th,td{text-align:left;padding:.5rem .75rem;border-bottom:1px solid var(--linea)}
+th{color:var(--suave);font-weight:400;font-size:11px;letter-spacing:.07em;text-transform:uppercase}
+td.num{font-variant-numeric:tabular-nums;color:var(--oro)}
+.nivel{margin-top:2rem}
+.nivel h3{margin:0 0 .9rem;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase}
+.nivel em{color:var(--cyan);font-style:normal}
+.sep{color:var(--suave);margin:0 .6rem}
+.rejilla{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.rejilla figure{margin:0;background:var(--panel);box-shadow:0 0 0 1px var(--linea)}
+.rejilla figcaption{display:flex;justify-content:space-between;padding:.45rem .65rem;
+  font-size:11px;color:var(--suave);border-top:1px solid var(--linea)}
+.dir{font-variant-numeric:tabular-nums;color:var(--verde)}
+footer{margin-top:5rem;padding-top:1.5rem;border-top:1px solid var(--linea);
+  color:var(--suave);font-size:12px}
+
+/* Aviso de trabajo en curso: tiene que verse antes que las cifras, porque un
+   100% mal leido hace mas dano que no ponerlo. */
+.aviso{background:#3a2a10;border-left:3px solid var(--oro);margin:1.5rem auto;
+  padding:1rem 1.2rem;max-width:900px;border-radius:4px}
+.aviso p{margin:0;color:var(--tinta);font-size:15px;line-height:1.65}
+.galeria{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1.5rem;margin:1.5rem 0}
+.galeria figure{margin:0}
+.galeria img{width:100%;height:auto;image-rendering:pixelated;
+  border:1px solid var(--linea);border-radius:3px}
+.galeria figcaption{color:var(--suave);font-size:13px;margin-top:.5rem}
+audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
+</style>
+<div class="w"><nav class="top"><a href="index.html">Home</a><a href="GETTING-STARTED.html">Start</a><a href="THE-CARTRIDGE.html">The cartridge</a><a href="THE-SCREENS.html">The screens</a><a href="TENNIS-AND-HOCKEY.html">Tennis and Hockey</a><a href="THE-BIORHYTHM.html">The biorhythm</a><a href="THE-MUSIC.html">The music</a><a href="THE-TEXTS.html" style=color:var(--tinta)>The texts</a><a href="THE-CODE.html">The code</a><a href="FINDINGS.html">Findings</a><a href="OPEN-QUESTIONS.html">Open questions</a><a href="es/LOS-TEXTOS.html" style="margin-left:auto;color:var(--oro)">Castellano</a></nav>
+<h1 id="the-texts">The texts</h1>
+<p>Everything the cartridge writes on screen, taken from the ROM with <code>tools/saca_textos.py</code>. There are four formats: [VRAM address] and letters with <code>0xFE</code> / <code>0xFF</code> (the menus); the same with the letters 0x20 below ASCII (Tennis and Hockey and the MSX1 biorhythm); [x, y] and letters (the MSX2 biorhythm), and loose strings ending in <code>0xFF</code>. In the lists, &quot;fila&quot; is the row, &quot;col&quot; the column and &quot;suelto&quot; a loose string.</p>
+<p>The signs follow the cartridge&#x27;s own font (<code>p00:483F</code>), which is not ASCII: <code>0x3A</code> is an arrow, <code>0x3D</code> quotes, <code>0x3E</code> the equals sign and <code>0x40</code> a dash. The typos are the ROM&#x27;s own: &quot;FORAMT&quot; (three times), &quot;UNFORMATED&quot; and &quot;BIORYTHM&quot;.</p>
+<h2 id="p00">p00</h2>
+<pre><code>p00:4123*  fila  1 col  4  --SRAM DISK UTILITY--
+            fila 14 col  2  SELECT COMMAND
+            fila 15 col  4  DIRECTORY
+            fila 16 col  4  FILE DELETE
+            fila 17 col  4  FORMAT
+            fila 18 col  4  END
+p00:41E2*  fila  7 col 10  NO FILE
+p00:41EC*  fila  3 col  8  DIRECTORY
+p00:41F8*  fila 20 col  4  END&gt;PUSH SPACE
+p00:42D3*  fila 20 col  4  DELETE FILE
+            fila 21 col  6  FILE NAME  -----
+p00:42F4*  fila 22 col  4  FAILED
+p00:42FD*  fila 22 col  4  RAM DISK UNFORMATED
+p00:4313*  fila 22 col  4  FILE NOT FOUND
+p00:4324*  fila 22 col  4  FILE DELETED
+p00:4387*  fila  5 col  8  FORMAT RAM DISK
+            fila  9 col  8  OK  PUSH Y
+            fila 11 col  8  NO  PUSH N
+p00:43B3*  fila 22 col  8  FORMAT COMPLETED
+p00:43C6*  fila 22 col  8  FORAMT FAILED
+p00:51C3*  (suelto)      --DISK ERROR--
+p00:51FA*  (suelto)      HIT RETURN KEY
+p00:5215   (suelto)      &quot;FILE NOT FOUND&quot;
+p00:5226   (suelto)      &quot;TOO MANY FILES&quot;
+p00:5237   (suelto)      &quot;DISK FULL&quot;
+p00:5243   (suelto)      &quot;DISK READ ERROR&quot;
+p00:5255   (suelto)      &quot;DISK IO ERROR&quot;
+p00:534D   (suelto)      &quot;WRITE PROTECTED&quot;&quot;DISK OFFLINE&quot;   RETURN KEY--RETRY
+p00:5381   (suelto)      SPACE KEY --ABORT
+p00:546E*  (suelto)      NO FILE
+p00:5476*  (suelto)      HIT RETURN KEY
+p00:5B3A*  (suelto)      INPUT FILE NAME
+p00:5B4A*  (suelto)      SELECT FILE NAME
+p00:5C72*  fila 17 col  1  --MENU--
+            fila 17 col 12  DISK SAVE
+            fila 18 col 12  DISK LOAD
+            fila 19 col 12  END
+p00:5C9B*  fila 19 col 11  RC-7
+p00:5CBE*  fila 17 col 12  SCREEN DATA
+            fila 18 col 12  GAME DATA
+            fila 19 col 12  END
+p00:5CDE*  fila 17 col 12  GAME DATA
+            fila 18 col 12  END
+p00:5CF0   (suelto)      L&gt;END
+p00:5D1E   (suelto)      DISK-SAVE
+p00:5D28   (suelto)      DISK-LOAD
+p00:5D32   (suelto)      TAPE-SAVE
+p00:5D3C   (suelto)      TAPE-LOAD
+p00:5D46   (suelto)      RANKING
+p00:5D4E   (suelto)      PRINTER
+p00:5D7D   (suelto)      GAME
+p00:5D82   (suelto)      SCREEN
+p00:5D89   (suelto)      HI SCORE
+p00:5D92   (suelto)      RANKING
+p00:5DA4*  (suelto)      SEARCH FILE
+p00:5DBC*  fila 17 col 12  DISPLAY DATA
+            fila 18 col 12  CHANGE NAME
+            fila 22 col 12  END
+p00:5F96*  fila 17 col  6  --SCREEN DISPLAY MODE--
+            fila 19 col  7  DISPLAY ALL SCREEN
+            fila 20 col  7  END
+p00:5FCB*  fila  6 col  6  --SELF MODE MENU--
+            fila  9 col  7  LOAD SCREEN DATA
+            fila 11 col  7  SRAM DISK UTILITY
+            fila 13 col  7  TENNIS AND HOCKEY
+            fila 15 col  7  BIORYTHM
+            fila 17 col  7  END
+p01:602C   (suelto)      END
+p01:60B8*  fila  6 col  5  ---MODIFY STAGE NUMBER---
+            fila 11 col  7  STAGE NUMBER=
+p01:6137*  fila  6 col  6  --MODIFY PLAYER NUMBER--
+            fila 11 col  7  PLAYER NUMBER=
+p01:619F   fila  6 col  6  --RANKING MODE--
+            fila  9 col  7  LOAD DISK DATA
+            fila 11 col  7  CLEAR RANKING DATA
+            fila 13 col  7  END
+p01:6273*  fila  6 col  6  --MODIFY MODE MENU--
+            fila  9 col  7  MODIFY STAGE NUMBER
+            fila 11 col  7  MODIFY PLAYER NUMBER
+            fila 13 col  7  START GAME
+p01:6958*  fila 17 col  1  RANKING
+            fila 20 col 12  INPUT 1P NAME
+p01:6972*  fila 20 col 12  INPUT 2P NAME
+p01:6982*  fila 17 col 12  1P NAME =
+p01:698F*  fila 18 col 12  2P NAME =
+p01:699C*  fila 20 col 12  OK
+            fila 22 col 12  RETRY
+p01:6C50   bufer 0x8000  *** RC-7   SCORE RANKING ***
+            bufer 0x803A  Rank.  Name.   Score.
+            bufer 0x8054  ----------------------------</code></pre>
+<h2 id="p02">p02</h2>
+<pre><code>p02:854C*  (suelto)      INPUT FILE NAME
+p02:855C*  (suelto)      SELECT FILE NAME
+p02:8668*  fila 17 col  1  --MENU--
+            fila 17 col 12  DISK SAVE
+            fila 18 col 12  DISK LOAD
+            fila 19 col 12  END
+p02:8691*  fila 19 col 11  RC-7
+p02:86B4*  fila 17 col 12  SCREEN DATA
+            fila 18 col 12  GAME DATA
+            fila 19 col 12  END
+p02:86D4*  fila 17 col 12  GAME DATA
+            fila 18 col 12  END
+p02:86EA   (suelto)      L&gt;END
+p02:8718   (suelto)      DISK-SAVE
+p02:8722   (suelto)      DISK-LOAD
+p02:872C   (suelto)      RANKING
+p02:8734   (suelto)      PRINTER
+p02:8763   (suelto)      GAME
+p02:8768   (suelto)      SCREEN
+p02:876F   (suelto)      HI SCORE
+p02:8778   (suelto)      RANKING
+p02:878A*  (suelto)      SEARCH FILE
+p02:87A2*  fila 17 col 12  DISPLAY DATA
+            fila 18 col 12  CHANGE NAME
+            fila 22 col 12  END
+p02:882E*  fila  6 col  6  --SELF MODE MENU--
+            fila  9 col  7  LOAD SCREEN DATA
+            fila 11 col  7  SRAM DISK UTILITY
+            fila 13 col  7  TENNIS AND HOCKEY
+            fila 15 col  7  BIORYTHM
+            fila 17 col  7  END
+p02:894E*  fila  6 col  6  --RAM DISK FORMAT--
+            fila  9 col  7  FORMAT
+            fila 11 col  7  END
+p02:8973*  fila 14 col  9  FORAMT COMPLETED
+p02:8986*  fila 14 col  9  FORAMT FAILED
+p02:89C2*  fila 17 col  6  --SCREEN DISPLAY MODE--
+            fila 19 col  7  DISPLAY ALL SCREEN
+            fila 20 col  7  END
+p02:8A79*  fila  6 col  5  ---MODIFY STAGE NUMBER---
+            fila 11 col  7  STAGE NUMBER=
+p02:8AF8*  fila  6 col  6  --MODIFY PLAYER NUMBER--
+            fila 11 col  7  PLAYER NUMBER=
+p02:8B60   fila  6 col  6  --RANKING MODE--
+            fila  9 col  7  LOAD DISK DATA
+            fila 11 col  7  CLEAR RANKING DATA
+            fila 13 col  7  END
+p02:8C34*  fila  6 col  6  --MODIFY MODE MENU--
+            fila  9 col  7  MODIFY STAGE NUMBER
+            fila 11 col  7  MODIFY PLAYER NUMBER
+            fila 13 col  7  START GAME
+p02:956F*  (suelto)      --DISK ERROR--
+p02:95A6*  (suelto)      HIT RETURN KEY
+p02:95C1   (suelto)      &quot;FILE NOT FOUND&quot;
+p02:95D2   (suelto)      &quot;TOO MANY FILES&quot;
+p02:95E3   (suelto)      &quot;DISK FULL&quot;
+p02:95EF   (suelto)      &quot;DISK READ ERROR&quot;
+p02:9601   (suelto)      &quot;DISK IO ERROR&quot;
+p02:96ED   (suelto)      &quot;WRITE PROTECTED&quot;&quot;DISK OFFLINE&quot;   RETURN KEY--RETRY
+p02:9721   (suelto)      SPACE KEY --ABORT
+p02:980E*  (suelto)      NO FILE
+p02:9816*  (suelto)      HIT RETURN KEY
+p02:9BC2*  fila 17 col  1  RANKING
+            fila 20 col 12  INPUT 1P NAME
+p02:9BDC*  fila 20 col 12  INPUT 2P NAME
+p02:9BEC*  fila 17 col 12  1P NAME =
+p02:9BF9*  fila 18 col 12  2P NAME =
+p02:9C06*  fila 20 col 12  OK
+            fila 22 col 12  RETRY</code></pre>
+<h2 id="p05-biorritmo-de-msx1">p05 (biorritmo de MSX1)</h2>
+<pre><code>p05:9E40   OK&lt;RET
+p05:9E71   BIRTHDAY Y M D
+p05:9EA0   CHECK DAY Y M D
+p05:9EFB   PUSH SPACE KEY
+p05:9F0C   CHECK DAY Y M D
+p05:9F2B   PHY&lt;
+p05:9F32   SEN&lt;
+p05:9F39   INT&lt;
+p05:9F54   WORST
+p05:9F5A   BAD
+p05:9F5E   CAUTION
+p05:9F66   NORMAL
+p05:9F6D   GOOD</code></pre>
+<h2 id="p06">p06</h2>
+<pre><code>p06:A15E*  x  32 y  24  BIRTHDAY
+            x  32 y  32  Y      M    D
+p06:A17C*  x  48 y  48  CHECK   DAY
+            x  48 y  56  Y      M    D
+p06:A19D*  x 176 y  72  ;00DAY
+p06:A1B2*  x  80 y 186  PHYSICAL
+p06:A1BD*  x  80 y 186  SENSITIVITY
+p06:A1CB*  x  80 y 186  INTELLECTUAL
+p06:A1DA*  x  80 y 186  PUSH SPACE KEY
+p06:A1EB*  x  32 y  24  CHECK DAY
+            x  40 y  32  Y      M    D
+p06:A208*  x  40 y  48  PHY&lt;
+            x  40 y  58  SEN&lt;
+            x  40 y  68  INT&lt;
+p06:A21D   (suelto)      WORST
+p06:A223   (suelto)      BAD
+p06:A227   (suelto)      CAUTION
+p06:A22F   (suelto)      NORMAL
+p06:A236   (suelto)      GOOD
+p06:A267*  x 184 y 168  OK&lt;RET</code></pre>
+<h2 id="p07">p07</h2>
+<pre><code>p07:8186*  fila  8 col 13  SET START
+p07:8192*  fila  8 col 13  START
+p07:82A0*  fila 18 col  9  PUSH SPACE KEY
+p07:8399*  fila  8 col 12  HALF TIME
+p07:876E*  fila  7 col 11  GAME SELECT
+            fila 10 col 14  TENNIS
+            fila 12 col 14  HOCKEY
+            fila 14 col 14  END
+            fila 17 col  9  PUSH SPACE KEY
+p07:87A5*  fila  3 col 11  GAME MODIFY
+            fila  6 col  8  LENGTH  1 2 3 4
+            fila  8 col  8  SPEED   1 2 3 4 5
+            fila 10 col  8  TYPE    A B C
+            fila 12 col  8  BAR     N Y
+            fila 17 col  9  PUSH SPACE KEY
+p07:881C*  fila  5 col 14  DRAW</code></pre>
+<h2 id="p09">p09</h2>
+<pre><code>p09:8D74*  fila 19 col 10  (C)KONAMI 1988</code></pre>
+<footer><p><em>Konami's Game Master 2</em> (in Japan, <em>Konami no Shin 10-bai Cartridge</em>) was published by Konami for the MSX in 1987; its catalogue number is RC-755 and it is 128 KB. All rights remain with their holders. This is preservation, study and documentation work, and the cartridge image is not distributed.</p></footer></div>

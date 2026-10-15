@@ -77,6 +77,12 @@ TXT = {
 }
 
 
+import contenido_web as _cw                                       # noqa: E402
+if hasattr(_cw, "NAV_EN"):        # las paginas del juego, si trae las suyas
+    TXT["es"]["docnav"] = list(_cw.NAV_ES[1:])
+    TXT["en"]["docnav"] = list(_cw.NAV_EN[1:])
+
+
 def img64(ruta):
     with open(ruta, "rb") as f:
         return "data:image/png;base64," + base64.b64encode(f.read()).decode()

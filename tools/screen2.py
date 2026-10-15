@@ -47,8 +47,10 @@ def png(w, h, px, fn, escala=2):
                 + chunk(b"IEND", b""))
 
 
-def pinta(v, borde=1, con_sprites=True):
-    """Los 16 KB en 256x192 puntos: [fila][columna] -> (r, g, b)."""
+def pinta(v, borde=1, con_sprites=True, paleta=None):
+    """Los 16 KB en 256x192 puntos: [fila][columna] -> (r, g, b).
+    `paleta`: los 16 colores de un MSX2 (por defecto, los del TMS9918)."""
+    PALETA = paleta or globals()["PALETA"]
     fondo_borde = PALETA[borde & 15]
     px = [[fondo_borde] * 256 for _ in range(192)]
     for fila in range(24):
@@ -66,11 +68,11 @@ def pinta(v, borde=1, con_sprites=True):
                     px[fila * 8 + y][col * 8 + x] = \
                         tinta if linea & (0x80 >> x) else fondo
     if con_sprites:
-        pinta_sprites(v, px)
+        pinta_sprites(v, px, PALETA)
     return px
 
 
-def pinta_sprites(v, px):
+def pinta_sprites(v, px, PALETA=PALETA):
     """Los sprites de 16x16, de atras adelante (el 0 tapa a los demas).
 
     Y = 0xD0 corta la lista; la linea que se ve es Y + 1, y las Y de 0xE0 en

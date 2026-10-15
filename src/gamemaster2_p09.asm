@@ -225,7 +225,7 @@ titulo_letras:		; dibuja tres rotulos de letras de 1 bit (p09:9B6A, 9BD2, 9C3A)
 	call letras_1bit_a_4bit		;8184   ; letras_1bit_a_4bit: pinta B letras de 1 bit en SCREEN 5 (4 bits)
 	ld de,04040h		;8187   ; en (0x40, 0x40)...
 	ld hl,09b29h		;818a   ; ...la lista de letras de p09:9B29
-	call pinta_lista_de_letras		;818d   ; pinta_lista_de_letras: pinta una lista de letras [n, letras]; 0xFF acaba, 0xFE salta
+	call pinta_lista_de_letras		;818d   ; pinta_lista_de_letras: pinta una lista de letras de la hoja: cada byte una letra; 0xFE baja una fila (+ columnas), 0xFF acaba
 	ret			;8190
 titulo_graficos:		; los patrones, los colores y la fuente de la presentacion
 	call titulo_patrones		;8191   ; titulo_patrones: descomprime p09:81DB en los tres tercios
@@ -341,7 +341,7 @@ L_8297:
 	call vdp_hmmm		;82a4   ; vdp_hmmm: copia rapida de VRAM a VRAM (HMMM): origen HL, destino DE, tamano BC, paginas en A
 	or 0ffh		;82a7   ; NZ: sigue
 	ret			;82a9
-pinta_lista_de_letras:		; pinta una lista de letras [n, letras]; 0xFF acaba, 0xFE salta
+pinta_lista_de_letras:		; pinta una lista de letras de la hoja: cada byte una letra; 0xFE baja una fila (+ columnas), 0xFF acaba
 	push de			;82aa
 L_82AB:
 	ld a,(hl)			;82ab   ; el byte de la lista
@@ -693,7 +693,7 @@ L_8692:
 	call pantalla_apagada		;8692   ; pantalla_apagada: R#1 sin el bit 6 y R#8 con el bit 1
 	call borra_vram_32k		;8695   ; borra_vram_32k: BIGFIL de 0x8000 bytes desde 0
 	call titulo_paleta		;8698   ; titulo_paleta: el color 7 del fondo (R#7) y la paleta de p09:8706
-	call titulo_dibujos		;869b   ; titulo_dibujos: descomprime p09:8C00 y p09:8800 en la VRAM 0xA580 y 0xA390
+	call titulo_dibujos		;869b   ; titulo_dibujos: descomprime p10:A580 y p10:A390 en la hoja de la VRAM (0x8C00 y 0x8800)
 	call titulo_sprites		;869e   ; titulo_sprites: los sprites del rotulo en MSX2 (p09:9D0A a 0xF800)
 	call titulo_rotulos_msx2		;86a1   ; titulo_rotulos_msx2: pinta los dos rotulos de p09:9828 y p09:98A0
 	call pantalla_encendida		;86a4   ; pantalla_encendida: R#1 con el bit 6 (pantalla encendida) y R#8 sin el bit 1
@@ -714,11 +714,11 @@ titulo_sprites:		; los sprites del rotulo en MSX2 (p09:9D0A a 0xF800)
 	call 0016bh		;86c4   ; BIOS BIGFIL - Same function as FILVRM (with 16-bit VRAM-address)
 	ret			;86c7
 titulo_rotulos_msx2:		; pinta los dos rotulos de p09:9828 y p09:98A0
-	ld hl,09828h		;86c8
+	ld hl,09828h		;86c8   ; el pinguino: p09:9828 en x = 0x10, y = 0x30, 10 por fila, 12 filas
 	ld de,01030h		;86cb
 	ld bc,00a0ch		;86ce
 	call pinta_letras_8x8		;86d1   ; pinta_letras_8x8: pinta B letras de 8x8 desde HL (p09:8F7D)
-	ld hl,098a0h		;86d4
+	ld hl,098a0h		;86d4   ; la tele: p09:98A0 en x = 0x78, y = 0x30, 14 por fila, 12 filas
 	ld de,07830h		;86d7
 	ld bc,00e0ch		;86da
 	call pinta_letras_8x8		;86dd   ; pinta_letras_8x8: pinta B letras de 8x8 desde HL (p09:8F7D)
@@ -765,7 +765,7 @@ DATA_resto_8706:
 ; ======================================================================
 
 
-titulo_dibujos:		; descomprime p09:8C00 y p09:8800 en la VRAM 0xA580 y 0xA390
+titulo_dibujos:		; descomprime p10:A580 y p10:A390 en la hoja de la VRAM (0x8C00 y 0x8800)
 	ld de,0a580h		;8731
 	ld hl,08c00h		;8734
 	call descomprime_128k		;8737   ; descomprime_128k: descomprime HL a la VRAM DE de 128 KB: n & 0x7F repeticiones
@@ -1010,23 +1010,23 @@ dibujo_del_banco_11:		; pone el banco 11 en 0xA000, descomprime p11:A000 y vuelv
 	ld (0a000h),a		;8b4d   ; el mapper: pone en 0xA000 el banco de A
 	ret			;8b50
 titulo_pinta_msx2:		; pinta la presentacion en MSX2
-	ld hl,08bcdh		;8b51   ; las letras de p09:8BCD en (0x08, 0x60): 4 x 8
+	ld hl,08bcdh		;8b51   ; las casillas de p09:8BCD en x = 0x60, y = 0x08: 8 por fila, 4 filas
 	ld de,06008h		;8b54
 	ld bc,00804h		;8b57
 	call pinta_letras_8x8		;8b5a   ; pinta_letras_8x8: pinta B letras de 8x8 desde HL (p09:8F7D)
-	ld hl,08bedh		;8b5d   ; las de p09:8BED en (0x28, 0x00): 8 x 32
+	ld hl,08bedh		;8b5d   ; las de p09:8BED en x = 0x00, y = 0x28: 32 por fila, 8 filas
 	ld de,00028h		;8b60
 	ld bc,02008h		;8b63
 	call pinta_letras_8x8		;8b66   ; pinta_letras_8x8: pinta B letras de 8x8 desde HL (p09:8F7D)
-	ld hl,08cedh		;8b69   ; las de p09:8CED en (0x68, 0x60): 4 x 8
+	ld hl,08cedh		;8b69   ; las de p09:8CED en x = 0x60, y = 0x68: 8 por fila, 4 filas
 	ld de,06068h		;8b6c
 	ld bc,00804h		;8b6f
 	call pinta_letras_8x8		;8b72   ; pinta_letras_8x8: pinta B letras de 8x8 desde HL (p09:8F7D)
-	ld hl,08d0dh		;8b75   ; las de p09:8D0D en (0x88, 0x50): 1 x 12
+	ld hl,08d0dh		;8b75   ; las de p09:8D0D en x = 0x50, y = 0x88: 12, una fila
 	ld de,05088h		;8b78
 	ld bc,00c01h		;8b7b
 	call pinta_letras_8x8		;8b7e   ; pinta_letras_8x8: pinta B letras de 8x8 desde HL (p09:8F7D)
-	ld hl,08d19h		;8b81   ; y las de p09:8D19 en (0xA0, 0x48): 1 x 14
+	ld hl,08d19h		;8b81   ; y las de p09:8D19 en x = 0x48, y = 0xA0: 14, una fila
 	ld de,048a0h		;8b84
 	ld bc,00e01h		;8b87
 	call pinta_letras_8x8		;8b8a   ; pinta_letras_8x8: pinta B letras de 8x8 desde HL (p09:8F7D)

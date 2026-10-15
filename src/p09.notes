@@ -191,11 +191,11 @@ C 0x8873 la tabla de nombres de p09:8900 (0x220 bytes)
 C 0x887F los atributos de los sprites de p09:88C0
 C 0x888B el texto de p09:88A0
 C 0x8891 espera el espacio
-C 0x8B51 las letras de p09:8BCD en (0x08, 0x60): 4 x 8
-C 0x8B5D las de p09:8BED en (0x28, 0x00): 8 x 32
-C 0x8B69 las de p09:8CED en (0x68, 0x60): 4 x 8
-C 0x8B75 las de p09:8D0D en (0x88, 0x50): 1 x 12
-C 0x8B81 y las de p09:8D19 en (0xA0, 0x48): 1 x 14
+C 0x8B51 las casillas de p09:8BCD en x = 0x60, y = 0x08: 8 por fila, 4 filas
+C 0x8B5D las de p09:8BED en x = 0x00, y = 0x28: 32 por fila, 8 filas
+C 0x8B69 las de p09:8CED en x = 0x60, y = 0x68: 8 por fila, 4 filas
+C 0x8B75 las de p09:8D0D en x = 0x50, y = 0x88: 12, una fila
+C 0x8B81 y las de p09:8D19 en x = 0x48, y = 0xA0: 14, una fila
 C 0x8D2A el patron de p09:8DE6 en 0x3080
 C 0x8D36 su color 0xF0
 C 0x8D41 los colores de 0x0080 a 0xF0
@@ -336,6 +336,9 @@ D 0x9048 0xA000 resto_9048  lo apuntan con el banco puesto p09:8858 (0x9048), p0
 F 0x9048 16
 # --- fin de los bloques de bloques.py ---
 
+C 0x86C8 el pinguino: p09:9828 en x = 0x10, y = 0x30, 10 por fila, 12 filas
+C 0x86D4 la tele: p09:98A0 en x = 0x78, y = 0x30, 14 por fila, 12 filas
+
 # --- ANOTACIONES AUTOMATICAS (seccion que reescribe tools/anota.py; no editar a mano) ---
 L 0x8000 engancha_cuenta pone en H.KEYI (0xFD9A) la cuenta atras de 0xE008 (p09:800E)
 L 0x8013 desengancha_cuenta devuelve H.KEYI a `ret`
@@ -352,7 +355,7 @@ L 0x819B titulo_colores los colores y los patrones del rotulo en MSX1
 L 0x81D2 titulo_patrones descomprime p09:81DB en los tres tercios
 L 0x823D fuente_a_vram la fuente de p00:483F a la VRAM 0x2180 y su color 0xF0
 L 0x8254 titulo_anima la animacion de la presentacion (0xE001)
-L 0x82AA pinta_lista_de_letras pinta una lista de letras [n, letras]; 0xFF acaba, 0xFE salta
+L 0x82AA pinta_lista_de_letras pinta una lista de letras de la hoja: cada byte una letra; 0xFE baja una fila (+ columnas), 0xFF acaba
 L 0x82CA titulo_dibuja dibuja la presentacion (p09:9DE3 y p10:A1E3)
 L 0x8457 copia_filas_a_vram copia B filas de C bytes a la VRAM, una fila de 32 de paso
 L 0x846D titulo_menu_bucle el bucle del menu de la presentacion: espera, flechas y espacio
@@ -366,7 +369,7 @@ L 0x86B3 titulo_sprites los sprites del rotulo en MSX2 (p09:9D0A a 0xF800)
 L 0x86C8 titulo_rotulos_msx2 pinta los dos rotulos de p09:9828 y p09:98A0
 L 0x86E1 pinta_letras_8x8 pinta B letras de 8x8 desde HL (p09:8F7D)
 L 0x86F8 titulo_paleta el color 7 del fondo (R#7) y la paleta de p09:8706
-L 0x8731 titulo_dibujos descomprime p09:8C00 y p09:8800 en la VRAM 0xA580 y 0xA390
+L 0x8731 titulo_dibujos descomprime p10:A580 y p10:A390 en la hoja de la VRAM (0x8C00 y 0x8800)
 L 0x8744 descomprime_128k descomprime HL a la VRAM DE de 128 KB: n & 0x7F repeticiones
 L 0x8775 siguiente_fila_128k pasa a la fila siguiente cada 32 bytes
 L 0x8846 titulo_rotulo el rotulo de la presentacion en MSX1 (p09:9048)
@@ -434,7 +437,7 @@ C 0x813E descomprime_con_direccion: descomprime a la VRAM de la palabra de HL
 C 0x816C letras_1bit_a_4bit: pinta B letras de 1 bit en SCREEN 5 (4 bits)
 C 0x8178 letras_1bit_a_4bit: pinta B letras de 1 bit en SCREEN 5 (4 bits)
 C 0x8184 letras_1bit_a_4bit: pinta B letras de 1 bit en SCREEN 5 (4 bits)
-C 0x818D pinta_lista_de_letras: pinta una lista de letras [n, letras]; 0xFF acaba, 0xFE salta
+C 0x818D pinta_lista_de_letras: pinta una lista de letras de la hoja: cada byte una letra; 0xFE baja una fila (+ columnas), 0xFF acaba
 C 0x8191 titulo_patrones: descomprime p09:81DB en los tres tercios
 C 0x8194 titulo_colores: los colores y los patrones del rotulo en MSX1
 C 0x8197 fuente_a_vram: la fuente de p00:483F a la VRAM 0x2180 y su color 0xF0
@@ -487,7 +490,7 @@ C 0x8648 pinta_texto: pinta el texto de HL: [direccion de VRAM] y letras; 0xFE o
 C 0x8692 pantalla_apagada: R#1 sin el bit 6 y R#8 con el bit 1
 C 0x8695 borra_vram_32k: BIGFIL de 0x8000 bytes desde 0
 C 0x8698 titulo_paleta: el color 7 del fondo (R#7) y la paleta de p09:8706
-C 0x869B titulo_dibujos: descomprime p09:8C00 y p09:8800 en la VRAM 0xA580 y 0xA390
+C 0x869B titulo_dibujos: descomprime p10:A580 y p10:A390 en la hoja de la VRAM (0x8C00 y 0x8800)
 C 0x869E titulo_sprites: los sprites del rotulo en MSX2 (p09:9D0A a 0xF800)
 C 0x86A1 titulo_rotulos_msx2: pinta los dos rotulos de p09:9828 y p09:98A0
 C 0x86A4 pantalla_encendida: R#1 con el bit 6 (pantalla encendida) y R#8 sin el bit 1

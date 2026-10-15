@@ -2619,12 +2619,12 @@ L_7343:
 	ld b,a			;7346
 	ld a,(hl)			;7347   ; el bit 7 dice que hacer
 	inc hl			;7348
-	jr nz,L_734F		;7349   ; 0x80-0xFF: copiar los n bytes que siguen
-	cp b			;734b   ; 0x00 acaba; 0x01-0x7F: repetir
-	jr nz,descomprime_con_direccion		;734c   ; (0x80 justo: otra direccion de VRAM)
+	jr nz,L_734F		;7349   ; n distinto de 0: una tirada
+	cp b			;734b   ; n = 0: 0x00 acaba...
+	jr nz,descomprime_con_direccion		;734c   ; ...y 0x80 trae otra direccion de VRAM
 	ret			;734e
 L_734F:
-	cp b			;734f
+	cp b			;734f   ; bit 7 a cero (0x01-0x7F): repetir el byte; puesto (0x81-0xFF): copiar n bytes
 	jr z,L_735D		;7350
 L_7352:
 	ld a,(hl)			;7352   ; copia: un byte...

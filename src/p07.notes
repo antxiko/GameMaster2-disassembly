@@ -789,9 +789,11 @@ C 0x8265 apunta a los tantos del jugador 1
 C 0x8268 th_pinta_bcd: pinta el byte BCD de DE en dos cifras grandes
 C 0x826E apunta a los tantos del jugador 2
 C 0x8271 th_pinta_bcd: pinta el byte BCD de DE en dos cifras grandes
+C 0x82B1 th_texto_resultado: pinta el resultado, parpadeando: DRAW, 1P WIN o 2P WIN segun 0xE41D
 C 0x82B4 lee los canales del motor de sonido (0x2C bytes cada uno)
 C 0x82BC th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
 C 0x82DC pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
+C 0x82EF th_texto_resultado: pinta el resultado, parpadeando: DRAW, 1P WIN o 2P WIN segun 0xE41D
 C 0x82F2 lee los canales del motor de sonido (0x2C bytes cada uno)
 C 0x82FA th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
 C 0x830A pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)

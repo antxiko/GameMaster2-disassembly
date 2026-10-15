@@ -772,12 +772,12 @@ L_A4D8:
 	ld b,a			;a4db
 	ld a,(hl)			;a4dc   ; el bit 7 dice que hacer
 	inc hl			;a4dd
-	jr nz,L_A4E4		;a4de   ; 0x80-0xFF: copiar los n bytes que siguen
-	cp b			;a4e0   ; 0x00 acaba; 0x01-0x7F: repetir
-	jr nz,descomprime_con_direccion		;a4e1   ; (0x80 justo: otra direccion de VRAM)
+	jr nz,L_A4E4		;a4de   ; n distinto de 0: una tirada
+	cp b			;a4e0   ; n = 0: 0x00 acaba...
+	jr nz,descomprime_con_direccion		;a4e1   ; ...y 0x80 trae otra direccion de VRAM
 	ret			;a4e3
 L_A4E4:
-	cp b			;a4e4
+	cp b			;a4e4   ; bit 7 a cero (0x01-0x7F): repetir el byte; puesto (0x81-0xFF): copiar n bytes
 	jr z,L_A4F2		;a4e5
 L_A4E7:
 	ld a,(hl)			;a4e7   ; copia: un byte...

@@ -48,9 +48,9 @@ C 0xA4C8 los B tercios
 C 0xA4D8 el byte de cuenta
 C 0xA4D9 n & 0x7F: cuantos
 C 0xA4DC el bit 7 dice que hacer
-C 0xA4DE 0x80-0xFF: copiar los n bytes que siguen
-C 0xA4E0 0x00 acaba; 0x01-0x7F: repetir
-C 0xA4E1 (0x80 justo: otra direccion de VRAM)
+C 0xA4DE n distinto de 0: una tirada
+C 0xA4E0 n = 0: 0x00 acaba...
+C 0xA4E1 ...y 0x80 trae otra direccion de VRAM
 C 0xA4E7 copia: un byte...
 C 0xA4E9 ...a la VRAM
 C 0xA4EC una pausa para el VDP
@@ -308,6 +308,8 @@ F 0xA941 2
 D 0xA98C 0xC000 relleno_ff  5748 bytes a 0xFF hasta el final del banco: relleno; lo leen nadie (5748 bytes)
 F 0xA98C 16
 # --- fin de los bloques de bloques.py ---
+
+C 0xA4E4 bit 7 a cero (0x01-0x7F): repetir el byte; puesto (0x81-0xFF): copiar n bytes
 
 # --- ANOTACIONES AUTOMATICAS (seccion que reescribe tools/anota.py; no editar a mano) ---
 L 0xA122 pon_valor escribe 0xF29C en la variable del juego (0xF28A) (gemela de p01:6F70)

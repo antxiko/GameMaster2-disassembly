@@ -400,7 +400,7 @@ DATA_resto_827E:
 
 
 L_82B1:
-	call th_texto_resultado		;82b1
+	call th_texto_resultado		;82b1   ; th_texto_resultado: pinta el resultado, parpadeando: DRAW, 1P WIN o 2P WIN segun 0xE41D
 	ld a,(0e200h)		;82b4   ; lee los canales del motor de sonido (0x2C bytes cada uno)
 	and a			;82b7
 	ret nz			;82b8
@@ -432,7 +432,7 @@ L_82CC:
 	ld (0e403h),a		;82e9
 	jp L_80EC		;82ec   ; y vuelve al menu
 L_82EF:
-	call th_texto_resultado		;82ef
+	call th_texto_resultado		;82ef   ; th_texto_resultado: pinta el resultado, parpadeando: DRAW, 1P WIN o 2P WIN segun 0xE41D
 	ld a,(0e200h)		;82f2   ; lee los canales del motor de sonido (0x2C bytes cada uno)
 	and a			;82f5
 	ret nz			;82f6

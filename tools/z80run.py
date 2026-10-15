@@ -465,6 +465,10 @@ class Z80:
         if op == 0xF9:                                   # ld sp,hl
             self.sp = self.hl; return
 
+        if (op & 0xC7) == 0xC7:                          # rst n
+            self._push(self.pc)
+            self.pc = op & 0x38
+            return
         raise ParadaZ80("opcode 0x%02X sin implementar, en 0x%04X" % (op, pc0))
 
     # ------------------------------------------------------------ auxiliares
@@ -566,6 +570,20 @@ class Z80:
                 if not repite or self.bc == 0:
                     break
             self.f &= ~(FN | FH | FPV)
+            return
+        if op in (0xB1, 0xB9, 0xA1, 0xA9):               # cpir/cpdr/cpi/cpd
+            paso = 1 if op in (0xB1, 0xA1) else -1
+            repite = op in (0xB1, 0xB9)
+            c = self.f & FC
+            while True:
+                igual = self.a == self._leer(self.hl)
+                self.hl = (self.hl + paso) & 0xFFFF
+                self.bc = (self.bc - 1) & 0xFFFF
+                if not repite or igual or self.bc == 0:
+                    break
+            # Z si lo encontro; P/V a 1 mientras BC no sea 0 (`jp po` = se acabo)
+            self.f = (c | FN | (FZ if igual else 0)
+                      | (FPV if self.bc != 0 else 0))
             return
         if op in (0x42, 0x52, 0x62, 0x72):               # sbc hl,rr
             otro = {0x42: self.bc, 0x52: self.de,

@@ -12,7 +12,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from corre import cartucho  # noqa: E402
+from corre import cartucho, BIOS, BIOS_INT  # noqa: E402
 import pantallas  # noqa: E402
 
 # nombre: dict con
@@ -34,6 +34,11 @@ PUNTOS = {
     "menu_principal": dict(para=(9, 0x8477), teclas=MENU),  # antes del primer cuadro
     "menu_self": dict(para=(1, 0x767C), teclas=SELF, ve=VE),
     "sram_utilidad": dict(para=(1, 0x7696), teclas=SELF + [0x1F, 0x20], ve=VE),
+    "sram_formatear": dict(para=(0, 0x433C), teclas=SELF + [0x1F, 0x20, 0x1F, 0x1F, 0x20], ve=VE),
+    "sram_formateada": dict(para=(1, 0x7696), vez=4,
+                            teclas=SELF + [0x1F, 0x20, 0x1F, 0x1F, 0x20, 0x59], ve=VE),
+    "sram_borrar": dict(para=(0, 0x4222), teclas=SELF + [0x1F, 0x20, 0x1F, 0x20], ve=VE),
+    "sram_directorio": dict(para=(1, 0x7696), vez=2, teclas=SELF + [0x1F, 0x20, 0x20], ve=VE),
     "tenis_menu": dict(para=(7, 0x909A), cuadros=1, teclas=SELF + [0x1F, 0x1F, 0x20],
                        ve=VE, sprites_conjunto=True),
     # en GAME SELECT, el espacio (fila 8, bit 0) en el segundo cuadro
@@ -53,6 +58,13 @@ PUNTOS = {
                          sprites_conjunto=True),
     # biorritmo (SELF, opcion 3): la tercera vez en su espera de tecla, ya volcado
     "bio_entrada": dict(para=(5, 0x968A), vez=3, teclas=SELF + [0x1F, 0x1F, 0x1F, 0x20], ve=VE),
+    # las fechas de ejemplo: 1970 01 01, RETURN, 1988 01 01, RETURN, RETURN; se
+    # para en el bucle de la grafica tras su primer volcado (p05:8BE8)
+    "bio_grafica": dict(para=(5, 0x8BE8), teclas=SELF + [0x1F, 0x1F, 0x1F, 0x20] + [
+        0x31, 0x39, 0x37, 0x30, 0x30, 0x31, 0x30, 0x31, 0x0D,
+        0x31, 0x39, 0x38, 0x38, 0x30, 0x31, 0x30, 0x31, 0x0D, 0x0D, 0x0D], ve=VE),
+    # con la C-BIOS internacional: sin rotulo, el menu con GAME MASTER II
+    "menu_principal_internacional": dict(para=(9, 0x8477), bios="int"),
     "tenis_pista": dict(para=(7, 0x81A8), teclas=SELF + [0x1F, 0x1F, 0x20], ve=VE,
                         ancla=(7, 0x909A), pulsa={2: [(8, 0)], 8: [(8, 0)]},
                         sprites_conjunto=True),
@@ -73,7 +85,7 @@ def ejecuta(nombre, tope=60_000_000):
     banco, parada = c["para"]
     ancla = c.get("ancla", c["para"])
     ve = c.get("ve")
-    z = cartucho()
+    z = cartucho(bios=BIOS_INT if c.get("bios") == "int" else BIOS)
     z.teclas = list(c.get("teclas", []))
     pulsa = c.get("pulsa", {})
     llegada = [None]

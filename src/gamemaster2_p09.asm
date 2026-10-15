@@ -900,7 +900,7 @@ DATA_resto_87F8:
 
 titulo_rotulo:		; el rotulo de la presentacion en MSX1 (p09:9048)
 	ld a,(0e009h)		;8846   ; lee el juego de caracteres de la BIOS (0x002B)
-	and a			;8849   ; con el juego de caracteres japones, nada
+	and a			;8849   ; sin el juego de caracteres japones (distinto de 0), nada: el rotulo solo sale en Japon
 	ret nz			;884a
 	ld a,(0e003h)		;884b   ; lee es un MSX2
 	and a			;884e   ; en MSX2, otra (p09:8B20)

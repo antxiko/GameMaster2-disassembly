@@ -508,6 +508,224 @@ def bio_entrada(v, cursor=0x0F):
     v.v[0x3800:0x3B00] = copia                        # p05:8D07
 
 
+def bio_dias(y, m, d):
+    """p05:8E34-8F46: el dia de la fecha: ano x 365 + (ano-1)/4 - (ano-1)/100
+    + (ano-1)/400 + los dias hasta el mes (p05:959E) + el dia, y uno mas desde
+    marzo en ano bisiesto."""
+    hasta = rom(BIO, 0x959E, 24)
+    n = y * 365 + (y - 1) // 4 - (y - 1) // 100 + (y - 1) // 400
+    n += (hasta[2 * (m - 1)] << 8 | hasta[2 * (m - 1) + 1]) + d
+    if (y % 4 == 0 and y % 100 != 0) or y % 400 == 0:
+        if m > 2:
+            n += 1
+    return n
+
+
+def bio_seno(angulo):
+    """p05:932F: la altura del angulo (0-359) con la tabla de p05:94E8 (un
+    byte util de cada dos); negativa arriba (la pantalla crece hacia abajo)."""
+    t = lambda k: rom(BIO, 0x94E8 + ((2 * k) & 0xFF))[0]
+    if angulo >= 270:
+        return t(360 - angulo)
+    if angulo >= 180:
+        return t(angulo - 180)
+    if angulo >= 90:
+        return (-t(180 - angulo)) & 0xFF
+    return (-t(angulo)) & 0xFF
+
+
+def bio_grafica(v, nacimiento=(1970, 1, 1), dia=(1988, 1, 1)):
+    """La grafica del biorritmo de MSX1 (estados 1-5 de la tabla de p05:8B1B),
+    con las dos fechas de ejemplo tecleadas en bio_entrada.
+
+    1 (p05:8E34): dias vividos, el resto entre 23, 28 y 33, a grados
+      (x 360 / ciclo) y menos el retraso de p05:9043 (235, 193, 164: los 15
+      dias de antes de hoy).
+    2 (p05:8B78): textos de p05:9EDC; las guias (p05:9F97: bits OR en los
+      dibujos de la zona de la grafica, filas 10-21, columnas 3-28) y esa zona
+      con color 0xF0 (p05:9F7F); las letras P, S, I ordenadas por la altura
+      del primer dia (p06:A33D) en 0xE441/61/81 y el texto de p05:9EF9.
+    3 (p05:8B8D): 192 columnas. Cada una suma 4, 3 y 2 grados a los angulos,
+      saca la altura (seno + 0x88) y pinta el punto (p05:90DF: solo si la
+      casilla tiene el color 0xF0, OR del bit en el dibujo); luego la
+      correccion de p05:9179 (contadores de 4, 6 y 20 columnas).
+    4 (p05:8BBD): textos de p05:9F0A y 9F29, los angulos de hoy, la fecha y
+      el nivel de cada ciclo (umbrales 0xA0, 0x90, 0x80, 0x70; textos de
+      p05:9DC2) en 0xE36A, 0xE38A, 0xE3AA.
+    5 (p05:8BDB): vuelca los nombres y los 6 sprites de p05:8CE2 (la raya del
+      dia 0) mas 6 bytes de la copia (0xE0)."""
+    bio_entrada(v)
+    copia = bytearray(v.v[0x3800:0x3B00])
+    cifras = [int(c) for c in "%04d%02d%02d%04d%02d%02d" % (nacimiento + dia)]
+    for (d, n), k in zip(((0x4F, 4), (0x56, 2), (0x5B, 2), (0xAF, 4), (0xB6, 2), (0xBB, 2)),
+                         (0, 4, 6, 8, 12, 14)):
+        copia[d:d + n] = bytes(c + 0x10 for c in cifras[k:k + n])
+    # el cursor esta en la ultima cifra: no se pinta (p05:96B0)
+    # --- 1: el calculo
+    dias = bio_dias(*dia) - bio_dias(*nacimiento)
+    ciclos = (23, 28, 33)
+    retraso = rom(BIO, 0x9043, 6)
+    ang = [(dias % c) * 360 // c - (retraso[2 * k] | retraso[2 * k + 1] << 8)
+           for k, c in enumerate(ciclos)]
+    hoy = list(ang)                                   # p05:9049 (0xE033)
+    col = 0                                           # 0xE03F
+    alt = [(bio_seno(a % 360) + 0x88) & 0xFF for a in ang]
+    ang[0] %= 360                                     # p05:9055: solo el fisico se guarda
+    # --- 2: el marco
+    bio_texto(copia, 0x9EDC)
+    for hl_, b, a in ((0x0A18, 0x1A, 0xFF), (0x1018, 0x1A, 0xCC), (0x1618, 0x1A, 0xFF),
+                      (0x0919, 0x1A, 0xFF), (0x1619, 0x1A, 0xFF)):        # p05:9F97
+        for k in range(b):
+            v.v[hl_ + 0x2000 + 8 * k] |= a
+    for hl_, a in ((0x0A18, 0xC0), (0x0A58, 0x10), (0x0AE0, 0x03)):         # p05:9FC9
+        for f in range(12):
+            for k in range(8):
+                v.v[hl_ + 0x2000 + 0x100 * f + k] |= a
+    for f in range(12):                               # p05:9F7F
+        v.llena(0x0A18 + 0x100 * f, 0xD0, 0xF0)
+    sprites = bytearray([0xE0]) * 0x80                # p05:8D14
+    sprites[0:0x18] = rom(BIO, 0x8CE2, 0x18)          # p05:8CDB
+    h, l = alt[0], 0x1B                               # p06:A33D: H >= D >= B
+    d_, e = alt[1], 0x1C
+    b_, c = alt[2], 0x1D
+    if h < d_:
+        h, l, d_, e = d_, e, h, l
+    if h < b_:
+        h, l, b_, c = b_, c, h, l
+    if d_ < b_:
+        d_, e, b_, c = b_, c, d_, e
+    copia[0x141], copia[0x161], copia[0x181] = c, e, l
+    bio_texto(copia, 0x9EF9)
+    # --- 3: las 192 columnas
+    cont = [0, 0, 0]                                  # 0xE06B, 0xE06C, 0xE06D
+    for _ in range(192):
+        alt = []
+        for k, desp in enumerate((4, 3, 2)):          # p05:9265
+            ang[k] = (ang[k] + desp) % 360
+            alt.append(((bio_seno(ang[k]) + 0x88) & 0xFF, (col + 0x20) & 0xFF))
+        for y, x in alt:                              # p05:90C3
+            yy = (y - 8) & 0xFF
+            dirc = (yy // 8) * 0x100 + yy % 8 + (x // 8) * 8
+            if v.v[dirc] == 0xF0:
+                v.v[dirc] = 0xF0
+                v.v[dirc + 0x2000] |= 0x80 >> (x % 8)
+        col += 1
+        cont[1] = (cont[1] + 1) % 6                   # p05:9183
+        if cont[1] == 0:
+            ang[1] += 1
+        cont[0] = (cont[0] + 1) % 4                   # p05:9197
+        if cont[0] == 0:
+            cont[2] = (cont[2] + 1) % 20
+            if cont[2] == 0:
+                ang[0] -= 1
+        if cont[0]:                                   # p05:91B7
+            ang[2] += 1
+    # --- 4: el dia
+    bio_texto(copia, 0x9F0A)
+    bio_texto(copia, 0x9F29)
+    hoy = [(a + (retraso[2 * k] | retraso[2 * k + 1] << 8)) % 360 for k, a in enumerate(hoy)]
+    alt = [(bio_seno(a) + 0x88) & 0xFF for a in hoy]
+    fecha = cifras[8:]
+    copia[0x4F:0x53] = bytes(c + 0x10 for c in fecha[0:4])   # p05:9D21
+    copia[0x56:0x58] = bytes(c + 0x10 for c in fecha[4:6])
+    copia[0x5B:0x5D] = bytes(c + 0x10 for c in fecha[6:8])
+    for a, dest in zip(alt, (0x6A, 0x8A, 0xAA)):      # p05:9D55
+        nivel = sum(1 for u in (0xA0, 0x90, 0x80, 0x70) if a < u)
+        t = rom(BIO, 0x9DC2 + 2 * nivel, 2)
+        t = t[0] | t[1] << 8
+        copia[dest + 3:dest + 8] = bytes([4]) * 5
+        k = 0
+        while rom(BIO, t + k)[0] != 0x80:
+            copia[dest + k] = rom(BIO, t + k)[0]
+            k += 1
+    # --- 5: lo que vuelca el bucle de la grafica
+    v.v[0x3800:0x3B00] = copia                        # p05:8D07
+    v.v[0x3B00:0x3B1E] = sprites[0:0x1E]              # p05:8CFA
+
+
+def menu_principal_internacional(v):
+    """El menu principal con una BIOS no japonesa (0x002B & 0x0F distinto de 0,
+    p09:8024): sin el rotulo grande (p09:8846 vuelve en seguida) y, dentro de
+    titulo_dibuja, p09:8D27 (titulo_msx1_b): la fuente, el dibujo de p09:8DE6
+    (la (C)) en la letra 0x10 del tercio de abajo, colores 0xF0, los dibujos
+    de p10:B460 en 0x2080 y el rotulo GAME MASTER II (p09:8D99, 3 x 25 en
+    0x3844; p09:8DE4, la TM, en 0x38BC) y el texto de p09:8D74."""
+    logo_konami(v)
+    P = PRESENTACION
+    v.llena(0x3800, 0x300, 0)                         # p09:82D1 (p01:72EA)
+    v.v[0x3B00] = 0xD0
+    v.descomprime_tercios(P, 0x9DE3, 0x2300)          # p09:82D4
+    v.descomprime_tercios(P, 0xA1E3, 0x0300)          # p09:82DD
+    v.descomprime(P, 0xA32E, 0x1800)                  # p09:82E6
+    tercios_copia(v, P, 0x483F, 0x2180, 0x158)        # p09:8D27 -> p09:823D
+    tercios_llena(v, 0x0180, 0x158, 0xF0)
+    v.copia(P, 0x8DE6, 0x3080, 8)                     # p09:8D2A
+    v.llena(0x1080, 8, 0xF0)                          # p09:8D36
+    v.llena(0x0080, 0x200, 0xF0)                      # p09:8D41
+    v.descomprime(P, 0xB460, 0x2080)                  # p09:8D4C
+    v.filas(P, 0x8D99, 0x3844, 3, 0x19)               # p09:8D55
+    v.filas(P, 0x8DE4, 0x38BC, 1, 2)                  # p09:8D61
+    v.texto(P, 0x8D74)                                # p09:8D6D
+    v.filas(9, 0x8337, 0x38C2, 12, 10)                # p09:82F6
+    v.filas(9, 0x83AF, 0x38CF, 12, 14)                # p09:8302
+    v.copia(9, 0x831B, 0x3B00, 0x1C)                  # p09:830E
+
+
+def sram_directorio(v):
+    """DIRECTORY (p00:417D) con la SRAM sin formatear, de vuelta en el menu.
+
+    Al elegir: borra 0x3AC0 (p01:79C8), 0x3A80 y 0x38A0 (p00:417D), pinta
+    'DIRECTORY' (p00:41EC) y pide el directorio a la SRAM (orden 5, por CALSLT
+    a p00:4020 -> p04:8000); sin marca de formato (p04:84FB) no hay lista y
+    sale 'NO FILE' (p00:41E2). Vuelve al menu (p01:79B9): su texto y el cursor
+    en la primera opcion."""
+    sram_utilidad(v)
+    v.v[0x3AC0:0x3AE0] = bytes(0x20)                  # p01:79C8
+    v.v[0x3A80:0x3AC0] = bytes(0x40)                  # p00:417D
+    v.v[0x38A0:0x39A0] = bytes(0x100)                 # p00:4180
+    v.texto(0, 0x41EC)                                # p00:4193
+    v.texto(0, 0x41E2)                                # p00:41D1
+    v.texto(0, 0x4123)                                # p01:79B9
+    lista = rom(0, 0x4175, 2)
+    v.v[lista[0] | lista[1] << 8] = 0x10              # p01:7690
+
+
+def sram_formatear(v):
+    """FORMAT (p00:4333): la pregunta, esperando Y o N. Al elegir se borra
+    0x3AC0 (p01:79C8); luego toda la tabla de nombres (p00:448D) y el texto
+    de p00:4387 (FORMAT RAM DISK / OK PUSH Y / NO PUSH N)."""
+    sram_utilidad(v)
+    v.v[0x3AC0:0x3AE0] = bytes(0x20)                  # p01:79C8
+    v.llena(0x3800, 0x300, 0)                         # p00:4333
+    v.texto(0, 0x4387)                                # p00:4336
+
+
+def sram_formateada(v):
+    """Tras la Y: las ordenes 0x0C y 0x0D a la SRAM (p00:4373: borrarla y
+    escribir la marca de formato), 'FORMAT COMPLETED' (p00:43B3, fila 22),
+    borrado de las filas 5-12, 14-18 y 20-21 (p00:4369) y de vuelta al menu
+    (p01:79B9) con el mensaje todavia abajo."""
+    sram_formatear(v)
+    v.texto(0, 0x43B3)                                # p00:435B
+    v.v[0x38A0:0x39A0] = bytes(0x100)                 # p00:4369
+    v.v[0x39C0:0x3A60] = bytes(0xA0)                  # p00:436C
+    v.v[0x3A80:0x3AC0] = bytes(0x40)                  # p00:436F
+    v.texto(0, 0x4123)                                # p01:79B9
+    lista = rom(0, 0x4175, 2)
+    v.v[lista[0] | lista[1] << 8] = 0x10              # p01:7690
+
+
+def sram_borrar(v):
+    """FILE DELETE (p00:4209, menu_borrar), esperando el nombre de 5 letras:
+    borra 0x3AC0 (p01:79C8), 0x39C0 y 0x3A80 y pinta el texto de p00:42D3
+    (DELETE FILE / FILE NAME -----)."""
+    sram_utilidad(v)
+    v.v[0x3AC0:0x3AE0] = bytes(0x20)                  # p01:79C8
+    v.v[0x39C0:0x3A60] = bytes(0xA0)                  # p00:4209
+    v.v[0x3A80:0x3AC0] = bytes(0x40)                  # p00:420C
+    v.texto(0, 0x42D3)                                # p00:420F
+
+
 PANTALLAS = {
     "logo_konami": logo_konami,
     "presentacion_japonesa": presentacion_japonesa,
@@ -521,6 +739,12 @@ PANTALLAS = {
     "hockey_start": hockey_start,
     "hockey_pista": hockey_pista,
     "bio_entrada": bio_entrada,
+    "bio_grafica": bio_grafica,
+    "menu_principal_internacional": menu_principal_internacional,
+    "sram_directorio": sram_directorio,
+    "sram_formatear": sram_formatear,
+    "sram_formateada": sram_formateada,
+    "sram_borrar": sram_borrar,
 }
 
 

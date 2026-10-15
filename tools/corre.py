@@ -27,11 +27,15 @@ from z80run import Z80, ParadaZ80  # noqa: E402
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BIOS = os.path.join(RAIZ, "cbios_main_msx1_jp.rom")
+VUELTA_CALSLT = 0x3FF0                         # una direccion de la BIOS que no usa nadie
+# La internacional (juego de caracteres 1), la de la maquina C-BIOS_MSX1 de
+# openMSX (sha1 2f997e8a...): con ella el cartucho sigue el camino no japones.
+BIOS_INT = os.path.join(RAIZ, "cbios_main_msx1.rom")
 SLOT_GM, SLOT_RAM = 0x01, 0x03
 
 
 class GameMaster2(Z80):
-    def __init__(self, rom, msx2=False):
+    def __init__(self, rom, msx2=False, bios=BIOS):
         super().__init__()
         self.rom = rom
         self.sram = bytearray(0x2000)
@@ -45,14 +49,16 @@ class GameMaster2(Z80):
         for v, b in ((0x4000, 0), (0x6000, 1), (0x8000, 2), (0xA000, 3)):
             self.pon_banco(v, b)
         m = self.mem
-        m[0x0000:0x4000] = open(BIOS, "rb").read()[:0x4000]
-        assert m[0x0006] == m[0x0007] == 0x98 and m[0x002B] & 0x0F == 0
+        m[0x0000:0x4000] = open(bios, "rb").read()[:0x4000]
+        assert m[0x0006] == m[0x0007] == 0x98
         m[0x002D] = 1 if msx2 else 0
         for s in range(4):
             m[0xFCC1 + s] = 0x00               # EXPTBL: nada expandido
         m[0xF3E0] = 0xE2                       # RG1SAV
         m[0xFD9A:0xFFCA] = bytes([0xC9]) * (0xFFCA - 0xFD9A)   # los ganchos, a `ret`
         self.ei = False
+        self.calslt = []                       # (vuelta, pagina 2 en RAM) de cada CALSLT
+        self.bios_real = None                  # ejecutando codigo de la BIOS hasta esta vuelta
         self.cuadros = 0
         self.dentro = False
         self.por_cuadro = 10_000               # instrucciones entre interrupciones
@@ -99,6 +105,11 @@ class GameMaster2(Z80):
     # ------------------------------------------------------------ la BIOS
 
     def _bios(self, pc):
+        if pc == VUELTA_CALSLT:
+            vuelta, ram = self.calslt.pop()
+            self.pagina2(ram)
+            self.pc = vuelta
+            return
         v, a = self.vdp, self.a
         hl, de, bc = self._get_hl(), self._get_de(), self._get_bc()
         if pc == 0x0024:                       # ENASLT
@@ -115,6 +126,17 @@ class GameMaster2(Z80):
             self.a = self.teclas.pop(0)
         elif pc == 0x013E:                     # RDVDP: S#0 con la marca de cuadro
             self.a = 0x80
+        elif pc == 0x001C:                     # CALSLT: aqui solo al propio cartucho (pagina 1)
+            slot = self.iy >> 8
+            if slot != SLOT_GM or not 0x4000 <= self.ix < 0x8000:
+                raise ParadaZ80("CALSLT a 0x%04X del slot 0x%02X" % (self.ix, slot))
+            self.llamadas.append(pc)
+            # la BIOS deja los slots como estaban al volver: se apunta la vuelta y
+            # el estado de la pagina 2, y la vuelta pasa por VUELTA_CALSLT
+            self.calslt.append((self._leer16(self.sp), self.pagina2_ram))
+            self.mem[self.sp], self.mem[self.sp + 1] = VUELTA_CALSLT & 0xFF, VUELTA_CALSLT >> 8
+            self.pc = self.ix
+            return
         elif pc == 0x0138:                     # RSLREG: BIOS 0, el GM 1, pagina 2, RAM 3
             self.a = (SLOT_RAM << 6) | ((SLOT_RAM if self.pagina2_ram else SLOT_GM) << 4) | (SLOT_GM << 2)
         elif pc == 0x000C:                     # RDSLT: no hay mas cartuchos
@@ -131,7 +153,7 @@ class GameMaster2(Z80):
             v.dir = hl & 0x3FFF
         elif pc == 0x0050:                     # SETRD
             v.dir = hl & 0x3FFF
-        elif pc in (0x0056, 0x016B):           # FILVRM / BIGFIL
+        elif pc in (0x0056, 0x016B):           # FILVRM / BIGFIL (en MSX2)
             for i in range(bc):
                 v.vram[(hl + i) & 0x3FFF] = a
         elif pc == 0x0059:                     # LDIRMV
@@ -160,6 +182,11 @@ class GameMaster2(Z80):
         self.sp = (self.sp + 2) & 0xFFFF
 
     def _una(self):
+        if self.bios_real is not None:
+            if self.pc == self.bios_real:
+                self.bios_real = None
+            else:
+                return Z80._una(self)
         if self.pc < 0x4000:
             return self._bios(self.pc)
         op = self.mem[self.pc]
@@ -199,6 +226,6 @@ class GameMaster2(Z80):
         self.corre(dir_, tope)
 
 
-def cartucho(msx2=False):
+def cartucho(msx2=False, bios=BIOS):
     rom = open(os.path.join(RAIZ, "gamemaster2.rom"), "rb").read()
-    return GameMaster2(rom, msx2)
+    return GameMaster2(rom, msx2, bios)

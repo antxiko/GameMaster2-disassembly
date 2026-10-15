@@ -182,7 +182,7 @@ C 0x87C8 E = la columna, B = cuantas letras
 C 0x87CB HL = las letras, detras
 C 0x87CC C = 1
 C 0x87CE en la fila 0x90
-C 0x8849 con el juego de caracteres japones, nada
+C 0x8849 sin el juego de caracteres japones (distinto de 0), nada: el rotulo solo sale en Japon
 C 0x884E en MSX2, otra (p09:8B20)
 C 0x8858 los patrones de p09:9048 en 0x2008 (tercios)
 C 0x8861 los colores de p09:953A en 0x0008

@@ -20,6 +20,7 @@ VOLCADO = {
     "menu_msx2": "menu",
     "menu_self_msx2": "self",
     "bio_entrada_msx2": "bio",
+    "bio_grafica_msx2": "grafica",
 }
 
 

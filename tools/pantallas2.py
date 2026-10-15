@@ -410,12 +410,145 @@ def bio_entrada_msx2(v):
             lmmm_timp(v, sx, sy, x + 8 * k, 0x20, 8, 8, 1, 0)
 
 
+def caja(v, x, y, ancho, alto, sombra=True, texto=None):
+    """Una caja de p06: la sombra 0x99 cuatro puntos abajo a la derecha, la
+    caja 0x55, el marco blanco (p05:839C) y su texto (p05:86AF)."""
+    if sombra:
+        v.hmmv(x + 4, y + 4, ancho, alto, 0, 0x99)
+    v.hmmv(x, y, ancho, alto, 0, 0x55)
+    rectangulo(v, x, y, ancho, alto, 0x0F)
+    if texto:
+        texto_8x8(v, BIO, texto)
+
+
+def cifras_msx2(v, cifras, x, y, borrar=True):
+    """p05:9B07 / p05:9CB0: cada cifra en su casilla (borrada con 0x55 en la
+    pregunta) con la letra cifra + 0x30 (LMMM TIMP)."""
+    for k, c in enumerate(cifras):
+        if borrar:
+            v.hmmv(x + 8 * k, y, 8, 8, 0, 0x55)
+        sx, sy = letra_hoja((c + 0x30) & 0xFF)
+        lmmm_timp(v, sx, sy, x + 8 * k, y, 8, 8, 1, 0)
+
+
+def bio_grafica_msx2(v, nacimiento=(1970, 1, 1), dia=(1988, 1, 1)):
+    """La grafica del biorritmo en MSX2 con las fechas de ejemplo (la tabla de
+    estados de p05:8B29). Las fechas: la de nacimiento en su caja, la caja
+    OK<RET (p06:A23B) y su borrado (p06:A270, color 0x44 del fondo), la caja
+    del dia (p06:A092, texto p06:A17C) con sus cifras. Luego:
+    2 (p05:8B84): el cuadro (p06:A006: fondo 1 en (0x18, 0x58), 0xD0 x 0x60,
+      dos marcos, el eje en y = 0x88 y la raya del dia 0 en x = 0x5C), los
+      sprites de p05:8DAA y sus dibujos (p05:8DCC en 0xF800) y las marcas P,
+      S, I en (0x12, altura & 0xF8) con su casilla (p06:A336).
+    3 (p05:8BA5): 192 columnas; en cada una, una LINE vertical de 2 puntos por
+      ciclo (p05:9249) con los colores 0x0C, 0x0D y 0x0E.
+    4 (p05:8BCF): la caja grande (p06:A0F6, texto p06:A1EB), la zona de abajo
+      (p06:A122), la caja del dia mostrado (p06:A034, texto p06:A19D), los
+      rotulos de p06:A208, la fecha (p05:9C8A) y los niveles (p06:A3A4).
+    5 (p05:8C02): los sprites a 0xF600 y su color 0x0F en 0xF400; el texto
+      de abajo va cambiando (p06:A27E): aqui, el de PUSH SPACE KEY, con los
+      colores de las curvas ya encendidos."""
+    import pantallas
+    bio_entrada_msx2(v)
+    cif = [int(c) for c in "%04d%02d%02d%04d%02d%02d" % (nacimiento + dia)]
+    cifras_msx2(v, cif[0:4], 0x30, 0x20)              # p05:9ACC
+    cifras_msx2(v, cif[4:6], 0x68, 0x20)
+    cifras_msx2(v, cif[6:8], 0x90, 0x20)
+    caja(v, 0xB4, 0xA4, 0x38, 0x10, texto=0xA267)     # p06:A23B: OK<RET (x = 0xB4, y = 0xA4)
+    v.hmmv(0xB4, 0xA4, 0x3C, 0x14, 0, 0x44)           # p06:A270
+    caja(v, 0x2A, 0x2A, 0x8C, 0x1C, texto=0xA17C)     # p06:A092
+    cifras_msx2(v, cif[8:12], 0x40, 0x38)             # p05:9AE0
+    cifras_msx2(v, cif[12:14], 0x78, 0x38)
+    cifras_msx2(v, cif[14:16], 0xA0, 0x38)
+    caja(v, 0xB4, 0xA4, 0x38, 0x10, texto=0xA267)
+    v.hmmv(0xB4, 0xA4, 0x3C, 0x14, 0, 0x44)
+    # 1: el calculo (el mismo que en MSX1: tools/pantallas.py)
+    dias = pantallas.bio_dias(*dia) - pantallas.bio_dias(*nacimiento)
+    retraso = rom(BIO, 0x9043, 6)
+    ret = [retraso[2 * k] | retraso[2 * k + 1] << 8 for k in range(3)]
+    ang = [(dias % c) * 360 // c - ret[k] for k, c in enumerate((23, 28, 33))]
+    hoy = list(ang)
+    alt = [(pantallas.bio_seno(a % 360) + 0x88) & 0xFF for a in ang]
+    ang[0] %= 360
+    # 2: el cuadro, los sprites y las marcas
+    v.hmmv(0x18, 0x58, 0xD0, 0x60, 0, 0x01)           # p06:A010
+    rectangulo(v, 0x18, 0x58, 0xD0, 0x60, 0x0F)
+    rectangulo(v, 0x17, 0x57, 0xD2, 0x62, 0x0F)
+    linea(v, 0x18, 0x88, 0xD0, 0x0F)                  # p06:A050
+    linea(v, 0x5C, 0x58, 0x60, 0x0F, vertical=True)   # p06:A05B
+    copia = bytearray([0xD8]) * 0x80                  # p05:8D61
+    copia[0:0x18] = rom(BIO, 0x8DAA, 0x18)            # p05:8D97
+    descomprime_lineal(v, BIO, 0x8DCC, 0xF800)        # p05:8DC2 (C = 0: sin espejo)
+    for a, letra in zip(alt, (0x50, 0x53, 0x49)):     # p06:A375
+        y = a & 0xF8
+        v.hmmv(0x11, y - 1, 0x0C, 0x0A, 0, 0x55)      # p06:A0DB
+        rectangulo(v, 0x11, y - 1, 0x0A, 0x0A, 0x0F)
+        sx, sy = letra_hoja(letra)
+        lmmm_timp(v, sx, sy, 0x12, y, 8, 8, 1, 0)
+    # 3: las curvas
+    col, cont = 0, [0, 0, 0]
+    for _ in range(192):
+        for k, (desp, color) in enumerate(((4, 0x0C), (3, 0x0D), (2, 0x0E))):
+            ang[k] = (ang[k] + desp) % 360
+            y = (pantallas.bio_seno(ang[k]) + 0x88) & 0xFF
+            linea(v, (col + 0x20) & 0xFF, y, 1, color, vertical=True)   # p05:9249
+        col += 1
+        cont[1] = (cont[1] + 1) % 6
+        if cont[1] == 0:
+            ang[1] += 1
+        cont[0] = (cont[0] + 1) % 4
+        if cont[0] == 0:
+            cont[2] = (cont[2] + 1) % 20
+            if cont[2] == 0:
+                ang[0] -= 1
+        if cont[0]:
+            ang[2] += 1
+    # 4: las cajas de arriba, la fecha y los niveles
+    caja(v, 0x18, 0x12, 0xCE, 0x3C, texto=0xA1EB)     # p06:A0F6
+    caja(v, 0x4E, 0xB8, 0x74, 0x0C, sombra=False)     # p06:A122
+    caja(v, 0xAC, 0x44, 0x40, 0x10, sombra=False, texto=0xA19D)   # p06:A034
+    texto_8x8(v, BIO, 0xA208)                         # p06:A157
+    cifras_msx2(v, cif[8:12], 0x38, 0x20, False)      # p05:9C94
+    cifras_msx2(v, cif[12:14], 0x70, 0x20, False)
+    cifras_msx2(v, cif[14:16], 0x98, 0x20, False)
+    hoy = [(a + ret[k]) % 360 for k, a in enumerate(hoy)]
+    alt = [(pantallas.bio_seno(a) + 0x88) & 0xFF for a in hoy]
+    for a, y in zip(alt, (0x30, 0x3A, 0x44)):         # p06:A3EA
+        nivel = sum(1 for u in (0xA8, 0x94, 0x7E, 0x6C) if a < u)
+        t = rom(BIO, 0xA417 + 2 * nivel, 2)
+        t = t[0] | t[1] << 8
+        v.hmmv(0x50, y, 0x38, 0x08, 0, 0x55)          # p06:A436
+        x = 0x50
+        while True:
+            c = rom(BIO, t)[0]
+            t += 1
+            if c == 0xFF:
+                break
+            sx, sy = letra_hoja(c)
+            lmmm_timp(v, sx, sy, x, y, 8, 8, 1, 0)
+            x += 8
+    # 5: el bucle de la grafica
+    v.v[0xF600:0xF61C] = copia[0:0x1C]                # p05:8DD5
+    v.v[0xF400:0xF4E0] = bytes([0x0F]) * 0xE0         # p05:8DE1
+    caja(v, 0x4E, 0xB8, 0x74, 0x0C, sombra=False, texto=0xA1DA)    # p06:A27E: PUSH SPACE KEY
+    # los colores de las curvas se encienden dia a dia (p06:A2B7, A2D3, A2F7)
+    # hasta el dia 0x12: al final, 12 = 0x72 0x07 (amarillo), 13 = 0x27 0x07
+    # (cian) y 14 = 0x77 0x02 (magenta), tambien en la paleta de la VRAM
+    dia_final = 0x12 & 7
+    for color, rb, g in ((12, (dia_final | 0x70) & 0x77, 0x07),
+                         (13, ((dia_final << 4) | 7) & 0x77, 0x07),
+                         (14, 0x77, dia_final & 7)):
+        v.paleta[color] = color_msx2(rb, g)
+        v.v[0xF680 + 2 * color:0xF682 + 2 * color] = bytes([rb, g])
+
+
 PANTALLAS = {
     "logo_konami_msx2": logo_konami_msx2,
     "rotulo_msx2": rotulo_msx2,
     "menu_msx2": menu_msx2,
     "menu_self_msx2": menu_self_msx2,
     "bio_entrada_msx2": bio_entrada_msx2,
+    "bio_grafica_msx2": bio_grafica_msx2,
 }
 CLASE = {"menu_self_msx2": Vram4}             # las de SCREEN 2 con paleta
 

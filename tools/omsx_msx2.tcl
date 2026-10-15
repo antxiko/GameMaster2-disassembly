@@ -54,6 +54,12 @@ after time 31 { pulsa 8 6 }
 after time 32 { pulsa 8 6 }
 after time 33 { pulsa 8 0 }
 after time 37 { vuelca "bio" }
-after time 38 { type "1970010119880101" }
-after time 58 { vuelca "grafica" }
-after time 59 { exit }
+after time 38 { type "19700101" }
+after time 41 { pulsa 7 7 }
+after time 43 { vuelca "bio_fecha1" }
+after time 44 { type "19880101" }
+after time 47 { pulsa 7 7 }
+after time 49 { vuelca "bio_fecha2" }
+after time 50 { pulsa 7 7 }
+after time 100 { vuelca "grafica" }
+after time 101 { exit }

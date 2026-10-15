@@ -282,11 +282,140 @@ def menu_self_msx2(v):
     v.borde = m.borde
 
 
+BIO = {0x6000: 1, 0x8000: 5, 0xA000: 6}
+
+
+def linea(v, x, y, largo, color, vertical=False, pagina=0):
+    """LINE (p05:832F / p05:8365) recta: el lado largo NX = largo, el corto 0."""
+    for k in range(largo + 1):
+        if vertical:
+            v.pon(x, (y + k) & 0xFF, pagina, color & 0x0F)
+        else:
+            v.pon((x + k) & 0xFF, y, pagina, color & 0x0F)
+
+
+def rectangulo(v, x, y, ancho, alto, color):
+    """p05:839C: el marco con cuatro lineas (izquierda, arriba, abajo, derecha)."""
+    linea(v, x, y, alto, color, True)
+    linea(v, x, y, ancho, color)
+    linea(v, x, y + alto, ancho, color)
+    linea(v, x + ancho, y, alto, color, True)
+
+
+def letra_hoja(c):
+    """p05:8720: la letra c en la hoja de la pagina 1: c - 0x20 (salvo el 0),
+    32 por fila de 8 puntos."""
+    i = (c - 0x20) & 0xFF if c else 0
+    return (i & 0x1F) * 8, (i & 0xE0) >> 2
+
+
+def lmmm_timp(v, sx, sy, dx, dy, nx, ny, origen, destino):
+    """LMMM con TIMP (p05:86FC, A = 0x48): punto a punto, menos el color 0."""
+    for y in range(ny):
+        for x in range(nx):
+            c = v.punto(sx + x, sy + y, origen)
+            if c:
+                v.pon(dx + x, dy + y, destino, c)
+
+
+def texto_8x8(v, bancos, hl_):
+    """p05:86AF: [x, y] y letras (LMMM TIMP desde la hoja); 0xFE otra
+    posicion, 0xFF acaba."""
+    while True:
+        x, y = rom(bancos, hl_, 2)
+        hl_ += 2
+        while True:
+            c = rom(bancos, hl_)[0]
+            hl_ += 1
+            if c == 0xFF:
+                return
+            if c == 0xFE:
+                break
+            sx, sy = letra_hoja(c)
+            lmmm_timp(v, sx, sy, x, y, 8, 8, 1, 0)
+            x = (x + 8) & 0xFF
+
+
+def bio_pantalla_msx2(v):
+    """El biorritmo en MSX2 (p05:8768 y p05:8D22): SCREEN 5 (CHGMOD), los
+    registros de p05:87B2, el borde 0 (R#7), sin sprites; 0xD8 en 0xF600, la
+    paleta de p05:8D77, tres casillas de color 1 en la pagina 1 (p05:8D38) y la
+    hoja de letras de la pagina 1 (p05:896E): 16 veces la letra de p05:8B0C
+    con los colores 0-15, la fuente de la BIOS desde el espacio (0x60 letras)
+    en la fila 1, las 0x2B letras de p05:89B4 desde x = 0x80 de la fila 0 (que
+    siguen en la fila 1 tapando la BIOS: la fuente gorda) y las 2 de p05:8E06
+    en la fila 3."""
+    import pantallas
+    # p05:8787: CHGMOD 5. Lo que hace la BIOS (aqui la C-BIOS de los cotejos):
+    # borra las 212 lineas de la pagina 0 con el color de fondo (BAKCLR = 4) y
+    # deja los sprites en Y = 0xD9 con patrones 0, 4, 8... (0x7600)
+    v.v[0:0x6A00] = bytes([0x44]) * 0x6A00
+    for k in range(32):
+        v.v[0x7600 + 4 * k:0x7604 + 4 * k] = bytes([0xD9, 0, 4 * k, 0x0F])
+    v.v[0xF680:0xF6A0] = rom(BIO, 0x82D7, 32)         # p05:82C3: la paleta, tambien en VRAM (p05:82B0)
+    v.v[0xF600] = 0xD8                                # p05:827B
+    v.paleta_tabla(BIO, 0x8D77)                       # p05:8D70
+    v.v[0xF680:0xF6A0] = rom(BIO, 0x8D77, 32)
+    v.borde = 0                                       # p05:87A9
+    for y in (0x00, 0x40, 0x80):                      # p05:8D38
+        v.hmmv(0, y, 8, 8, 1, 0x01)
+    x = y = 0
+    for color in range(16):                           # p05:8973
+        letra_4bit(v, BIO, 0x8B0C, x, y, color)
+        x = (x + 8) & 0xFF
+        if x == 0:
+            y += 8
+
+    def letras(hl_, x, y, n, color):                  # p05:8628
+        for k in range(n):
+            letra_4bit(v, None, hl_ + 8 * k, x, y, color)
+            x = (x + 8) & 0xFF
+            if x == 0:
+                y += 8
+    bios = pantallas.BIOS
+    cg = bios[4] | bios[5] << 8
+    fuente = bios[cg + 0x20 * 8:cg + 0x80 * 8]
+    x, y = 0, 8                                       # p05:8989
+    for k in range(0x60):
+        for f in range(8):
+            b = fuente[8 * k + f]
+            for p in range(8):
+                v.pon(x + p, y + f, 1, 0x0F if b & (0x80 >> p) else 0)
+        x = (x + 8) & 0xFF
+        if x == 0:
+            y += 8
+    for hl_, x, y, n in ((0x89B4, 0x80, 0x00, 0x2B), (0x8E06, 0x00, 0x18, 0x02)):   # p05:8997, 8DF9
+        for k in range(n):
+            letra_4bit(v, BIO, hl_ + 8 * k, x, y, 0x0F)
+            x = (x + 8) & 0xFF
+            if x == 0:
+                y += 8
+
+
+def bio_entrada_msx2(v):
+    """La primera pregunta (p05:9717 y p05:974D -> p06:A066): la caja de la
+    fecha de nacimiento con su sombra (HMMV 0x99 en (0x1E, 0x16) y la caja 0x55
+    en (0x1A, 0x12), 0x8C x 0x1C), su marco blanco (p05:839C) y el texto de
+    p06:A15E; las cifras vacias (p05:9ACC: cada casilla borrada con 0x55 y la
+    letra 0xD4 + 0x30, que en la hoja esta vacia)."""
+    bio_pantalla_msx2(v)
+    v.hmmv(0x1E, 0x16, 0x8C, 0x1C, 0, 0x99)           # p06:A066
+    v.hmmv(0x1A, 0x12, 0x8C, 0x1C, 0, 0x55)           # p06:A073
+    rectangulo(v, 0x1A, 0x12, 0x8C, 0x1C, 0x0F)       # p06:A080
+    texto_8x8(v, BIO, 0xA15E)                         # p06:A08B
+    for x, n in ((0x30, 4), (0x68, 2), (0x90, 2)):    # p05:9ACC
+        for k in range(n):
+            v.hmmv(x + 8 * k, 0x20, 8, 8, 0, 0x55)    # p05:9B25
+            sx, sy = letra_hoja((0xD4 + 0x30) & 0xFF)
+            lmmm_timp(v, sx, sy, x + 8 * k, 0x20, 8, 8, 1, 0)
+
+
 PANTALLAS = {
     "logo_konami_msx2": logo_konami_msx2,
     "rotulo_msx2": rotulo_msx2,
     "menu_msx2": menu_msx2,
     "menu_self_msx2": menu_self_msx2,
+    "bio_entrada_msx2": bio_entrada_msx2,
 }
 CLASE = {"menu_self_msx2": Vram4}             # las de SCREEN 2 con paleta
 

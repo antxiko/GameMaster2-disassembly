@@ -45,10 +45,10 @@ C 0x82DF el campo...
 C 0x82E2 ...y sus piezas
 C 0x82E5 0xE41E y 0xE403 a cero
 C 0x82EC y vuelve al menu
-C 0x831B quien saca (0xE41D): 0...
-C 0x831F ...el texto de p07:881C
-C 0x8324 1: el de p07:8808
-C 0x832A 2: el de p07:8812
+C 0x831B el ganador (0xE41D): 0, empate...
+C 0x831F ...DRAW (p07:881C)
+C 0x8324 1: 1P WIN (p07:8808)
+C 0x832A 2: 2P WIN (p07:8812)
 C 0x8339 B = quien gano el partido
 C 0x833C 0xE2F7: se acabo
 C 0x8344 la musica 0x12
@@ -115,47 +115,47 @@ C 0x86FE ...y esta pulsado: lo recien pulsado
 C 0x8700 en el byte anterior
 C 0x8713 la fila 7 del teclado...
 C 0x8718 ...a nivel alto
-C 0x8719 ESC al bit 5? (bit 2 de la fila 7, rotado)
+C 0x8719 SELECT (bit 6) al bit 5: el boton B
 C 0x871D la fila 8 (espacio y flechas)
 C 0x8722 a nivel alto
 C 0x8723 la fila de nuevo...
 C 0x8725 B = la fila rotada
-C 0x8726 el espacio, al bit 2
-C 0x872E las flechas arriba/abajo, a los bits 3 y 4
-C 0x8734 izquierda/derecha, a los bits 0 y 1
+C 0x8726 la flecha izquierda (bit 4) al bit 2
+C 0x872E la derecha (bit 7) al bit 3 y el espacio (bit 0) al bit 4: el boton A
+C 0x8734 arriba y abajo (bits 5 y 6) a los bits 0 y 1
 C 0x8737 lo que traia el mando...
 C 0x8738 junto con lo del mando
 C 0x873A guarda lo del mando
 C 0x873B la fila 3 del teclado
 C 0x8740 a nivel alto (1 = pulsada)
 C 0x8741 C = la fila
-C 0x8742 una tecla al bit 3
+C 0x8742 la F (bit 3) al bit 3: derecha
 C 0x8744 E = las teclas juntas
 C 0x8745 la fila otra vez
-C 0x8746 otra al bit 0
+C 0x8746 la E (bit 2) al bit 0: arriba
 C 0x874B E = las teclas juntas
 C 0x874C la fila otra vez
-C 0x874D otra al bit 1
+C 0x874D la C (bit 0) al bit 1: abajo
 C 0x8751 E = las teclas juntas
 C 0x8752 la fila 5
 C 0x8757 a nivel alto
-C 0x8758 una tecla al bit 2
+C 0x8758 la S (bit 0) al bit 2: izquierda
 C 0x875D E = las teclas juntas
 C 0x875E la fila 6
 C 0x8763 a nivel alto
-C 0x8764 dos teclas a los bits 4 y 5
+C 0x8764 SHIFT y CTRL (bits 0 y 1) a los bits 4 y 5: los botones
 C 0x876B lo que trae el mando
 C 0x876C junto con lo del mando
-C 0x8A28 TYPE 0: el color de siempre (p07:8AAF)
-C 0x8A2C TYPE 1-2...
+C 0x8A28 TYPE A (0): una raqueta sola
+C 0x8A2C TYPE B y C (1-2): una segunda raqueta...
 C 0x8A31 ...+ 2 en el hockey
-C 0x8A34 el color de la raqueta en la tabla de p07:8A4D
-C 0x8A3B al jugador 1 (0xE426)
-C 0x8A87 TYPE 0: el color de siempre
-C 0x8A8A TYPE 1-2...
+C 0x8A34 ...en la columna de la tabla de p07:8A4D (B 0xA8, C 0x50; hockey 0x98, 0x60)
+C 0x8A3B la columna de la segunda raqueta del jugador 1 (0xE426)
+C 0x8A87 TYPE A (0): una raqueta sola
+C 0x8A8A TYPE B y C (1-2): una segunda raqueta...
 C 0x8A8F ...+ 2 en el hockey
-C 0x8A92 el color de la raqueta en la tabla de p07:8AAB
-C 0x8A99 al jugador 2 (0xE436)
+C 0x8A92 ...en la columna de la tabla de p07:8AAB (B 0x48, C 0xA0; hockey 0x58, 0x90)
+C 0x8A99 la columna de la segunda raqueta del jugador 2 (0xE436)
 C 0x8AAF LENGTH...
 C 0x8AB2 ...elige dos bytes de la tabla de p07:8AD9...
 C 0x8ABB ...para el jugador 1 (0xE428)
@@ -401,7 +401,7 @@ C 0x923F TYPE
 C 0x9245 BAR
 C 0x9249 el marcador a cero...
 C 0x9250 ...los juegos, los sets...
-C 0x925F ...quien saca...
+C 0x925F ...el ganador...
 C 0x9265 ...y el primero en sacar, el jugador 1
 C 0x926D la musica del tenis (0x0E)...
 C 0x9271 ...o la del hockey (0x0F)
@@ -635,15 +635,21 @@ D 0x9FFE 0xA000 partida_9FFE  los 2 primeros bytes de una instruccion de 3 (3A E
 F 0x9FFE 2
 # --- fin de los bloques de bloques.py ---
 
+C 0x92EF el que gano el tanto gana el partido (0xE41D)
+C 0x9355 el ganador: 0 empate, 1 o 2 (0xE41D)
+C 0x9359 se acabo el partido
+C 0x9336 a 0: el ultimo sonido
+C 0x8147 el reloj del hockey empieza en 90 (BCD)
+
 # --- ANOTACIONES AUTOMATICAS (seccion que reescribe tools/anota.py; no editar a mano) ---
 L 0x8000 th_arranca Tennis and Hockey: engancha H.KEYI (p07:8004) y prepara la pantalla
 L 0x8024 hl_mas_a HL = HL + A (gemela de p01:7251)
 L 0x8029 de_mas_a DE = DE + A (gemela de p01:7256)
 L 0x802E despacha salta a la palabra A de la tabla pegada detras del `call` (gemela de p01:737B)
-L 0x806E th_sale_con_teclas si se pulsan a la vez las teclas de salida (SNSMAT 6 y 3), acaba el juego
+L 0x806E th_sale_con_teclas con CTRL y C pulsadas a la vez vuelve al principio (0xE400 = 0x0100)
 L 0x8154 th_marcador_set pinta el SET y el 1ST/2ND/3RD (tenis: 0xE412 = 1)
 L 0x822D th_esconde_sprites pone 0xE0 en la tabla de sprites (0x3B00)
-L 0x831B th_texto_saque pinta el texto del saque segun 0xE41D
+L 0x831B th_texto_resultado pinta el resultado, parpadeando: DRAW, 1P WIN o 2P WIN segun 0xE41D
 L 0x83A5 th_pinta_campo pinta las piezas del campo de la tabla de p07:83C6
 L 0x83D2 th_pantalla_campo borra y pinta el campo (p07:83F5 en 0x38E8)
 L 0x8495 th_borra_sprites pone 0xE0 en la copia de sprites (0xE500) y la vuelca
@@ -667,8 +673,8 @@ L 0x86B0 th_inicia silencio, sonido 1, borra la VRAM y pone los 8 registros del 
 L 0x86E2 th_lee_mandos lee los dos mandos y el teclado (0xE405-0xE408)
 L 0x86FB th_recien_pulsado guarda lo pulsado y deja en A lo que se acaba de pulsar
 L 0x8702 th_lee_puerto lee el puerto de mandos E (R#15 del PSG y R#14)
-L 0x8712 th_teclas_1 las teclas del jugador 1 (SNSMAT 7 y 8)
-L 0x873A th_teclas_2 las teclas del jugador 2 (SNSMAT 3...)
+L 0x8712 th_teclas_1 las teclas del jugador 1: flechas, espacio (A) y SELECT (B)
+L 0x873A th_teclas_2 las teclas del jugador 2: E S F C, SHIFT (A) y CTRL (B)
 L 0x8823 th_fuente la fuente del minijuego (p07:885B en 0x2080) y su color
 L 0x883A th_patrones los patrones del campo
 L 0x898C th_partido prepara el partido: tenis (p07:95BC) o hockey (p07:987C)
@@ -729,7 +735,7 @@ L 0x9FFB th_9ffb HL = 0xE2F6 y sigue en p08
 C 0x8008 sonido_cuadro: el motor de sonido: un cuadro de los cinco canales
 C 0x800B apunta a el cuadro esta en marcha
 C 0x8014 th_lee_mandos: lee los dos mandos y el teclado (0xE405-0xE408)
-C 0x8017 th_sale_con_teclas: si se pulsan a la vez las teclas de salida (SNSMAT 6 y 3), acaba el juego
+C 0x8017 th_sale_con_teclas: con CTRL y C pulsadas a la vez vuelve al principio (0xE400 = 0x0100)
 C 0x801C guarda el cuadro esta en marcha
 C 0x803C guarda el gancho H.KEYI
 C 0x8042 guarda la direccion del gancho H.KEYI y el byte siguiente (16 bits)
@@ -783,11 +789,9 @@ C 0x8265 apunta a los tantos del jugador 1
 C 0x8268 th_pinta_bcd: pinta el byte BCD de DE en dos cifras grandes
 C 0x826E apunta a los tantos del jugador 2
 C 0x8271 th_pinta_bcd: pinta el byte BCD de DE en dos cifras grandes
-C 0x82B1 th_texto_saque: pinta el texto del saque segun 0xE41D
 C 0x82B4 lee los canales del motor de sonido (0x2C bytes cada uno)
 C 0x82BC th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
 C 0x82DC pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
-C 0x82EF th_texto_saque: pinta el texto del saque segun 0xE41D
 C 0x82F2 lee los canales del motor de sonido (0x2C bytes cada uno)
 C 0x82FA th_pinta_texto: pinta un texto: [direccion de VRAM][n][letras], letras + 0x20
 C 0x830A pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
@@ -831,10 +835,10 @@ C 0x8672 el puerto de escritura del VDP (VDP.DW)
 C 0x86B2 pon_mezclador: escribe A en R#7 del PSG y en 0xE2EE
 C 0x86B7 pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
 C 0x86E4 th_lee_puerto: lee el puerto de mandos E (R#15 del PSG y R#14)
-C 0x86E7 th_teclas_1: las teclas del jugador 1 (SNSMAT 7 y 8)
+C 0x86E7 th_teclas_1: las teclas del jugador 1: flechas, espacio (A) y SELECT (B)
 C 0x86ED th_recien_pulsado: guarda lo pulsado y deja en A lo que se acaba de pulsar
 C 0x86F2 th_lee_puerto: lee el puerto de mandos E (R#15 del PSG y R#14)
-C 0x86F5 th_teclas_2: las teclas del jugador 2 (SNSMAT 3...)
+C 0x86F5 th_teclas_2: las teclas del jugador 2: E S F C, SHIFT (A) y CTRL (B)
 C 0x8823 th_patrones: los patrones del campo
 C 0x882C th_descomprime_tercios: descomprime DE en los tres tercios
 C 0x8837 th_rellena_tercios: FILVRM en los tres tercios

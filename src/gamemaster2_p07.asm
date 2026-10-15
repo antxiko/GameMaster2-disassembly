@@ -27,7 +27,7 @@ L_8004:
 	inc (hl)			;8012
 	ei			;8013
 	call th_lee_mandos		;8014   ; th_lee_mandos: lee los dos mandos y el teclado (0xE405-0xE408)
-	call th_sale_con_teclas		;8017   ; th_sale_con_teclas: si se pulsan a la vez las teclas de salida (SNSMAT 6 y 3), acaba el juego
+	call th_sale_con_teclas		;8017   ; th_sale_con_teclas: con CTRL y C pulsadas a la vez vuelve al principio (0xE400 = 0x0100)
 	ld a,000h		;801a
 	ld (0e404h),a		;801c   ; guarda el cuadro esta en marcha
 L_801F:
@@ -83,7 +83,7 @@ L_8062:
 	ld a,0c9h		;8068
 	ld (0fd9ah),a		;806a   ; guarda el gancho H.KEYI
 	ret			;806d
-th_sale_con_teclas:		; si se pulsan a la vez las teclas de salida (SNSMAT 6 y 3), acaba el juego
+th_sale_con_teclas:		; con CTRL y C pulsadas a la vez vuelve al principio (0xE400 = 0x0100)
 	ld a,006h		;806e
 	call 00141h		;8070   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
 	bit 1,a		;8073
@@ -216,7 +216,7 @@ DATA_saltos_8139:
 L_8141:
 	call th_borra_pantalla		;8141   ; th_borra_pantalla: borra los sprites y la tabla de nombres
 	call th_marcador_set		;8144   ; th_marcador_set: pinta el SET y el 1ST/2ND/3RD (tenis: 0xE412 = 1)
-	ld a,090h		;8147
+	ld a,090h		;8147   ; el reloj del hockey empieza en 90 (BCD)
 	ld (0e419h),a		;8149   ; guarda el tiempo del hockey (BCD)
 	ld a,05ah		;814c
 	ld (0e403h),a		;814e
@@ -400,7 +400,7 @@ DATA_resto_827E:
 
 
 L_82B1:
-	call th_texto_saque		;82b1   ; th_texto_saque: pinta el texto del saque segun 0xE41D
+	call th_texto_resultado		;82b1
 	ld a,(0e200h)		;82b4   ; lee los canales del motor de sonido (0x2C bytes cada uno)
 	and a			;82b7
 	ret nz			;82b8
@@ -411,7 +411,7 @@ L_82C2:
 	ld a,008h		;82c2
 	call 00141h		;82c4   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
 	rra			;82c7
-	jr c,th_texto_saque		;82c8
+	jr c,th_texto_resultado		;82c8
 	jr L_8308		;82ca
 L_82CC:
 	dec b			;82cc   ; B = quien gano: 1...
@@ -432,7 +432,7 @@ L_82CC:
 	ld (0e403h),a		;82e9
 	jp L_80EC		;82ec   ; y vuelve al menu
 L_82EF:
-	call th_texto_saque		;82ef   ; th_texto_saque: pinta el texto del saque segun 0xE41D
+	call th_texto_resultado		;82ef
 	ld a,(0e200h)		;82f2   ; lee los canales del motor de sonido (0x2C bytes cada uno)
 	and a			;82f5
 	ret nz			;82f6
@@ -443,7 +443,7 @@ L_8300:
 	ld a,008h		;8300
 	call 00141h		;8302   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
 	rra			;8305
-	jr c,th_texto_saque		;8306
+	jr c,th_texto_resultado		;8306
 L_8308:
 	ld a,001h		;8308
 	call pide_sonido		;830a   ; pide_sonido: pide el sonido A al motor (con las interrupciones cerradas)
@@ -453,15 +453,15 @@ L_8308:
 	ld hl,00000h		;8314
 	ld (0e400h),hl		;8317
 	ret			;831a
-th_texto_saque:		; pinta el texto del saque segun 0xE41D
-	ld a,(0e41dh)		;831b   ; quien saca (0xE41D): 0...
+th_texto_resultado:		; pinta el resultado, parpadeando: DRAW, 1P WIN o 2P WIN segun 0xE41D
+	ld a,(0e41dh)		;831b   ; el ganador (0xE41D): 0, empate...
 	and a			;831e
-	ld de,0881ch		;831f   ; ...el texto de p07:881C
+	ld de,0881ch		;831f   ; ...DRAW (p07:881C)
 	jr z,L_832D		;8322
-	dec a			;8324   ; 1: el de p07:8808
+	dec a			;8324   ; 1: 1P WIN (p07:8808)
 	ld de,08808h		;8325
 	jr z,L_832D		;8328
-	ld de,08812h		;832a   ; 2: el de p07:8812
+	ld de,08812h		;832a   ; 2: 2P WIN (p07:8812)
 L_832D:
 	ld hl,0e40dh		;832d
 	dec (hl)			;8330
@@ -942,12 +942,12 @@ DATA_resto_86D5:
 th_lee_mandos:		; lee los dos mandos y el teclado (0xE405-0xE408)
 	ld e,08fh		;86e2
 	call th_lee_puerto		;86e4   ; th_lee_puerto: lee el puerto de mandos E (R#15 del PSG y R#14)
-	call th_teclas_1		;86e7   ; th_teclas_1: las teclas del jugador 1 (SNSMAT 7 y 8)
+	call th_teclas_1		;86e7   ; th_teclas_1: las teclas del jugador 1: flechas, espacio (A) y SELECT (B)
 	ld hl,0e406h		;86ea
 	call th_recien_pulsado		;86ed   ; th_recien_pulsado: guarda lo pulsado y deja en A lo que se acaba de pulsar
 	ld e,0cfh		;86f0
 	call th_lee_puerto		;86f2   ; th_lee_puerto: lee el puerto de mandos E (R#15 del PSG y R#14)
-	call th_teclas_2		;86f5   ; th_teclas_2: las teclas del jugador 2 (SNSMAT 3...)
+	call th_teclas_2		;86f5   ; th_teclas_2: las teclas del jugador 2: E S F C, SHIFT (A) y CTRL (B)
 	ld hl,0e408h		;86f8
 th_recien_pulsado:		; guarda lo pulsado y deja en A lo que se acaba de pulsar
 	ld c,(hl)			;86fb   ; lo que habia
@@ -967,12 +967,12 @@ th_lee_puerto:		; lee el puerto de mandos E (R#15 del PSG y R#14)
 	cpl			;870e
 	and 03fh		;870f
 	ret			;8711
-th_teclas_1:		; las teclas del jugador 1 (SNSMAT 7 y 8)
+th_teclas_1:		; las teclas del jugador 1: flechas, espacio (A) y SELECT (B)
 	push af			;8712
 	ld a,007h		;8713   ; la fila 7 del teclado...
 	call 00141h		;8715   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
 	cpl			;8718   ; ...a nivel alto
-	rrca			;8719   ; ESC al bit 5? (bit 2 de la fila 7, rotado)
+	rrca			;8719   ; SELECT (bit 6) al bit 5: el boton B
 	and 020h		;871a
 	ld e,a			;871c
 	ld a,008h		;871d   ; la fila 8 (espacio y flechas)
@@ -981,46 +981,46 @@ th_teclas_1:		; las teclas del jugador 1 (SNSMAT 7 y 8)
 	rrca			;8723   ; la fila de nuevo...
 	rrca			;8724
 	ld b,a			;8725   ; B = la fila rotada
-	and 004h		;8726   ; el espacio, al bit 2
+	and 004h		;8726   ; la flecha izquierda (bit 4) al bit 2
 	or e			;8728
 	ld c,a			;8729
 	ld a,b			;872a
 	rrca			;872b
 	rrca			;872c
 	ld b,a			;872d
-	and 018h		;872e   ; las flechas arriba/abajo, a los bits 3 y 4
+	and 018h		;872e   ; la derecha (bit 7) al bit 3 y el espacio (bit 0) al bit 4: el boton A
 	or c			;8730
 	ld c,a			;8731
 	ld a,b			;8732
 	rrca			;8733
-	and 003h		;8734   ; izquierda/derecha, a los bits 0 y 1
+	and 003h		;8734   ; arriba y abajo (bits 5 y 6) a los bits 0 y 1
 	or c			;8736
 	pop bc			;8737   ; lo que traia el mando...
 	or b			;8738   ; junto con lo del mando
 	ret			;8739
-th_teclas_2:		; las teclas del jugador 2 (SNSMAT 3...)
+th_teclas_2:		; las teclas del jugador 2: E S F C, SHIFT (A) y CTRL (B)
 	push af			;873a   ; guarda lo del mando
 	ld a,003h		;873b   ; la fila 3 del teclado
 	call 00141h		;873d   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
 	cpl			;8740   ; a nivel alto (1 = pulsada)
 	ld c,a			;8741   ; C = la fila
-	and 008h		;8742   ; una tecla al bit 3
+	and 008h		;8742   ; la F (bit 3) al bit 3: derecha
 	ld e,a			;8744   ; E = las teclas juntas
 	ld a,c			;8745   ; la fila otra vez
-	rrca			;8746   ; otra al bit 0
+	rrca			;8746   ; la E (bit 2) al bit 0: arriba
 	rrca			;8747
 	and 001h		;8748
 	or e			;874a
 	ld e,a			;874b   ; E = las teclas juntas
 	ld a,c			;874c   ; la fila otra vez
-	rlca			;874d   ; otra al bit 1
+	rlca			;874d   ; la C (bit 0) al bit 1: abajo
 	and 002h		;874e
 	or e			;8750
 	ld e,a			;8751   ; E = las teclas juntas
 	ld a,005h		;8752   ; la fila 5
 	call 00141h		;8754   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
 	cpl			;8757   ; a nivel alto
-	rlca			;8758   ; una tecla al bit 2
+	rlca			;8758   ; la S (bit 0) al bit 2: izquierda
 	rlca			;8759
 	and 004h		;875a
 	or e			;875c
@@ -1028,7 +1028,7 @@ th_teclas_2:		; las teclas del jugador 2 (SNSMAT 3...)
 	ld a,006h		;875e   ; la fila 6
 	call 00141h		;8760   ; BIOS SNSMAT - Returns the value of the specified line from the keyboard matrix
 	cpl			;8763   ; a nivel alto
-	rlca			;8764   ; dos teclas a los bits 4 y 5
+	rlca			;8764   ; SHIFT y CTRL (bits 0 y 1) a los bits 4 y 5: los botones
 	rlca			;8765
 	rlca			;8766
 	rlca			;8767
@@ -1189,17 +1189,17 @@ L_8A08:
 L_8A24:
 	ld (hl),a			;8a24
 	ld a,(0e415h)		;8a25   ; lee TYPE
-	or a			;8a28   ; TYPE 0: el color de siempre (p07:8AAF)
+	or a			;8a28   ; TYPE A (0): una raqueta sola
 	jp z,L_8AAF		;8a29
-	dec a			;8a2c   ; TYPE 1-2...
+	dec a			;8a2c   ; TYPE B y C (1-2): una segunda raqueta...
 	ld b,a			;8a2d
 	ld a,(0e412h)		;8a2e   ; lee el juego: 1 tenis, 2 hockey
 	and 002h		;8a31   ; ...+ 2 en el hockey
 	add a,b			;8a33
-	ld hl,08a4dh		;8a34   ; el color de la raqueta en la tabla de p07:8A4D
+	ld hl,08a4dh		;8a34   ; ...en la columna de la tabla de p07:8A4D (B 0xA8, C 0x50; hockey 0x98, 0x60)
 	call hl_mas_a		;8a37   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;8a3a
-	ld de,0e426h		;8a3b   ; al jugador 1 (0xE426)
+	ld de,0e426h		;8a3b   ; la columna de la segunda raqueta del jugador 1 (0xE426)
 	ld (de),a			;8a3e
 	jr $+112		;8a3f
 
@@ -1242,17 +1242,17 @@ L_8A67:
 L_8A83:
 	ld (hl),a			;8a83
 	ld a,(0e415h)		;8a84   ; lee TYPE
-	or a			;8a87   ; TYPE 0: el color de siempre
+	or a			;8a87   ; TYPE A (0): una raqueta sola
 	jr z,$+60		;8a88
-	dec a			;8a8a   ; TYPE 1-2...
+	dec a			;8a8a   ; TYPE B y C (1-2): una segunda raqueta...
 	ld b,a			;8a8b
 	ld a,(0e412h)		;8a8c   ; lee el juego: 1 tenis, 2 hockey
 	and 002h		;8a8f   ; ...+ 2 en el hockey
 	add a,b			;8a91
-	ld hl,08aabh		;8a92   ; el color de la raqueta en la tabla de p07:8AAB
+	ld hl,08aabh		;8a92   ; ...en la columna de la tabla de p07:8AAB (B 0x48, C 0xA0; hockey 0x58, 0x90)
 	call hl_mas_a		;8a95   ; hl_mas_a: HL = HL + A (gemela de p01:7251)
 	ld a,(hl)			;8a98
-	ld de,0e436h		;8a99   ; al jugador 2 (0xE436)
+	ld de,0e436h		;8a99   ; la columna de la segunda raqueta del jugador 2 (0xE436)
 	ld (de),a			;8a9c
 	jr $+39		;8a9d
 
@@ -2521,7 +2521,7 @@ th_aplica_opciones:		; copia LENGTH, SPEED, TYPE y BAR (0xE461...) a 0xE413...
 	ld (0e41bh),a		;9256
 	ld (0e41ch),a		;9259
 	ld (0e419h),a		;925c   ; guarda el tiempo del hockey (BCD)
-	ld (0e41dh),a		;925f   ; ...quien saca...
+	ld (0e41dh),a		;925f   ; ...el ganador...
 	ld (0e41eh),a		;9262
 	inc a			;9265   ; ...y el primero en sacar, el jugador 1
 	ld (0e41ah),a		;9266
@@ -2599,7 +2599,7 @@ L_92A6:
 	ret			;92eb
 L_92EC:
 	ld a,(0e409h)		;92ec
-	ld (0e41dh),a		;92ef
+	ld (0e41dh),a		;92ef   ; el que gano el tanto gana el partido (0xE41D)
 	xor a			;92f2
 	ld (0e40ah),a		;92f3
 	ret			;92f6
@@ -2638,7 +2638,7 @@ th_reloj:		; en hockey, baja el tiempo (0xE419, BCD) cada 64 cuadros
 	push af			;9332
 	and a			;9333   ; a 0...
 	jr nz,L_933C		;9334
-	ld a,01fh		;9336   ; ...el canal 2 del sonido a 0x1F
+	ld a,01fh		;9336   ; a 0: el ultimo sonido
 	ld hl,0e28ah		;9338
 	ld (hl),a			;933b
 L_933C:
@@ -2658,9 +2658,9 @@ L_933C:
 	inc c			;9353
 L_9354:
 	ld a,c			;9354
-	ld (0e41dh),a		;9355
+	ld (0e41dh),a		;9355   ; el ganador: 0 empate, 1 o 2 (0xE41D)
 	xor a			;9358
-	ld (0e40ah),a		;9359
+	ld (0e40ah),a		;9359   ; se acabo el partido
 	ret			;935c
 th_gol:		; mira si la pelota sale por un lado y de quien es el tanto
 	ld a,(0e412h)		;935d   ; lee el juego: 1 tenis, 2 hockey

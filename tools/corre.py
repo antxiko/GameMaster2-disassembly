@@ -150,8 +150,8 @@ class GameMaster2(Z80):
             pass
         elif pc == 0x0093:                     # WRTPSG
             self.maq.psg[a & 0x0F] = self.e
-        elif pc == 0x0096:                     # RDPSG
-            self.a = self.maq.psg[a & 0x0F]
+        elif pc == 0x0096:                     # RDPSG: el 14 es el puerto de los mandos
+            self.a = self.maq.mando if (a & 0x0F) == 14 else self.maq.psg[a & 0x0F]
         else:
             raise ParadaZ80("BIOS 0x%04X sin atrapar (vuelve a 0x%04X)"
                             % (pc, self._leer16(self.sp)))

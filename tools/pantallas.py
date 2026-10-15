@@ -325,6 +325,129 @@ def tenis_menu(v):
     v.v[p[0] | p[1] << 8] = 0x8D
 
 
+def tenis_modify(v, valores=(0, 0, 0, 0)):
+    """GAME MODIFY (p07:80F7 -> p07:9100), tras el espacio en GAME SELECT, y
+    su primer cuadro (p07:9136 -> p07:9199): la flecha en LENGTH (0x8D en la
+    primera de p07:920C) y los cuatro recuadros rojos, que son los sprites
+    de p07:9126 (patron 0x24, color 8) llevados a la Y, X del valor de cada
+    opcion (tablas de p07:9214, 921C, 9226, 922C). Los valores de 0xE461...
+    estan a cero (p07:8045 borra 0xE200-0xE8FF): 1, 1, A y N."""
+    tenis_menu(v)
+    copia = bytearray(0x80)
+    copia[0:0x30] = bytes([0xE0]) * 0x30              # p07:85D5 -> p07:8495
+    v.llena(0x3800, 0x300, 0)
+    v.texto(TENIS, 0x87A5)                            # p07:9100
+    copia[0:0x10] = rom(TENIS, 0x9126, 0x10)          # p07:9106
+    for d in (0x38CF, 0x390F, 0x394F, 0x398F):        # p07:9199
+        v.v[d] = 0
+    p = rom(TENIS, 0x920C, 2)                         # p07:91B5
+    v.v[p[0] | p[1] << 8] = 0x8D
+    for k, tabla in enumerate((0x9214, 0x921C, 0x9226, 0x922C)):   # p07:91C8
+        yx = rom(TENIS, tabla + 2 * valores[k], 2)
+        copia[4 * k:4 * k + 2] = yx
+    th_sprites(v, copia)
+
+
+def tenis_set(v):
+    """1ST SET START (p07:8141, estado 0x0200), cuando acaba la melodia que
+    suena tras el espacio en GAME MODIFY: nombres y sprites borrados
+    (p07:85D5), "SET START" (p07:8186) y delante, en 0x3909, las tres letras
+    del set que se juega (0xE40C = 0) de la tabla de p07:8176."""
+    tenis_modify(v)
+    copia = bytearray(0x80)
+    copia[0:0x30] = bytes([0xE0]) * 0x30              # p07:8495
+    copia[0x30:0x80] = bytes(0x50)
+    th_sprites(v, copia)
+    v.llena(0x3800, 0x300, 0)                         # p07:85D8
+    v.texto(TENIS, 0x8186)                            # p07:815A
+    v.v[0x3909:0x390C] = rom(TENIS, 0x8176, 3)        # p07:8160
+
+
+def th_cifra(v, dest, n):
+    """p07:8596: la cifra n con las dos letras de p07:85AD, una encima de otra."""
+    p = rom(TENIS, 0x85AD + 2 * n, 2)
+    v.v[dest], v.v[dest + 32] = p[0], p[1]
+
+
+def th_raqueta(copia, i, y, x, largo, patrones, color):
+    """p07:8C17: una raqueta en los sprites i, i+1 de la copia. Con 0xE427 = 1
+    (LENGTH 1) el segundo sprite se esconde (los cuatro bytes a 0xE0)."""
+    copia[4 * i:4 * i + 4] = bytes([y, x, patrones[0], color])
+    if largo == 1:
+        copia[4 * i + 4:4 * i + 8] = bytes([0xE0] * 4)
+    else:
+        copia[4 * i + 4:4 * i + 8] = bytes([(y + 16) & 0xFF, x, patrones[1], color])
+
+
+def tenis_pista(v, length=0, type_=0):
+    """La pista de tenis preparada (p07:81A2: th_pinta_marcadores y
+    th_partido), antes del primer cuadro de juego; con las opciones de salida
+    (LENGTH 1, SPEED 1, TYPE A, BAR N) y saca el 1P (0xE41A = 1, p07:9266).
+
+    Marcador (p07:84A5): la cabecera de p07:84C6 en las dos primeras filas, los
+    tantos (0xE410, 0xE411) en cifras grandes y los juegos (0xE417, 0xE41B).
+    La pista: p07:95BC (0x2C0 bytes) en 0x3840 (p07:89A7). Sprites: la copia
+    borrada (p07:8495), la pelota en (0x60, 0xDA) (p07:8CE6 y p07:8CEE), la
+    raqueta del 1P en la columna 0xE0 con color 0x0A y la del 2P en 0x10 con
+    color 7 (p07:8A41, p07:8A9F), a la altura de p07:8A51 segun LENGTH y con
+    los patrones de p07:8AD9."""
+    tenis_set(v)
+    v.v[0x3800:0x3840] = rom(TENIS, 0x84C6, 0x40)    # p07:84B1
+    for d in (0x3814, 0x3815, 0x380D, 0x380E):        # p07:8551: 00 y 00
+        th_cifra(v, d, 0)
+    th_cifra(v, 0x381C, 0)                            # p07:8574: los juegos
+    th_cifra(v, 0x3808, 0)
+    copia = bytearray(0x80)
+    copia[0:0x30] = bytes([0xE0]) * 0x30              # p07:898C
+    v.v[0x3B00:0x3B80] = copia                        # p07:898F: la copia tal cual
+    v.v[0x3840:0x3B00] = rom(TENIS, 0x95BC, 0x2C0)   # p07:89A7
+    y = rom(TENIS, 0x8A51 + length)[0]                # p07:8A0A
+    largo = 1 if length < 2 else 2                    # p07:8A1A
+    pat = rom(TENIS, 0x8AD9 + 2 * length, 2)          # p07:8AAF
+    th_raqueta(copia, 1, y, 0xE0, largo, pat, 0x0A)   # p07:8BD7: el 1P
+    th_raqueta(copia, 5, y, 0x10, largo, pat, 0x07)   # p07:8BF9: el 2P
+    copia[0:4] = bytes([0x60, 0xDA, 0x00, 0x0F])      # p07:902C: la pelota
+    th_sprites(v, copia)                              # p07:89D0
+
+
+def hockey_start(v):
+    """Lo mismo que tenis_set para el hockey (0xE412 = 2): p07:8154 salta el
+    SET y pinta solo "START" (p07:817F, el texto de p07:8192). Antes, en
+    GAME SELECT, la flecha baja a HOCKEY (p07:90C1); GAME MODIFY es igual."""
+    tenis_modify(v)
+    v.v[0x394D] = 0                                   # p07:90D0 (la flecha ya no esta en TENNIS)
+    copia = bytearray(0x80)
+    copia[0:0x30] = bytes([0xE0]) * 0x30
+    th_sprites(v, copia)
+    v.llena(0x3800, 0x300, 0)                         # p07:85D8
+    v.texto(TENIS, 0x8192)                            # p07:817F
+
+
+def hockey_pista(v, length=0):
+    """La pista de hockey preparada (p07:81A2), como tenis_pista: la cabecera
+    de p07:8506, los goles en cifras grandes y el reloj (0xE419 = 0x90,
+    p07:8147) en 0x381C; la pista de p07:987C; las raquetas en las columnas
+    0xB8 (1P) y 0x38 (2P) (p07:8A47, p07:8AA5) y la pelota en (0x60, 0xB3)
+    (p07:8CEF: saca el 1P)."""
+    hockey_start(v)
+    v.v[0x3800:0x3840] = rom(TENIS, 0x8506, 0x40)    # p07:84BD
+    for d in (0x3814, 0x3815, 0x380D, 0x380E):        # p07:8551
+        th_cifra(v, d, 0)
+    th_cifra(v, 0x381C, 9)                            # p07:8562: el reloj, 90
+    th_cifra(v, 0x381D, 0)
+    copia = bytearray(0x80)
+    copia[0:0x30] = bytes([0xE0]) * 0x30              # p07:898C
+    v.v[0x3B00:0x3B80] = copia
+    v.v[0x3840:0x3B00] = rom(TENIS, 0x987C, 0x2C0)   # p07:89A4
+    y = rom(TENIS, 0x8A51 + length)[0]
+    largo = 1 if length < 2 else 2
+    pat = rom(TENIS, 0x8AD9 + 2 * length, 2)
+    th_raqueta(copia, 1, y, 0xB8, largo, pat, 0x0A)
+    th_raqueta(copia, 5, y, 0x38, largo, pat, 0x07)
+    copia[0:4] = bytes([0x60, 0xB3, 0x00, 0x0F])
+    th_sprites(v, copia)
+
+
 PANTALLAS = {
     "logo_konami": logo_konami,
     "presentacion_japonesa": presentacion_japonesa,
@@ -332,6 +455,11 @@ PANTALLAS = {
     "menu_self": menu_self,
     "sram_utilidad": sram_utilidad,
     "tenis_menu": tenis_menu,
+    "tenis_modify": tenis_modify,
+    "tenis_set": tenis_set,
+    "tenis_pista": tenis_pista,
+    "hockey_start": hockey_start,
+    "hockey_pista": hockey_pista,
 }
 
 

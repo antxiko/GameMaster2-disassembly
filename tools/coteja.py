@@ -36,12 +36,40 @@ PUNTOS = {
     "sram_utilidad": dict(para=(1, 0x7696), teclas=SELF + [0x1F, 0x20], ve=VE),
     "tenis_menu": dict(para=(7, 0x909A), cuadros=1, teclas=SELF + [0x1F, 0x1F, 0x20],
                        ve=VE, sprites_conjunto=True),
+    # en GAME SELECT, el espacio (fila 8, bit 0) en el segundo cuadro
+    "tenis_modify": dict(para=(7, 0x909A), cuadros=5, teclas=SELF + [0x1F, 0x1F, 0x20],
+                         ve=VE, pulsa={2: [(8, 0)]}, sprites_conjunto=True),
+    # y el espacio otra vez en GAME MODIFY (cuadro 8); tras la melodia de
+    # confirmar (~370 cuadros) sale 1ST SET START y luego la pista
+    "tenis_set": dict(para=(7, 0x8175), teclas=SELF + [0x1F, 0x1F, 0x20], ve=VE,
+                      ancla=(7, 0x909A), pulsa={2: [(8, 0)], 8: [(8, 0)]},
+                      sprites_conjunto=True),
+    # hockey: abajo (fila 8, bit 6) en el cuadro 2, espacio en el 4 y en el 10
+    "hockey_start": dict(para=(7, 0x8185), teclas=SELF + [0x1F, 0x1F, 0x20], ve=VE,
+                         ancla=(7, 0x909A), pulsa={2: [(8, 6)], 4: [(8, 0)], 10: [(8, 0)]},
+                         sprites_conjunto=True),
+    "hockey_pista": dict(para=(7, 0x81A8), teclas=SELF + [0x1F, 0x1F, 0x20], ve=VE,
+                         ancla=(7, 0x909A), pulsa={2: [(8, 6)], 4: [(8, 0)], 10: [(8, 0)]},
+                         sprites_conjunto=True),
+    "tenis_pista": dict(para=(7, 0x81A8), teclas=SELF + [0x1F, 0x1F, 0x20], ve=VE,
+                        ancla=(7, 0x909A), pulsa={2: [(8, 0)], 8: [(8, 0)]},
+                        sprites_conjunto=True),
 }
 
 
-def ejecuta(nombre, tope=40_000_000):
+def _en(z, banco, dir_):
+    return z.pc == dir_ and (dir_ < 0x6000 or z.bancos.get(dir_ & 0xE000, 0) & 0x0F == banco)
+
+
+def ejecuta(nombre, tope=60_000_000):
+    """La VRAM del cartucho ejecutado en el instante de la pantalla.
+
+    `ancla` (por defecto la parada) es desde donde se cuentan los cuadros de
+    `pulsa` y de `cuadros`; sin `cuadros`, se para justo antes de ejecutar la
+    instruccion de `para`, la primera vez que pasa por ella."""
     c = PUNTOS[nombre]
     banco, parada = c["para"]
+    ancla = c.get("ancla", c["para"])
     ve = c.get("ve")
     z = cartucho()
     z.teclas = list(c.get("teclas", []))
@@ -57,15 +85,13 @@ def ejecuta(nombre, tope=40_000_000):
         inter()
     z.interrupcion = interrupcion
     una = z._una
-    estado = {"visto": False, "ve": False}
 
     def mira():
-        if not estado["visto"] and z.pc == parada and                 z.bancos.get(parada & 0xE000, 0) & 0x0F == banco:
-            estado["visto"] = True
+        if llegada[0] is None and _en(z, *ancla):
             llegada[0] = z.cuadros
-            if "cuadros" not in c:
-                raise Llegada()              # antes de ejecutar la instruccion de la parada
-        if ve and z.pc == ve[1] and z.bancos.get(ve[1] & 0xE000, 0) & 0x0F == ve[0]:
+        if "cuadros" not in c and llegada[0] is not None and _en(z, banco, parada):
+            raise Llegada()                  # antes de ejecutar la instruccion de la parada
+        if ve and _en(z, *ve):
             z.chsns_ve_teclas = True
         una()
     z._una = mira
@@ -73,9 +99,8 @@ def ejecuta(nombre, tope=40_000_000):
     z.pc = 0x5583
     n = 0
     while True:
-        if estado["visto"]:
-            if not z.dentro and z.cuadros >= llegada[0] + c["cuadros"]:
-                return z.vdp.vram
+        if "cuadros" in c and llegada[0] is not None and not z.dentro and                 z.cuadros >= llegada[0] + c["cuadros"]:
+            return z.vdp.vram
         n += 1
         if n > tope:
             raise RuntimeError("%s: no se llego a p%02d:%04X" % (nombre, banco, parada))

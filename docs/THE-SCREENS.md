@@ -1,10 +1,10 @@
 # The screens
 
-All 24 are drawn with our own code (`tools/pantallas.py` for MSX1,
+All 24 are drawn with our own code (`tools/pantallas.py` for MSX,
 `tools/pantallas2.py` for MSX2) following the steps of the routine that paints
 them, quoted with each one. None is a capture. Each is compared byte for byte
 (`tools/coteja.py`, `tools/coteja2.py`) with the cartridge running on a Python
-Z80 or with the openMSX VRAM, and they all match completely. On MSX1 the BIOS
+Z80 or with the openMSX VRAM, and they all match completely. On MSX the BIOS
 letters are those of the Japanese C-BIOS.
 
 ## The title sequence
@@ -71,7 +71,7 @@ The same for hockey, with the clock at 90.
 ![The dates](imagenes/bio_entrada.png)
 ![The chart](imagenes/bio_grafica.png)
 
-On MSX1, asking for the dates (`p05:9674`) and the chart with the example
+On MSX, asking for the dates (`p05:9674`) and the chart with the example
 dates 1970-01-01 and 1988-01-01.
 
 ## On MSX2

@@ -4,7 +4,7 @@ Banks 5 and 6. It asks for two dates, the date of birth and the day to look
 at, and draws the three classic cycles: physical (23 days), sensitivity (28)
 and intellect (33).
 
-![The chart on MSX1](imagenes/bio_grafica.png)
+![The chart on MSX](imagenes/bio_grafica.png)
 
 ## The sum
 
@@ -23,7 +23,7 @@ correction every 4, 6 and 20 columns so that each day is worth what it should
 Today's level comes from the height: WORST, BAD, CAUTION, NORMAL or GOOD
 (`p05:9DA5`).
 
-## On MSX1
+## On MSX
 
 The screen is SCREEN 2, but rows 10 to 23 have a different character in each
 square: a canvas where each point is drawn into the pattern of its character

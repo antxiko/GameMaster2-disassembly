@@ -12,7 +12,7 @@ lugar: dos mitades de 4 KB. Los bancos 12 a 15 están vacíos (`0xFF`).
 | p00-p01 | el menú del cartucho solo (su RAM, en `0xF2xx` y en la página 2) |
 | p02-p03 | la copia que corre con el juego al lado (su RAM, en `0xD1xx`-`0xD3xx`) |
 | p04 | el sistema de ficheros de la SRAM |
-| p05-p06 | el biorritmo, en MSX1 y en MSX2 |
+| p05-p06 | el biorritmo, en MSX y en MSX2 |
 | p07-p08 | Tennis and Hockey y su motor de sonido |
 | p09 | la presentación y la biblioteca del VDP |
 | p10-p11 | dibujos |
@@ -23,7 +23,7 @@ Al encender busca un cartucho de Konami en las otras ranuras y lee los 256
 primeros bytes de su arranque buscando la dirección de un gancho de
 interrupción (`p00:5878`): primero la de H.TIMI (`9F FD`), donde se cuelgan los
 seis cartuchos de MSX2 de Konami, y luego la de H.KEYI (`9A FD`), la de los de
-MSX1 (`p00:588C`). El Game Master 1 solo buscaba la segunda: por eso este
+MSX (`p00:588C`). El Game Master 1 solo buscaba la segunda: por eso este
 entra también en Vampire Killer y en Hinotori.
 
 Si al encender se mantiene pulsado el espacio o GRAPH, el cartucho no arranca.

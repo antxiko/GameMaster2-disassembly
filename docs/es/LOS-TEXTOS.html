@@ -84,7 +84,7 @@ audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
 </style>
 <div class="w"><nav class="top"><a href="index.html">Portada</a><a href="EMPEZAR.html">Empezar</a><a href="EL-CARTUCHO.html">El cartucho</a><a href="LAS-PANTALLAS.html">Las pantallas</a><a href="TENNIS-Y-HOCKEY.html">Tennis and Hockey</a><a href="EL-BIORRITMO.html">El biorritmo</a><a href="LA-MUSICA.html">La música</a><a href="LOS-TEXTOS.html" style=color:var(--tinta)>Los textos</a><a href="EL-CODIGO.html">El código</a><a href="HALLAZGOS.html">Hallazgos</a><a href="PREGUNTAS-ABIERTAS.html">Preguntas abiertas</a><a href="../THE-TEXTS.html" style="margin-left:auto;color:var(--oro)">English</a></nav>
 <h1 id="los-textos">Los textos</h1>
-<p>Todo lo que el cartucho escribe en pantalla, sacado de la ROM con <code>tools/saca_textos.py</code>. Hay cuatro formatos: [dirección de VRAM] y letras con <code>0xFE</code> / <code>0xFF</code> (los menús); el mismo con las letras 0x20 por debajo del ASCII (Tennis and Hockey y el biorritmo de MSX1); [x, y] y letras (el biorritmo de MSX2), y tiras sueltas que acaban en <code>0xFF</code>.</p>
+<p>Todo lo que el cartucho escribe en pantalla, sacado de la ROM con <code>tools/saca_textos.py</code>. Hay cuatro formatos: [dirección de VRAM] y letras con <code>0xFE</code> / <code>0xFF</code> (los menús); el mismo con las letras 0x20 por debajo del ASCII (Tennis and Hockey y el biorritmo de MSX); [x, y] y letras (el biorritmo de MSX2), y tiras sueltas que acaban en <code>0xFF</code>.</p>
 <p>Los signos van con la fuente del cartucho (<code>p00:483F</code>), que no es ASCII: el <code>0x3A</code> es una flecha, el <code>0x3D</code> comillas, el <code>0x3E</code> el igual y el <code>0x40</code> un guion. Las erratas son de la ROM, tal cual: «FORAMT» (tres veces), «UNFORMATED» y «BIORYTHM». En las listas, «fila» y «col» son la fila y la columna de la pantalla, y «suelto» una tira sin posición.</p>
 <h2 id="p00">p00</h2>
 <pre><code>p00:4123*  fila  1 col  4  --SRAM DISK UTILITY--
@@ -247,7 +247,7 @@ p02:9BEC*  fila 17 col 12  1P NAME =
 p02:9BF9*  fila 18 col 12  2P NAME =
 p02:9C06*  fila 20 col 12  OK
             fila 22 col 12  RETRY</code></pre>
-<h2 id="p05-biorritmo-de-msx1">p05 (biorritmo de MSX1)</h2>
+<h2 id="p05-biorritmo-de-msx">p05 (biorritmo de MSX)</h2>
 <pre><code>p05:9E40   OK&lt;RET
 p05:9E71   BIRTHDAY Y M D
 p05:9EA0   CHECK DAY Y M D

@@ -85,12 +85,12 @@ audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
 <div class="w"><nav class="top"><a href="index.html">Home</a><a href="GETTING-STARTED.html">Start</a><a href="THE-CARTRIDGE.html">The cartridge</a><a href="THE-SCREENS.html">The screens</a><a href="TENNIS-AND-HOCKEY.html">Tennis and Hockey</a><a href="THE-BIORHYTHM.html" style=color:var(--tinta)>The biorhythm</a><a href="THE-MUSIC.html">The music</a><a href="THE-TEXTS.html">The texts</a><a href="THE-CODE.html">The code</a><a href="FINDINGS.html">Findings</a><a href="OPEN-QUESTIONS.html">Open questions</a><a href="es/EL-BIORRITMO.html" style="margin-left:auto;color:var(--oro)">Castellano</a></nav>
 <h1 id="the-biorhythm">The biorhythm</h1>
 <p>Banks 5 and 6. It asks for two dates, the date of birth and the day to look at, and draws the three classic cycles: physical (23 days), sensitivity (28) and intellect (33).</p>
-<p><img src="imagenes/bio_grafica.png" alt="The chart on MSX1"></p>
+<p><img src="imagenes/bio_grafica.png" alt="The chart on MSX"></p>
 <h2 id="the-sum">The sum</h2>
 <p>Each date is turned into days with the Gregorian calendar (<code>p05:8E34</code>): the year times 365, plus the leap years ((year-1)/4 - (year-1)/100 + (year-1)/400), plus the days up to the month (<code>p05:959E</code>) and one more from March in a leap year. The difference is the days lived; its remainder by 23, 28 and 33 is turned into degrees (remainder x 360 / cycle, <code>p05:8FFB</code>) and moved back 15 days (235, 193 and 164 degrees, <code>p05:9043</code>) so that the chart starts before today.</p>
 <p>The height of each point comes from a sine table from 0 to 90 degrees (<code>p05:94E8</code>, <code>p05:932F</code>). Each column moves on 4, 3 and 2 degrees, with a correction every 4, 6 and 20 columns so that each day is worth what it should (<code>p05:9179</code>). There are 192 columns: from 15 days before to 30 after.</p>
 <p>Today&#x27;s level comes from the height: WORST, BAD, CAUTION, NORMAL or GOOD (<code>p05:9DA5</code>).</p>
-<h2 id="on-msx1">On MSX1</h2>
+<h2 id="on-msx">On MSX</h2>
 <p>The screen is SCREEN 2, but rows 10 to 23 have a different character in each square: a canvas where each point is drawn into the pattern of its character (<code>p05:90DF</code>). The letters S, P, I on the left show in which order the curves start (<code>p06:A33D</code>).</p>
 <h2 id="on-msx2">On MSX2</h2>
 <p><img src="imagenes/bio_grafica_msx2.png" alt="The chart on MSX2"></p>

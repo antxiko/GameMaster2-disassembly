@@ -85,13 +85,13 @@ audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
 <div class="w"><nav class="top"><a href="index.html">Home</a><a href="GETTING-STARTED.html">Start</a><a href="THE-CARTRIDGE.html">The cartridge</a><a href="THE-SCREENS.html">The screens</a><a href="TENNIS-AND-HOCKEY.html">Tennis and Hockey</a><a href="THE-BIORHYTHM.html">The biorhythm</a><a href="THE-MUSIC.html">The music</a><a href="THE-TEXTS.html">The texts</a><a href="THE-CODE.html">The code</a><a href="FINDINGS.html" style=color:var(--tinta)>Findings</a><a href="OPEN-QUESTIONS.html">Open questions</a><a href="es/HALLAZGOS.html" style="margin-left:auto;color:var(--oro)">Castellano</a></nav>
 <h1 id="findings">Findings</h1>
 <h2 id="it-also-gets-into-msx2-cartridges">It also gets into MSX2 cartridges</h2>
-<p>To get into the game it looks in its start-up code for the address of an interrupt hook: first H.TIMI, the one of Konami&#x27;s six MSX2 cartridges, then H.KEYI, the MSX1 one (<code>p00:588C</code>). Game Master 1 only looked for the second. Checked with the ROMs: the six MSX2 ones write to H.TIMI and none to H.KEYI.</p>
+<p>To get into the game it looks in its start-up code for the address of an interrupt hook: first H.TIMI, the one of Konami&#x27;s six MSX2 cartridges, then H.KEYI, the MSX one (<code>p00:588C</code>). Game Master 1 only looked for the second. Checked with the ROMs: the six MSX2 ones write to H.TIMI and none to H.KEYI.</p>
 <h2 id="six-new-signatures">Six new signatures</h2>
 <p>The signature table (<code>p00:44BE</code>) is Game Master 1&#x27;s plus five for Vampire Killer and one for Hinotori: 68 for 30 games.</p>
-<h2 id="a-non-japanese-machine-gets-the-msx1-title-sequence">A non-Japanese machine gets the MSX1 title sequence</h2>
-<p>If the BIOS character set is not the Japanese one, the cartridge forgets it is on an MSX2 and shows the MSX1 title sequence without the title (<code>p09:8024</code>).</p>
-<h2 id="on-msx1-it-calls-a-routine-that-only-exists-on-msx2">On MSX1 it calls a routine that only exists on MSX2</h2>
-<p>To clear the VRAM it uses BIGFIL (<code>0x016B</code>) on MSX1 too, where that BIOS entry does not exist (on the C-BIOS it is zeros up to <code>0x0200</code>): the VRAM is not fully cleared. It does not show because what is left falls on characters the screen does not use. Checked against openMSX: on the SELF menu 8,322 bytes of the tables differ and not one dot on the screen.</p>
+<h2 id="a-non-japanese-machine-gets-the-msx-title-sequence">A non-Japanese machine gets the MSX title sequence</h2>
+<p>If the BIOS character set is not the Japanese one, the cartridge forgets it is on an MSX2 and shows the MSX title sequence without the title (<code>p09:8024</code>).</p>
+<h2 id="on-msx-it-calls-a-routine-that-only-exists-on-msx2">On MSX it calls a routine that only exists on MSX2</h2>
+<p>To clear the VRAM it uses BIGFIL (<code>0x016B</code>) on MSX too, where that BIOS entry does not exist (on the C-BIOS it is zeros up to <code>0x0200</code>): the VRAM is not fully cleared. It does not show because what is left falls on characters the screen does not use. Checked against openMSX: on the SELF menu 8,322 bytes of the tables differ and not one dot on the screen.</p>
 <h2 id="five-tracks-for-three-voices">Five tracks for three voices</h2>
 <p>The Tennis and Hockey engine has three music tracks and two effect tracks; an effect takes PSG voice C or B if its priority is not lower than the music&#x27;s, and gives it back when it ends (<code>p08:A291</code>).</p>
 <h2 id="tennis-without-deuce">Tennis without deuce</h2>

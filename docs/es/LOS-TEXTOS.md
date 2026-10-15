@@ -3,7 +3,7 @@
 Todo lo que el cartucho escribe en pantalla, sacado de la ROM con
 `tools/saca_textos.py`. Hay cuatro formatos: [dirección de VRAM] y letras con
 `0xFE` / `0xFF` (los menús); el mismo con las letras 0x20 por debajo del ASCII
-(Tennis and Hockey y el biorritmo de MSX1); [x, y] y letras (el biorritmo de
+(Tennis and Hockey y el biorritmo de MSX); [x, y] y letras (el biorritmo de
 MSX2), y tiras sueltas que acaban en `0xFF`.
 
 Los signos van con la fuente del cartucho (`p00:483F`), que no es ASCII: el
@@ -180,7 +180,7 @@ p02:9C06*  fila 20 col 12  OK
             fila 22 col 12  RETRY
 ```
 
-## p05 (biorritmo de MSX1)
+## p05 (biorritmo de MSX)
 
 ```
 p05:9E40   OK<RET

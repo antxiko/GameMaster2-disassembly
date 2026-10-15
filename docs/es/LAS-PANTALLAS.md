@@ -1,10 +1,10 @@
 # Las pantallas
 
-Las 24 están dibujadas con código propio (`tools/pantallas.py` para MSX1,
+Las 24 están dibujadas con código propio (`tools/pantallas.py` para MSX,
 `tools/pantallas2.py` para MSX2) siguiendo los pasos de la rutina que las
 pinta, citada en cada una. Ninguna es una captura. Cada una se compara byte a
 byte (`tools/coteja.py`, `tools/coteja2.py`) con el cartucho ejecutado en un Z80
-de Python o con la VRAM de openMSX, y todas coinciden enteras. En MSX1, las
+de Python o con la VRAM de openMSX, y todas coinciden enteras. En MSX, las
 letras de la BIOS son las de la C-BIOS japonesa.
 
 ## La presentación
@@ -72,7 +72,7 @@ Lo mismo en el hockey, con el reloj en 90.
 ![Las fechas](../imagenes/bio_entrada.png)
 ![La gráfica](../imagenes/bio_grafica.png)
 
-En MSX1, pidiendo las fechas (`p05:9674`) y la gráfica con las fechas de
+En MSX, pidiendo las fechas (`p05:9674`) y la gráfica con las fechas de
 ejemplo 1970-01-01 y 1988-01-01.
 
 ## En MSX2

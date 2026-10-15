@@ -5,7 +5,7 @@ y letras ASCII (0x00 = espacio); 0xFE trae otra direccion, 0xFF acaba.
 Tennis and Hockey (p07) usa el mismo formato con las letras 0x20 por debajo
 del ASCII (0x21 = 'A').
 
-El biorritmo de MSX1 (p05, pinta_texto_bio) lleva las letras 0x20 por debajo del
+El biorritmo de MSX (p05, pinta_texto_bio) lleva las letras 0x20 por debajo del
 ASCII y acaba en 0x80 (0x81 trae otra direccion, que va a una copia de la tabla
 de nombres en RAM): de ese se dan las tiras de letras, sin posicion.
 
@@ -152,7 +152,7 @@ def main():
         n = 2 if b == 0 else 1
         d = ROM[b * 0x2000:(b + n) * 0x2000]
         if b == 5:
-            print("## p05 (biorritmo de MSX1)\n\n```")
+            print("## p05 (biorritmo de MSX)\n\n```")
             ap = apuntados(5)
             for dir_, s in tiras_bio(d, BASE[b]):
                 print("p05:%04X%s  %s" % (dir_, "*" if dir_ in ap else " ", s.rstrip()))

@@ -29,7 +29,7 @@ biorritmo.
 
 Busca en los 256 primeros bytes del arranque del juego la dirección de un
 gancho de interrupción: primero H.TIMI (la de los cartuchos de MSX2 de Konami) y
-luego H.KEYI (la de los de MSX1). Así entra también en Vampire Killer y en
+luego H.KEYI (la de los de MSX). Así entra también en Vampire Killer y en
 Hinotori, cosa que el Game Master 1 no hacía.
 
 ## Reproducirlo

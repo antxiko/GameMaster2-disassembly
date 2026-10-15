@@ -16,7 +16,7 @@ byte for byte, and 40% of the instructions are commented.
 
 - [The cartridge](THE-CARTRIDGE.html): the banks, how it gets into the game,
   the table of 30 games, the cheats, the SRAM and the disk.
-- [The screens](THE-SCREENS.html): 24 screens drawn from the ROM, on MSX1 and
+- [The screens](THE-SCREENS.html): 24 screens drawn from the ROM, on MSX and
   MSX2.
 - [Tennis and Hockey](TENNIS-AND-HOCKEY.html): the minigame, its rules and its
   options.
@@ -31,7 +31,7 @@ byte for byte, and 40% of the instructions are commented.
 
 Every picture is drawn with our own code reading the cartridge's tables, and
 each has been compared byte for byte with the running cartridge or with the
-openMSX VRAM: they match completely. The MSX1 ones use the BIOS font of the
+openMSX VRAM: they match completely. The MSX ones use the BIOS font of the
 Japanese C-BIOS, the machine used for the checks; on another machine the BIOS
 letters would differ.
 

@@ -4,7 +4,7 @@ Bancos 5 y 6. Pide dos fechas, la de nacimiento y la del día que se quiere
 mirar, y dibuja los tres ciclos clásicos: físico (23 días), sensibilidad (28)
 e intelecto (33).
 
-![La gráfica en MSX1](../imagenes/bio_grafica.png)
+![La gráfica en MSX](../imagenes/bio_grafica.png)
 
 ## La cuenta
 
@@ -23,7 +23,7 @@ corrección cada 4, 6 y 20 columnas para que cada día valga lo que debe
 El nivel de hoy sale de la altura: WORST, BAD, CAUTION, NORMAL o GOOD
 (`p05:9DA5`).
 
-## En MSX1
+## En MSX
 
 La pantalla es SCREEN 2, pero las filas 10 a 23 llevan una letra distinta en
 cada casilla: un lienzo donde cada punto se pinta en el dibujo de su letra

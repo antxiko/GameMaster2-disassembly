@@ -3,7 +3,7 @@
 Everything the cartridge writes on screen, taken from the ROM with
 `tools/saca_textos.py`. There are four formats: [VRAM address] and letters with
 `0xFE` / `0xFF` (the menus); the same with the letters 0x20 below ASCII (Tennis
-and Hockey and the MSX1 biorhythm); [x, y] and letters (the MSX2 biorhythm), and
+and Hockey and the MSX biorhythm); [x, y] and letters (the MSX2 biorhythm), and
 loose strings ending in `0xFF`. In the lists, "fila" is the row, "col" the
 column and "suelto" a loose string.
 
@@ -180,7 +180,7 @@ p02:9C06*  fila 20 col 12  OK
             fila 22 col 12  RETRY
 ```
 
-## p05 (biorritmo de MSX1)
+## p05 (biorritmo de MSX)
 
 ```
 p05:9E40   OK<RET

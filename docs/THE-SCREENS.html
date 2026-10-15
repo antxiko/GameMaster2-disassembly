@@ -84,7 +84,7 @@ audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
 </style>
 <div class="w"><nav class="top"><a href="index.html">Home</a><a href="GETTING-STARTED.html">Start</a><a href="THE-CARTRIDGE.html">The cartridge</a><a href="THE-SCREENS.html" style=color:var(--tinta)>The screens</a><a href="TENNIS-AND-HOCKEY.html">Tennis and Hockey</a><a href="THE-BIORHYTHM.html">The biorhythm</a><a href="THE-MUSIC.html">The music</a><a href="THE-TEXTS.html">The texts</a><a href="THE-CODE.html">The code</a><a href="FINDINGS.html">Findings</a><a href="OPEN-QUESTIONS.html">Open questions</a><a href="es/LAS-PANTALLAS.html" style="margin-left:auto;color:var(--oro)">Castellano</a></nav>
 <h1 id="the-screens">The screens</h1>
-<p>All 24 are drawn with our own code (<code>tools/pantallas.py</code> for MSX1, <code>tools/pantallas2.py</code> for MSX2) following the steps of the routine that paints them, quoted with each one. None is a capture. Each is compared byte for byte (<code>tools/coteja.py</code>, <code>tools/coteja2.py</code>) with the cartridge running on a Python Z80 or with the openMSX VRAM, and they all match completely. On MSX1 the BIOS letters are those of the Japanese C-BIOS.</p>
+<p>All 24 are drawn with our own code (<code>tools/pantallas.py</code> for MSX, <code>tools/pantallas2.py</code> for MSX2) following the steps of the routine that paints them, quoted with each one. None is a capture. Each is compared byte for byte (<code>tools/coteja.py</code>, <code>tools/coteja2.py</code>) with the cartridge running on a Python Z80 or with the openMSX VRAM, and they all match completely. On MSX the BIOS letters are those of the Japanese C-BIOS.</p>
 <h2 id="the-title-sequence">The title sequence</h2>
 <p><img src="imagenes/logo_konami.png" alt="The Konami logo"></p>
 <p>The Konami logo (<code>p09:8135</code>), at the end of its animation: one line per frame, six rows of 21 characters.</p>
@@ -110,7 +110,7 @@ audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
 <p>The same for hockey, with the clock at 90.</p>
 <h2 id="the-biorhythm">The biorhythm</h2>
 <p><img src="imagenes/bio_entrada.png" alt="The dates"> <img src="imagenes/bio_grafica.png" alt="The chart"></p>
-<p>On MSX1, asking for the dates (<code>p05:9674</code>) and the chart with the example dates 1970-01-01 and 1988-01-01.</p>
+<p>On MSX, asking for the dates (<code>p05:9674</code>) and the chart with the example dates 1970-01-01 and 1988-01-01.</p>
 <h2 id="on-msx2">On MSX2</h2>
 <p><img src="imagenes/logo_konami_msx2.png" alt="The logo on MSX2"> <img src="imagenes/rotulo_msx2.png" alt="The title on MSX2"> <img src="imagenes/menu_msx2.png" alt="The menu on MSX2"> <img src="imagenes/menu_self_msx2.png" alt="The SELF menu on MSX2"> <img src="imagenes/bio_entrada_msx2.png" alt="The dates on MSX2"> <img src="imagenes/bio_grafica_msx2.png" alt="The chart on MSX2"></p>
 <p>On an MSX2 with a Japanese BIOS the title sequence is different: SCREEN 5, with the pictures put together with VDP commands (<code>p09:80DC</code>, <code>p09:8B20</code>, <code>p09:8692</code>). The SELF menu is the same with the MSX2 palette, and the biorhythm changes completely (<code>p05:8D22</code>, <code>p06:A006</code>).</p>

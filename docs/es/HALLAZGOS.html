@@ -85,13 +85,13 @@ audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
 <div class="w"><nav class="top"><a href="index.html">Portada</a><a href="EMPEZAR.html">Empezar</a><a href="EL-CARTUCHO.html">El cartucho</a><a href="LAS-PANTALLAS.html">Las pantallas</a><a href="TENNIS-Y-HOCKEY.html">Tennis and Hockey</a><a href="EL-BIORRITMO.html">El biorritmo</a><a href="LA-MUSICA.html">La música</a><a href="LOS-TEXTOS.html">Los textos</a><a href="EL-CODIGO.html">El código</a><a href="HALLAZGOS.html" style=color:var(--tinta)>Hallazgos</a><a href="PREGUNTAS-ABIERTAS.html">Preguntas abiertas</a><a href="../FINDINGS.html" style="margin-left:auto;color:var(--oro)">English</a></nav>
 <h1 id="hallazgos">Hallazgos</h1>
 <h2 id="entra-tambien-en-los-cartuchos-de-msx2">Entra también en los cartuchos de MSX2</h2>
-<p>Para colarse en el juego busca en su arranque la dirección de un gancho de interrupción: primero H.TIMI, la de los seis cartuchos de MSX2 de Konami, y luego H.KEYI, la de los de MSX1 (<code>p00:588C</code>). El Game Master 1 solo buscaba la segunda. Comprobado con las ROM: los seis de MSX2 escriben en H.TIMI y ninguno en H.KEYI.</p>
+<p>Para colarse en el juego busca en su arranque la dirección de un gancho de interrupción: primero H.TIMI, la de los seis cartuchos de MSX2 de Konami, y luego H.KEYI, la de los de MSX (<code>p00:588C</code>). El Game Master 1 solo buscaba la segunda. Comprobado con las ROM: los seis de MSX2 escriben en H.TIMI y ninguno en H.KEYI.</p>
 <h2 id="seis-firmas-nuevas">Seis firmas nuevas</h2>
 <p>La tabla de firmas (<code>p00:44BE</code>) es la del Game Master 1 más cinco de Vampire Killer y una de Hinotori: 68 para 30 juegos.</p>
-<h2 id="una-maquina-no-japonesa-ve-la-presentacion-de-msx1">Una máquina no japonesa ve la presentación de MSX1</h2>
-<p>Si el juego de caracteres de la BIOS no es el japonés, el cartucho se olvida de que es un MSX2 y pone la presentación de MSX1 sin el rótulo (<code>p09:8024</code>).</p>
-<h2 id="en-msx1-llama-a-una-rutina-que-solo-existe-en-msx2">En MSX1 llama a una rutina que solo existe en MSX2</h2>
-<p>Para borrar la VRAM usa BIGFIL (<code>0x016B</code>) también en MSX1, donde esa entrada de la BIOS no existe (en la C-BIOS son ceros hasta <code>0x0200</code>): la VRAM no se borra entera. No se ve porque los restos caen en letras que la pantalla no usa. Cotejado con openMSX: en el menú SELF quedan 8.322 bytes distintos en las tablas y ningún punto distinto en la pantalla.</p>
+<h2 id="una-maquina-no-japonesa-ve-la-presentacion-de-msx">Una máquina no japonesa ve la presentación de MSX</h2>
+<p>Si el juego de caracteres de la BIOS no es el japonés, el cartucho se olvida de que es un MSX2 y pone la presentación de MSX sin el rótulo (<code>p09:8024</code>).</p>
+<h2 id="en-msx-llama-a-una-rutina-que-solo-existe-en-msx2">En MSX llama a una rutina que solo existe en MSX2</h2>
+<p>Para borrar la VRAM usa BIGFIL (<code>0x016B</code>) también en MSX, donde esa entrada de la BIOS no existe (en la C-BIOS son ceros hasta <code>0x0200</code>): la VRAM no se borra entera. No se ve porque los restos caen en letras que la pantalla no usa. Cotejado con openMSX: en el menú SELF quedan 8.322 bytes distintos en las tablas y ningún punto distinto en la pantalla.</p>
 <h2 id="cinco-pistas-para-tres-voces">Cinco pistas para tres voces</h2>
 <p>El motor de Tennis and Hockey lleva tres pistas de música y dos de efectos; un efecto se queda la voz C o la B del PSG si su prioridad no es menor que la de la música, y se la devuelve al acabar (<code>p08:A291</code>).</p>
 <h2 id="el-tenis-sin-iguales">El tenis sin iguales</h2>

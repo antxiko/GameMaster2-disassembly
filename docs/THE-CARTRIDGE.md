@@ -12,7 +12,7 @@ SRAM there instead: two halves of 4 KB. Banks 12 to 15 are empty (`0xFF`).
 | p00-p01 | the menu of the cartridge on its own (its RAM at `0xF2xx` and in page 2) |
 | p02-p03 | the copy that runs with the game next to it (its RAM at `0xD1xx`-`0xD3xx`) |
 | p04 | the SRAM file system |
-| p05-p06 | the biorhythm, on MSX1 and MSX2 |
+| p05-p06 | the biorhythm, on MSX and MSX2 |
 | p07-p08 | Tennis and Hockey and its sound engine |
 | p09 | the title sequence and the VDP library |
 | p10-p11 | graphics |
@@ -22,7 +22,7 @@ SRAM there instead: two halves of 4 KB. Banks 12 to 15 are empty (`0xFF`).
 At power-on it looks for a Konami cartridge in the other slots and reads the
 first 256 bytes of its start-up code looking for the address of an interrupt
 hook (`p00:5878`): first H.TIMI (`9F FD`), where Konami's six MSX2 cartridges
-hook in, then H.KEYI (`9A FD`), the MSX1 one (`p00:588C`). Game Master 1 only
+hook in, then H.KEYI (`9A FD`), the MSX one (`p00:588C`). Game Master 1 only
 looked for the second: that is why this one also gets into Vampire Killer and
 Hinotori.
 

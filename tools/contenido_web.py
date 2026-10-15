@@ -66,7 +66,7 @@ PORTADA = {
         claim="El cartucho de trucos de Konami por dentro: c&oacute;mo se cuela "
               "en 30 juegos, su SRAM, un Tennis and Hockey para dos, un "
               "biorritmo y nueve m&uacute;sicas. 24 pantallas dibujadas desde la "
-              "ROM, en MSX1 y en MSX2.",
+              "ROM, en MSX y en MSX2.",
         ficha=["Konami - <b>(c) Konami 1987</b>",
                "Cartucho <b>RC-755</b>, 128 KB con SRAM (mapper Game Master 2)",
                "<b>MSX</b> (y MSX2)", "Volcado <b>5c00f9e3...</b>"],
@@ -81,7 +81,7 @@ PORTADA = {
         titulo="Konami's Game Master 2 - a commented disassembly",
         claim="Konami's cheat cartridge from the inside: how it gets into 30 "
               "games, its SRAM, a two-player Tennis and Hockey, a biorhythm and "
-              "nine tunes. 24 screens drawn from the ROM, on MSX1 and MSX2.",
+              "nine tunes. 24 screens drawn from the ROM, on MSX and MSX2.",
         ficha=["Konami - <b>(c) Konami 1987</b>",
                "An <b>RC-755</b> cartridge, 128 KB with SRAM (Game Master 2 mapper)",
                "<b>MSX</b> (and MSX2)", "Dump <b>5c00f9e3...</b>"],
@@ -102,7 +102,7 @@ HALLAZGOS = {
          "<p>Para colarse en el juego busca en su arranque la direcci&oacute;n de "
          "un gancho de interrupci&oacute;n: primero la de H.TIMI, donde se "
          "cuelgan los seis cartuchos de MSX2 de Konami, y luego la de H.KEYI, la "
-         "de los de MSX1 (<code>p00:588C</code>). El Game Master 1 solo buscaba "
+         "de los de MSX (<code>p00:588C</code>). El Game Master 1 solo buscaba "
          "la segunda.</p>" + LEIDO["es"]),
         ("68 firmas para 30 juegos",
          "<p>Si el juego no trae la segunda cabecera de <code>0x4010</code>, suma "
@@ -110,9 +110,9 @@ HALLAZGOS = {
          "<code>p00:44BE</code>: son las 62 del Game Master 1 m&aacute;s cinco "
          "de Vampire Killer y una de Hinotori. 35 est&aacute;n comprobadas "
          "sumando las ROM.</p>"),
-        ("En MSX1 llama a una rutina que solo existe en MSX2",
+        ("En MSX llama a una rutina que solo existe en MSX2",
          "<p>Al borrar la VRAM usa BIGFIL (<code>0x016B</code>) tambi&eacute;n en "
-         "MSX1, donde esa entrada de la BIOS no existe: la VRAM no se borra "
+         "MSX, donde esa entrada de la BIOS no existe: la VRAM no se borra "
          "entera. No se ve porque lo que queda cae en letras que la pantalla no "
          "usa.</p>" + COTEJADO["es"]),
         ("Cinco pistas para tres voces",
@@ -134,15 +134,15 @@ HALLAZGOS = {
         ("It also gets into MSX2 cartridges",
          "<p>To get into the game it looks in its start-up code for the address "
          "of an interrupt hook: first H.TIMI, where Konami's six MSX2 cartridges "
-         "hook in, then H.KEYI, the MSX1 one (<code>p00:588C</code>). Game "
+         "hook in, then H.KEYI, the MSX one (<code>p00:588C</code>). Game "
          "Master 1 only looked for the second.</p>" + LEIDO["en"]),
         ("68 signatures for 30 games",
          "<p>If the game has no second header at <code>0x4010</code>, it adds up "
          "the 256 bytes at <code>0x5000</code> and looks the sum up at "
          "<code>p00:44BE</code>: Game Master 1's 62 plus five for Vampire Killer "
          "and one for Hinotori. 35 are checked by adding up the ROMs.</p>"),
-        ("On MSX1 it calls a routine that only exists on MSX2",
-         "<p>To clear the VRAM it uses BIGFIL (<code>0x016B</code>) on MSX1 too, "
+        ("On MSX it calls a routine that only exists on MSX2",
+         "<p>To clear the VRAM it uses BIGFIL (<code>0x016B</code>) on MSX too, "
          "where that BIOS entry does not exist: the VRAM is not fully cleared. "
          "It does not show because what is left falls on characters the screen "
          "does not use.</p>" + COTEJADO["en"]),
@@ -181,8 +181,8 @@ GALERIA = [
      "La pista de hockey (<code>p07:81A2</code>).",
      "The hockey rink (<code>p07:81A2</code>)."),
     ("bio_grafica.png",
-     "El biorritmo en MSX1, con las fechas de ejemplo (<code>p05:8B1B</code>).",
-     "The biorhythm on MSX1, with the example dates (<code>p05:8B1B</code>)."),
+     "El biorritmo en MSX, con las fechas de ejemplo (<code>p05:8B1B</code>).",
+     "The biorhythm on MSX, with the example dates (<code>p05:8B1B</code>)."),
     ("rotulo_msx2.png",
      "El r&oacute;tulo en MSX2 (<code>p09:8B20</code>).",
      "The title on MSX2 (<code>p09:8B20</code>)."),

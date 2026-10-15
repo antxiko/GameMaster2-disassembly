@@ -17,7 +17,7 @@ vuelven a montar byte a byte, y el 40 % de las instrucciones va comentado.
 - [El cartucho](EL-CARTUCHO.html): los bancos, cómo se cuela en el juego, la
   tabla de 30 juegos, los trucos, la SRAM y el disco.
 - [Las pantallas](LAS-PANTALLAS.html): 24 pantallas dibujadas desde la ROM,
-  en MSX1 y en MSX2.
+  en MSX y en MSX2.
 - [Tennis and Hockey](TENNIS-Y-HOCKEY.html): el minijuego, sus reglas y sus
   opciones.
 - [El biorritmo](EL-BIORRITMO.html): cómo cuenta los días y cómo dibuja las
@@ -32,7 +32,7 @@ vuelven a montar byte a byte, y el 40 % de las instrucciones va comentado.
 
 Todas las imágenes están dibujadas con código propio leyendo las tablas del
 cartucho, y cada una se ha comparado byte a byte con el cartucho ejecutado o
-con la VRAM de openMSX: coinciden enteras. Las de MSX1 llevan la fuente de la
+con la VRAM de openMSX: coinciden enteras. Las de MSX llevan la fuente de la
 BIOS de la C-BIOS japonesa, la máquina con la que se coteja; en otra máquina
 cambiarían las letras de la BIOS.
 

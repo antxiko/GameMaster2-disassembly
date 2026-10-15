@@ -85,12 +85,12 @@ audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
 <div class="w"><nav class="top"><a href="index.html">Portada</a><a href="EMPEZAR.html">Empezar</a><a href="EL-CARTUCHO.html">El cartucho</a><a href="LAS-PANTALLAS.html">Las pantallas</a><a href="TENNIS-Y-HOCKEY.html">Tennis and Hockey</a><a href="EL-BIORRITMO.html" style=color:var(--tinta)>El biorritmo</a><a href="LA-MUSICA.html">La música</a><a href="LOS-TEXTOS.html">Los textos</a><a href="EL-CODIGO.html">El código</a><a href="HALLAZGOS.html">Hallazgos</a><a href="PREGUNTAS-ABIERTAS.html">Preguntas abiertas</a><a href="../THE-BIORHYTHM.html" style="margin-left:auto;color:var(--oro)">English</a></nav>
 <h1 id="el-biorritmo">El biorritmo</h1>
 <p>Bancos 5 y 6. Pide dos fechas, la de nacimiento y la del día que se quiere mirar, y dibuja los tres ciclos clásicos: físico (23 días), sensibilidad (28) e intelecto (33).</p>
-<p><img src="../imagenes/bio_grafica.png" alt="La gráfica en MSX1"></p>
+<p><img src="../imagenes/bio_grafica.png" alt="La gráfica en MSX"></p>
 <h2 id="la-cuenta">La cuenta</h2>
 <p>Cada fecha se pasa a días con el calendario gregoriano (<code>p05:8E34</code>): el año por 365, más los bisiestos ((año-1)/4 - (año-1)/100 + (año-1)/400), más los días hasta el mes (<code>p05:959E</code>) y uno más desde marzo en año bisiesto. La resta son los días vividos; su resto entre 23, 28 y 33 se pasa a grados (resto x 360 / ciclo, <code>p05:8FFB</code>) y se retrasa 15 días (235, 193 y 164 grados, <code>p05:9043</code>) para que la gráfica empiece antes de hoy.</p>
 <p>La altura de cada punto sale de una tabla de seno de 0 a 90 grados (<code>p05:94E8</code>, <code>p05:932F</code>). Cada columna avanza 4, 3 y 2 grados, con una corrección cada 4, 6 y 20 columnas para que cada día valga lo que debe (<code>p05:9179</code>). Son 192 columnas: de 15 días antes a 30 después.</p>
 <p>El nivel de hoy sale de la altura: WORST, BAD, CAUTION, NORMAL o GOOD (<code>p05:9DA5</code>).</p>
-<h2 id="en-msx1">En MSX1</h2>
+<h2 id="en-msx">En MSX</h2>
 <p>La pantalla es SCREEN 2, pero las filas 10 a 23 llevan una letra distinta en cada casilla: un lienzo donde cada punto se pinta en el dibujo de su letra (<code>p05:90DF</code>). Las letras S, P, I de la izquierda dicen en qué orden empiezan las curvas (<code>p06:A33D</code>).</p>
 <h2 id="en-msx2">En MSX2</h2>
 <p><img src="../imagenes/bio_grafica_msx2.png" alt="La gráfica en MSX2"></p>

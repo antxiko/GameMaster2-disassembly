@@ -84,7 +84,7 @@ audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
 </style>
 <div class="w"><nav class="top"><a href="index.html">Home</a><a href="GETTING-STARTED.html">Start</a><a href="THE-CARTRIDGE.html">The cartridge</a><a href="THE-SCREENS.html">The screens</a><a href="TENNIS-AND-HOCKEY.html">Tennis and Hockey</a><a href="THE-BIORHYTHM.html">The biorhythm</a><a href="THE-MUSIC.html">The music</a><a href="THE-TEXTS.html" style=color:var(--tinta)>The texts</a><a href="THE-CODE.html">The code</a><a href="FINDINGS.html">Findings</a><a href="OPEN-QUESTIONS.html">Open questions</a><a href="es/LOS-TEXTOS.html" style="margin-left:auto;color:var(--oro)">Castellano</a></nav>
 <h1 id="the-texts">The texts</h1>
-<p>Everything the cartridge writes on screen, taken from the ROM with <code>tools/saca_textos.py</code>. There are four formats: [VRAM address] and letters with <code>0xFE</code> / <code>0xFF</code> (the menus); the same with the letters 0x20 below ASCII (Tennis and Hockey and the MSX1 biorhythm); [x, y] and letters (the MSX2 biorhythm), and loose strings ending in <code>0xFF</code>. In the lists, &quot;fila&quot; is the row, &quot;col&quot; the column and &quot;suelto&quot; a loose string.</p>
+<p>Everything the cartridge writes on screen, taken from the ROM with <code>tools/saca_textos.py</code>. There are four formats: [VRAM address] and letters with <code>0xFE</code> / <code>0xFF</code> (the menus); the same with the letters 0x20 below ASCII (Tennis and Hockey and the MSX biorhythm); [x, y] and letters (the MSX2 biorhythm), and loose strings ending in <code>0xFF</code>. In the lists, &quot;fila&quot; is the row, &quot;col&quot; the column and &quot;suelto&quot; a loose string.</p>
 <p>The signs follow the cartridge&#x27;s own font (<code>p00:483F</code>), which is not ASCII: <code>0x3A</code> is an arrow, <code>0x3D</code> quotes, <code>0x3E</code> the equals sign and <code>0x40</code> a dash. The typos are the ROM&#x27;s own: &quot;FORAMT&quot; (three times), &quot;UNFORMATED&quot; and &quot;BIORYTHM&quot;.</p>
 <h2 id="p00">p00</h2>
 <pre><code>p00:4123*  fila  1 col  4  --SRAM DISK UTILITY--
@@ -247,7 +247,7 @@ p02:9BEC*  fila 17 col 12  1P NAME =
 p02:9BF9*  fila 18 col 12  2P NAME =
 p02:9C06*  fila 20 col 12  OK
             fila 22 col 12  RETRY</code></pre>
-<h2 id="p05-biorritmo-de-msx1">p05 (biorritmo de MSX1)</h2>
+<h2 id="p05-biorritmo-de-msx">p05 (biorritmo de MSX)</h2>
 <pre><code>p05:9E40   OK&lt;RET
 p05:9E71   BIRTHDAY Y M D
 p05:9EA0   CHECK DAY Y M D

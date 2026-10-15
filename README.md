@@ -29,7 +29,7 @@ biorhythm.
 
 It looks in the first 256 bytes of the game's start-up code for the address
 of an interrupt hook: first H.TIMI (the one Konami's MSX2 cartridges use), then
-H.KEYI (the MSX1 one). That is how it also gets into Vampire Killer and
+H.KEYI (the MSX one). That is how it also gets into Vampire Killer and
 Hinotori, which Game Master 1 could not do.
 
 ## Reproducing it

@@ -1637,3 +1637,4 @@ C 0x9FF6 bio_caja_a1eb: una caja con sombra, su marco y el texto de p06:A1EB
 C 0x9FF9 bio_borra_zona: borra la zona de la grafica (comando del VDP)
 C 0x9FFC bio_caja_a19d: una caja con su marco y el texto de p06:A19D
 # --- fin de las anotaciones de anota.py ---
+C 0x93B2 FALLO DEL JUEGO: dec a no toca el acarreo (sigue a 1 del sbc) y el resultado no se guarda: el jr nc nunca salta y el prestamo cae en el byte 3 (inc hl / dec (hl)) y no en el 2

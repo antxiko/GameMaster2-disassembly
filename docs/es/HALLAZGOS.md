@@ -49,3 +49,14 @@ El rótulo «GAME MASTER II» de las máquinas no japonesas reutiliza letras ent
 palabras (`p09:8D99`). En la columna de en medio de la M de MASTER, abajo
 (`p09:8DD5`), pone la letra 0x21, que es la esquina de la G, donde la M de GAME
 lleva la 0x26: por eso esa M sale con un trozo raro. openMSX la pinta igual.
+
+## La resta de 24 bits resta al byte que no es
+
+La rutina `resta_24` (`p05:93A7`, la usa el biorritmo en `p05:8F04`) resta DE a un
+número de tres bytes. Cuando el byte medio pide un préstamo, tendría que bajar
+el tercero. Pero `dec a` (`p05:93B2`) no toca el acarreo, que sigue a 1 de la
+resta anterior, y además no guarda el resultado: el `jr nc` no salta nunca y el
+préstamo baja el **cuarto** byte (`p05:93B6`), el de al lado, y no el tercero.
+Ejecutada la rutina con `[0, 0, 5, 7] - 1` sale `[255, 255, 5, 6]`; con el
+préstamo bien saldría `[255, 255, 4, 7]`. Solo ocurre cuando los dos bytes bajos
+son menores que lo que se resta. *Medido ejecutando la rutina.*

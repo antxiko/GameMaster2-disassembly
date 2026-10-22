@@ -2716,7 +2716,7 @@ resta_24:		; resta DE de los 24 bits de HL
 	jr nc,L_93B7		;93ae   ; sin acarreo, ya esta
 	inc hl			;93b0
 	ld a,(hl)			;93b1   ; si no, el alto baja uno
-	dec a			;93b2
+	dec a			;93b2   ; FALLO DEL JUEGO: dec a no toca el acarreo (sigue a 1 del sbc) y el resultado no se guarda: el jr nc nunca salta y el prestamo cae en el byte 3 (inc hl / dec (hl)) y no en el 2
 	jr nc,L_93B7		;93b3
 	inc hl			;93b5
 	dec (hl)			;93b6

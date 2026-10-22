@@ -48,3 +48,15 @@ words (`p09:8D99`). In the middle column of the M of MASTER, at the bottom
 (`p09:8DD5`), it puts character 0x21, which is the corner of the G, where the M
 of GAME has 0x26: that is why that M comes out with an odd piece. openMSX draws
 it the same way.
+
+## The 24-bit subtraction subtracts from the wrong byte
+
+The routine `resta_24` (`p05:93A7`, used by the biorhythm at `p05:8F04`)
+subtracts DE from a three-byte number. When the middle byte needs a borrow, it
+should decrement the third. But `dec a` (`p05:93B2`) does not touch the carry,
+which is still 1 from the earlier subtraction, and it does not store its result
+either: the `jr nc` is never taken and the borrow lowers the **fourth** byte
+(`p05:93B6`), the one next to it, and not the third. Running the routine on `[0,
+0, 5, 7] - 1` gives `[255, 255, 5, 6]`; with the borrow done right it would be
+`[255, 255, 4, 7]`. It only happens when the two low bytes are smaller than what
+is subtracted. *Measured by running the routine.*

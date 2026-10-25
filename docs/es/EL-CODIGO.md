@@ -26,3 +26,30 @@ por debajo del mínimo de comentarios.
   (`tools/omsx_msx2.tcl`, `tools/coteja2.py`).
 - `tools/musica.py` ejecuta el motor de sonido y saca los MP3;
   `tools/omsx_psg.tcl` y `tools/coteja_psg.py` lo cotejan con openMSX.
+
+## Código compartido con otros cartuchos de Konami
+
+Este desensamblado se ha comparado, instrucción por instrucción, con
+todos los demás de Konami de la serie. Cuenta un bloque cuando las
+mismas instrucciones, al menos seis desde una etiqueta hasta su `ret`
+o su salto sin condición, están en los dos cartuchos; las direcciones
+no se miran, porque cambian de un cartucho a otro. De los otros 57,
+**46** tienen al menos un bloque en común con este; estos son los
+que más comparten:
+
+| Cartucho | Bloques | Instrucciones | Por ejemplo (aquí = allí) |
+|---|---:|---:|---|
+| [Konami’s Game Master](https://antxiko.github.io/GameMaster-disassembly/es/) | 155 | 2.447 | `lee_teclas` (p01:662E) = `lee_las_teclas_de_truco` |
+| [Shalom: Knightmare III](https://antxiko.github.io/Shalom-disassembly/es/) | 67 | 917 | `sonido_mezclador` (p08:A384) = `mezclador` |
+| [The Pro Yakyuu Gekitotsu Pennant Race](https://antxiko.github.io/PennantRace-disassembly/es/) | 59 | 976 | `vdp_hmmc` (p05:8448) = `rectangulo_desde_ram` |
+| [Hai no Majutsushi - Mahjong 2](https://antxiko.github.io/Majutsushi-disassembly/es/) | 54 | 661 | `sonido_mezcla` (p08:A291) = `vuelca_psg` |
+| [Gekitotsu Pennant Race 2](https://antxiko.github.io/PennantRace2-disassembly/es/) | 40 | 499 | `vdp_hmmv` (p05:83C8) = `borra_bloque_vram` |
+| [King's Valley II](https://antxiko.github.io/KingsValley2-disassembly/es/) | 39 | 453 | `sonido_envolvente` (p08:A356) |
+| [Salamander - Operation X](https://antxiko.github.io/Salamander-disassembly/es/) | 37 | 462 | `th_pinta_texto` (p07:8626) = `lista_a_vram` |
+| [Nemesis 3 - The Eve of Destruction](https://antxiko.github.io/Nemesis3-disassembly/es/) | 34 | 414 | `th_pinta_texto` (p07:8626) = `escribe_texto` |
+| [Parodius](https://antxiko.github.io/Parodius-disassembly/es/) | 34 | 408 | `canal_libre` (p07:9BCB) = `carga_canal` |
+| [F-1 Spirit — The Way to Formula 1](https://antxiko.github.io/F1Spirit-disassembly/es/) | 31 | 391 | `canal_libre` (p07:9BCB) = `SONIDO_CANAL` |
+
+La matriz entera, los 58 cartuchos entre sí, está en
+[Las rutinas](https://antxiko.github.io/MSX-disassembly-database/es/LAS-RUTINAS.html) de la base de datos de la
+serie, con el método y el programa que la mide.
